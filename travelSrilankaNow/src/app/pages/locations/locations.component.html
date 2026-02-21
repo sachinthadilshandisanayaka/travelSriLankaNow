@@ -1,0 +1,164 @@
+<!-- Animated Page Header -->
+<app-page-header
+  subtitle="Discover Sri Lanka"
+  title="Explore Locations"
+  description="Discover the beauty and diversity of Sri Lanka's most breathtaking destinations"
+  theme="locations"
+  [showAnimation]="true">
+</app-page-header>
+
+<!-- Filter Section -->
+<section class="filter-section">
+  <div class="container">
+    <div class="filter-wrapper">
+      <!-- Search Bar -->
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Search locations..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange($event)"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <!-- Category Filters -->
+      <div class="category-filters">
+        <button
+          *ngFor="let category of categories"
+          [class.active]="selectedCategory === category.value"
+          (click)="filterByCategory(category.value)"
+          class="filter-btn"
+        >
+          {{ category.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      <p>Showing <strong>{{ locations.length }}</strong> of <strong>{{ totalElements }}</strong> locations (Page {{ currentPage + 1 }} of {{ totalPages }})</p>
+    </div>
+  </div>
+</section>
+
+<!-- Locations Grid -->
+<section class="locations-section">
+  <div class="container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading locations...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-state">
+      <span class="error-icon">⚠️</span>
+      <h3>Connection Error</h3>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadData()" class="btn-retry">
+        <span>Try Again</span>
+        <span class="btn-shine"></span>
+        <span class="btn-corner btn-corner--tl"></span>
+        <span class="btn-corner btn-corner--tr"></span>
+        <span class="btn-corner btn-corner--bl"></span>
+        <span class="btn-corner btn-corner--br"></span>
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage" class="location-grid">
+      <div
+        *ngFor="let location of locations; let i = index"
+        class="location-card card-stagger"
+      >
+        <div class="location-image">
+          <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
+          <div class="image-overlay">
+            <span class="category-badge">{{ location.category }}</span>
+          </div>
+        </div>
+
+        <div class="location-content">
+          <h3>{{ location.name }}</h3>
+          <p>{{ location.description }}</p>
+
+          <div class="location-meta">
+            <span class="location-pin">📍</span>
+            <span>{{ location.region }}</span>
+          </div>
+
+          <a [routerLink]="['/locations', location.id]" class="btn-view-details">
+            <span>View Details</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="!isLoading && !errorMessage && locations.length === 0" class="no-results">
+      <div class="no-results-content">
+        <span class="no-results-icon">🔍</span>
+        <h3>No locations found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+        <button (click)="filterByCategory('all'); searchTerm = ''; loadData()" class="btn-reset">
+          <span>Clear Filters</span>
+          <span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span>
+          <span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span>
+          <span class="btn-corner btn-corner--br"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div *ngIf="!isLoading && !errorMessage && totalPages > 1" class="pagination">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(0)"
+      >
+        First
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(currentPage - 1)"
+      >
+        Previous
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page + 1 }}
+        </button>
+      </div>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(currentPage + 1)"
+      >
+        Next
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(totalPages - 1)"
+      >
+        Last
+      </button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,272 @@
+<!-- Loading State -->
+<div class="loading" *ngIf="isLoading">
+  <div class="loading__spinner"></div>
+  <p>Loading dashboard data...</p>
+</div>
+
+<!-- Dashboard Content -->
+<div class="dashboard" *ngIf="!isLoading">
+
+  <!-- Stats Cards -->
+  <section class="stats-grid">
+    <div class="stat-card stat-card--events">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <a routerLink="/admin/events" class="stat-card__link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Total Events</span>
+        <span class="stat-card__value">{{ stats.events.total }}</span>
+      </div>
+      <div class="stat-card__footer">
+        <div class="stat-card__meta">
+          <span>{{ stats.events.featured }} featured</span>
+          <span class="stat-card__percentage">{{ getPercentage(stats.events.featured, stats.events.total) }}%</span>
+        </div>
+        <div class="stat-card__progress">
+          <div class="stat-card__progress-bar" [style.width.%]="getPercentage(stats.events.featured, stats.events.total)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--locations">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <a routerLink="/admin/locations" class="stat-card__link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Total Locations</span>
+        <span class="stat-card__value">{{ stats.locations.total }}</span>
+      </div>
+      <div class="stat-card__footer">
+        <div class="stat-card__meta">
+          <span>{{ stats.locations.featured }} featured</span>
+          <span class="stat-card__percentage">{{ getPercentage(stats.locations.featured, stats.locations.total) }}%</span>
+        </div>
+        <div class="stat-card__progress">
+          <div class="stat-card__progress-bar" [style.width.%]="getPercentage(stats.locations.featured, stats.locations.total)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--places">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/>
+          </svg>
+        </div>
+        <a routerLink="/admin/places" class="stat-card__link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Total Places</span>
+        <span class="stat-card__value">{{ stats.places.total }}</span>
+      </div>
+      <div class="stat-card__footer">
+        <div class="stat-card__meta">
+          <span>{{ stats.places.featured }} featured</span>
+          <span class="stat-card__percentage">{{ getPercentage(stats.places.featured, stats.places.total) }}%</span>
+        </div>
+        <div class="stat-card__progress">
+          <div class="stat-card__progress-bar" [style.width.%]="getPercentage(stats.places.featured, stats.places.total)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--gallery">
+      <div class="stat-card__header">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
+        </div>
+        <a routerLink="/admin/gallery" class="stat-card__link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="stat-card__body">
+        <span class="stat-card__label">Gallery Items</span>
+        <span class="stat-card__value">{{ stats.gallery.total }}</span>
+      </div>
+      <div class="stat-card__footer">
+        <div class="stat-card__meta">
+          <span>{{ stats.gallery.featured }} featured</span>
+          <span class="stat-card__percentage">{{ getPercentage(stats.gallery.featured, stats.gallery.total) }}%</span>
+        </div>
+        <div class="stat-card__progress">
+          <div class="stat-card__progress-bar" [style.width.%]="getPercentage(stats.gallery.featured, stats.gallery.total)"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Two Column Layout -->
+  <section class="content-grid">
+    <!-- Recent Events -->
+    <div class="card card--wide">
+      <div class="card__header">
+        <div>
+          <h2 class="card__title">Recent Events</h2>
+          <p class="card__subtitle">Latest tours and experiences</p>
+        </div>
+        <a routerLink="/admin/events" class="card__action">View All</a>
+      </div>
+      <div class="card__body">
+        <div class="event-list" *ngIf="recentEvents.length > 0">
+          <div class="event-item" *ngFor="let event of recentEvents">
+            <div class="event-item__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </div>
+            <div class="event-item__content">
+              <h3 class="event-item__title">{{ event.title }}</h3>
+              <p class="event-item__meta">{{ event.location }} • {{ event.duration }}</p>
+            </div>
+            <div class="event-item__right">
+              <span class="badge badge--purple">{{ event.category }}</span>
+              <span class="event-item__price">${{ event.price }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="recentEvents.length === 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          <p>No events added yet</p>
+          <a routerLink="/admin/events" class="btn btn--primary btn--sm">Add First Event</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card__header">
+        <h2 class="card__title">Quick Actions</h2>
+      </div>
+      <div class="card__body">
+        <div class="quick-actions">
+          <a routerLink="/admin/events" class="quick-action quick-action--purple">
+            <div class="quick-action__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <div class="quick-action__text">
+              <span class="quick-action__title">Add Event</span>
+              <span class="quick-action__desc">Create new experience</span>
+            </div>
+          </a>
+
+          <a routerLink="/admin/locations" class="quick-action quick-action--blue">
+            <div class="quick-action__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <div class="quick-action__text">
+              <span class="quick-action__title">Add Location</span>
+              <span class="quick-action__desc">New destination</span>
+            </div>
+          </a>
+
+          <a routerLink="/admin/places" class="quick-action quick-action--cyan">
+            <div class="quick-action__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <div class="quick-action__text">
+              <span class="quick-action__title">Add Place</span>
+              <span class="quick-action__desc">Hotel or restaurant</span>
+            </div>
+          </a>
+
+          <a routerLink="/admin/gallery" class="quick-action quick-action--teal">
+            <div class="quick-action__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <div class="quick-action__text">
+              <span class="quick-action__title">Add Photo</span>
+              <span class="quick-action__desc">Upload to gallery</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Locations -->
+  <section class="card">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Recent Locations</h2>
+        <p class="card__subtitle">Latest added destinations</p>
+      </div>
+      <a routerLink="/admin/locations" class="card__action">View All</a>
+    </div>
+    <div class="card__body">
+      <div class="location-grid" *ngIf="recentLocations.length > 0">
+        <div class="location-card" *ngFor="let location of recentLocations">
+          <img [src]="location.imageUrl" [alt]="location.name" class="location-card__image">
+          <div class="location-card__content">
+            <h3 class="location-card__title">{{ location.name }}</h3>
+            <p class="location-card__desc">{{ location.shortDescription }}</p>
+            <div class="location-card__footer">
+              <span class="badge badge--blue">{{ location.category }}</span>
+              <div class="location-card__rating">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span>{{ location.rating }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="recentLocations.length === 0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <p>No locations added yet</p>
+        <a routerLink="/admin/locations" class="btn btn--primary btn--sm">Add First Location</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <p>&copy; 2026 Travel Sri Lanka Now. All rights reserved.</p>
+  </footer>
+</div>

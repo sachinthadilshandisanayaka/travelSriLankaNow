@@ -1,0 +1,171 @@
+-- Sample data for Locations
+INSERT INTO locations (name, description, short_description, image_url, category, region, best_time_to_visit, rating, featured) VALUES
+('Sigiriya Rock Fortress', 'An ancient rock fortress and palace ruins surrounded by the remains of an extensive network of gardens, reservoirs, and other structures. A UNESCO World Heritage site and one of the most iconic landmarks in Sri Lanka.', 'Ancient rock fortress with stunning frescoes and gardens', 'https://example.com/images/sigiriya.jpg', 'cultural', 'central', 'December to April', 4.8, true),
+('Mirissa Beach', 'A beautiful beach town on the south coast of Sri Landka, known for its golden sandy beaches, whale watching opportunities, and vibrant nightlife. Perfect for surfing and relaxation.', 'Tropical paradise for beach lovers and whale watching', 'https://example.com/images/mirissa.jpg', 'beach', 'south', 'November to April', 4.7, true),
+('Ella', 'A charming hill country town offering spectacular views, hiking trails including the famous Ella Rock, Nine Arch Bridge, and lush tea plantations. A must-visit for nature enthusiasts.', 'Scenic hill town with amazing hiking trails', 'https://example.com/images/ella.jpg', 'mountain', 'central', 'December to March', 4.9, true),
+('Yala National Park', 'Sri Lanka''s most visited and second largest national park. Famous for having one of the highest leopard densities in the world, along with elephants, sloth bears, and numerous bird species.', 'Wildlife safari destination with high leopard density', 'https://example.com/images/yala.jpg', 'wildlife', 'south', 'February to July', 4.6, true);
+
+-- Sample data for Location Images
+INSERT INTO location_images (location_id, image_url) VALUES
+(1, 'https://example.com/images/sigiriya-1.jpg'),
+(1, 'https://example.com/images/sigiriya-2.jpg'),
+(2, 'https://example.com/images/mirissa-1.jpg'),
+(2, 'https://example.com/images/mirissa-2.jpg'),
+(3, 'https://example.com/images/ella-1.jpg'),
+(3, 'https://example.com/images/ella-2.jpg'),
+(4, 'https://example.com/images/yala-1.jpg'),
+(4, 'https://example.com/images/yala-2.jpg');
+
+-- Sample data for Location Activities
+INSERT INTO location_activities (location_id, activity) VALUES
+(1, 'Historical site exploration'),
+(1, 'Photography'),
+(1, 'Climbing'),
+(2, 'Whale watching'),
+(2, 'Surfing'),
+(2, 'Beach activities'),
+(3, 'Hiking'),
+(3, 'Train rides'),
+(3, 'Tea plantation tours'),
+(4, 'Safari tours'),
+(4, 'Wildlife photography'),
+(4, 'Bird watching');
+
+-- Sample data for Location Highlights
+INSERT INTO location_highlights (location_id, highlight) VALUES
+(1, 'Ancient frescoes'),
+(1, 'Lion''s Gate'),
+(1, 'Mirror Wall'),
+(2, 'Blue whales sightings'),
+(2, 'Beautiful sunset views'),
+(2, 'Coconut Hill'),
+(3, 'Nine Arch Bridge'),
+(3, 'Ella Rock summit'),
+(3, 'Little Adam''s Peak'),
+(4, 'Leopard sightings'),
+(4, 'Elephant herds'),
+(4, 'Diverse ecosystems');
+
+-- Sample data for Places
+INSERT INTO places (name, type, description, short_description, image_url, location, region, rating, price_range, address, opening_hours, featured, phone, email, website, lat, lng) VALUES
+('Heritance Kandalama', 'hotel', 'A stunning eco-friendly resort designed by renowned architect Geoffrey Bawa, seamlessly integrated into the natural rock face overlooking Kandalama Lake. Features infinity pools, spa, and breathtaking views.', 'Luxury eco-resort with spectacular lake views', 'https://example.com/images/heritance.jpg', 'Dambulla', 'central', 4.8, '$$$$', 'Kandalama, Dambulla 21100', '24 hours', true, '+94 66 555 5000', 'info@heritancehotels.com', 'https://www.heritancehotels.com', 7.8903, 80.6695),
+('Ministry of Crab', 'restaurant', 'World-renowned restaurant specializing in Sri Lankan lagoon crabs. Located in a historic Dutch hospital building in Colombo Fort. Known for serving some of the best seafood in Asia.', 'Award-winning seafood restaurant', 'https://example.com/images/ministry-crab.jpg', 'Colombo', 'west', 4.9, '$$$', 'Old Dutch Hospital, Colombo 01', '12:00 PM - 3:00 PM, 6:00 PM - 11:00 PM', true, '+94 11 234 2722', 'reservations@ministryofcrab.com', 'https://www.ministryofcrab.com', 6.9344, 79.8428),
+('Cafe Chill', 'cafe', 'A cozy beachfront cafe in Mirissa offering healthy breakfast bowls, fresh juices, and excellent coffee. Perfect spot to watch the sunrise while enjoying a hearty meal.', 'Beachfront cafe with healthy options', 'https://example.com/images/cafe-chill.jpg', 'Mirissa', 'south', 4.6, '$$', 'Beach Road, Mirissa 81740', '7:00 AM - 6:00 PM', true, '+94 77 123 4567', 'info@cafechill.lk', 'https://www.cafechill.lk', 5.9462, 80.4583),
+('98 Acres Resort', 'resort', 'An award-winning boutique resort in Ella surrounded by tea plantations. Offers luxurious chalets with panoramic views, infinity pool, and farm-to-table dining experiences.', 'Boutique resort in tea country', 'https://example.com/images/98acres.jpg', 'Ella', 'central', 4.7, '$$$', 'Passara Road, Ella 90090', '24 hours', true, '+94 57 567 5000', 'reservations@98acres.com', 'https://www.98acres.com', 6.8667, 81.0467);
+
+-- Sample data for Place Images
+INSERT INTO place_images (place_id, image_url) VALUES
+(1, 'https://example.com/images/heritance-1.jpg'),
+(1, 'https://example.com/images/heritance-2.jpg'),
+(2, 'https://example.com/images/ministry-crab-1.jpg'),
+(2, 'https://example.com/images/ministry-crab-2.jpg'),
+(3, 'https://example.com/images/cafe-chill-1.jpg'),
+(3, 'https://example.com/images/cafe-chill-2.jpg'),
+(4, 'https://example.com/images/98acres-1.jpg'),
+(4, 'https://example.com/images/98acres-2.jpg');
+
+-- Sample data for Place Cuisine
+INSERT INTO place_cuisine (place_id, cuisine) VALUES
+(2, 'Sri Lankan'),
+(2, 'Seafood'),
+(2, 'Asian'),
+(3, 'Western'),
+(3, 'Healthy'),
+(3, 'Vegetarian'),
+(4, 'International'),
+(4, 'Sri Lankan');
+
+-- Sample data for Place Amenities
+INSERT INTO place_amenities (place_id, amenity) VALUES
+(1, 'Infinity Pool'),
+(1, 'Spa'),
+(1, 'Free WiFi'),
+(1, 'Restaurant'),
+(2, 'Air Conditioning'),
+(2, 'Parking'),
+(2, 'Outdoor Seating'),
+(3, 'Beach View'),
+(3, 'Free WiFi'),
+(3, 'Vegetarian Options'),
+(4, 'Infinity Pool'),
+(4, 'Tea Plantation Tours'),
+(4, 'Free WiFi'),
+(4, 'Restaurant');
+
+-- Sample data for Events
+INSERT INTO events (title, description, short_description, image_url, category, location, price, duration, max_participants, available_spots, rating, featured) VALUES
+('Esala Perahera Experience', 'Join us for an unforgettable experience at the grand Esala Perahera festival in Kandy. Witness the spectacular procession of decorated elephants, traditional dancers, and fire performers. Includes premium seating, cultural guide, and traditional Sri Lankan dinner.', 'Grand Buddhist festival with elephant processions', 'https://example.com/images/perahera.jpg', 'cultural', 'Kandy', 150.00, '6 hours', 50, 50, 4.9, true),
+('Whitewater Rafting Adventure', 'Experience the thrill of whitewater rafting on the Kelani River. Perfect for adventure seekers of all levels. Includes safety equipment, professional guides, lunch, and transport from Colombo.', 'Exciting rafting experience on Kelani River', 'https://example.com/images/rafting.jpg', 'adventure', 'Kitulgala', 75.00, '4 hours', 30, 30, 4.7, true),
+('Sri Lankan Cooking Class', 'Learn to cook authentic Sri Lankan dishes with a local chef. Visit a traditional market, learn about spices, and prepare a full meal including rice and curry, hoppers, and traditional desserts. Includes recipes and certificate.', 'Learn authentic Sri Lankan cuisine', 'https://example.com/images/cooking.jpg', 'food', 'Colombo', 60.00, '3 hours', 15, 15, 4.8, true),
+('Tea Plantation Tour', 'Explore the lush tea plantations of Nuwara Eliya. Learn about tea production from plucking to packaging, visit a tea factory, enjoy tea tasting sessions, and take in breathtaking mountain views.', 'Comprehensive tea estate experience', 'https://example.com/images/tea-tour.jpg', 'tour', 'Nuwara Eliya', 50.00, '5 hours', 40, 40, 4.6, true);
+
+-- Sample data for Event Included Items
+INSERT INTO event_included (event_id, included_item) VALUES
+(1, 'Premium seating at the procession'),
+(1, 'Cultural guide'),
+(1, 'Traditional dinner'),
+(1, 'Transportation'),
+(2, 'Safety equipment'),
+(2, 'Professional guides'),
+(2, 'Lunch'),
+(2, 'Transport from Colombo'),
+(3, 'Market visit'),
+(3, 'All ingredients'),
+(3, 'Recipe book'),
+(3, 'Certificate'),
+(4, 'Tea factory visit'),
+(4, 'Tea tasting'),
+(4, 'Expert guide'),
+(4, 'Light refreshments');
+
+-- Sample data for Event Requirements
+INSERT INTO event_requirements (event_id, requirement) VALUES
+(1, 'Modest clothing required'),
+(1, 'Comfortable walking shoes'),
+(2, 'Must know how to swim'),
+(2, 'Minimum age 12 years'),
+(2, 'Good physical fitness'),
+(3, 'No specific requirements'),
+(4, 'Comfortable walking shoes'),
+(4, 'Warm clothing recommended');
+
+-- Sample data for Event Dates
+INSERT INTO event_dates (event_id, date, start_time, end_time, available_spots) VALUES
+(1, '2025-08-05', '17:00', '23:00', 50),
+(1, '2025-08-06', '17:00', '23:00', 50),
+(2, '2025-12-15', '08:00', '12:00', 30),
+(2, '2025-12-22', '08:00', '12:00', 30),
+(3, '2025-12-10', '09:00', '12:00', 15),
+(3, '2025-12-17', '09:00', '12:00', 15),
+(4, '2025-12-20', '08:00', '13:00', 40),
+(4, '2025-12-25', '08:00', '13:00', 40);
+
+-- Sample data for Gallery Items
+INSERT INTO gallery_items (type, url, thumbnail_url, title, description, category, location, photographer, upload_date, featured) VALUES
+('image', 'https://example.com/gallery/sigiriya-sunset.jpg', 'https://example.com/gallery/thumbs/sigiriya-sunset.jpg', 'Sigiriya at Sunset', 'The magnificent Sigiriya Rock Fortress bathed in golden sunset light', 'cultural', 'Sigiriya', 'John Silva', '2024-11-20 10:30:00', true),
+('image', 'https://example.com/gallery/mirissa-whales.jpg', 'https://example.com/gallery/thumbs/mirissa-whales.jpg', 'Blue Whale Encounter', 'A majestic blue whale breaching near Mirissa coast', 'wildlife', 'Mirissa', 'Sarah Johnson', '2024-11-18 14:20:00', true),
+('image', 'https://example.com/gallery/nine-arch.jpg', 'https://example.com/gallery/thumbs/nine-arch.jpg', 'Nine Arch Bridge', 'The iconic Nine Arch Bridge with a train passing through', 'architecture', 'Ella', 'David Chen', '2024-11-15 09:45:00', true),
+('image', 'https://example.com/gallery/rice-curry.jpg', 'https://example.com/gallery/thumbs/rice-curry.jpg', 'Traditional Rice and Curry', 'Authentic Sri Lankan rice and curry spread', 'food', 'Colombo', 'Nimal Perera', '2024-11-10 12:15:00', true),
+('image', 'https://example.com/gallery/tea-picker.jpg', 'https://example.com/gallery/thumbs/tea-picker.jpg', 'Tea Plantation Worker', 'A tea picker at work in the lush green plantations', 'people', 'Nuwara Eliya', 'Emma Wilson', '2024-11-05 08:30:00', true),
+('image', 'https://example.com/gallery/unawatuna.jpg', 'https://example.com/gallery/thumbs/unawatuna.jpg', 'Unawatuna Beach', 'Crystal clear waters and palm trees at Unawatuna', 'beach', 'Galle', 'Michael Brown', '2024-11-01 16:00:00', true);
+
+-- Sample data for Gallery Tags
+INSERT INTO gallery_tags (gallery_item_id, tag) VALUES
+(1, 'UNESCO'),
+(1, 'heritage'),
+(1, 'sunset'),
+(2, 'whale watching'),
+(2, 'ocean'),
+(2, 'wildlife'),
+(3, 'bridge'),
+(3, 'train'),
+(3, 'architecture'),
+(4, 'cuisine'),
+(4, 'traditional'),
+(4, 'spicy'),
+(5, 'tea'),
+(5, 'plantation'),
+(5, 'culture'),
+(6, 'beach'),
+(6, 'tropical'),
+(6, 'paradise');

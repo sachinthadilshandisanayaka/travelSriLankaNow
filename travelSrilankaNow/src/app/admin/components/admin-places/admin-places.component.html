@@ -1,0 +1,355 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Manage Places</h1>
+        <p>Hotels, restaurants, cafes, and more</p>
+      </div>
+      <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Add New Place</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <!-- Places Table -->
+    <div *ngIf="!isLoading" class="admin-table">
+      <div class="admin-table__wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>Rating</th>
+              <th>Price</th>
+              <th>Featured</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let place of places">
+              <td>
+                <img [src]="place.imageUrl" [alt]="place.name" class="admin-table__image">
+              </td>
+              <td>
+                <div class="admin-table__title">{{ place.name }}</div>
+                <div class="admin-table__subtitle">{{ place.shortDescription }}</div>
+              </td>
+              <td>
+                <span class="admin-badge"
+                      [class.admin-badge--blue]="place.type === 'hotel'"
+                      [class.admin-badge--warning]="place.type === 'restaurant'"
+                      [class.admin-badge--cyan]="place.type === 'cafe'"
+                      [class.admin-badge--teal]="place.type === 'guesthouse'"
+                      [class.admin-badge--purple]="place.type === 'resort'">
+                  {{ place.type }}
+                </span>
+              </td>
+              <td>
+                <div class="admin-table__text">{{ place.location }}</div>
+                <span class="admin-badge admin-badge--blue">{{ place.region }}</span>
+              </td>
+              <td>
+                <div class="admin-rating">
+                  <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
+                  <span>{{ place.rating }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="admin-table__text admin-table__text--bold">{{ place.priceRange }}</span>
+              </td>
+              <td>
+                <span *ngIf="place.featured" class="admin-badge admin-badge--success">Yes</span>
+                <span *ngIf="!place.featured" class="admin-badge admin-badge--gray">No</span>
+              </td>
+              <td>
+                <div class="admin-table__actions">
+                  <button class="admin-btn admin-btn--ghost" (click)="openEditModal(place)" title="Edit">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete(place.id)" title="Delete">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="places.length === 0">
+              <td colspan="8">
+                <div class="admin-table__empty">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                  <h3>No places found</h3>
+                  <p>Get started by adding a new place</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 0" class="admin-pagination">
+        <div class="admin-pagination__info">
+          Showing <strong>{{ currentPage * pageSize + 1 }}</strong> to
+          <strong>{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</strong> of
+          <strong>{{ totalElements }}</strong> results
+        </div>
+        <div class="admin-pagination__controls">
+          <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">
+            Previous
+          </button>
+          <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                  class="admin-pagination__btn"
+                  [class.admin-pagination__btn--active]="currentPage === i"
+                  (click)="goToPage(i)">
+            {{ i + 1 }}
+          </button>
+          <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div *ngIf="showModal" class="admin-modal">
+  <div class="admin-modal__content admin-modal__content--large">
+    <div class="admin-modal__header">
+      <h2>{{ isEditMode ? 'Edit Place' : 'Add New Place' }}</h2>
+      <button class="admin-modal__close" (click)="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="placeForm" (ngSubmit)="savePlace()">
+      <div class="admin-modal__body">
+        <!-- Basic Information Section -->
+        <div class="admin-form__section">
+          <h3 class="admin-form__section-title">Basic Information</h3>
+          <div class="admin-form__grid">
+            <!-- Name -->
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Place Name *</label>
+              <input type="text" formControlName="name" class="admin-input" placeholder="e.g., The Hilltop Resort">
+            </div>
+
+            <!-- Type -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Type *</label>
+              <select formControlName="type" class="admin-select">
+                <option *ngFor="let type of placeTypes" [value]="type.code">{{ type.displayName }}</option>
+              </select>
+            </div>
+
+            <!-- Region -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Region *</label>
+              <select formControlName="region" class="admin-select">
+                <option *ngFor="let reg of regions" [value]="reg.code">{{ reg.displayName }}</option>
+              </select>
+            </div>
+
+            <!-- Location -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Location/City *</label>
+              <input type="text" formControlName="location" class="admin-input" placeholder="e.g., Kandy">
+            </div>
+
+            <!-- Address -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Address</label>
+              <input type="text" formControlName="address" class="admin-input" placeholder="Street address">
+            </div>
+
+            <!-- Rating -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Rating (0-5) *</label>
+              <input type="number" formControlName="rating" class="admin-input" min="0" max="5" step="0.1" placeholder="4.5">
+            </div>
+
+            <!-- Price Range -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Price Range *</label>
+              <select formControlName="priceRange" class="admin-select">
+                <option *ngFor="let price of priceRanges" [value]="price.code">{{ price.displayName }}</option>
+              </select>
+            </div>
+
+            <!-- Featured -->
+            <div class="admin-form__group">
+              <label class="admin-checkbox">
+                <input type="checkbox" formControlName="featured">
+                <span>Featured on Homepage</span>
+              </label>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="admin-form__group admin-form__group--full">
+              <app-image-upload
+                [currentImageUrl]="placeForm.get('imageUrl')?.value"
+                [folder]="'places'"
+                [label]="'Place Image'"
+                (imageUploaded)="onImageUploaded($event)"
+              ></app-image-upload>
+            </div>
+
+            <!-- Short Description -->
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Short Description *</label>
+              <input type="text" formControlName="shortDescription" class="admin-input" placeholder="Brief one-line description">
+            </div>
+
+            <!-- Full Description -->
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Full Description *</label>
+              <textarea formControlName="description" class="admin-textarea" rows="4" placeholder="Detailed description of the place"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="admin-form__section">
+          <h3 class="admin-form__section-title">Contact Information</h3>
+          <div class="admin-form__grid">
+            <!-- Phone -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Phone</label>
+              <input type="tel" formControlName="phone" class="admin-input" placeholder="+94 11 234 5678">
+            </div>
+
+            <!-- Email -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Email</label>
+              <input type="email" formControlName="email" class="admin-input" placeholder="info@example.com">
+            </div>
+
+            <!-- Website -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Website</label>
+              <input type="url" formControlName="website" class="admin-input" placeholder="https://www.example.com">
+            </div>
+
+            <!-- Opening Hours -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Opening Hours</label>
+              <input type="text" formControlName="openingHours" class="admin-input" placeholder="e.g., 9:00 AM - 10:00 PM">
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Details Section -->
+        <div class="admin-form__section">
+          <h3 class="admin-form__section-title">Additional Details</h3>
+          <div class="admin-form__grid">
+            <!-- Cuisine -->
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">
+                Cuisine Types (comma-separated)
+                <span class="admin-form__label-hint">- For restaurants</span>
+              </label>
+              <input type="text" formControlName="cuisine" class="admin-input" placeholder="Sri Lankan, Chinese, Italian">
+            </div>
+
+            <!-- Amenities -->
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">
+                Amenities (comma-separated)
+                <span class="admin-form__label-hint">- For hotels/resorts</span>
+              </label>
+              <input type="text" formControlName="amenities" class="admin-input" placeholder="WiFi, Pool, Parking, Restaurant, Gym">
+            </div>
+          </div>
+        </div>
+
+        <!-- GPS Coordinates Section -->
+        <div class="admin-form__section">
+          <h3 class="admin-form__section-title">GPS Coordinates</h3>
+          <div class="admin-form__grid">
+            <!-- Latitude -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Latitude</label>
+              <input type="number" formControlName="lat" class="admin-input" step="0.000001" placeholder="7.2906">
+            </div>
+
+            <!-- Longitude -->
+            <div class="admin-form__group">
+              <label class="admin-form__label">Longitude</label>
+              <input type="number" formControlName="lng" class="admin-input" step="0.000001" placeholder="80.6337">
+            </div>
+          </div>
+          <p class="admin-form__hint">
+            Use <a href="https://www.google.com/maps" target="_blank" class="admin-link">Google Maps</a> to find coordinates
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="placeForm.invalid || isLoading">
+          {{ isEditMode ? 'Update' : 'Create' }} Place
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete Place</h3>
+      <p class="admin-confirm__text">Are you sure you want to delete this place? This action cannot be undone.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="deletePlace()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+

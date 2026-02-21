@@ -1,0 +1,176 @@
+@import 'variables';
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+// Headings
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-primary;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  color: $text-dark;
+  margin: 0 0 $spacing-md;
+}
+
+h1 {
+  font-size: $font-size-3xl;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-5xl;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: $font-size-6xl;
+  }
+}
+
+h2 {
+  font-size: $font-size-2xl;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-4xl;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: $font-size-5xl;
+  }
+}
+
+h3 {
+  font-size: $font-size-xl;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-3xl;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: $font-size-4xl;
+  }
+}
+
+h4 {
+  font-size: $font-size-lg;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-2xl;
+  }
+}
+
+h5 {
+  font-size: $font-size-base;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-xl;
+  }
+}
+
+h6 {
+  font-size: $font-size-sm;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-lg;
+  }
+}
+
+// Body Text
+p {
+  font-family: $font-primary;
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+  color: $warm-gray;
+  margin: 0 0 $spacing-md;
+}
+
+// Special Typography Classes
+.display-1 {
+  font-family: $font-secondary;
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: $font-size-6xl;
+  }
+}
+
+.display-2 {
+  font-family: $font-secondary;
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: $font-size-5xl;
+  }
+}
+
+.lead {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-light;
+  line-height: $line-height-relaxed;
+
+  @media (min-width: $breakpoint-md) {
+    font-size: $font-size-xl;
+  }
+}
+
+.subtitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: $warm-gray;
+}
+
+.text-gradient {
+  background: $gradient-primary;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Text Colors
+.text-primary { color: $primary-blue; }
+.text-secondary { color: $accent-peach; }
+.text-teal { color: $primary-blue; }
+.text-dark { color: $text-dark; }
+.text-gray { color: $warm-gray; }
+.text-light { color: $medium-gray; }
+.text-white { color: $white; }
+
+// Font Weights
+.font-light { font-weight: $font-weight-light; }
+.font-normal { font-weight: $font-weight-normal; }
+.font-medium { font-weight: $font-weight-medium; }
+.font-semibold { font-weight: $font-weight-semibold; }
+.font-bold { font-weight: $font-weight-bold; }
+
+// Text Alignment
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+// Links
+a {
+  color: $primary-blue;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: darken($primary-blue, 10%);
+  }
+}
+
+// Lists
+ul, ol {
+  font-family: $font-primary;
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+  color: $warm-gray;
+  padding-left: $spacing-xl;
+  margin: 0 0 $spacing-md;
+}
+
+li {
+  margin-bottom: $spacing-sm;
+}

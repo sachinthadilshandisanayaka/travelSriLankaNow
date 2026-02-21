@@ -1,0 +1,30 @@
+// Import shared admin styles
+@import '../../styles/admin-shared';
+
+// Places-specific styles
+.admin-table__text--bold {
+  font-weight: 600;
+  color: $admin-gray-900;
+}
+
+.admin-modal__content--large {
+  max-width: 56rem;
+}
+
+.admin-form__label-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: $admin-gray-500;
+  margin-left: 0.25rem;
+}
+
+.admin-link {
+  color: $admin-blue;
+  text-decoration: none;
+  transition: color $admin-transition-fast;
+
+  &:hover {
+    color: $admin-purple;
+    text-decoration: underline;
+  }
+}

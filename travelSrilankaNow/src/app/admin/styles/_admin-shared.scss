@@ -1,0 +1,1634 @@
+// ============================================
+// ADMIN SHARED STYLES
+// Brand Colors: #0F2854, #1C4D8D, #4988C4, #BDE8F5
+// Navy Blue Theme
+// ============================================
+
+// Brand Color Variables - Navy Blue Palette
+$admin-navy-dark: #0F2854;   // Darkest - headers, primary buttons
+$admin-navy: #1C4D8D;        // Primary - main actions
+$admin-blue: #4988C4;        // Secondary - hover states, accents
+$admin-sky: #BDE8F5;         // Light - backgrounds, highlights
+
+// Aliases for backward compatibility
+$admin-purple: $admin-navy-dark;
+$admin-cyan: $admin-blue;
+$admin-teal: $admin-sky;
+
+// Light variants
+$admin-navy-dark-light: #E8EDF5;
+$admin-navy-light: #E0E8F5;
+$admin-blue-light: #EAF4FC;
+$admin-sky-light: #F5FBFE;
+
+// Backward compatibility aliases
+$admin-purple-light: $admin-navy-dark-light;
+$admin-cyan-light: $admin-blue-light;
+$admin-teal-light: $admin-sky-light;
+
+// Neutral Colors
+$admin-white: #FFFFFF;
+$admin-gray-50: #F9FAFB;
+$admin-gray-100: #F3F4F6;
+$admin-gray-200: #E5E7EB;
+$admin-gray-300: #D1D5DB;
+$admin-gray-400: #9CA3AF;
+$admin-gray-500: #6B7280;
+$admin-gray-600: #4B5563;
+$admin-gray-700: #374151;
+$admin-gray-800: #1F2937;
+$admin-gray-900: #111827;
+
+// Feedback Colors
+$admin-success: #10B981;
+$admin-success-light: #D1FAE5;
+$admin-error: #EF4444;
+$admin-error-light: #FEE2E2;
+$admin-warning: #F59E0B;
+$admin-warning-light: #FEF3C7;
+
+// Shadows
+$admin-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$admin-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$admin-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$admin-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$admin-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+// Border Radius
+$admin-radius-sm: 0.375rem;
+$admin-radius: 0.5rem;
+$admin-radius-lg: 0.75rem;
+$admin-radius-xl: 1rem;
+$admin-radius-2xl: 1.5rem;
+$admin-radius-full: 9999px;
+
+// Transitions
+$admin-transition-fast: 150ms ease;
+$admin-transition: 200ms ease;
+$admin-transition-slow: 300ms ease;
+
+// ============================================
+// MIXINS
+// ============================================
+
+@mixin admin-gradient {
+  background: linear-gradient(135deg, $admin-navy-dark 0%, $admin-navy 100%);
+}
+
+@mixin admin-gradient-hover {
+  background: linear-gradient(135deg, $admin-navy 0%, $admin-blue 100%);
+}
+
+@mixin admin-gradient-light {
+  background: linear-gradient(135deg, $admin-blue 0%, $admin-sky 100%);
+}
+
+@mixin admin-card {
+  background: $admin-white;
+  border-radius: $admin-radius-xl;
+  box-shadow: $admin-shadow;
+  border: 1px solid $admin-gray-200;
+}
+
+@mixin admin-focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba($admin-navy, 0.3);
+  border-color: $admin-navy;
+}
+
+// ============================================
+// SHARED COMPONENTS
+// ============================================
+
+// Page Container
+.admin-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, $admin-sky-light 0%, rgba($admin-sky, 0.15) 100%);
+  padding-top: 0;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 2rem;
+
+  &__container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+// Admin User Bar (Top Header) - Premium Styling
+.admin-user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 2rem;
+  margin: 0 -2rem 1.5rem -2rem;
+  background: linear-gradient(135deg, $admin-white 0%, rgba($admin-sky, 0.08) 100%);
+  border-bottom: 1px solid rgba($admin-navy, 0.08);
+  box-shadow: 0 2px 12px rgba($admin-navy-dark, 0.06), 0 1px 3px rgba($admin-navy-dark, 0.04);
+  backdrop-filter: blur(8px);
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 2rem;
+    right: 2rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba($admin-navy, 0.1), transparent);
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: $admin-navy-dark;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: color $admin-transition;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: $admin-navy;
+    }
+
+    &:hover {
+      color: $admin-navy;
+    }
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: $admin-navy;
+    color: $admin-white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  &__name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $admin-gray-700;
+  }
+}
+
+// Page Header
+.admin-header {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  animation: fadeIn 0.4s ease;
+
+  &__info {
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: $admin-gray-900;
+      margin: 0 0 0.25rem 0;
+      animation: slideInRight 0.5s ease;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: $admin-gray-500;
+      margin: 0;
+      animation: slideInRight 0.5s ease 0.1s both;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    animation: slideIn 0.5s ease 0.2s both;
+  }
+}
+
+// Primary Button - Premium Thin Border Design
+// Navy Blue theme with elegant thin borders
+.admin-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0.625em 1.5em;
+  border: 1px solid $admin-navy;
+  border-radius: $admin-radius;
+  color: $admin-navy;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-sizing: border-box;
+
+  // Text and icon z-index to stay above circles
+  span, svg {
+    position: relative;
+    z-index: 1;
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+    transition: transform $admin-transition;
+  }
+
+  // Circle pseudo-elements for hover effect
+  &::after,
+  &::before {
+    content: "";
+    position: absolute;
+    width: 14em;
+    aspect-ratio: 1;
+    background: $admin-sky;
+    opacity: 0.6;
+    border-radius: 50%;
+    transition: transform 500ms ease, background 300ms ease, opacity 300ms ease;
+  }
+
+  &::before {
+    left: 0;
+    transform: translateX(-12em);
+  }
+
+  &::after {
+    right: 0;
+    transform: translateX(12em);
+  }
+
+  &:hover {
+    color: $admin-navy-dark;
+    border-color: $admin-blue;
+
+    &::before {
+      transform: translateX(-1em);
+      opacity: 0.8;
+    }
+
+    &::after {
+      transform: translateX(1em);
+      opacity: 0.8;
+    }
+  }
+
+  &:active {
+    border-color: $admin-navy-dark;
+
+    &::before,
+    &::after {
+      background: $admin-blue;
+      opacity: 0.7;
+    }
+  }
+
+  // Primary variant - filled background with light circle effect
+  &--primary {
+    background: linear-gradient(135deg, $admin-navy-dark 0%, darken($admin-navy-dark, 5%) 100%);
+    border-color: transparent;
+    color: $admin-white;
+    box-shadow: 0 2px 8px rgba($admin-navy-dark, 0.25);
+
+    &::before,
+    &::after {
+      background: $admin-sky;
+      opacity: 0.4;
+    }
+
+    &:hover {
+      color: $admin-white;
+      border-color: $admin-navy;
+      background: $admin-navy;
+      box-shadow: $admin-shadow-lg, 0 4px 20px rgba($admin-navy-dark, 0.4);
+
+      &::before,
+      &::after {
+        opacity: 0.5;
+      }
+    }
+
+    &:active {
+      background: $admin-navy-dark;
+      border-color: $admin-navy-dark;
+      box-shadow: $admin-shadow-sm;
+
+      &::before,
+      &::after {
+        background: $admin-blue;
+        opacity: 0.6;
+      }
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $admin-shadow-lg, 0 0 0 3px rgba($admin-navy, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &::before,
+      &::after {
+        display: none;  // Hide circles when disabled
+      }
+
+      &:hover {
+        background: $admin-navy-dark;
+        border-color: $admin-navy-dark;
+        box-shadow: $admin-shadow-md;
+      }
+    }
+  }
+
+  // Secondary variant - outlined with navy
+  &--secondary {
+    background: $admin-white;
+    border: 1px solid $admin-gray-200;
+    color: $admin-gray-600;
+
+    &::before,
+    &::after {
+      background: $admin-gray-200;
+      opacity: 0.5;
+    }
+
+    &:hover {
+      color: $admin-navy;
+      border-color: $admin-navy;
+
+      &::before,
+      &::after {
+        background: $admin-sky-light;
+        opacity: 0.7;
+      }
+    }
+
+    &:active {
+      border-color: $admin-navy-dark;
+
+      &::before,
+      &::after {
+        background: $admin-blue-light;
+      }
+    }
+  }
+
+  // Danger variant - red theme
+  &--danger {
+    background: linear-gradient(135deg, $admin-error 0%, darken($admin-error, 8%) 100%);
+    border-color: transparent;
+    color: $admin-white;
+    box-shadow: 0 2px 6px rgba($admin-error, 0.2);
+
+    &::before,
+    &::after {
+      background: lighten($admin-error, 30%);
+      opacity: 0.4;
+    }
+
+    &:hover {
+      color: $admin-white;
+      border-color: darken($admin-error, 8%);
+      background: darken($admin-error, 5%);
+      box-shadow: $admin-shadow-md, 0 4px 15px rgba($admin-error, 0.35);
+
+      &::before,
+      &::after {
+        opacity: 0.5;
+      }
+    }
+
+    &:active {
+      background: darken($admin-error, 10%);
+      border-color: darken($admin-error, 15%);
+
+      &::before,
+      &::after {
+        background: darken($admin-error, 5%);
+        opacity: 0.6;
+      }
+    }
+  }
+
+  // Ghost variant - transparent with navy accent
+  &--ghost {
+    background: transparent;
+    border-color: transparent;
+    color: $admin-navy;
+    padding: 0.5rem;
+
+    &::before,
+    &::after {
+      width: 3em;
+      background: $admin-sky;
+      opacity: 0;
+    }
+
+    &:hover {
+      color: $admin-navy-dark;
+      border-color: transparent;
+      background: $admin-sky-light;
+
+      &::before,
+      &::after {
+        opacity: 0.5;
+        transform: translateX(0);
+      }
+    }
+
+    &:active {
+      background: $admin-blue-light;
+    }
+
+    svg {
+      margin-right: 0;
+    }
+  }
+
+  // Ghost Danger variant
+  &--ghost-danger {
+    background: transparent;
+    border-color: transparent;
+    color: $admin-error;
+    padding: 0.5rem;
+
+    &::before,
+    &::after {
+      width: 3em;
+      background: $admin-error-light;
+      opacity: 0;
+    }
+
+    &:hover {
+      color: darken($admin-error, 10%);
+      border-color: transparent;
+      background: $admin-error-light;
+
+      &::before,
+      &::after {
+        opacity: 0.6;
+        transform: translateX(0);
+      }
+    }
+
+    &:active {
+      background: darken($admin-error-light, 5%);
+    }
+
+    svg {
+      margin-right: 0;
+    }
+  }
+
+  // Outline variant - thin elegant border
+  &--outline {
+    background: transparent;
+    border: 1px solid $admin-navy;
+    color: $admin-navy;
+
+    &::before,
+    &::after {
+      background: $admin-sky;
+      opacity: 0.5;
+    }
+
+    &:hover {
+      color: $admin-navy-dark;
+      border-color: $admin-blue;
+      background: rgba($admin-sky, 0.2);
+    }
+
+    &:active {
+      border-color: $admin-navy-dark;
+      background: rgba($admin-sky, 0.3);
+    }
+  }
+
+  // Sky variant - light button with sky colors
+  &--sky {
+    background: linear-gradient(135deg, $admin-sky 0%, lighten($admin-sky, 5%) 100%);
+    border: 1px solid rgba($admin-blue, 0.2);
+    color: $admin-navy-dark;
+
+    &::before,
+    &::after {
+      background: $admin-white;
+      opacity: 0.5;
+    }
+
+    &:hover {
+      border-color: $admin-blue;
+      background: lighten($admin-sky, 3%);
+
+      &::before,
+      &::after {
+        opacity: 0.7;
+      }
+    }
+
+    &:active {
+      background: darken($admin-sky, 5%);
+      border-color: $admin-navy;
+    }
+  }
+}
+
+// Toast Messages
+.admin-toast {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-radius: $admin-radius-lg;
+  margin-bottom: 1.5rem;
+  animation: toastSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: $admin-shadow-md;
+  position: relative;
+  overflow: hidden;
+
+  // Animated progress bar at bottom
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    animation: shrinkWidth 3s linear forwards;
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    animation: iconBounce 0.5s ease 0.2s;
+  }
+
+  &--success {
+    background: $admin-success-light;
+    border: 1px solid $admin-success;
+    color: darken($admin-success, 20%);
+
+    &::after {
+      background: $admin-success;
+    }
+
+    svg {
+      animation: checkmark 0.4s ease 0.2s both;
+    }
+  }
+
+  &--error {
+    background: $admin-error-light;
+    border: 1px solid $admin-error;
+    color: darken($admin-error, 10%);
+
+    &::after {
+      background: $admin-error;
+    }
+  }
+}
+
+@keyframes shrinkWidth {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+// Loading Spinner
+.admin-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 0;
+  animation: fadeIn 0.3s ease;
+
+  &__spinner {
+    width: 3rem;
+    height: 3rem;
+    animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+
+    circle {
+      stroke: $admin-blue-light;
+    }
+
+    path {
+      fill: $admin-blue;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  // Loading text dots animation
+  &__text {
+    margin-left: 1rem;
+    font-size: 0.875rem;
+    color: $admin-gray-600;
+
+    span {
+      display: inline-block;
+      animation: loadingDots 1.4s ease-in-out infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
+}
+
+// Data Table
+.admin-table {
+  @include admin-card;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease;
+
+  &__wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: linear-gradient(180deg, $admin-gray-50 0%, $admin-gray-100 100%);
+
+    th {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $admin-gray-600;
+      border-bottom: 2px solid $admin-gray-200;
+      transition: background $admin-transition-fast;
+
+      &:hover {
+        background: rgba($admin-gray-200, 0.5);
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $admin-gray-100;
+      transition: all $admin-transition;
+      animation: tableRowIn 0.4s ease both;
+
+      // Stagger animation for each row
+      @for $i from 1 through 15 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.05}s;
+        }
+      }
+
+      &:hover {
+        background: $admin-blue-light;
+        transform: scale(1.005);
+        box-shadow: 0 2px 8px rgba($admin-blue, 0.1);
+
+        td {
+          color: $admin-gray-900;
+        }
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      padding: 1rem 1.5rem;
+      vertical-align: middle;
+      transition: color $admin-transition-fast;
+    }
+  }
+
+  &__image {
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+    border-radius: $admin-radius-lg;
+    box-shadow: $admin-shadow-sm;
+    transition: all $admin-transition;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: $admin-shadow-md;
+    }
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-gray-900;
+    margin-bottom: 0.25rem;
+    transition: color $admin-transition-fast;
+  }
+
+  &__subtitle {
+    font-size: 0.8125rem;
+    color: $admin-gray-500;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__text {
+    font-size: 0.875rem;
+    color: $admin-gray-700;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    opacity: 0.7;
+    transition: opacity $admin-transition-fast;
+  }
+
+  tbody tr:hover &__actions {
+    opacity: 1;
+  }
+
+  &__empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+
+    svg {
+      width: 4rem;
+      height: 4rem;
+      color: $admin-gray-300;
+      margin: 0 auto 1rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: $admin-gray-700;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: $admin-gray-500;
+      margin: 0;
+    }
+  }
+}
+
+// Badges
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: $admin-radius-full;
+  text-transform: capitalize;
+  transition: all $admin-transition;
+  cursor: default;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  // Navy Dark badge (primary)
+  &--navy-dark,
+  &--purple {
+    background: $admin-navy-dark-light;
+    color: $admin-navy-dark;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-navy-dark, 0.25);
+    }
+  }
+
+  // Navy badge
+  &--navy {
+    background: $admin-navy-light;
+    color: $admin-navy;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-navy, 0.25);
+    }
+  }
+
+  // Blue badge
+  &--blue,
+  &--cyan {
+    background: $admin-blue-light;
+    color: $admin-blue;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-blue, 0.25);
+    }
+  }
+
+  // Sky badge
+  &--sky,
+  &--teal {
+    background: $admin-sky-light;
+    color: darken($admin-sky, 50%);
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-sky, 0.5);
+    }
+  }
+
+  &--success {
+    background: $admin-success-light;
+    color: darken($admin-success, 15%);
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-success, 0.25);
+    }
+  }
+
+  &--gray {
+    background: $admin-gray-100;
+    color: $admin-gray-600;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-gray-400, 0.25);
+    }
+  }
+
+  &--warning {
+    background: $admin-warning-light;
+    color: darken($admin-warning, 15%);
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba($admin-warning, 0.3);
+    }
+  }
+
+  // Featured badge with pulse animation - Navy theme
+  &--featured {
+    background: linear-gradient(135deg, $admin-navy-light 0%, $admin-sky-light 100%);
+    color: $admin-navy-dark;
+    animation: badgePulse 2s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba($admin-white, 0.4), transparent);
+      animation: shimmer 2s ease-in-out infinite;
+    }
+  }
+}
+
+// Rating Display
+.admin-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: transform $admin-transition;
+
+  &:hover {
+    transform: scale(1.1);
+
+    svg {
+      animation: pulse 0.5s ease;
+    }
+  }
+
+  svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: $admin-warning;
+    transition: transform $admin-transition-fast;
+  }
+
+  span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-gray-700;
+    transition: color $admin-transition-fast;
+  }
+}
+
+// Pagination
+.admin-pagination {
+  background: linear-gradient(180deg, $admin-gray-50 0%, $admin-white 100%);
+  padding: 1rem 1.5rem;
+  border-top: 1px solid $admin-gray-200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  animation: slideUp 0.3s ease;
+
+  &__info {
+    font-size: 0.875rem;
+    color: $admin-gray-600;
+
+    strong {
+      color: $admin-navy-dark;
+      font-weight: 600;
+    }
+  }
+
+  &__controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: $admin-radius;
+    border: 1px solid $admin-gray-200;
+    background: $admin-white;
+    color: $admin-gray-600;
+    cursor: pointer;
+    transition: all $admin-transition cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba($admin-sky, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    &:hover:not(:disabled) {
+      background: $admin-sky-light;
+      border-color: $admin-navy;
+      color: $admin-navy;
+      box-shadow: 0 2px 8px rgba($admin-navy, 0.15);
+
+      &::after {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &--active {
+      @include admin-gradient;
+      color: $admin-white;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba($admin-navy-dark, 0.3);
+
+      &::after {
+        background: rgba($admin-sky, 0.3);
+      }
+
+      &:hover {
+        @include admin-gradient-hover;
+        box-shadow: 0 4px 12px rgba($admin-navy, 0.4);
+      }
+    }
+  }
+}
+
+// Modal
+.admin-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba($admin-gray-900, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+  animation: modalBackdropIn 0.3s ease forwards;
+
+  &__content {
+    background: $admin-white;
+    border-radius: $admin-radius-xl;
+    box-shadow: $admin-shadow-xl, 0 0 0 1px rgba($admin-gray-900, 0.05);
+    max-width: 52rem;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    overflow: hidden;
+    transform-origin: center center;
+
+    // Form inside modal - flex container for body + footer
+    form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+  }
+
+  &__header {
+    background: $admin-white;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid $admin-gray-200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: $admin-radius-xl $admin-radius-xl 0 0;
+
+    h2 {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: $admin-gray-900;
+      margin: 0;
+      animation: slideInRight 0.3s ease 0.1s both;
+    }
+  }
+
+  &__close {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $admin-radius;
+    background: transparent;
+    border: none;
+    color: $admin-gray-400;
+    cursor: pointer;
+    transition: all $admin-transition;
+    animation: fadeIn 0.3s ease 0.2s both;
+
+    &:hover {
+      background: $admin-gray-100;
+      color: $admin-gray-600;
+      transform: rotate(90deg);
+    }
+
+    &:active {
+      transform: rotate(90deg) scale(0.9);
+    }
+
+    svg {
+      width: 1.125rem;
+      height: 1.125rem;
+      transition: transform $admin-transition;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    min-height: 0;
+
+    // Custom scrollbar for modal body
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $admin-gray-100;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $admin-gray-300;
+      border-radius: 3px;
+      transition: background $admin-transition-fast;
+
+      &:hover {
+        background: $admin-gray-400;
+      }
+    }
+  }
+
+  &__footer {
+    background: $admin-gray-50;
+    padding: 0.875rem 1.25rem;
+    border-top: 1px solid $admin-gray-200;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-radius: 0 0 $admin-radius-xl $admin-radius-xl;
+    animation: slideUp 0.3s ease 0.15s both;
+  }
+}
+
+// Delete Confirmation Modal
+.admin-confirm {
+  @extend .admin-modal;
+
+  &__content {
+    max-width: 28rem;
+    animation: modalContentIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  &__body {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  &__icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.5rem;
+    background: $admin-error-light;
+    border-radius: $admin-radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: shake 0.6s ease 0.2s, pulse 2s ease-in-out 0.8s infinite;
+
+    svg {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: $admin-error;
+      animation: iconBounce 0.5s ease 0.3s;
+    }
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0 0 0.75rem 0;
+    animation: fadeIn 0.3s ease 0.2s both;
+  }
+
+  &__text {
+    font-size: 0.9375rem;
+    color: $admin-gray-500;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease 0.3s both;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    animation: slideUp 0.3s ease 0.35s both;
+
+    button {
+      flex: 1;
+    }
+  }
+}
+
+// Form Elements
+.admin-form {
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__group {
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $admin-gray-700;
+    margin-bottom: 0.375rem;
+  }
+
+  &__hint {
+    font-size: 0.6875rem;
+    color: $admin-gray-500;
+    margin-top: 0.25rem;
+  }
+
+  &__section {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid $admin-gray-200;
+
+    &:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &__section-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: $admin-gray-800;
+    margin: 0 0 0.75rem 0;
+  }
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  background: $admin-white;
+  color: $admin-gray-900;
+  transition: all $admin-transition cubic-bezier(0.4, 0, 0.2, 1);
+
+  &::placeholder {
+    color: $admin-gray-400;
+    transition: color $admin-transition-fast;
+  }
+
+  &:hover {
+    border-color: $admin-gray-400;
+    background: $admin-gray-50;
+  }
+
+  &:focus {
+    @include admin-focus;
+    background: $admin-white;
+    animation: focusGlow 1.5s ease-in-out infinite;
+
+    &::placeholder {
+      color: $admin-gray-300;
+    }
+  }
+}
+
+.admin-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.admin-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
+
+  &:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%230065F8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+  }
+}
+
+.admin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: transform $admin-transition-fast;
+
+  &:hover {
+    transform: translateX(2px);
+  }
+
+  input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid $admin-gray-300;
+    border-radius: $admin-radius-sm;
+    cursor: pointer;
+    accent-color: $admin-blue;
+    transition: all $admin-transition;
+
+    &:checked {
+      background: $admin-blue;
+      border-color: $admin-blue;
+      animation: pulse 0.3s ease;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba($admin-blue, 0.2);
+    }
+  }
+
+  span {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $admin-gray-700;
+    transition: color $admin-transition-fast;
+  }
+
+  &:hover span {
+    color: $admin-gray-900;
+  }
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+
+// Basic Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Enhanced Modal Animations
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes modalContentIn {
+  0% {
+    opacity: 0;
+    transform: translateY(2rem) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-0.25rem) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalContentOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.95);
+  }
+}
+
+// Button Animations
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba($admin-blue, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba($admin-blue, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba($admin-blue, 0);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// Delete/Warning Animations
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  70% {
+    transform: translateY(-4px);
+  }
+}
+
+// Badge Animations
+@keyframes badgePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Table Row Animation
+@keyframes tableRowIn {
+  from {
+    opacity: 0;
+    transform: translateX(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Toast Animations
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-1rem) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0.125rem) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Form Field Animations
+@keyframes focusGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba($admin-blue, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba($admin-blue, 0.3);
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(-45deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(-45deg);
+  }
+  100% {
+    transform: scale(1) rotate(-45deg);
+  }
+}
+
+// Loading Animations
+@keyframes loadingDots {
+  0%, 20% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

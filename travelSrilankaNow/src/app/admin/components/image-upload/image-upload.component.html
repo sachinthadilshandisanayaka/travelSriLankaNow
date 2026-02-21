@@ -1,0 +1,127 @@
+<div class="image-upload">
+  <label class="image-upload__label">{{ label }} *</label>
+
+  <!-- Single Image Upload -->
+  <div *ngIf="!multiple" class="image-upload__container">
+    <!-- Drop Zone -->
+    <div
+      class="image-upload__dropzone"
+      [class.image-upload__dropzone--active]="isDragOver"
+      [class.image-upload__dropzone--has-image]="previewUrl"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <!-- Preview Image -->
+      <div *ngIf="previewUrl && !isUploading" class="image-upload__preview">
+        <img [src]="previewUrl" alt="Preview" />
+        <button type="button" class="image-upload__remove" (click)="removeImage()">
+          <span>×</span>
+        </button>
+      </div>
+
+      <!-- Upload Progress -->
+      <div *ngIf="isUploading" class="image-upload__progress">
+        <div class="image-upload__progress-bar">
+          <div
+            class="image-upload__progress-fill"
+            [style.width.%]="uploadProgress"
+          ></div>
+        </div>
+        <span class="image-upload__progress-text">{{ uploadProgress }}%</span>
+      </div>
+
+      <!-- Upload Prompt -->
+      <div *ngIf="!previewUrl && !isUploading" class="image-upload__prompt">
+        <div class="image-upload__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <p class="image-upload__text">
+          <strong>Click to upload</strong> or drag and drop
+        </p>
+        <p class="image-upload__hint">PNG, JPG, GIF or WebP (max 10MB)</p>
+      </div>
+
+      <!-- Hidden File Input -->
+      <input
+        type="file"
+        class="image-upload__input"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        (change)="onFileSelected($event)"
+        [disabled]="isUploading"
+      />
+    </div>
+  </div>
+
+  <!-- Multiple Images Upload -->
+  <div *ngIf="multiple" class="image-upload__container image-upload__container--multiple">
+    <!-- Existing Images -->
+    <div *ngIf="currentImages.length > 0" class="image-upload__gallery">
+      <div *ngFor="let img of currentImages; let i = index" class="image-upload__gallery-item">
+        <img [src]="img" alt="Image {{ i + 1 }}" />
+        <button type="button" class="image-upload__remove" (click)="removeMultipleImage(i)">
+          <span>×</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload Progress for Multiple -->
+    <div *ngIf="isUploading && multipleProgress.length > 0" class="image-upload__multi-progress">
+      <div *ngFor="let prog of multipleProgress; let i = index" class="image-upload__multi-item">
+        <span>Image {{ i + 1 }}</span>
+        <div class="image-upload__progress-bar">
+          <div
+            class="image-upload__progress-fill"
+            [class.image-upload__progress-fill--error]="prog.status === 'error'"
+            [class.image-upload__progress-fill--complete]="prog.status === 'completed'"
+            [style.width.%]="prog.progress"
+          ></div>
+        </div>
+        <span class="image-upload__progress-text">
+          {{ prog.status === 'completed' ? 'Done' : prog.status === 'error' ? 'Failed' : prog.progress + '%' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Drop Zone for Multiple -->
+    <div
+      class="image-upload__dropzone image-upload__dropzone--multiple"
+      [class.image-upload__dropzone--active]="isDragOver"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <div class="image-upload__prompt">
+        <div class="image-upload__icon image-upload__icon--small">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <p class="image-upload__text">
+          <strong>Add more images</strong>
+        </p>
+      </div>
+
+      <input
+        type="file"
+        class="image-upload__input"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        multiple
+        (change)="onFileSelected($event)"
+        [disabled]="isUploading"
+      />
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="image-upload__error">
+    <span>{{ errorMessage }}</span>
+    <button type="button" (click)="clearError()">×</button>
+  </div>
+</div>

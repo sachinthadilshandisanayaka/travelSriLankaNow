@@ -1,0 +1,399 @@
+@import '../../../../styles/variables';
+
+// Navbar height for offset calculations
+$navbar-height: 80px;
+
+.page-header.animated-header {
+  position: relative;
+  min-height: calc(280px + #{$navbar-height});
+  display: flex;
+  align-items: center;
+  // Extend behind navbar with negative margin, compensate with extra padding
+  margin-top: -$navbar-height;
+  padding: calc(#{$spacing-4xl} + #{$navbar-height}) 0 $spacing-3xl;
+  background: linear-gradient(135deg, $primary-navy-dark 0%, $primary-navy 50%, $primary-blue 100%);
+  overflow: hidden;
+
+  // Theme variations (used when no background image)
+  &.theme-locations {
+    background: linear-gradient(135deg, #0F2854 0%, #1C4D8D 60%, #4988C4 100%);
+  }
+
+  &.theme-events {
+    background: linear-gradient(135deg, #1C4D8D 0%, #4988C4 50%, #BDE8F5 100%);
+  }
+
+  &.theme-gallery {
+    background: linear-gradient(135deg, #0F2854 0%, #1C4D8D 70%, #D4AF73 100%);
+  }
+
+  &.theme-places {
+    background: linear-gradient(135deg, #1C4D8D 0%, #0F2854 50%, #D4AF73 100%);
+  }
+
+  // Dynamic background image support
+  &.has-background-image {
+    background: none;
+
+    .background-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+
+    .header-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  // Loading state
+  &.is-loading {
+    min-height: calc(280px + #{$navbar-height});
+  }
+}
+
+// Animated particles
+.header-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba($white, 0.3);
+    border-radius: 50%;
+    animation: float-particle 8s ease-in-out infinite;
+
+    @for $i from 1 through 8 {
+      &:nth-child(#{$i}) {
+        left: $i * 12%;
+        top: (20 + ($i * 8) % 60) * 1%;
+        animation-delay: $i * -1s;
+        animation-duration: (6 + ($i % 4)) * 1s;
+        width: (4 + ($i % 4)) * 1px;
+        height: (4 + ($i % 4)) * 1px;
+      }
+    }
+  }
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) scale(1.2);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-5px) scale(0.8);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(-30px) translateX(15px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+// Wave decoration at bottom
+.header-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  color: $white;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Content wrapper
+.header-content-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-2xl;
+  position: relative;
+  z-index: 2;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+// Text content
+.header-content {
+  flex: 1;
+  color: $white;
+
+  .subtitle {
+    display: inline-block;
+    padding: $spacing-xs $spacing-md;
+    background: rgba($white, 0.15);
+    backdrop-filter: blur(8px);
+    border-radius: $radius-full;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: $spacing-md;
+  }
+
+  h1 {
+    font-family: $font-secondary;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-md;
+    line-height: $line-height-tight;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .subtitle {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .lead {
+    font-size: $font-size-lg;
+    opacity: 0.9;
+    max-width: 500px;
+    line-height: $line-height-relaxed;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 6px rgba(0, 0, 0, 0.15);
+
+    @media (max-width: $breakpoint-md) {
+      margin: 0 auto;
+    }
+  }
+}
+
+// Animation container
+.header-animation {
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+
+  @media (max-width: $breakpoint-md) {
+    width: 150px;
+    height: 150px;
+    order: -1;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+// SVG Theme Decorations
+:host ::ng-deep .theme-decoration {
+  width: 100%;
+  height: 100%;
+
+  // Locations - Compass animation
+  &.locations-deco {
+    .compass-ring {
+      animation: rotate-slow 20s linear infinite;
+      transform-origin: center;
+    }
+
+    .compass-needle {
+      animation: compass-wobble 3s ease-in-out infinite;
+      transform-origin: 100px 100px;
+    }
+
+    .floating-pin {
+      animation: float-pin 2.5s ease-in-out infinite;
+
+      &.pin-2 {
+        animation-delay: -1.2s;
+      }
+    }
+  }
+
+  // Events - Calendar animation
+  &.events-deco {
+    .pulse-circle {
+      animation: pulse 2s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .confetti {
+      animation: confetti-fall 3s ease-in-out infinite;
+
+      &.c1 { animation-delay: 0s; }
+      &.c2 { animation-delay: -0.5s; }
+      &.c3 { animation-delay: -1s; }
+      &.c4 { animation-delay: -1.5s; }
+      &.c5 { animation-delay: -2s; }
+    }
+  }
+
+  // Gallery - Camera animation
+  &.gallery-deco {
+    .lens-flare {
+      animation: flare 2s ease-in-out infinite;
+    }
+
+    .shutter-btn {
+      animation: shutter-press 4s ease-in-out infinite;
+    }
+
+    .photo-float {
+      animation: photo-drift 3s ease-in-out infinite;
+
+      &.p1 { animation-delay: 0s; }
+      &.p2 { animation-delay: -1s; }
+      &.p3 { animation-delay: -2s; }
+    }
+  }
+
+  // Places - Hotel animation
+  &.places-deco {
+    .star {
+      animation: twinkle 2s ease-in-out infinite;
+
+      &.s1 { animation-delay: 0s; }
+      &.s2 { animation-delay: -0.7s; }
+      &.s3 { animation-delay: -1.4s; }
+    }
+
+    .utensils {
+      animation: utensil-swing 3s ease-in-out infinite;
+      transform-origin: 170px 105px;
+    }
+  }
+
+  // Default - Palm tree animation
+  &.default-deco {
+    .sun-glow {
+      animation: sun-pulse 3s ease-in-out infinite;
+    }
+
+    .wave-path {
+      animation: wave-move 4s ease-in-out infinite;
+
+      &.w2 {
+        animation-delay: -1s;
+        animation-duration: 3s;
+      }
+    }
+  }
+}
+
+// Keyframe animations
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes compass-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+@keyframes float-pin {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes confetti-fall {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  50% { transform: translateY(10px) rotate(180deg); opacity: 0.6; }
+}
+
+@keyframes flare {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.3); }
+}
+
+@keyframes shutter-press {
+  0%, 90%, 100% { transform: scale(1); }
+  95% { transform: scale(0.9); }
+}
+
+@keyframes photo-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes utensil-swing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.2); }
+}
+
+@keyframes wave-move {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-20px); }
+}
+
+// Slide-in animations
+.animate-slide-in {
+  animation: slideIn 0.6s ease-out forwards;
+  opacity: 0;
+
+  &.delay-1 { animation-delay: 0.15s; }
+  &.delay-2 { animation-delay: 0.3s; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .header-particles .particle,
+  :host ::ng-deep .theme-decoration * {
+    animation: none !important;
+  }
+
+  .animate-slide-in {
+    animation: none;
+    opacity: 1;
+  }
+}

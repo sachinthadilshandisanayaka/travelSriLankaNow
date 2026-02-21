@@ -1,0 +1,204 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Master Data Management</h1>
+        <p>Manage dropdown values for categories, types, regions, and more</p>
+      </div>
+      <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Add New Item</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Filter Section -->
+    <div class="admin-filter">
+      <div class="admin-filter__group">
+        <label class="admin-form__label">Filter by Type</label>
+        <select [(ngModel)]="selectedType" (change)="onTypeChange()" class="admin-select">
+          <option value="">All Types</option>
+          <option *ngFor="let type of types" [value]="type">{{ getTypeDisplayName(type) }}</option>
+        </select>
+      </div>
+      <div class="admin-filter__info">
+        Showing <strong>{{ filteredList.length }}</strong> items
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <!-- Master Data Table -->
+    <div *ngIf="!isLoading" class="admin-table">
+      <div class="admin-table__wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Code</th>
+              <th>Display Name</th>
+              <th>Color</th>
+              <th>Sort Order</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredList">
+              <td>
+                <span class="admin-badge admin-badge--info">{{ getTypeDisplayName(item.type) }}</span>
+              </td>
+              <td>
+                <span class="admin-table__code">{{ item.code }}</span>
+              </td>
+              <td>
+                <span class="admin-table__text">{{ item.displayName }}</span>
+              </td>
+              <td>
+                <div class="color-preview" *ngIf="item.color">
+                  <span class="color-swatch" [style.backgroundColor]="item.color"></span>
+                  <span class="color-value">{{ item.color }}</span>
+                </div>
+                <span *ngIf="!item.color" class="admin-table__text--muted">-</span>
+              </td>
+              <td>
+                <span class="admin-table__text">{{ item.sortOrder }}</span>
+              </td>
+              <td>
+                <span class="admin-badge" [ngClass]="item.isActive ? 'admin-badge--success' : 'admin-badge--gray'">
+                  {{ item.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <div class="admin-table__actions">
+                  <button class="admin-btn admin-btn--ghost" (click)="toggleActive(item)" [title]="item.isActive ? 'Deactivate' : 'Activate'">
+                    <svg *ngIf="item.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                    </svg>
+                    <svg *ngIf="!item.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </button>
+                  <button class="admin-btn admin-btn--ghost" (click)="openEditModal(item)" title="Edit">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <button class="admin-btn admin-btn--ghost-danger" (click)="deleteItem(item)" title="Delete">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredList.length === 0">
+              <td colspan="7">
+                <div class="admin-table__empty">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                  </svg>
+                  <h3>No master data found</h3>
+                  <p>Get started by adding a new item</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div *ngIf="showModal" class="admin-modal">
+  <div class="admin-modal__content admin-modal__content--sm">
+    <div class="admin-modal__header">
+      <h2>{{ isEditing ? 'Edit Item' : 'Add New Item' }}</h2>
+      <button class="admin-modal__close" (click)="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body">
+      <div class="admin-form__grid">
+        <!-- Type -->
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Type *</label>
+          <select [(ngModel)]="currentItem.type" class="admin-select" [disabled]="isEditing">
+            <option *ngFor="let type of types" [value]="type">{{ getTypeDisplayName(type) }}</option>
+          </select>
+        </div>
+
+        <!-- Code -->
+        <div class="admin-form__group">
+          <label class="admin-form__label">Code *</label>
+          <input type="text" [(ngModel)]="currentItem.code" class="admin-input" placeholder="e.g., beach, hotel">
+          <p class="admin-form__hint">Unique identifier (lowercase, no spaces)</p>
+        </div>
+
+        <!-- Display Name -->
+        <div class="admin-form__group">
+          <label class="admin-form__label">Display Name *</label>
+          <input type="text" [(ngModel)]="currentItem.displayName" class="admin-input" placeholder="e.g., Beach, Hotel">
+        </div>
+
+        <!-- Sort Order -->
+        <div class="admin-form__group">
+          <label class="admin-form__label">Sort Order</label>
+          <input type="number" [(ngModel)]="currentItem.sortOrder" class="admin-input" min="0" placeholder="0">
+        </div>
+
+        <!-- Color -->
+        <div class="admin-form__group">
+          <label class="admin-form__label">Color</label>
+          <div class="color-input-wrapper">
+            <input type="color" [(ngModel)]="currentItem.color" class="admin-input-color">
+            <input type="text" [(ngModel)]="currentItem.color" class="admin-input" placeholder="#3B82F6">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Description</label>
+          <textarea [(ngModel)]="currentItem.description" class="admin-textarea" rows="2" placeholder="Optional description"></textarea>
+        </div>
+
+        <!-- Active Status -->
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="currentItem.isActive">
+            <span>Active</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-modal__footer">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeModal()">Cancel</button>
+      <button type="button" class="admin-btn admin-btn--primary" (click)="saveItem()" [disabled]="!currentItem.code || !currentItem.displayName || !currentItem.type">
+        {{ isEditing ? 'Update' : 'Create' }} Item
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,318 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Toast Messages -->
+    <div class="admin-toast admin-toast--success" *ngIf="successMessage">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+      {{ successMessage }}
+    </div>
+    <div class="admin-toast admin-toast--error" *ngIf="errorMessage">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Sections List View -->
+    <ng-container *ngIf="!selectedSection">
+      <header class="admin-header">
+        <div class="admin-header__info">
+          <h1>More Sections</h1>
+          <p>Manage additional navigation sections and their content</p>
+        </div>
+        <div class="admin-header__actions">
+          <button class="admin-btn admin-btn--primary" (click)="openAddSection()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Section
+          </button>
+        </div>
+      </header>
+
+      <!-- Loading -->
+      <div class="admin-loader" *ngIf="isLoading">
+        <svg viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80,200" stroke-dashoffset="0"></circle>
+        </svg>
+        <p>Loading sections<span class="admin-loader__dots">...</span></p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="sections-empty" *ngIf="!isLoading && sections.length === 0">
+        <div class="sections-empty__icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+        </div>
+        <h3>No sections yet</h3>
+        <p>Create your first "More" section to add dynamic content to the navigation.</p>
+        <button class="admin-btn admin-btn--primary" (click)="openAddSection()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Create First Section
+        </button>
+      </div>
+
+      <!-- Sections Grid -->
+      <div class="sections-grid" *ngIf="!isLoading && sections.length > 0">
+        <div class="section-card" *ngFor="let section of sections" [class.section-card--inactive]="!section.active">
+          <div class="section-card__image" *ngIf="section.imageUrl">
+            <img [src]="section.imageUrl" [alt]="section.name">
+          </div>
+          <div class="section-card__image section-card__image--placeholder" *ngIf="!section.imageUrl">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+          <div class="section-card__body">
+            <div class="section-card__header">
+              <h3 class="section-card__title">{{ section.name }}</h3>
+              <span class="admin-badge" [class.admin-badge--success]="section.active" [class.admin-badge--gray]="!section.active">
+                {{ section.active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <p class="section-card__slug">/more/{{ section.slug }}</p>
+            <p class="section-card__desc" *ngIf="section.description">{{ section.description }}</p>
+            <div class="section-card__meta">
+              <span class="section-card__item-count">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                {{ getItemCount(section) }} item{{ getItemCount(section) !== 1 ? 's' : '' }}
+              </span>
+              <span class="section-card__order" *ngIf="section.displayOrder">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                Order: {{ section.displayOrder }}
+              </span>
+            </div>
+            <div class="section-card__actions">
+              <button class="admin-btn admin-btn--ghost" (click)="selectSection(section)" title="Manage Items">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                Items
+              </button>
+              <button class="admin-btn admin-btn--ghost" (click)="openEditSection(section)" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost" (click)="toggleSectionActive(section)" [title]="section.active ? 'Deactivate' : 'Activate'">
+                <svg *ngIf="section.active" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path></svg>
+                <svg *ngIf="!section.active" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete('section', section.id, section.name)" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Items View -->
+    <ng-container *ngIf="selectedSection">
+      <header class="admin-header">
+        <div class="admin-header__info">
+          <button class="admin-btn admin-btn--ghost" (click)="backToSections()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back
+          </button>
+          <h1>{{ selectedSection.name }} - Items</h1>
+          <p>Manage items in this section</p>
+        </div>
+        <div class="admin-header__actions">
+          <button class="admin-btn admin-btn--primary" (click)="openAddItem()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Item
+          </button>
+        </div>
+      </header>
+
+      <div class="admin-loader" *ngIf="isLoadingItems">
+        <svg viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80,200" stroke-dashoffset="0"></circle>
+        </svg>
+        <p>Loading items<span class="admin-loader__dots">...</span></p>
+      </div>
+
+      <div class="sections-empty" *ngIf="!isLoadingItems && items.length === 0">
+        <div class="sections-empty__icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+        </div>
+        <h3>No items yet</h3>
+        <p>Add items to the "{{ selectedSection.name }}" section to display content.</p>
+        <button class="admin-btn admin-btn--primary" (click)="openAddItem()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Add First Item
+        </button>
+      </div>
+
+      <!-- Items Card Grid -->
+      <div class="items-grid" *ngIf="!isLoadingItems && items.length > 0">
+        <div class="item-card" *ngFor="let item of items" [class.item-card--inactive]="!item.active">
+          <div class="item-card__image" *ngIf="item.imageUrl">
+            <img [src]="item.imageUrl" [alt]="item.title">
+            <span class="item-card__link-badge" *ngIf="item.link">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            </span>
+          </div>
+          <div class="item-card__image item-card__image--placeholder" *ngIf="!item.imageUrl">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="item-card__link-badge" *ngIf="item.link">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            </span>
+          </div>
+          <div class="item-card__content">
+            <div class="item-card__header">
+              <h4 class="item-card__title">{{ item.title }}</h4>
+              <span class="admin-badge" [class.admin-badge--success]="item.active" [class.admin-badge--gray]="!item.active">
+                {{ item.active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <p class="item-card__desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+            <span class="item-card__link" *ngIf="item.link">{{ item.link }}</span>
+            <div class="item-card__actions">
+              <button class="admin-btn admin-btn--ghost" (click)="openEditItem(item)" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost" (click)="toggleItemActive(item)">
+                <svg *ngIf="item.active" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path></svg>
+                <svg *ngIf="!item.active" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete('item', item.id, item.title)" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Section Modal -->
+<div class="admin-modal" *ngIf="showSectionModal">
+  <div class="admin-modal__backdrop" (click)="closeSectionModal()"></div>
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>{{ isEditingSection ? 'Edit Section' : 'Add Section' }}</h2>
+      <button class="admin-btn admin-btn--ghost" (click)="closeSectionModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <div class="admin-form__grid">
+        <div class="admin-form__group">
+          <label class="admin-form__label">Name *</label>
+          <input class="admin-input" [(ngModel)]="sectionForm.name" (ngModelChange)="onSectionNameChange()" placeholder="Section name">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Slug *</label>
+          <input class="admin-input" [(ngModel)]="sectionForm.slug" placeholder="section-slug">
+          <span class="admin-form__hint">Auto-generated from name. Used in URL path.</span>
+        </div>
+      </div>
+      <div class="admin-form__group">
+        <label class="admin-form__label">Description</label>
+        <textarea class="admin-textarea" [(ngModel)]="sectionForm.description" rows="3" placeholder="Brief description"></textarea>
+      </div>
+      <div class="admin-form__group">
+        <app-image-upload
+          [folder]="'more-sections'"
+          [label]="'Section Image'"
+          [currentImageUrl]="sectionForm.imageUrl"
+          (imageUploaded)="onSectionImageUploaded($event)">
+        </app-image-upload>
+      </div>
+      <div class="admin-form__grid">
+        <div class="admin-form__group">
+          <label class="admin-form__label">Display Order</label>
+          <input class="admin-input" type="number" [(ngModel)]="sectionForm.displayOrder">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Status</label>
+          <label class="admin-toggle">
+            <input type="checkbox" [(ngModel)]="sectionForm.active">
+            <span class="admin-toggle__slider"></span>
+            <span class="admin-toggle__label">{{ sectionForm.active ? 'Active' : 'Inactive' }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeSectionModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveSection()" [disabled]="!sectionForm.name || !sectionForm.slug">
+        {{ isEditingSection ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Item Modal -->
+<div class="admin-modal" *ngIf="showItemModal">
+  <div class="admin-modal__backdrop" (click)="closeItemModal()"></div>
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>{{ isEditingItem ? 'Edit Item' : 'Add Item' }}</h2>
+      <button class="admin-btn admin-btn--ghost" (click)="closeItemModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <div class="admin-form__group">
+        <label class="admin-form__label">Title *</label>
+        <input class="admin-input" [(ngModel)]="itemForm.title" placeholder="Item title">
+      </div>
+      <div class="admin-form__group">
+        <label class="admin-form__label">Short Description</label>
+        <input class="admin-input" [(ngModel)]="itemForm.shortDescription" placeholder="Brief summary">
+      </div>
+      <div class="admin-form__group">
+        <label class="admin-form__label">Description</label>
+        <textarea class="admin-textarea" [(ngModel)]="itemForm.description" rows="4" placeholder="Full description"></textarea>
+      </div>
+      <div class="admin-form__group">
+        <app-image-upload
+          [folder]="'more-sections/items'"
+          [label]="'Item Image'"
+          [currentImageUrl]="itemForm.imageUrl"
+          (imageUploaded)="onItemImageUploaded($event)">
+        </app-image-upload>
+      </div>
+      <div class="admin-form__group">
+        <label class="admin-form__label">Link URL</label>
+        <input class="admin-input" [(ngModel)]="itemForm.link" placeholder="https://example.com/page">
+        <span class="admin-form__hint">Full URL including https://. Leave empty if no link needed.</span>
+      </div>
+      <div class="admin-form__grid">
+        <div class="admin-form__group">
+          <label class="admin-form__label">Display Order</label>
+          <input class="admin-input" type="number" [(ngModel)]="itemForm.displayOrder">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Status</label>
+          <label class="admin-toggle">
+            <input type="checkbox" [(ngModel)]="itemForm.active">
+            <span class="admin-toggle__slider"></span>
+            <span class="admin-toggle__label">{{ itemForm.active ? 'Active' : 'Inactive' }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeItemModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveItem()" [disabled]="!itemForm.title">
+        {{ isEditingItem ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon admin-confirm__icon--warning">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete {{ deleteTarget?.type === 'section' ? 'Section' : 'Item' }}</h3>
+      <p class="admin-confirm__text">Are you sure you want to delete "{{ deleteTarget?.name }}"? This action cannot be undone.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="executeDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,248 @@
+// Import shared admin styles
+@import '../../styles/admin-shared';
+
+// Gallery-specific styles
+
+// Empty State
+.gallery-empty {
+  @include admin-card;
+  padding: 4rem 2rem;
+  text-align: center;
+
+  svg {
+    width: 5rem;
+    height: 5rem;
+    color: $admin-gray-300;
+    margin: 0 auto 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $admin-gray-700;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    color: $admin-gray-500;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+// Gallery Grid
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// Gallery Card
+.gallery-card {
+  @include admin-card;
+  overflow: hidden;
+  transition: all $admin-transition;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $admin-shadow-lg;
+  }
+
+  &__image {
+    position: relative;
+    height: 12rem;
+    background: $admin-gray-100;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform $admin-transition-slow;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+
+  &__type-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    background: $admin-blue;
+    color: $admin-white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: $admin-radius-full;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &--video {
+      background: $admin-error;
+    }
+  }
+
+  &__featured-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    background: $admin-warning;
+    color: $admin-white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: $admin-radius-full;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &__content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $admin-gray-900;
+    margin: 0 0 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__description {
+    font-size: 0.8125rem;
+    color: $admin-gray-600;
+    margin: 0 0 0.75rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+
+  &__category {
+    margin-bottom: 0.75rem;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: $admin-gray-500;
+
+    svg {
+      width: 0.875rem;
+      height: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: $admin-gray-100;
+    color: $admin-gray-600;
+    font-size: 0.6875rem;
+    border-radius: $admin-radius-sm;
+
+    &--more {
+      background: $admin-blue-light;
+      color: $admin-blue;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid $admin-gray-200;
+    margin-top: auto;
+  }
+}
+
+// Gallery Pagination
+.gallery-pagination {
+  @include admin-card;
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+// Button Loading State
+.admin-btn__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-btn__spinner {
+  width: 1rem;
+  height: 1rem;
+  animation: spin 1s linear infinite;
+
+  circle {
+    opacity: 0.25;
+  }
+
+  path {
+    opacity: 0.75;
+  }
+}

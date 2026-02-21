@@ -1,0 +1,118 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.footer {
+  background: linear-gradient(180deg, $white 0%, rgba($primary-sky, 0.15) 100%);
+  border-top: 2px solid rgba($primary-navy, 0.1);
+  color: $warm-gray;
+  padding: $spacing-4xl 0 $spacing-xl;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-3xl;
+  margin-bottom: $spacing-3xl;
+
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include respond-to('lg') {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.footer-section {
+  h3 {
+    font-family: $font-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $primary-navy-dark;
+    margin-bottom: $spacing-md;
+    letter-spacing: -0.01em;
+
+    span {
+      color: $primary-navy;
+    }
+  }
+
+  h4 {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-md;
+    color: $primary-navy-dark;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: $font-size-sm;
+  }
+
+  p {
+    font-size: $font-size-sm;
+    color: $warm-gray;
+    margin-bottom: $spacing-sm;
+    line-height: $line-height-relaxed;
+  }
+}
+
+.footer-description {
+  line-height: $line-height-relaxed;
+  max-width: 280px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin-bottom: $spacing-sm;
+  }
+
+  a {
+    color: $warm-gray;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    transition: color $transition-base;
+    display: inline-block;
+
+    &:hover {
+      color: $primary-navy;
+      transform: translateX(3px);
+    }
+  }
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+
+  a {
+    color: $warm-gray;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    transition: all $transition-base;
+    padding: $spacing-xs $spacing-md;
+    border: 1px solid rgba($primary-navy, 0.2);
+    border-radius: $radius-md;
+
+    &:hover {
+      color: $primary-navy;
+      border-color: $primary-navy;
+      background: rgba($primary-sky, 0.3);
+    }
+  }
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba($primary-navy, 0.1);
+  padding-top: $spacing-lg;
+  text-align: center;
+
+  p {
+    font-size: $font-size-xs;
+    color: $warm-gray;
+    margin: 0;
+  }
+}

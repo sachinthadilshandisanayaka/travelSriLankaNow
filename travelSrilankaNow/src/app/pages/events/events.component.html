@@ -1,0 +1,172 @@
+<!-- Animated Page Header -->
+<app-page-header
+  subtitle="Experience Sri Lanka"
+  title="Events & Festivals"
+  description="Immerse yourself in the vibrant culture and traditions of Sri Lanka through its colorful events"
+  theme="events"
+  [showAnimation]="true">
+</app-page-header>
+
+<!-- Filter Section -->
+<section class="filter-section">
+  <div class="container">
+    <div class="filter-wrapper">
+      <!-- Search Bar -->
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Search events..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange($event)"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <!-- Category Filters -->
+      <div class="category-filters">
+        <button
+          *ngFor="let category of categories"
+          [class.active]="selectedCategory === category.value"
+          (click)="filterByCategory(category.value)"
+          class="filter-btn"
+        >
+          {{ category.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      <p>Showing <strong>{{ events.length }}</strong> of <strong>{{ totalElements }}</strong> events (Page {{ currentPage + 1 }} of {{ totalPages }})</p>
+    </div>
+  </div>
+</section>
+
+<!-- Events Grid -->
+<section class="events-section">
+  <div class="container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading events...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-state">
+      <span class="error-icon">⚠️</span>
+      <h3>Connection Error</h3>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadData()" class="btn-retry">
+        <span>Try Again</span>
+        <span class="btn-shine"></span>
+        <span class="btn-corner btn-corner--tl"></span>
+        <span class="btn-corner btn-corner--tr"></span>
+        <span class="btn-corner btn-corner--bl"></span>
+        <span class="btn-corner btn-corner--br"></span>
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage" class="events-grid">
+      <div
+        *ngFor="let event of events; let i = index"
+        class="event-card reveal stagger-{{i % 6 + 1}}"
+      >
+        <div class="event-image">
+          <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title" />
+          <div class="event-badge-wrapper">
+            <span class="type-badge">{{ event.category }}</span>
+            <span class="price-badge">${{ event.price }}</span>
+          </div>
+        </div>
+
+        <div class="event-content">
+          <h3>{{ event.title }}</h3>
+
+          <div class="event-meta">
+            <div class="meta-item">
+              <span>⏱️</span>
+              <span>{{ event.duration }}</span>
+            </div>
+            <div class="meta-item">
+              <span>📍</span>
+              <span>{{ event.location }}</span>
+            </div>
+          </div>
+
+          <p>{{ event.shortDescription }}</p>
+
+          <a [routerLink]="['/events', event.id]" class="btn-view-details">
+            <span>View Details</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="!isLoading && !errorMessage && events.length === 0" class="no-results">
+      <div class="no-results-content">
+        <span class="no-results-icon">🎉</span>
+        <h3>No events found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+        <button (click)="filterByCategory('all'); searchTerm = ''; loadData()" class="btn-reset">
+          <span>Clear Filters</span>
+          <span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span>
+          <span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span>
+          <span class="btn-corner btn-corner--br"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div *ngIf="!isLoading && !errorMessage && totalPages > 1" class="pagination">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(0)"
+      >
+        First
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(currentPage - 1)"
+      >
+        Previous
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page + 1 }}
+        </button>
+      </div>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(currentPage + 1)"
+      >
+        Next
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(totalPages - 1)"
+      >
+        Last
+      </button>
+    </div>
+  </div>
+</section>

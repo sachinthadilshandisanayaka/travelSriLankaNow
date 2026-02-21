@@ -1,0 +1,243 @@
+@import 'variables';
+@import 'mixins';
+
+// Spacing Utilities
+.mt-0 { margin-top: 0; }
+.mt-xs { margin-top: $spacing-xs; }
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+.mt-xl { margin-top: $spacing-xl; }
+.mt-2xl { margin-top: $spacing-2xl; }
+.mt-3xl { margin-top: $spacing-3xl; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-xs { margin-bottom: $spacing-xs; }
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-lg { margin-bottom: $spacing-lg; }
+.mb-xl { margin-bottom: $spacing-xl; }
+.mb-2xl { margin-bottom: $spacing-2xl; }
+.mb-3xl { margin-bottom: $spacing-3xl; }
+
+.ml-auto { margin-left: auto; }
+.mr-auto { margin-right: auto; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.pt-0 { padding-top: 0; }
+.pt-xs { padding-top: $spacing-xs; }
+.pt-sm { padding-top: $spacing-sm; }
+.pt-md { padding-top: $spacing-md; }
+.pt-lg { padding-top: $spacing-lg; }
+.pt-xl { padding-top: $spacing-xl; }
+.pt-2xl { padding-top: $spacing-2xl; }
+.pt-3xl { padding-top: $spacing-3xl; }
+.pt-4xl { padding-top: $spacing-4xl; }
+
+.pb-0 { padding-bottom: 0; }
+.pb-xs { padding-bottom: $spacing-xs; }
+.pb-sm { padding-bottom: $spacing-sm; }
+.pb-md { padding-bottom: $spacing-md; }
+.pb-lg { padding-bottom: $spacing-lg; }
+.pb-xl { padding-bottom: $spacing-xl; }
+.pb-2xl { padding-bottom: $spacing-2xl; }
+.pb-3xl { padding-bottom: $spacing-3xl; }
+.pb-4xl { padding-bottom: $spacing-4xl; }
+
+.py-sm { padding-top: $spacing-sm; padding-bottom: $spacing-sm; }
+.py-md { padding-top: $spacing-md; padding-bottom: $spacing-md; }
+.py-lg { padding-top: $spacing-lg; padding-bottom: $spacing-lg; }
+.py-xl { padding-top: $spacing-xl; padding-bottom: $spacing-xl; }
+.py-2xl { padding-top: $spacing-2xl; padding-bottom: $spacing-2xl; }
+.py-3xl { padding-top: $spacing-3xl; padding-bottom: $spacing-3xl; }
+.py-4xl { padding-top: $spacing-4xl; padding-bottom: $spacing-4xl; }
+
+.px-sm { padding-left: $spacing-sm; padding-right: $spacing-sm; }
+.px-md { padding-left: $spacing-md; padding-right: $spacing-md; }
+.px-lg { padding-left: $spacing-lg; padding-right: $spacing-lg; }
+.px-xl { padding-left: $spacing-xl; padding-right: $spacing-xl; }
+
+// Container
+.container {
+  @include container;
+}
+
+// Button Classes
+.btn-primary {
+  @include button-primary;
+}
+
+.btn-secondary {
+  @include button-secondary;
+}
+
+.btn-outline {
+  @include button-outline;
+}
+
+.btn-sm {
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-sm;
+}
+
+.btn-lg {
+  padding: $spacing-lg $spacing-2xl;
+  font-size: $font-size-lg;
+}
+
+// Card
+.card {
+  @include card;
+}
+
+.card-body {
+  padding: $spacing-xl;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// Flex Utilities
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.flex-column { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-center { @include flex-center; }
+.flex-between { @include flex-between; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.gap-sm { gap: $spacing-sm; }
+.gap-md { gap: $spacing-md; }
+.gap-lg { gap: $spacing-lg; }
+.gap-xl { gap: $spacing-xl; }
+
+// Grid Utilities
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+@include respond-to('md') {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+@include respond-to('lg') {
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+// Display Utilities
+.block { display: block; }
+.inline-block { display: inline-block; }
+.hidden { display: none; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+// Width/Height
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.w-auto { width: auto; }
+.h-auto { height: auto; }
+
+// Overflow
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+
+// Border Radius
+.rounded-sm { border-radius: $radius-sm; }
+.rounded-md { border-radius: $radius-md; }
+.rounded-lg { border-radius: $radius-lg; }
+.rounded-xl { border-radius: $radius-xl; }
+.rounded-full { border-radius: $radius-full; }
+
+// Shadows
+.shadow-sm { box-shadow: $shadow-sm; }
+.shadow-md { box-shadow: $shadow-md; }
+.shadow-lg { box-shadow: $shadow-lg; }
+.shadow-xl { box-shadow: $shadow-xl; }
+.shadow-2xl { box-shadow: $shadow-2xl; }
+.shadow-none { box-shadow: none; }
+
+// Background Colors - Navy Blue Theme
+.bg-primary { background-color: $primary-navy-dark; }
+.bg-secondary { background-color: $primary-navy; }
+.bg-accent { background-color: $primary-blue; }
+.bg-sky { background-color: $primary-sky; }
+.bg-white { background-color: $white; }
+.bg-light { background-color: $navy-bg-lightest; }
+.bg-light-soft { background-color: $navy-bg-light; }
+.bg-light-navy { background-color: $navy-bg-soft; }
+.bg-dark { background-color: $primary-navy-dark; color: $white; }
+.bg-gradient-primary { background: $gradient-primary; }
+.bg-gradient-light { background: $gradient-light; }
+.bg-gradient-soft { background: linear-gradient(180deg, $navy-bg-lightest 0%, $navy-bg-light 100%); }
+.bg-gradient-sky { background: linear-gradient(180deg, rgba($primary-sky, 0.1) 0%, rgba($primary-sky, 0.3) 100%); }
+
+// Opacity
+.opacity-0 { opacity: 0; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+// Transitions
+.transition { transition: all $transition-base; }
+.transition-fast { transition: all $transition-fast; }
+.transition-slow { transition: all $transition-slow; }
+
+// Cursor
+.cursor-pointer { cursor: pointer; }
+
+// Object Fit
+.object-cover { object-fit: cover; }
+.object-contain { object-fit: contain; }
+
+// Section Spacing
+.section {
+  padding: $spacing-3xl 0;
+
+  @include respond-to('lg') {
+    padding: $spacing-4xl 0;
+  }
+}
+
+.section-light {
+  background-color: $navy-bg-lightest;
+}
+
+.section-soft {
+  background-color: $navy-bg-light;
+}
+
+.section-navy-light {
+  background-color: $navy-bg-soft;
+}
+
+.section-sky {
+  background: linear-gradient(180deg, rgba($primary-sky, 0.15) 0%, rgba($primary-sky, 0.05) 100%);
+}
+
+.section-dark {
+  background-color: $primary-navy-dark;
+  color: $white;
+}
+
+.section-navy {
+  background: $gradient-primary;
+  color: $white;
+}

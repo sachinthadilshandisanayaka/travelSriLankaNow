@@ -1,0 +1,269 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { LocationService } from '../../services/location.service';
+import { EventService } from '../../services/event.service';
+import { PlaceService } from '../../services/place.service';
+import { HeroSlideService } from '../../services/hero-slide.service';
+import { HomepageSectionService } from '../../services/homepage-section.service';
+import { SocialMediaContentService } from '../../services/social-media-content.service';
+import { Location } from '../../models/location.model';
+import { Event as EventModel } from '../../models/event.model';
+import { Place } from '../../models/place.model';
+import { HeroSlide } from '../../models/hero-slide.model';
+import { HomepageSection, HomepageSectionConfig } from '../../models/homepage-section.model';
+import { SocialMediaContent } from '../../models/social-media-content.model';
+
+@Component({
+  selector: 'app-landing',
+  templateUrl: './landing.component.html',
+  styleUrls: ['./landing.component.scss']
+})
+export class LandingComponent implements OnInit, OnDestroy {
+  // Hero Slider
+  heroSlides: HeroSlide[] = [];
+  currentSlideIndex = 0;
+  slideInterval: any = null;
+  isTransitioning = false;
+  slidesLoaded = false;
+
+  // Data
+  featuredLocations: Location[] = [];
+  featuredEvents: EventModel[] = [];
+  featuredPlaces: Place[] = [];
+  socialMediaContent: SocialMediaContent[] = [];
+
+  // Dynamic Sections
+  homepageSections: HomepageSection[] = [];
+  sectionConfigs: Map<string, HomepageSectionConfig> = new Map();
+  sectionsLoaded = false;
+  useFallbackLayout = false;
+
+  constructor(
+    private locationService: LocationService,
+    private eventService: EventService,
+    private placeService: PlaceService,
+    private heroSlideService: HeroSlideService,
+    private homepageSectionService: HomepageSectionService,
+    private socialMediaContentService: SocialMediaContentService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadHomepageSections();
+  }
+
+  ngOnDestroy(): void {
+    this.stopSlideTimer();
+  }
+
+  private loadHomepageSections(): void {
+    this.homepageSectionService.getActiveSections().subscribe({
+      next: (sections) => {
+        this.homepageSections = sections;
+        this.sectionsLoaded = true;
+
+        // Parse configs
+        sections.forEach(section => {
+          if (section.config) {
+            try {
+              this.sectionConfigs.set(section.sectionType, JSON.parse(section.config));
+            } catch {
+              this.sectionConfigs.set(section.sectionType, {});
+            }
+          }
+        });
+
+        // Load data for active sections
+        this.loadSectionData();
+      },
+      error: () => {
+        // Fallback: load all data with defaults
+        this.useFallbackLayout = true;
+        this.sectionsLoaded = true;
+        this.loadHeroSlides();
+        this.loadFallbackData();
+      }
+    });
+  }
+
+  private loadSectionData(): void {
+    this.homepageSections.forEach(section => {
+      const config = this.sectionConfigs.get(section.sectionType) || {};
+      const itemsCount = config.itemsCount || 6;
+
+      switch (section.sectionType) {
+        case 'HERO_SLIDER':
+          this.loadHeroSlides();
+          break;
+        case 'FEATURED_LOCATIONS':
+          this.loadLocations(itemsCount);
+          break;
+        case 'UPCOMING_EVENTS':
+          this.loadEvents(itemsCount);
+          break;
+        case 'PLACES':
+          this.loadPlaces(itemsCount);
+          break;
+        case 'SOCIAL_MEDIA':
+          this.loadSocialMedia();
+          break;
+      }
+    });
+  }
+
+  private loadFallbackData(): void {
+    this.loadLocations(6);
+    this.loadEvents(6);
+    this.loadPlaces(6);
+  }
+
+  private loadHeroSlides(): void {
+    this.heroSlideService.getActiveHeroSlides().subscribe({
+      next: (slides) => {
+        this.heroSlides = slides;
+        this.slidesLoaded = true;
+        if (slides.length > 1) {
+          this.startSlideTimer();
+        }
+      },
+      error: () => {
+        this.heroSlides = [];
+        this.slidesLoaded = true;
+      }
+    });
+  }
+
+  private loadLocations(count: number): void {
+    this.locationService.getFeaturedLocations().subscribe({
+      next: (items) => this.featuredLocations = items.slice(0, count),
+      error: () => {
+        // Fallback to paginated if featured endpoint fails
+        this.locationService.getLocationsPaginated(0, count).subscribe({
+          next: (response) => this.featuredLocations = response.content || [],
+          error: () => this.featuredLocations = []
+        });
+      }
+    });
+  }
+
+  private loadEvents(count: number): void {
+    this.eventService.getFeaturedEvents().subscribe({
+      next: (items) => this.featuredEvents = items.slice(0, count),
+      error: () => {
+        this.eventService.getEventsPaginated(0, count).subscribe({
+          next: (response) => this.featuredEvents = response.content || [],
+          error: () => this.featuredEvents = []
+        });
+      }
+    });
+  }
+
+  private loadPlaces(count: number): void {
+    this.placeService.getFeaturedPlaces().subscribe({
+      next: (items) => this.featuredPlaces = items.slice(0, count),
+      error: () => {
+        this.placeService.getPlacesPaginated(0, count).subscribe({
+          next: (response) => this.featuredPlaces = response.content || [],
+          error: () => this.featuredPlaces = []
+        });
+      }
+    });
+  }
+
+  private loadSocialMedia(): void {
+    this.socialMediaContentService.getActiveSocialMediaContent().subscribe({
+      next: (items) => this.socialMediaContent = items,
+      error: () => this.socialMediaContent = []
+    });
+  }
+
+  // Section helpers
+  isSectionActive(sectionType: string): boolean {
+    if (this.useFallbackLayout) {
+      return sectionType !== 'SOCIAL_MEDIA';
+    }
+    return this.homepageSections.some(s => s.sectionType === sectionType);
+  }
+
+  getSectionTitle(sectionType: string): string {
+    const section = this.homepageSections.find(s => s.sectionType === sectionType);
+    return section?.title || '';
+  }
+
+  getSectionSubtitle(sectionType: string): string {
+    const section = this.homepageSections.find(s => s.sectionType === sectionType);
+    return section?.subtitle || '';
+  }
+
+  getSectionConfig(sectionType: string): HomepageSectionConfig {
+    return this.sectionConfigs.get(sectionType) || {};
+  }
+
+  getPlatformClass(platform: string): string {
+    return `social-platform--${platform.toLowerCase()}`;
+  }
+
+  getPlatformLabel(platform: string): string {
+    const labels: Record<string, string> = {
+      'INSTAGRAM': 'Instagram',
+      'FACEBOOK': 'Facebook',
+      'TWITTER': 'X',
+      'YOUTUBE': 'YouTube',
+      'TIKTOK': 'TikTok'
+    };
+    return labels[platform] || platform;
+  }
+
+  // Hero Slider controls
+  private startSlideTimer(): void {
+    this.stopSlideTimer();
+    if (this.heroSlides.length > 1) {
+      const currentSlide = this.heroSlides[this.currentSlideIndex];
+      const duration = currentSlide?.displayDuration || 5000;
+      this.slideInterval = setTimeout(() => {
+        this.nextSlide();
+      }, duration);
+    }
+  }
+
+  private stopSlideTimer(): void {
+    if (this.slideInterval) {
+      clearTimeout(this.slideInterval);
+      this.slideInterval = null;
+    }
+  }
+
+  nextSlide(): void {
+    if (this.isTransitioning || this.heroSlides.length <= 1) return;
+    this.isTransitioning = true;
+    this.currentSlideIndex = (this.currentSlideIndex + 1) % this.heroSlides.length;
+    setTimeout(() => {
+      this.isTransitioning = false;
+      this.startSlideTimer();
+    }, 800);
+  }
+
+  prevSlide(): void {
+    if (this.isTransitioning || this.heroSlides.length <= 1) return;
+    this.isTransitioning = true;
+    this.currentSlideIndex = this.currentSlideIndex === 0
+      ? this.heroSlides.length - 1
+      : this.currentSlideIndex - 1;
+    setTimeout(() => {
+      this.isTransitioning = false;
+      this.startSlideTimer();
+    }, 800);
+  }
+
+  goToSlide(index: number): void {
+    if (this.isTransitioning || index === this.currentSlideIndex) return;
+    this.isTransitioning = true;
+    this.currentSlideIndex = index;
+    setTimeout(() => {
+      this.isTransitioning = false;
+      this.startSlideTimer();
+    }, 800);
+  }
+
+  get currentSlide(): HeroSlide | null {
+    return this.heroSlides[this.currentSlideIndex] || null;
+  }
+}

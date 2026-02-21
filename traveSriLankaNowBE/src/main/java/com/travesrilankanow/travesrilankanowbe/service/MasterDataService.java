@@ -1,0 +1,95 @@
+package com.travesrilankanow.travesrilankanowbe.service;
+
+import com.travesrilankanow.travesrilankanowbe.entity.MasterData;
+import com.travesrilankanow.travesrilankanowbe.entity.MasterData.MasterDataType;
+import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
+import com.travesrilankanow.travesrilankanowbe.repository.MasterDataRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class MasterDataService {
+
+    private final MasterDataRepository masterDataRepository;
+
+    public List<MasterData> getAllMasterData() {
+        return masterDataRepository.findAllByOrderByTypeAscSortOrderAsc();
+    }
+
+    public List<MasterData> getByType(MasterDataType type) {
+        return masterDataRepository.findByTypeOrderBySortOrderAsc(type);
+    }
+
+    public List<MasterData> getActiveByType(MasterDataType type) {
+        return masterDataRepository.findByTypeAndIsActiveTrueOrderBySortOrderAsc(type);
+    }
+
+    public MasterData getById(Long id) {
+        return masterDataRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Master data not found with id: " + id));
+    }
+
+    public MasterData getByTypeAndCode(MasterDataType type, String code) {
+        return masterDataRepository.findByTypeAndCode(type, code)
+                .orElseThrow(() -> new ResourceNotFoundException("Master data not found with type: " + type + " and code: " + code));
+    }
+
+    @Transactional
+    public MasterData create(MasterData masterData) {
+        if (masterDataRepository.existsByTypeAndCode(masterData.getType(), masterData.getCode())) {
+            throw new IllegalArgumentException("Master data with type '" + masterData.getType() + "' and code '" + masterData.getCode() + "' already exists");
+        }
+
+        MasterData saved = masterDataRepository.save(masterData);
+        log.info("Master data created: {} - {}", saved.getType(), saved.getCode());
+        return saved;
+    }
+
+    @Transactional
+    public MasterData update(Long id, MasterData masterData) {
+        MasterData existing = getById(id);
+
+        if (masterDataRepository.existsByTypeAndCodeAndIdNot(masterData.getType(), masterData.getCode(), id)) {
+            throw new IllegalArgumentException("Master data with type '" + masterData.getType() + "' and code '" + masterData.getCode() + "' already exists");
+        }
+
+        existing.setType(masterData.getType());
+        existing.setCode(masterData.getCode());
+        existing.setDisplayName(masterData.getDisplayName());
+        existing.setDescription(masterData.getDescription());
+        existing.setSortOrder(masterData.getSortOrder());
+        existing.setIsActive(masterData.getIsActive());
+        existing.setColor(masterData.getColor());
+        existing.setIcon(masterData.getIcon());
+
+        MasterData updated = masterDataRepository.save(existing);
+        log.info("Master data updated: {} - {}", updated.getType(), updated.getCode());
+        return updated;
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        MasterData existing = getById(id);
+        masterDataRepository.delete(existing);
+        log.info("Master data deleted: {} - {}", existing.getType(), existing.getCode());
+    }
+
+    @Transactional
+    public MasterData toggleActive(Long id) {
+        MasterData existing = getById(id);
+        existing.setIsActive(!existing.getIsActive());
+        MasterData updated = masterDataRepository.save(existing);
+        log.info("Master data {} status changed to: {}", updated.getCode(), updated.getIsActive() ? "active" : "inactive");
+        return updated;
+    }
+
+    public List<MasterDataType> getAllTypes() {
+        return List.of(MasterDataType.values());
+    }
+}

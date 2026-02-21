@@ -1,0 +1,483 @@
+<!-- Dynamic Sections Rendering -->
+<ng-container *ngFor="let section of homepageSections">
+
+  <!-- ========== HERO SLIDER ========== -->
+  <ng-container *ngIf="section.sectionType === 'HERO_SLIDER'">
+    <!-- Hero Section with Dynamic Slider -->
+    <section class="hero-slider" *ngIf="slidesLoaded">
+      <!-- Fallback for no slides -->
+      <div *ngIf="heroSlides.length === 0" class="hero hero-fallback">
+        <div class="hero-content animate-fadeInUp">
+          <h1 class="hero-title">
+            <span class="title-line-1">Journey Through</span>
+            <span class="title-line-2">Ancient Sri Lanka</span>
+          </h1>
+          <p class="hero-subtitle">
+            Experience the majestic heritage and discover the rich culture of an ancient kingdom
+          </p>
+          <div class="hero-buttons">
+            <a routerLink="/locations" class="btn-primary">
+              <span>Explore Destinations</span>
+              <span class="btn-shine"></span>
+              <span class="btn-corner btn-corner--tl"></span>
+              <span class="btn-corner btn-corner--tr"></span>
+              <span class="btn-corner btn-corner--bl"></span>
+              <span class="btn-corner btn-corner--br"></span>
+            </a>
+            <a routerLink="/events" class="btn-secondary">
+              <span>View Events</span>
+              <span class="btn-shine"></span>
+              <span class="btn-corner btn-corner--tl"></span>
+              <span class="btn-corner btn-corner--tr"></span>
+              <span class="btn-corner btn-corner--bl"></span>
+              <span class="btn-corner btn-corner--br"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Slider -->
+      <div *ngIf="heroSlides.length > 0" class="hero-carousel">
+        <!-- Slides -->
+        <div class="carousel-slides">
+          <div *ngFor="let slide of heroSlides; let i = index"
+               class="carousel-slide"
+               [class.carousel-slide--active]="i === currentSlideIndex"
+               [class.carousel-slide--prev]="i === (currentSlideIndex === 0 ? heroSlides.length - 1 : currentSlideIndex - 1)"
+               [class.carousel-slide--next]="i === (currentSlideIndex === heroSlides.length - 1 ? 0 : currentSlideIndex + 1)">
+            <!-- Background Image -->
+            <div class="slide-background">
+              <img [src]="slide.imageUrl" [alt]="slide.title" />
+              <div class="slide-overlay"></div>
+            </div>
+
+            <!-- Content -->
+            <div class="slide-content" [class.slide-content--visible]="i === currentSlideIndex">
+              <div class="slide-content-inner">
+                <h1 class="slide-title">{{ slide.title }}</h1>
+                <p *ngIf="slide.subtitle" class="slide-subtitle">{{ slide.subtitle }}</p>
+                <div class="slide-buttons" *ngIf="slide.buttonText">
+                  <a [routerLink]="slide.buttonLink || '/locations'" class="btn-primary btn-slide">
+                    <span>{{ slide.buttonText }}</span>
+                    <span class="btn-shine"></span>
+                    <span class="btn-corner btn-corner--tl"></span>
+                    <span class="btn-corner btn-corner--tr"></span>
+                    <span class="btn-corner btn-corner--bl"></span>
+                    <span class="btn-corner btn-corner--br"></span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button *ngIf="heroSlides.length > 1" class="carousel-nav carousel-nav--prev" (click)="prevSlide()" aria-label="Previous slide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <button *ngIf="heroSlides.length > 1" class="carousel-nav carousel-nav--next" (click)="nextSlide()" aria-label="Next slide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+
+        <!-- Slide Indicators -->
+        <div *ngIf="heroSlides.length > 1" class="carousel-indicators">
+          <button *ngFor="let slide of heroSlides; let i = index"
+                  class="carousel-indicator"
+                  [class.carousel-indicator--active]="i === currentSlideIndex"
+                  (click)="goToSlide(i)"
+                  [attr.aria-label]="'Go to slide ' + (i + 1)">
+            <span class="indicator-progress" *ngIf="i === currentSlideIndex"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading State for Hero -->
+    <section *ngIf="!slidesLoaded" class="hero-loading">
+      <div class="loading-spinner"></div>
+    </section>
+  </ng-container>
+
+  <!-- ========== FEATURED LOCATIONS ========== -->
+  <ng-container *ngIf="section.sectionType === 'FEATURED_LOCATIONS'">
+    <section class="section animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <span class="subtitle">Popular Destinations</span>
+          <h2>{{ section.title }}</h2>
+          <p class="lead">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="location-grid">
+          <div *ngFor="let location of featuredLocations; let i = index"
+               class="location-card card-stagger">
+            <div class="location-image image-zoom">
+              <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
+              <div class="image-overlay">
+                <span class="category-badge">{{ location.category }}</span>
+              </div>
+            </div>
+            <div class="location-content">
+              <h3>{{ location.name }}</h3>
+              <p>{{ location.shortDescription }}</p>
+              <div class="location-meta">
+                <span class="location-pin">📍</span>
+                <span>{{ location.region }}</span>
+              </div>
+              <a [routerLink]="['/locations', location.id]" class="btn-view-details">
+                <span>View Details</span>
+                <span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span>
+                <span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span>
+                <span class="btn-corner btn-corner--br"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="getSectionConfig('FEATURED_LOCATIONS').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
+          <a routerLink="/locations" class="btn-primary">
+            <span>View All Locations</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ========== UPCOMING EVENTS ========== -->
+  <ng-container *ngIf="section.sectionType === 'UPCOMING_EVENTS'">
+    <section class="section section-light animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <span class="subtitle">Experiences</span>
+          <h2>{{ section.title }}</h2>
+          <p class="lead">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="events-grid">
+          <div *ngFor="let event of featuredEvents; let i = index"
+               class="event-card card-stagger">
+            <div class="event-image image-zoom">
+              <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
+              <div class="event-badge-wrapper">
+                <span class="type-badge">{{ event.category }}</span>
+                <span class="price-badge">${{ event.price }}</span>
+              </div>
+            </div>
+            <div class="event-content">
+              <h3>{{ event.title || event.name }}</h3>
+              <div class="event-meta">
+                <div class="meta-item">
+                  <span>⏱️</span>
+                  <span>{{ event.duration }}</span>
+                </div>
+                <div class="meta-item">
+                  <span>📍</span>
+                  <span>{{ event.location }}</span>
+                </div>
+              </div>
+              <p>{{ event.shortDescription }}</p>
+              <a [routerLink]="['/events', event.id]" class="btn-view-details">
+                <span>Learn More</span>
+                <span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span>
+                <span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span>
+                <span class="btn-corner btn-corner--br"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="getSectionConfig('UPCOMING_EVENTS').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
+          <a routerLink="/events" class="btn-primary">
+            <span>View All Events</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ========== PLACES ========== -->
+  <ng-container *ngIf="section.sectionType === 'PLACES'">
+    <section class="section animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <span class="subtitle">Accommodations</span>
+          <h2>{{ section.title }}</h2>
+          <p class="lead">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="places-grid">
+          <div *ngFor="let place of featuredPlaces; let i = index"
+               class="place-card card-stagger">
+            <div class="place-image image-zoom">
+              <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
+              <div class="place-badge-wrapper">
+                <span class="type-badge">{{ place.type }}</span>
+              </div>
+            </div>
+            <div class="place-content">
+              <h3>{{ place.name }}</h3>
+              <div class="place-meta">
+                <div class="meta-item">
+                  <span class="rating">⭐ {{ place.rating }}</span>
+                </div>
+                <div class="meta-item price-range">
+                  {{ place.priceRange }}
+                </div>
+                <div class="meta-item">
+                  <span>📍</span>
+                  <span>{{ place.location }}</span>
+                </div>
+              </div>
+              <p>{{ place.shortDescription }}</p>
+              <a [routerLink]="['/places', place.id]" class="btn-view-details">
+                <span>View Details</span>
+                <span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span>
+                <span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span>
+                <span class="btn-corner btn-corner--br"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="getSectionConfig('PLACES').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
+          <a routerLink="/places" class="btn-primary">
+            <span>View All Places</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ========== SOCIAL MEDIA ========== -->
+  <ng-container *ngIf="section.sectionType === 'SOCIAL_MEDIA' && socialMediaContent.length > 0">
+    <section class="section section-light animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <span class="subtitle">Stay Connected</span>
+          <h2>{{ section.title }}</h2>
+          <p class="lead">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="social-media-grid">
+          <a *ngFor="let item of socialMediaContent"
+             [href]="item.url"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="social-media-item">
+            <div class="social-media-item__image">
+              <img [src]="item.thumbnailUrl" [alt]="item.title || 'Social media post'" loading="lazy" />
+            </div>
+            <div class="social-media-item__platform" [ngClass]="getPlatformClass(item.platform)">
+              {{ getPlatformLabel(item.platform) }}
+            </div>
+            <div class="social-media-item__overlay">
+              <p class="social-media-item__title" *ngIf="item.title">{{ item.title }}</p>
+            </div>
+            <div class="social-media-item__link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+</ng-container>
+
+<!-- ========== FALLBACK LAYOUT ========== -->
+<!-- Shown when homepage sections API fails -->
+<ng-container *ngIf="useFallbackLayout">
+  <!-- Hero Fallback -->
+  <section class="hero-slider" *ngIf="slidesLoaded">
+    <div *ngIf="heroSlides.length === 0" class="hero hero-fallback">
+      <div class="hero-content animate-fadeInUp">
+        <h1 class="hero-title">
+          <span class="title-line-1">Journey Through</span>
+          <span class="title-line-2">Ancient Sri Lanka</span>
+        </h1>
+        <p class="hero-subtitle">
+          Experience the majestic heritage and discover the rich culture of an ancient kingdom
+        </p>
+        <div class="hero-buttons">
+          <a routerLink="/locations" class="btn-primary">
+            <span>Explore Destinations</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="heroSlides.length > 0" class="hero-carousel">
+      <div class="carousel-slides">
+        <div *ngFor="let slide of heroSlides; let i = index"
+             class="carousel-slide"
+             [class.carousel-slide--active]="i === currentSlideIndex">
+          <div class="slide-background">
+            <img [src]="slide.imageUrl" [alt]="slide.title" />
+            <div class="slide-overlay"></div>
+          </div>
+          <div class="slide-content" [class.slide-content--visible]="i === currentSlideIndex">
+            <div class="slide-content-inner">
+              <h1 class="slide-title">{{ slide.title }}</h1>
+              <p *ngIf="slide.subtitle" class="slide-subtitle">{{ slide.subtitle }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button *ngIf="heroSlides.length > 1" class="carousel-nav carousel-nav--prev" (click)="prevSlide()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button *ngIf="heroSlides.length > 1" class="carousel-nav carousel-nav--next" (click)="nextSlide()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div *ngIf="heroSlides.length > 1" class="carousel-indicators">
+        <button *ngFor="let slide of heroSlides; let i = index"
+                class="carousel-indicator"
+                [class.carousel-indicator--active]="i === currentSlideIndex"
+                (click)="goToSlide(i)">
+          <span class="indicator-progress" *ngIf="i === currentSlideIndex"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fallback Locations -->
+  <section class="section animate-fadeIn">
+    <div class="container">
+      <div class="section-header animate-fadeInUp">
+        <span class="subtitle">Popular Destinations</span>
+        <h2>Featured Locations</h2>
+        <p class="lead">Discover the most breathtaking places in Sri Lanka</p>
+      </div>
+      <div class="location-grid">
+        <div *ngFor="let location of featuredLocations" class="location-card card-stagger">
+          <div class="location-image image-zoom">
+            <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
+            <div class="image-overlay"><span class="category-badge">{{ location.category }}</span></div>
+          </div>
+          <div class="location-content">
+            <h3>{{ location.name }}</h3>
+            <p>{{ location.shortDescription }}</p>
+            <div class="location-meta"><span class="location-pin">📍</span><span>{{ location.region }}</span></div>
+            <a [routerLink]="['/locations', location.id]" class="btn-view-details">
+              <span>View Details</span><span class="btn-shine"></span>
+              <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+              <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-2xl animate-fadeIn delay-6">
+        <a routerLink="/locations" class="btn-primary">
+          <span>View All Locations</span><span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fallback Events -->
+  <section class="section section-light animate-fadeIn">
+    <div class="container">
+      <div class="section-header animate-fadeInUp">
+        <span class="subtitle">Experiences</span>
+        <h2>Upcoming Events</h2>
+        <p class="lead">Join exciting events and festivals across Sri Lanka</p>
+      </div>
+      <div class="events-grid">
+        <div *ngFor="let event of featuredEvents" class="event-card card-stagger">
+          <div class="event-image image-zoom">
+            <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
+            <div class="event-badge-wrapper">
+              <span class="type-badge">{{ event.category }}</span><span class="price-badge">${{ event.price }}</span>
+            </div>
+          </div>
+          <div class="event-content">
+            <h3>{{ event.title || event.name }}</h3>
+            <p>{{ event.shortDescription }}</p>
+            <a [routerLink]="['/events', event.id]" class="btn-view-details">
+              <span>Learn More</span><span class="btn-shine"></span>
+              <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+              <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-2xl animate-fadeIn delay-6">
+        <a routerLink="/events" class="btn-primary">
+          <span>View All Events</span><span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fallback Places -->
+  <section class="section animate-fadeIn">
+    <div class="container">
+      <div class="section-header animate-fadeInUp">
+        <span class="subtitle">Accommodations</span>
+        <h2>Where to Stay</h2>
+        <p class="lead">Find the perfect place to rest during your journey</p>
+      </div>
+      <div class="places-grid">
+        <div *ngFor="let place of featuredPlaces" class="place-card card-stagger">
+          <div class="place-image image-zoom">
+            <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
+            <div class="place-badge-wrapper"><span class="type-badge">{{ place.type }}</span></div>
+          </div>
+          <div class="place-content">
+            <h3>{{ place.name }}</h3>
+            <p>{{ place.shortDescription }}</p>
+            <a [routerLink]="['/places', place.id]" class="btn-view-details">
+              <span>View Details</span><span class="btn-shine"></span>
+              <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+              <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-2xl animate-fadeIn delay-6">
+        <a routerLink="/places" class="btn-primary">
+          <span>View All Places</span><span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</ng-container>

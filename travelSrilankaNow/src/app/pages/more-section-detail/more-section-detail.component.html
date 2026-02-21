@@ -1,0 +1,52 @@
+<div class="more-section-page">
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-state" *ngIf="error && !isLoading">
+    <h2>Section Not Found</h2>
+    <p>The section you're looking for doesn't exist or is no longer available.</p>
+    <a routerLink="/" class="back-link">Back to Home</a>
+  </div>
+
+  <!-- Content -->
+  <div class="section-content" *ngIf="section && !isLoading">
+    <!-- Hero Banner -->
+    <div class="section-hero" [style.backgroundImage]="section.imageUrl ? 'url(' + section.imageUrl + ')' : ''">
+      <div class="section-hero__overlay"></div>
+      <div class="section-hero__content">
+        <h1 class="section-hero__title">{{ section.name }}</h1>
+        <p class="section-hero__desc" *ngIf="section.description">{{ section.description }}</p>
+      </div>
+    </div>
+
+    <!-- Items Grid -->
+    <div class="container">
+      <div class="items-grid" *ngIf="section.items && section.items.length > 0">
+        <div class="item-card" *ngFor="let item of section.items">
+          <div class="item-card__image" *ngIf="item.imageUrl">
+            <img [src]="item.imageUrl" [alt]="item.title">
+          </div>
+          <div class="item-card__content">
+            <h3 class="item-card__title">{{ item.title }}</h3>
+            <p class="item-card__short-desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+            <p class="item-card__desc" *ngIf="item.description">{{ item.description }}</p>
+            <a *ngIf="item.link" [href]="item.link" target="_blank" class="item-card__link">
+              Learn More
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!section.items || section.items.length === 0">
+        <p>No items available in this section yet.</p>
+      </div>
+    </div>
+  </div>
+</div>

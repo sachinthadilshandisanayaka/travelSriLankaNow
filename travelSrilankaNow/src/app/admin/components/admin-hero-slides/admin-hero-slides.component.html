@@ -1,0 +1,286 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Manage Hero Slides</h1>
+        <p>Configure landing page carousel images, text, and display settings</p>
+      </div>
+      <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Add New Slide</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <!-- Hero Slides Content -->
+    <div *ngIf="!isLoading">
+      <!-- Empty State -->
+      <div *ngIf="heroSlides.length === 0" class="hero-slides-empty">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <h3>No hero slides configured</h3>
+        <p>Get started by adding your first hero slide for the landing page carousel</p>
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Add First Slide
+        </button>
+      </div>
+
+      <!-- Hero Slides List -->
+      <div *ngIf="heroSlides.length > 0" class="hero-slides-list">
+        <div *ngFor="let slide of heroSlides; let i = index" class="hero-slide-card">
+          <!-- Slide Preview -->
+          <div class="hero-slide-card__preview">
+            <img [src]="slide.imageUrl" [alt]="slide.title">
+            <div class="hero-slide-card__overlay">
+              <span class="hero-slide-card__order">#{{ slide.displayOrder }}</span>
+            </div>
+            <!-- Status Badge -->
+            <div class="hero-slide-card__status" [class.hero-slide-card__status--active]="slide.active" [class.hero-slide-card__status--inactive]="!slide.active">
+              {{ slide.active ? 'Active' : 'Inactive' }}
+            </div>
+          </div>
+
+          <!-- Slide Content -->
+          <div class="hero-slide-card__content">
+            <div class="hero-slide-card__info">
+              <h3 class="hero-slide-card__title">{{ slide.title }}</h3>
+              <p *ngIf="slide.subtitle" class="hero-slide-card__subtitle">{{ slide.subtitle }}</p>
+
+              <div class="hero-slide-card__meta">
+                <div class="hero-slide-card__meta-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>{{ formatDuration(slide.displayDuration) }} display</span>
+                </div>
+                <div *ngIf="slide.buttonText" class="hero-slide-card__meta-item">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                  </svg>
+                  <span>{{ slide.buttonText }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Controls -->
+            <div class="hero-slide-card__order-controls">
+              <button class="admin-btn admin-btn--ghost" (click)="moveUp(slide)" [disabled]="i === 0" title="Move Up">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                </svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost" (click)="moveDown(slide)" [disabled]="i === heroSlides.length - 1" title="Move Down">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Actions -->
+            <div class="hero-slide-card__actions">
+              <button class="admin-btn admin-btn--ghost" (click)="toggleActive(slide)" [title]="slide.active ? 'Deactivate' : 'Activate'">
+                <svg *ngIf="slide.active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                <svg *ngIf="!slide.active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                </svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost" (click)="openEditModal(slide)" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete(slide.id!)" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 1" class="hero-slides-pagination">
+        <div class="admin-pagination__info">
+          Showing <strong>{{ currentPage * pageSize + 1 }}</strong> to
+          <strong>{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</strong> of
+          <strong>{{ totalElements }}</strong> slides
+        </div>
+        <div class="admin-pagination__controls">
+          <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">
+            Previous
+          </button>
+          <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                  class="admin-pagination__btn"
+                  [class.admin-pagination__btn--active]="currentPage === i"
+                  (click)="goToPage(i)">
+            {{ i + 1 }}
+          </button>
+          <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div *ngIf="showModal" class="admin-modal">
+  <div class="admin-modal__content admin-modal__content--large">
+    <div class="admin-modal__header">
+      <h2>{{ isEditMode ? 'Edit Hero Slide' : 'Add New Hero Slide' }}</h2>
+      <button class="admin-modal__close" (click)="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="heroSlideForm" (ngSubmit)="saveHeroSlide()">
+      <div class="admin-modal__body">
+        <div class="admin-form__grid">
+          <!-- Title -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Title *</label>
+            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Discover Ancient Sri Lanka">
+            <p class="admin-form__hint">Main heading displayed on the slide</p>
+          </div>
+
+          <!-- Subtitle -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Subtitle</label>
+            <input type="text" formControlName="subtitle" class="admin-input" placeholder="e.g., Experience the wonder of 2000 years of heritage">
+            <p class="admin-form__hint">Secondary text shown below the title</p>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="admin-form__group admin-form__group--full">
+            <app-image-upload
+              [currentImageUrl]="heroSlideForm.get('imageUrl')?.value"
+              [folder]="'hero-slides'"
+              [label]="'Slide Image'"
+              (imageUploaded)="onImageUploaded($event)"
+            ></app-image-upload>
+            <p class="admin-form__hint">Recommended size: 1920x1080 pixels or similar 16:9 aspect ratio</p>
+          </div>
+
+          <!-- Button Text -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Button Text</label>
+            <input type="text" formControlName="buttonText" class="admin-input" placeholder="e.g., Explore Now">
+            <p class="admin-form__hint">Leave empty to hide button</p>
+          </div>
+
+          <!-- Button Link -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Button Link</label>
+            <input type="text" formControlName="buttonLink" class="admin-input" placeholder="e.g., /locations or /events">
+            <p class="admin-form__hint">Page to navigate when button is clicked</p>
+          </div>
+
+          <!-- Display Duration -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Display Duration *</label>
+            <select formControlName="displayDuration" class="admin-select">
+              <option *ngFor="let preset of durationPresets" [value]="preset.value">{{ preset.label }}</option>
+            </select>
+            <p class="admin-form__hint">How long this slide is shown before transitioning</p>
+          </div>
+
+          <!-- Display Order -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Display Order</label>
+            <input type="number" formControlName="displayOrder" class="admin-input" min="0">
+            <p class="admin-form__hint">Lower numbers appear first (auto-assigned if left at 0)</p>
+          </div>
+
+          <!-- Active Status -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-checkbox">
+              <input type="checkbox" formControlName="active">
+              <span>Active - Show this slide in the carousel</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="heroSlideForm.invalid || isLoading">
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Update' : 'Create' }} Slide</span>
+          <span *ngIf="isLoading" class="admin-btn__loading">
+            <svg class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete Hero Slide</h3>
+      <p class="admin-confirm__text">Are you sure you want to delete this hero slide? This action cannot be undone.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="deleteHeroSlide()" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Delete</span>
+          <span *ngIf="isLoading" class="admin-btn__loading">
+            <svg class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

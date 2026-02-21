@@ -1,0 +1,221 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Manage Display Order</h1>
+        <p>Select a section and arrange the order of featured items</p>
+      </div>
+      <div class="admin-header__actions">
+        <a routerLink="/admin/dashboard" class="admin-btn admin-btn--secondary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span>Back to Dashboard</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Type Selector Tabs -->
+    <div class="type-selector">
+      <button
+        *ngFor="let type of itemTypes"
+        class="type-selector__tab"
+        [class.type-selector__tab--active]="itemType === type.value"
+        (click)="switchType(type.value)"
+      >
+        <!-- Location Icon -->
+        <svg *ngIf="type.icon === 'location'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <!-- Calendar Icon -->
+        <svg *ngIf="type.icon === 'calendar'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <!-- Building Icon -->
+        <svg *ngIf="type.icon === 'building'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <!-- Image Icon -->
+        <svg *ngIf="type.icon === 'image'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span>{{ type.label }}</span>
+      </button>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Two Panel Layout -->
+    <div class="order-panels">
+      <!-- Left Panel: Available Items -->
+      <div class="order-panel">
+        <div class="order-panel__header">
+          <h3>Available {{ getTypeTitle() }}</h3>
+          <p>Click + or drag items to add to display order</p>
+        </div>
+
+        <!-- Search -->
+        <div class="order-panel__search">
+          <input
+            type="text"
+            placeholder="Search {{ itemType }}..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+            class="admin-input"
+          />
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="order-panel__loading">
+          <div class="admin-loader__spinner"></div>
+          <span>Loading...</span>
+        </div>
+
+        <!-- Items List -->
+        <div *ngIf="!isLoading" class="order-panel__items">
+          <div
+            *ngFor="let item of availableItems"
+            class="order-item"
+            [class.order-item--added]="isInOrderedList(item)"
+            draggable="true"
+            (dragstart)="onDragStart($event, item)"
+            (dragend)="onDragEnd()"
+          >
+            <div class="order-item__image">
+              <img [src]="item.imageUrl" [alt]="item.name" />
+            </div>
+            <div class="order-item__info">
+              <span class="order-item__name">{{ item.name }}</span>
+              <span class="order-item__meta">{{ item.category || item.type || '' }}</span>
+            </div>
+            <button
+              class="order-item__add"
+              (click)="addToOrder(item)"
+              [disabled]="isInOrderedList(item)"
+              title="Add to order"
+            >
+              <svg *ngIf="!isInOrderedList(item)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <svg *ngIf="isInOrderedList(item)" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="availableItems.length === 0" class="order-panel__empty">
+            <p>No {{ itemType }} found</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="totalPages > 1" class="order-panel__pagination">
+          <button class="admin-btn admin-btn--ghost" (click)="previousPage()" [disabled]="currentPage === 0">
+            ← Prev
+          </button>
+          <span class="pagination-info">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+          <button class="admin-btn admin-btn--ghost" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Panel: Ordered Items -->
+      <div class="order-panel order-panel--ordered">
+        <div class="order-panel__header">
+          <h3>Display Order</h3>
+          <p>Drag to reorder or use arrows</p>
+        </div>
+
+        <!-- Drop Zone -->
+        <div
+          class="order-panel__dropzone"
+          [class.order-panel__dropzone--active]="draggedItem && !isInOrderedList(draggedItem)"
+          (dragover)="$event.preventDefault()"
+          (drop)="onDropToList($event)"
+        >
+          <!-- Ordered Items -->
+          <div
+            *ngFor="let item of orderedItems; let i = index"
+            class="ordered-item"
+            [class.ordered-item--drag-over]="dragOverIndex === i"
+            draggable="true"
+            (dragstart)="onDragStart($event, item, true)"
+            (dragover)="onDragOver($event, i)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop($event, i)"
+            (dragend)="onDragEnd()"
+          >
+            <span class="ordered-item__position">{{ i + 1 }}</span>
+            <div class="ordered-item__image">
+              <img [src]="item.imageUrl" [alt]="item.name" />
+            </div>
+            <div class="ordered-item__info">
+              <span class="ordered-item__name">{{ item.name }}</span>
+              <span class="ordered-item__meta">{{ item.category || item.type || '' }}</span>
+            </div>
+            <div class="ordered-item__actions">
+              <button class="action-btn" (click)="moveUp(i)" [disabled]="i === 0" title="Move up">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                </svg>
+              </button>
+              <button class="action-btn" (click)="moveDown(i)" [disabled]="i === orderedItems.length - 1" title="Move down">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <button class="action-btn action-btn--danger" (click)="removeFromOrder(i)" title="Remove">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="orderedItems.length === 0" class="order-panel__empty-drop">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+            </svg>
+            <p>Drag items here to set display order</p>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="order-panel__footer">
+          <button
+            class="admin-btn admin-btn--primary admin-btn--full"
+            (click)="saveOrder()"
+            [disabled]="isSaving || orderedItems.length === 0"
+          >
+            <svg *ngIf="!isSaving" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span *ngIf="!isSaving">Save Display Order</span>
+            <span *ngIf="isSaving">Saving...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,161 @@
+<div class="event-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading event details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>Error Loading Event</h2>
+    <p>{{ error }}</p>
+    <button (click)="goBack()" class="btn-primary">
+      <span>Back to Events</span>
+      <span class="btn-shine"></span>
+      <span class="btn-corner btn-corner--tl"></span>
+      <span class="btn-corner btn-corner--tr"></span>
+      <span class="btn-corner btn-corner--bl"></span>
+      <span class="btn-corner btn-corner--br"></span>
+    </button>
+  </div>
+
+  <!-- Event Details -->
+  <div *ngIf="event && !loading" class="event-detail">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <button (click)="goBack()" class="back-button">
+        <span class="arrow">←</span> Back to Events
+      </button>
+      <div class="hero-image">
+        <img [src]="event.imageUrl | cloudinaryOptimize:1200:600:85" [alt]="event.title" />
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="category-badge">
+            {{ getCategoryIcon(event.category) }} {{ event.category | titlecase }}
+          </span>
+          <h1>{{ event.title }}</h1>
+          <div class="hero-meta">
+            <span class="price">${{ event.price }}</span>
+            <span class="duration">⏱️ {{ event.duration }}</span>
+            <span class="rating">⭐ {{ event.rating }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="content-grid">
+        <!-- Left Column - Main Info -->
+        <div class="main-content">
+          <!-- Overview Section -->
+          <section class="detail-section">
+            <h2>Event Overview</h2>
+            <p class="description">{{ event.description }}</p>
+          </section>
+
+          <!-- What's Included Section -->
+          <section class="detail-section" *ngIf="event.included && event.included.length > 0">
+            <h2>What's Included</h2>
+            <ul class="included-list">
+              <li *ngFor="let item of event.included">
+                <span class="bullet">✓</span> {{ item }}
+              </li>
+            </ul>
+          </section>
+
+          <!-- Requirements Section -->
+          <section class="detail-section" *ngIf="event.requirements && event.requirements.length > 0">
+            <h2>Requirements</h2>
+            <ul class="requirements-list">
+              <li *ngFor="let req of event.requirements">
+                <span class="bullet">ℹ️</span> {{ req }}
+              </li>
+            </ul>
+          </section>
+
+          <!-- Event Dates Section -->
+          <section class="detail-section" *ngIf="event.dates && event.dates.length > 0">
+            <h2>Available Dates</h2>
+            <div class="dates-grid">
+              <div *ngFor="let date of event.dates" class="date-card">
+                <div class="date-info">
+                  <span class="date-value">{{ date.date | date: 'MMM dd, yyyy' }}</span>
+                  <span class="time-range">{{ date.startTime }} - {{ date.endTime }}</span>
+                </div>
+                <div class="spots-info">
+                  <span class="spots-available">{{ date.availableSpots }} spots available</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right Column - Booking Info -->
+        <div class="sidebar">
+          <!-- Booking Card -->
+          <div class="booking-card">
+            <div class="price-section">
+              <span class="price-label">Price per person</span>
+              <span class="price-value">${{ event.price }}</span>
+            </div>
+
+            <div class="availability-section" [ngClass]="getAvailabilityStatus()">
+              <span class="availability-icon">🎟️</span>
+              <span class="availability-text">{{ getAvailabilityText() }}</span>
+            </div>
+
+            <div class="event-info">
+              <div class="info-item">
+                <span class="info-label">Category</span>
+                <span class="info-value">
+                  {{ getCategoryIcon(event.category) }} {{ event.category | titlecase }}
+                </span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Duration</span>
+                <span class="info-value">⏱️ {{ event.duration }}</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Location</span>
+                <span class="info-value">📍 {{ event.location }}</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Max Participants</span>
+                <span class="info-value">👥 {{ event.maxParticipants }} people</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Rating</span>
+                <span class="info-value">⭐ {{ event.rating }} / 5</span>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn-primary btn-block" [disabled]="event.availableSpots === 0">
+                <span>{{ event.availableSpots === 0 ? 'Sold Out' : 'Book Now' }}</span>
+                <span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span>
+                <span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span>
+                <span class="btn-corner btn-corner--br"></span>
+              </button>
+              <button class="btn-secondary btn-block" (click)="goBack()">
+                <span>Back to Events</span>
+                <span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span>
+                <span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span>
+                <span class="btn-corner btn-corner--br"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

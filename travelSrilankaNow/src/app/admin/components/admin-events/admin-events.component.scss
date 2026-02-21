@@ -1,0 +1,8 @@
+// Import shared admin styles
+@import '../../styles/admin-shared';
+
+// Events-specific styles
+.admin-table__text--bold {
+  font-weight: 600;
+  color: $admin-gray-900;
+}

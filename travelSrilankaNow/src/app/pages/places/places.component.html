@@ -1,0 +1,193 @@
+<!-- Animated Page Header -->
+<app-page-header
+  subtitle="Stay & Dine"
+  title="Hotels & Restaurants"
+  description="Find the perfect place to stay and enjoy authentic Sri Lankan cuisine"
+  theme="places"
+  [showAnimation]="true">
+</app-page-header>
+
+<!-- Filter Section -->
+<section class="filter-section">
+  <div class="container">
+    <div class="filter-wrapper">
+      <!-- Search Bar -->
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Search places..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange($event)"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <!-- Filters Container -->
+      <div class="filters-container">
+        <!-- Type Filters -->
+        <div class="category-filters">
+          <button
+            *ngFor="let type of placeTypes"
+            [class.active]="selectedType === type.value"
+            (click)="filterByType(type.value)"
+            class="filter-btn"
+          >
+            {{ type.label }}
+          </button>
+        </div>
+
+        <!-- Price Range Filters -->
+        <div class="category-filters">
+          <button
+            *ngFor="let range of priceRanges"
+            [class.active]="selectedPriceRange === range.value"
+            (click)="filterByPriceRange(range.value)"
+            class="filter-btn"
+          >
+            {{ range.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      <p>Showing <strong>{{ places.length }}</strong> of <strong>{{ totalElements }}</strong> places (Page {{ currentPage + 1 }} of {{ totalPages }})</p>
+    </div>
+  </div>
+</section>
+
+<!-- Places Grid -->
+<section class="places-section">
+  <div class="container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading places...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-state">
+      <span class="error-icon">⚠️</span>
+      <h3>Connection Error</h3>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadData()" class="btn-retry">
+        <span>Try Again</span>
+        <span class="btn-shine"></span>
+        <span class="btn-corner btn-corner--tl"></span>
+        <span class="btn-corner btn-corner--tr"></span>
+        <span class="btn-corner btn-corner--bl"></span>
+        <span class="btn-corner btn-corner--br"></span>
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage" class="places-grid">
+      <div
+        *ngFor="let place of places; let i = index"
+        class="place-card reveal stagger-{{i % 6 + 1}}"
+      >
+        <div class="place-image">
+          <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
+          <div class="place-badge-wrapper">
+            <span class="type-badge">{{ place.type }}</span>
+          </div>
+        </div>
+
+        <div class="place-content">
+          <h3>{{ place.name }}</h3>
+
+          <div class="place-meta">
+            <div class="meta-item">
+              <span class="rating">⭐ {{ place.rating }}</span>
+            </div>
+            <div class="meta-item price-range">
+              {{ place.priceRange }}
+            </div>
+            <div class="meta-item">
+              <span>📍</span>
+              <span>{{ place.location }}</span>
+            </div>
+          </div>
+
+          <p>{{ place.description }}</p>
+
+          <div class="contact-info">
+            <span>📞</span>
+            <span>{{ place.contact.phone }}</span>
+          </div>
+
+          <a [routerLink]="['/places', place.id]" class="btn-view-details">
+            <span>View Details</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="!isLoading && !errorMessage && places.length === 0" class="no-results">
+      <div class="no-results-content">
+        <span class="no-results-icon">🏨</span>
+        <h3>No places found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+        <button (click)="filterByType('all'); filterByPriceRange('all'); searchTerm = ''; loadData()" class="btn-reset">
+          <span>Clear Filters</span>
+          <span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span>
+          <span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span>
+          <span class="btn-corner btn-corner--br"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div *ngIf="!isLoading && !errorMessage && totalPages > 1" class="pagination">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(0)"
+      >
+        First
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(currentPage - 1)"
+      >
+        Previous
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page + 1 }}
+        </button>
+      </div>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(currentPage + 1)"
+      >
+        Next
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(totalPages - 1)"
+      >
+        Last
+      </button>
+    </div>
+  </div>
+</section>

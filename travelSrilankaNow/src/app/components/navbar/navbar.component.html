@@ -1,0 +1,56 @@
+<nav class="navbar" [class.scrolled]="isScrolled">
+  <div class="container navbar-content">
+    <!-- Simple Logo -->
+    <a routerLink="/" class="logo" (click)="closeMenu()">
+      <h2 class="logo-text">Travel<span>SriLankaNow</span></h2>
+    </a>
+
+    <button class="menu-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="nav-links" [class.active]="isMenuOpen">
+      <a *ngFor="let link of navLinks"
+         [routerLink]="link.path"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: link.path === '/'}"
+         (click)="closeMenu()"
+         class="nav-link">
+        <span class="nav-link__text">{{ link.label }}</span>
+        <span class="nav-link__border nav-link__border--bottom"></span>
+        <span class="nav-link__border nav-link__border--left"></span>
+        <span class="nav-link__border nav-link__border--right"></span>
+        <span class="nav-link__border nav-link__border--top-left"></span>
+        <span class="nav-link__border nav-link__border--top-right"></span>
+        <span class="nav-link__shine"></span>
+      </a>
+
+      <!-- More Dropdown -->
+      <div class="more-dropdown" *ngIf="moreSections.length > 0">
+        <a class="nav-link" href="#" (click)="toggleMore($event)">
+          <span class="nav-link__text">More</span>
+          <svg class="more-dropdown__arrow" [class.more-dropdown__arrow--open]="isMoreOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+          <span class="nav-link__border nav-link__border--bottom"></span>
+          <span class="nav-link__border nav-link__border--left"></span>
+          <span class="nav-link__border nav-link__border--right"></span>
+          <span class="nav-link__border nav-link__border--top-left"></span>
+          <span class="nav-link__border nav-link__border--top-right"></span>
+          <span class="nav-link__shine"></span>
+        </a>
+        <div class="more-dropdown__menu" [class.more-dropdown__menu--open]="isMoreOpen">
+          <a *ngFor="let section of moreSections"
+             [routerLink]="'/more/' + section.slug"
+             class="more-dropdown__item"
+             (click)="closeMenu()">
+            <span class="more-dropdown__item-name">{{ section.name }}</span>
+            <span class="more-dropdown__item-desc" *ngIf="section.description">{{ section.description }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

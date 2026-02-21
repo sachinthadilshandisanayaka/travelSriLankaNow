@@ -1,0 +1,80 @@
+<div class="login-page">
+  <!-- Background Pattern -->
+  <div class="bg-pattern"></div>
+
+  <div class="login-wrapper">
+    <!-- Login Card -->
+    <div class="login-card">
+      <!-- Logo Section -->
+      <div class="logo-section">
+        <div class="logo-icon">🏝️</div>
+        <h1 class="brand-title">Travel Sri Lanka Now</h1>
+        <p class="brand-subtitle">Admin Panel</p>
+      </div>
+
+      <!-- Login Form -->
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
+        <!-- Username Field -->
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              [(ngModel)]="username"
+              required
+              placeholder="Enter username"
+              [disabled]="isLoading"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              placeholder="Enter password"
+              [disabled]="isLoading"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="error-message">
+          <span class="error-icon">⚠️</span>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Login Button -->
+        <button
+          type="submit"
+          [disabled]="!loginForm.form.valid || isLoading"
+          class="btn-login"
+        >
+          <span *ngIf="!isLoading">Sign In</span>
+          <span *ngIf="isLoading" class="loading-state">
+            <span class="spinner"></span>
+            Signing in...
+          </span>
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="login-footer">
+      🔐 Secure Admin Access
+    </p>
+  </div>
+</div>

@@ -1,0 +1,308 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Manage Gallery</h1>
+        <p>Add, edit, or remove photos and videos from the gallery</p>
+      </div>
+      <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Add New Item</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <!-- Gallery Content -->
+    <div *ngIf="!isLoading">
+      <!-- Empty State -->
+      <div *ngIf="galleryItems.length === 0" class="gallery-empty">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <h3>No gallery items found</h3>
+        <p>Get started by adding your first image or video</p>
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Add First Item
+        </button>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div *ngIf="galleryItems.length > 0" class="gallery-grid">
+        <div *ngFor="let item of galleryItems" class="gallery-card">
+          <!-- Image Preview -->
+          <div class="gallery-card__image">
+            <img [src]="item.thumbnailUrl || item.url" [alt]="item.title">
+
+            <!-- Type Badge -->
+            <div class="gallery-card__type-badge" [class.gallery-card__type-badge--video]="item.type === 'video'">
+              <svg fill="currentColor" viewBox="0 0 24 24">
+                <path [attr.d]="getTypeIcon(item.type)"></path>
+              </svg>
+              {{ item.type | titlecase }}
+            </div>
+
+            <!-- Featured Badge -->
+            <div *ngIf="item.featured" class="gallery-card__featured-badge">
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+              Featured
+            </div>
+          </div>
+
+          <!-- Card Content -->
+          <div class="gallery-card__content">
+            <h3 class="gallery-card__title" [title]="item.title">{{ item.title }}</h3>
+
+            <p *ngIf="item.description" class="gallery-card__description" [title]="item.description">
+              {{ item.description }}
+            </p>
+
+            <!-- Category -->
+            <div class="gallery-card__category">
+              <span class="admin-badge" [ngClass]="getCategoryColor(item.category)">
+                {{ item.category }}
+              </span>
+            </div>
+
+            <!-- Metadata -->
+            <div class="gallery-card__meta">
+              <div *ngIf="item.location" class="gallery-card__meta-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>{{ item.location }}</span>
+              </div>
+              <div *ngIf="item.photographer" class="gallery-card__meta-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>{{ item.photographer }}</span>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div *ngIf="item.tags && item.tags.length > 0" class="gallery-card__tags">
+              <span *ngFor="let tag of item.tags.slice(0, 3)" class="gallery-card__tag">#{{ tag }}</span>
+              <span *ngIf="item.tags.length > 3" class="gallery-card__tag gallery-card__tag--more">+{{ item.tags.length - 3 }}</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="gallery-card__actions">
+              <button class="admin-btn admin-btn--ghost" (click)="openEditModal(item)" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete(item.id)" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 0" class="gallery-pagination">
+        <div class="admin-pagination__info">
+          Showing <strong>{{ currentPage * pageSize + 1 }}</strong> to
+          <strong>{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</strong> of
+          <strong>{{ totalElements }}</strong> items
+        </div>
+        <div class="admin-pagination__controls">
+          <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">
+            Previous
+          </button>
+          <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                  class="admin-pagination__btn"
+                  [class.admin-pagination__btn--active]="currentPage === i"
+                  (click)="goToPage(i)">
+            {{ i + 1 }}
+          </button>
+          <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div *ngIf="showModal" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>{{ isEditMode ? 'Edit Gallery Item' : 'Add New Gallery Item' }}</h2>
+      <button class="admin-modal__close" (click)="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="galleryForm" (ngSubmit)="saveGalleryItem()">
+      <div class="admin-modal__body">
+        <div class="admin-form__grid">
+          <!-- Type -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Type *</label>
+            <select formControlName="type" class="admin-select">
+              <option *ngFor="let type of types" [value]="type.code">{{ type.displayName }}</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Category *</label>
+            <select formControlName="category" class="admin-select">
+              <option *ngFor="let cat of categories" [value]="cat.code">{{ cat.displayName }}</option>
+            </select>
+          </div>
+
+          <!-- Title -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Title *</label>
+            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Sunset at Mirissa Beach">
+          </div>
+
+          <!-- Image Upload (for image type) -->
+          <div *ngIf="galleryForm.get('type')?.value === 'image'" class="admin-form__group admin-form__group--full">
+            <app-image-upload
+              [currentImageUrl]="galleryForm.get('url')?.value"
+              [folder]="'gallery'"
+              [label]="'Gallery Image'"
+              (imageUploaded)="onMainImageUploaded($event)"
+            ></app-image-upload>
+          </div>
+
+          <!-- Video URL (for video type) -->
+          <div *ngIf="galleryForm.get('type')?.value === 'video'" class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Video URL *</label>
+            <input type="url" formControlName="url" class="admin-input" placeholder="https://example.com/video.mp4">
+            <p class="admin-form__hint">Enter the full URL of the video</p>
+          </div>
+
+          <!-- Thumbnail Upload -->
+          <div class="admin-form__group admin-form__group--full">
+            <app-image-upload
+              [currentImageUrl]="galleryForm.get('thumbnailUrl')?.value"
+              [folder]="'gallery/thumbnails'"
+              [label]="'Thumbnail Image'"
+              (imageUploaded)="onThumbnailUploaded($event)"
+            ></app-image-upload>
+          </div>
+
+          <!-- Description -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Description</label>
+            <textarea formControlName="description" class="admin-textarea" rows="3" placeholder="Brief description of the photo or video"></textarea>
+          </div>
+
+          <!-- Location -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Location</label>
+            <input type="text" formControlName="location" class="admin-input" placeholder="e.g., Mirissa, Southern Province">
+          </div>
+
+          <!-- Photographer -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Photographer</label>
+            <input type="text" formControlName="photographer" class="admin-input" placeholder="e.g., John Doe">
+          </div>
+
+          <!-- Tags -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Tags (comma-separated)</label>
+            <input type="text" formControlName="tags" class="admin-input" placeholder="e.g., sunset, ocean, tropical, paradise">
+            <p class="admin-form__hint">Separate tags with commas for better organization</p>
+          </div>
+
+          <!-- Featured -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-checkbox">
+              <input type="checkbox" formControlName="featured">
+              <span>Feature this item on the homepage</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="galleryForm.invalid || isLoading">
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Update' : 'Create' }} Item</span>
+          <span *ngIf="isLoading" class="admin-btn__loading">
+            <svg class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete Gallery Item</h3>
+      <p class="admin-confirm__text">Are you sure you want to delete this item? This action cannot be undone.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="deleteGalleryItem()" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Delete</span>
+          <span *ngIf="isLoading" class="admin-btn__loading">
+            <svg class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

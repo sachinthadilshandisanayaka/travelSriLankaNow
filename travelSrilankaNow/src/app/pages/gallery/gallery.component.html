@@ -1,0 +1,181 @@
+<!-- Animated Page Header -->
+<app-page-header
+  subtitle="Capture The Moment"
+  title="Photo Gallery"
+  description="Explore the beauty of Sri Lanka through stunning photos and videos"
+  theme="gallery"
+  [showAnimation]="true">
+</app-page-header>
+
+<!-- Filter Section -->
+<section class="filter-section">
+  <div class="container">
+    <!-- Search Box -->
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Search by title, description, location, photographer..."
+        [value]="searchTerm"
+        (input)="onSearchInput($event)"
+        class="search-input"
+      />
+      <button *ngIf="searchTerm" class="clear-btn" (click)="clearSearch()" title="Clear search">
+        ✕
+      </button>
+    </div>
+
+    <div class="filters-wrapper">
+      <!-- Category Filters -->
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <div class="category-filters">
+          <button
+            *ngFor="let category of categories"
+            [class.active]="selectedCategory === category.value"
+            (click)="filterByCategory(category.value)"
+            class="filter-btn"
+          >
+            {{ category.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Media Type Filters -->
+      <div class="filter-group">
+        <label class="filter-label">Media Type</label>
+        <div class="category-filters">
+          <button
+            *ngFor="let type of mediaTypes"
+            [class.active]="selectedType === type.value"
+            (click)="filterByType(type.value)"
+            class="filter-btn"
+          >
+            {{ type.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      <p>
+        Showing <strong>{{ galleryItems.length }}</strong> of <strong>{{ totalElements }}</strong> items
+        <span *ngIf="searchTerm"> for "<strong>{{ searchTerm }}</strong>"</span>
+        (Page {{ currentPage + 1 }} of {{ totalPages || 1 }})
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery Grid -->
+<section class="gallery-section">
+  <div class="container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading gallery...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-state">
+      <span class="error-icon">⚠️</span>
+      <h3>Connection Error</h3>
+      <p>{{ errorMessage }}</p>
+      <button (click)="loadData()" class="btn-retry">
+        <span>Try Again</span>
+        <span class="btn-shine"></span>
+        <span class="btn-corner btn-corner--tl"></span>
+        <span class="btn-corner btn-corner--tr"></span>
+        <span class="btn-corner btn-corner--bl"></span>
+        <span class="btn-corner btn-corner--br"></span>
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage" class="gallery-grid">
+      <div
+        *ngFor="let item of galleryItems; let i = index"
+        class="gallery-item reveal stagger-{{i % 6 + 1}}"
+      >
+        <div class="gallery-image-wrapper">
+          <img [src]="(item.thumbnailUrl || item.url) | cloudinaryOptimize:400:400:80" [alt]="item.title" />
+
+          <!-- Video indicator -->
+          <div *ngIf="item.type === 'video'" class="video-indicator">
+            <span class="play-icon">▶</span>
+          </div>
+
+          <!-- Overlay with info -->
+          <div class="gallery-overlay">
+            <div class="gallery-info">
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.description }}</p>
+              <span class="category-tag">{{ item.category }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="!isLoading && !errorMessage && galleryItems.length === 0" class="no-results">
+      <div class="no-results-content">
+        <span class="no-results-icon">📷</span>
+        <h3>No media found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+        <button (click)="filterByCategory('all'); filterByType('all'); clearSearch()" class="btn-reset">
+          <span>Clear All Filters</span>
+          <span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span>
+          <span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span>
+          <span class="btn-corner btn-corner--br"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div *ngIf="!isLoading && !errorMessage && totalPages > 1" class="pagination">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(0)"
+      >
+        First
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 0"
+        (click)="goToPage(currentPage - 1)"
+      >
+        Previous
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page + 1 }}
+        </button>
+      </div>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(currentPage + 1)"
+      >
+        Next
+      </button>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages - 1"
+        (click)="goToPage(totalPages - 1)"
+      >
+        Last
+      </button>
+    </div>
+  </div>
+</section>

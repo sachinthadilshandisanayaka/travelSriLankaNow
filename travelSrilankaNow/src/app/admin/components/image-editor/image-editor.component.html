@@ -1,0 +1,315 @@
+<div class="image-editor-overlay" (click)="onOverlayClick($event)">
+  <div class="image-editor-container" [class.sidebar-collapsed]="sidebarCollapsed">
+
+    <!-- Main Editor Area -->
+    <div class="editor-main">
+
+      <!-- Top Bar -->
+      <div class="editor-topbar">
+        <div class="topbar-left">
+          <button class="topbar-btn toggle-sidebar" (click)="toggleSidebar()" title="Toggle Tools Panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+          <div class="editor-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Image Editor</span>
+          </div>
+        </div>
+
+        <div class="topbar-center">
+          <div class="crop-dimensions-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/>
+            </svg>
+            <span>{{ cropDimensions }}</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="topbar-btn" (click)="togglePreview()" [class.active]="showPreview" title="Toggle Preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+          <button class="topbar-btn close-btn" (click)="onCancel()" title="Close (Esc)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        <p>Loading image...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="!loading && loadError" class="error-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p class="error-title">Failed to load image</p>
+        <p class="error-message">{{ loadError }}</p>
+        <button class="retry-btn" (click)="loadImage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M23 4v6h-6"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Retry
+        </button>
+      </div>
+
+      <!-- Canvas Workspace -->
+      <div *ngIf="!loading && imageLoaded" class="canvas-workspace" #container>
+        <div class="canvas-wrapper">
+          <canvas #canvas
+                  [width]="canvasWidth"
+                  [height]="canvasHeight"
+                  (mousedown)="onCanvasMouseDown($event)">
+          </canvas>
+        </div>
+
+        <!-- Quick Actions Bar (Bottom) -->
+        <div class="quick-actions-bar">
+          <div class="quick-action-group">
+            <button class="quick-btn" (click)="rotateLeft()" title="Rotate Left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 4v6h6"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+            </button>
+            <button class="quick-btn" (click)="rotateRight()" title="Rotate Right">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 4v6h-6"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="quick-action-divider"></div>
+
+          <div class="quick-action-group">
+            <button class="quick-btn" (click)="flipHorizontal()" [class.active]="flipH" title="Flip Horizontal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3v18M16 7l5 5-5 5M8 7l-5 5 5 5"/>
+              </svg>
+            </button>
+            <button class="quick-btn" (click)="flipVertical()" [class.active]="flipV" title="Flip Vertical">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M7 8L12 3l5 5M7 16l5 5 5-5"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="quick-action-divider"></div>
+
+          <div class="quick-action-group zoom-group">
+            <button class="quick-btn" (click)="zoomOut()" title="Zoom Out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/>
+              </svg>
+            </button>
+            <span class="zoom-value">{{ zoomLabel }}</span>
+            <button class="quick-btn" (click)="zoomIn()" title="Zoom In">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6m-3-3h6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="quick-action-divider"></div>
+
+          <button class="quick-btn reset-btn" (click)="reset()" title="Reset All">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="editor-footer" *ngIf="!loading && imageLoaded">
+        <div class="footer-left">
+          <button class="btn-cancel" (click)="onCancel()">Cancel</button>
+        </div>
+        <div class="footer-info">
+          <span class="info-badge">{{ cropDimensions }}</span>
+          <span class="info-badge" *ngIf="rotation !== 0">{{ rotationLabel }}</span>
+        </div>
+        <div class="footer-right">
+          <button class="btn-skip" (click)="onSkipEdit()" *ngIf="imageFile" title="Upload the original image without any changes">
+            Upload Original
+          </button>
+          <button class="btn-save" (click)="onSave()">
+            Save Edited
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tools Sidebar -->
+    <div class="editor-sidebar" *ngIf="!loading && imageLoaded">
+      <div class="sidebar-header">
+        <h3>Tools</h3>
+        <button class="sidebar-close" (click)="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-content">
+        <!-- Aspect Ratio Section -->
+        <div class="tool-section">
+          <div class="tool-section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+            <span>Aspect Ratio</span>
+          </div>
+          <div class="aspect-grid">
+            <button *ngFor="let aspect of recommendedAspects"
+                    class="aspect-btn"
+                    [class.active]="selectedAspect === aspect"
+                    (click)="onAspectChange(aspect)">
+              <span class="aspect-icon" [attr.data-aspect]="aspect">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="6" width="18" height="12" rx="1"/>
+                </svg>
+              </span>
+              <span class="aspect-label">{{ aspectRatios[aspect]?.label || aspect }}</span>
+            </button>
+            <button *ngIf="!recommendedAspects.includes('free')"
+                    class="aspect-btn"
+                    [class.active]="selectedAspect === 'free'"
+                    (click)="onAspectChange('free')">
+              <span class="aspect-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="1"/>
+                  <path d="M3 9h18M9 3v18"/>
+                </svg>
+              </span>
+              <span class="aspect-label">Free</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Transform Section -->
+        <div class="tool-section">
+          <div class="tool-section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            <span>Transform</span>
+          </div>
+
+          <div class="transform-controls">
+            <div class="control-row">
+              <span class="control-label">Rotation</span>
+              <div class="control-buttons">
+                <button class="control-btn" (click)="rotateLeft()" title="Rotate -90°">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 4v6h6"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                  </svg>
+                </button>
+                <span class="control-value">{{ rotationLabel }}</span>
+                <button class="control-btn" (click)="rotateRight()" title="Rotate +90°">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <span class="control-label">Flip</span>
+              <div class="control-buttons">
+                <button class="control-btn" [class.active]="flipH" (click)="flipHorizontal()" title="Flip Horizontal">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3v18M16 7l5 5-5 5M8 7l-5 5 5 5"/>
+                  </svg>
+                </button>
+                <button class="control-btn" [class.active]="flipV" (click)="flipVertical()" title="Flip Vertical">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M7 8L12 3l5 5M7 16l5 5 5-5"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <span class="control-label">Zoom</span>
+              <div class="control-buttons zoom-control">
+                <button class="control-btn" (click)="zoomOut()" title="Zoom Out">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="M8 11h6"/>
+                  </svg>
+                </button>
+                <div class="zoom-slider-wrapper">
+                  <input type="range"
+                         class="zoom-slider"
+                         [value]="zoom * 100"
+                         min="50"
+                         max="300"
+                         step="10"
+                         (input)="onZoomSliderChange($event)">
+                  <span class="zoom-label">{{ zoomLabel }}</span>
+                </div>
+                <button class="control-btn" (click)="zoomIn()" title="Zoom In">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="M11 8v6m-3-3h6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="tool-section preview-section" *ngIf="showPreview">
+          <div class="tool-section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>Preview</span>
+          </div>
+          <div class="preview-canvas-wrapper">
+            <canvas #previewCanvas class="preview-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="reset-all-btn" (click)="reset()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset All
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

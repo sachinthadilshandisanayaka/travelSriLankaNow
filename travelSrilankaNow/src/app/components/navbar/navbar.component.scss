@@ -1,0 +1,594 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+// Premium Transparent Navbar
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-index-fixed;
+  padding: $spacing-sm 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Default state - fully transparent over hero
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+
+  // Scrolled state - frosted glass effect
+  &.scrolled {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 1px 0 rgba($primary-navy-dark, 0.05),
+                0 4px 20px -4px rgba($primary-navy-dark, 0.1);
+
+    .logo-text {
+      color: $primary-navy-dark;
+      text-shadow: none;
+
+      // "SriLankaNow" part - navy blue for contrast on light background
+      span {
+        color: $primary-navy;
+        text-shadow: none;
+      }
+    }
+
+    .nav-link {
+      color: $warm-gray;
+      text-shadow: none;
+
+      .nav-link__border {
+        background: $primary-navy;
+      }
+
+      .nav-link__shine {
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba($primary-navy, 0.15) 50%,
+          transparent 100%
+        );
+      }
+
+      &:hover {
+        color: $primary-navy-dark;
+      }
+
+      &.active {
+        color: $primary-navy-dark;
+
+        .nav-link__border {
+          background: rgba($primary-navy-dark, 0.6);
+        }
+      }
+    }
+
+    .menu-toggle span {
+      background: $primary-navy-dark;
+    }
+  }
+}
+
+.navbar-content {
+  @include flex-between;
+  padding: $spacing-md $container-padding;
+  max-width: $container-max-width;
+  margin: 0 auto;
+}
+
+// ==================== Simple Logo ====================
+.logo {
+  text-decoration: none;
+  z-index: $z-index-fixed + 1;
+  position: relative;
+
+  .logo-text {
+    font-family: $font-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $white;
+    margin: 0;
+    letter-spacing: -0.02em;
+    transition: all 0.3s ease;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+
+    // "SriLankaNow" part - dark navy blue matching buttons
+    span {
+      color: $primary-navy-dark;
+      font-weight: $font-weight-semibold;
+      text-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
+    }
+
+    @include respond-to('lg') {
+      font-size: 1.375rem;
+    }
+  }
+
+  &:hover .logo-text {
+    transform: translateX(2px);
+  }
+}
+
+// ==================== Navigation Links with Animated Border ====================
+.nav-links {
+  display: none;
+  gap: $spacing-sm;
+  align-items: center;
+
+  @include respond-to('lg') {
+    display: flex;
+  }
+}
+
+// Nav link with border drawing from center outward
+.nav-link {
+  font-family: $font-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: $spacing-sm $spacing-md;
+  position: relative;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: color 0.3s ease;
+  overflow: hidden;
+
+  // Text content
+  &__text {
+    position: relative;
+    z-index: 2;
+  }
+
+  // Border segments - each draws separately
+  &__border {
+    position: absolute;
+    background: $primary-sky;
+    pointer-events: none;
+
+    // Bottom border - expands from center
+    &--bottom {
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 1px;
+      transform: translateX(-50%);
+      transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // Left border - draws upward
+    &--left {
+      bottom: 0;
+      left: 0;
+      width: 1px;
+      height: 0;
+      transition: height 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    }
+
+    // Right border - draws upward
+    &--right {
+      bottom: 0;
+      right: 0;
+      width: 1px;
+      height: 0;
+      transition: height 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    }
+
+    // Top-left border - draws from left toward center
+    &--top-left {
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+    }
+
+    // Top-right border - draws from right toward center
+    &--top-right {
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 1px;
+      transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+    }
+  }
+
+  // Shine effect
+  &__shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  // Hover state - draw border from center outward
+  &:hover {
+    color: $white;
+
+    // Step 1: Bottom expands from center (0ms - 150ms)
+    .nav-link__border--bottom {
+      width: 100%;
+    }
+
+    // Step 2: Left & Right draw upward (150ms - 300ms)
+    .nav-link__border--left,
+    .nav-link__border--right {
+      height: 100%;
+    }
+
+    // Step 3: Top-left & Top-right draw toward center (300ms - 450ms)
+    .nav-link__border--top-left,
+    .nav-link__border--top-right {
+      width: 50%;
+    }
+
+    // Step 4: Shine sweeps after border completes (500ms+)
+    .nav-link__shine {
+      left: 100%;
+      transition: left 0.4s ease 0.5s;
+    }
+  }
+
+  // Reset on mouse leave
+  &:not(:hover) {
+    .nav-link__border--bottom {
+      width: 0;
+      transition: width 0.1s ease 0.2s;
+    }
+
+    .nav-link__border--left,
+    .nav-link__border--right {
+      height: 0;
+      transition: height 0.1s ease 0.1s;
+    }
+
+    .nav-link__border--top-left,
+    .nav-link__border--top-right {
+      width: 0;
+      transition: width 0.1s ease;
+    }
+
+    .nav-link__shine {
+      left: -100%;
+      transition: none;
+    }
+  }
+
+  // Active state - full border visible
+  &.active {
+    color: $white;
+    font-weight: $font-weight-semibold;
+
+    .nav-link__border--bottom {
+      width: 100%;
+    }
+
+    .nav-link__border--left,
+    .nav-link__border--right {
+      height: 100%;
+    }
+
+    .nav-link__border--top-left,
+    .nav-link__border--top-right {
+      width: 50%;
+      background: rgba($white, 0.6);
+    }
+
+    .nav-link__border--bottom,
+    .nav-link__border--left,
+    .nav-link__border--right {
+      background: rgba($white, 0.6);
+    }
+  }
+}
+
+// ==================== Premium Hamburger Menu ====================
+.menu-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: $radius-md;
+  cursor: pointer;
+  padding: 0;
+  z-index: $z-index-fixed + 1;
+  transition: all 0.3s ease;
+  gap: 5px;
+
+  @include respond-to('lg') {
+    display: none;
+  }
+
+  span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: $white;
+    border-radius: $radius-full;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+
+  &.active {
+    background: rgba($primary-navy-dark, 0.9);
+    border-color: transparent;
+
+    span {
+      background: $white;
+    }
+
+    span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+
+    span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+  }
+
+  // Scrolled state
+  .navbar.scrolled & {
+    background: rgba($primary-navy-dark, 0.05);
+    border-color: rgba($primary-navy-dark, 0.1);
+
+    span {
+      background: $primary-navy-dark;
+    }
+
+    &:hover {
+      background: rgba($primary-navy-dark, 0.1);
+    }
+
+    &.active {
+      background: $primary-navy-dark;
+
+      span {
+        background: $white;
+      }
+    }
+  }
+}
+
+// ==================== Mobile Navigation Drawer ====================
+@media (max-width: $breakpoint-lg - 1px) {
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    height: 100dvh;
+    background: linear-gradient(180deg, $white 0%, $navy-bg-lightest 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 120px $spacing-xl $spacing-3xl;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    box-shadow: -20px 0 60px rgba($primary-navy-dark, 0.15);
+
+    &.active {
+      right: 0;
+    }
+
+    .nav-link {
+      padding: $spacing-lg $spacing-xl;
+      font-size: $font-size-lg;
+      color: $warm-gray;
+      text-shadow: none;
+      border-radius: $radius-lg;
+      margin-bottom: $spacing-xs;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      overflow: visible;
+
+      // Hide all border segments and shine on mobile
+      .nav-link__border,
+      .nav-link__shine {
+        display: none !important;
+      }
+
+      &:hover {
+        background: rgba($primary-sky, 0.2);
+        color: $primary-navy-dark;
+        border-color: rgba($primary-sky, 0.3);
+        transform: translateX(8px);
+      }
+
+      &.active {
+        background: $gradient-primary;
+        color: $white;
+        font-weight: $font-weight-semibold;
+        border-color: transparent;
+        box-shadow: 0 4px 20px rgba($primary-navy-dark, 0.25);
+      }
+    }
+  }
+
+  // Backdrop overlay
+  .nav-links.active::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba($primary-navy-dark, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    animation: fadeIn 0.3s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ==================== More Dropdown ====================
+.more-dropdown {
+  position: relative;
+
+  &__arrow {
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 220px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: $radius-lg;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: all 0.2s ease;
+    z-index: 100;
+
+    &--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(4px);
+    }
+  }
+
+  &__item {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: $radius-md;
+    text-decoration: none;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba($primary-navy, 0.06);
+    }
+  }
+
+  &__item-name {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $primary-navy-dark;
+  }
+
+  &__item-desc {
+    display: block;
+    font-size: 0.75rem;
+    color: $warm-gray;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// Scrolled dropdown colors
+.navbar.scrolled .more-dropdown {
+  &__arrow {
+    color: inherit;
+  }
+}
+
+// Mobile dropdown behavior
+@media (max-width: $breakpoint-lg - 1px) {
+  .more-dropdown {
+    width: 100%;
+
+    .nav-link {
+      justify-content: space-between;
+    }
+
+    &__menu {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      background: transparent;
+      backdrop-filter: none;
+      box-shadow: none;
+      border: none;
+      padding: 0 0 0 1rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+
+      &--open {
+        max-height: 500px;
+      }
+    }
+
+    &__item {
+      padding: 0.75rem 1rem;
+      border-radius: $radius-md;
+      border: 1px solid transparent;
+
+      &:hover {
+        background: rgba($primary-sky, 0.2);
+        border-color: rgba($primary-sky, 0.3);
+      }
+    }
+
+    &__item-name {
+      color: $warm-gray;
+    }
+
+    .nav-links.active & &__item-name {
+      color: $warm-gray;
+    }
+  }
+}
+
+// Host element spacing
+:host {
+  display: block;
+  margin-bottom: 0;
+}

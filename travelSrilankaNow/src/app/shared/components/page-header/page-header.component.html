@@ -1,0 +1,39 @@
+<section class="page-header animated-header"
+         [class]="'theme-' + theme"
+         [class.has-background-image]="backgroundImage"
+         [class.is-loading]="isLoadingBackground">
+
+  <!-- Dynamic Background Image (when available) -->
+  <div class="background-image" *ngIf="backgroundImage"
+       [style.backgroundImage]="'url(' + backgroundImage + ')'"></div>
+
+  <!-- Dynamic overlay when background image exists -->
+  <div class="header-overlay" *ngIf="backgroundImage" [ngStyle]="overlayStyle"></div>
+
+  <!-- Animated background particles (only when no background image) -->
+  <div class="header-particles" *ngIf="!backgroundImage">
+    <span class="particle" *ngFor="let p of [1,2,3,4,5,6,7,8]"></span>
+  </div>
+
+  <!-- Decorative wave at bottom -->
+  <div class="header-wave">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <path d="M0,60 C360,120 720,0 1080,60 C1260,90 1380,80 1440,60 L1440,120 L0,120 Z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <div class="container">
+    <div class="header-content-wrapper">
+      <div class="header-content">
+        <span class="subtitle animate-slide-in">{{ subtitle }}</span>
+        <h1 class="animate-slide-in delay-1">{{ title }}</h1>
+        <p class="lead animate-slide-in delay-2">{{ description }}</p>
+      </div>
+
+      <!-- Lottie/SVG Animation Container (only when no background image) -->
+      <div class="header-animation" *ngIf="showAnimation && !backgroundImage && !isLoadingBackground" #lottieContainer>
+        <!-- Animation will be inserted here -->
+      </div>
+    </div>
+  </div>
+</section>
