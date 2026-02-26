@@ -13,6 +13,7 @@ RUN npm ci
 COPY . .
 
 # Build the application for production
+ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN npm run build -- --configuration production
 
 # Stage 2: Serve with nginx

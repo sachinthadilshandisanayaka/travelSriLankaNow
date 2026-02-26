@@ -70,7 +70,7 @@ $navbar-height: 80px;
 
   .back-button {
     position: absolute;
-    top: calc($spacing-4xl + #{$navbar-height}); // Account for fixed navbar
+    top: calc(#{$spacing-4xl} + #{$navbar-height}); // Account for fixed navbar
     left: $spacing-2xl;
     z-index: 10;
     background: rgba(255, 255, 255, 0.95);

@@ -12,5 +12,11 @@ Thumbs.db
 # Docker volumes
 data/
 
+# Requirements
+requirements/
+
+# Environment secrets
+.env
+
 # Misc
 *.log

@@ -126,7 +126,7 @@
   align-items: center;
   justify-content: center;
   z-index: 2;
-  padding: calc($spacing-4xl + 80px) $spacing-xl $spacing-3xl; // Extra top padding for fixed navbar
+  padding: calc(#{$spacing-4xl} + 80px) $spacing-xl $spacing-3xl; // Extra top padding for fixed navbar
 }
 
 .slide-content-inner {
@@ -320,7 +320,7 @@
   background: $gradient-primary;
   color: $white;
   text-align: center;
-  padding: calc($spacing-4xl + 80px) $spacing-lg $spacing-3xl; // Extra top padding for fixed navbar
+  padding: calc(#{$spacing-4xl} + 80px) $spacing-lg $spacing-3xl; // Extra top padding for fixed navbar
   overflow: hidden;
 
   &::before {
@@ -684,7 +684,7 @@
 
 @media (max-width: $breakpoint-sm) {
   .hero {
-    padding: calc($spacing-3xl + 80px) $spacing-md $spacing-2xl; // Extra top padding for fixed navbar
+    padding: calc(#{$spacing-3xl} + 80px) $spacing-md $spacing-2xl; // Extra top padding for fixed navbar
   }
 
   .hero-buttons,
@@ -699,7 +699,7 @@
   }
 
   .slide-content {
-    padding: calc($spacing-3xl + 80px) $spacing-md $spacing-2xl; // Extra top padding for fixed navbar
+    padding: calc(#{$spacing-3xl} + 80px) $spacing-md $spacing-2xl; // Extra top padding for fixed navbar
   }
 
   .slide-title {
