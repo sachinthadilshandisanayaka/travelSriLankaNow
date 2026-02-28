@@ -5,14 +5,22 @@
   background: linear-gradient(180deg, $white 0%, rgba($primary-sky, 0.15) 100%);
   border-top: 2px solid rgba($primary-navy, 0.1);
   color: $warm-gray;
-  padding: $spacing-4xl 0 $spacing-xl;
+  padding: $spacing-3xl 0 $spacing-xl;
+
+  @include respond-to('md') {
+    padding: $spacing-4xl 0 $spacing-xl;
+  }
 }
 
 .footer-content {
   display: grid;
   grid-template-columns: 1fr;
-  gap: $spacing-3xl;
-  margin-bottom: $spacing-3xl;
+  gap: $spacing-2xl;
+  margin-bottom: $spacing-2xl;
+
+  @include respond-to('md') {
+    margin-bottom: $spacing-3xl;
+  }
 
   @include respond-to('md') {
     grid-template-columns: repeat(2, 1fr);
@@ -57,7 +65,11 @@
 
 .footer-description {
   line-height: $line-height-relaxed;
-  max-width: 280px;
+  max-width: 100%;
+
+  @include respond-to('md') {
+    max-width: 280px;
+  }
 }
 
 .footer-links {
@@ -73,8 +85,11 @@
     color: $warm-gray;
     text-decoration: none;
     font-size: $font-size-sm;
-    transition: color $transition-base;
+    transition: color $transition-base, transform $transition-base;
     display: inline-block;
+    padding: $spacing-xs 0;
+    min-height: 36px;
+    line-height: 1.8;
 
     &:hover {
       color: $primary-navy;
@@ -86,16 +101,19 @@
 .social-links {
   display: flex;
   flex-wrap: wrap;
-  gap: $spacing-md;
+  gap: $spacing-sm;
 
   a {
     color: $warm-gray;
     text-decoration: none;
     font-size: $font-size-sm;
     transition: all $transition-base;
-    padding: $spacing-xs $spacing-md;
+    padding: $spacing-sm $spacing-md;
     border: 1px solid rgba($primary-navy, 0.2);
     border-radius: $radius-md;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
 
     &:hover {
       color: $primary-navy;

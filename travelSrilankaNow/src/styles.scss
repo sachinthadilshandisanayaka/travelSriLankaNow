@@ -35,6 +35,11 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  &.loading-active,
+  &.menu-open {
+    overflow: hidden;
+  }
 }
 
 // Remove default button styles
