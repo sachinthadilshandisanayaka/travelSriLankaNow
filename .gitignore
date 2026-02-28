@@ -18,5 +18,8 @@ requirements/
 # Environment secrets
 .env
 
+# Documentation
+*.md
+
 # Misc
 *.log
