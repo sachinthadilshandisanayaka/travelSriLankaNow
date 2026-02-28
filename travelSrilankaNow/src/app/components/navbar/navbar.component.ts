@@ -1,4 +1,5 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, Renderer2, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { MoreSectionService } from '../../services/more-section.service';
 import { MoreSection } from '../../models/more-section.model';
 
@@ -22,7 +23,11 @@ export class NavbarComponent implements OnInit {
 
   moreSections: MoreSection[] = [];
 
-  constructor(private moreSectionService: MoreSectionService) {}
+  constructor(
+    private moreSectionService: MoreSectionService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
 
   ngOnInit(): void {
     this.loadMoreSections();
@@ -50,11 +55,21 @@ export class NavbarComponent implements OnInit {
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+    this.updateBodyScroll();
   }
 
   closeMenu() {
     this.isMenuOpen = false;
     this.isMoreOpen = false;
+    this.updateBodyScroll();
+  }
+
+  private updateBodyScroll(): void {
+    if (this.isMenuOpen) {
+      this.renderer.addClass(this.document.body, 'menu-open');
+    } else {
+      this.renderer.removeClass(this.document.body, 'menu-open');
+    }
   }
 
   toggleMore(event: Event) {
