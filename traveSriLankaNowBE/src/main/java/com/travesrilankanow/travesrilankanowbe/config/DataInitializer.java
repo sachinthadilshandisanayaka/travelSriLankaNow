@@ -13,6 +13,7 @@ import com.travesrilankanow.travesrilankanowbe.repository.SiteSettingRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,15 @@ public class DataInitializer implements CommandLineRunner {
     private final HomepageSectionRepository homepageSectionRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${admin.default.username}")
+    private String adminUsername;
+
+    @Value("${admin.default.password}")
+    private String adminPassword;
+
+    @Value("${admin.default.email:admin@travelsrilankanow.com}")
+    private String adminEmail;
+
     @Override
     public void run(String... args) {
         initializeAdminUser();
@@ -37,20 +47,17 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeAdminUser() {
-        // Remove old admin user if exists
-        userRepository.findByUsername("admin").ifPresent(userRepository::delete);
-
-        if (!userRepository.existsByUsername("Sachintha")) {
+        if (!userRepository.existsByUsername(adminUsername)) {
             User adminUser = User.builder()
-                    .username("Sachintha")
-                    .password(passwordEncoder.encode("Sanju@123"))
-                    .email("sachintha@travelsrilankanow.com")
-                    .fullName("Sachintha")
+                    .username(adminUsername)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .email(adminEmail)
+                    .fullName(adminUsername)
                     .role(User.Role.ADMIN)
                     .build();
 
             userRepository.save(adminUser);
-            log.info("Admin user created - Username: Sachintha");
+            log.info("Admin user created - Username: {}", adminUsername);
         }
     }
 
