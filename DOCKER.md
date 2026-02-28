@@ -15,7 +15,7 @@ The application consists of three services:
 |---------|-------------|------|
 | **postgres** | PostgreSQL 15 database | 5432 |
 | **backend** | Spring Boot API (Java 17) | 8080 |
-| **frontend** | Angular app served via Nginx | 80 |
+| **frontend** | Angular app served via Nginx | 4200 |
 
 ## Quick Start
 
@@ -47,16 +47,27 @@ docker-compose logs -f postgres
 
 | URL | Description |
 |-----|-------------|
-| http://localhost | Frontend (Angular) |
-| http://localhost/api | API via Nginx proxy |
-| http://localhost:8080/api | Direct backend access |
+| http://localhost:4200 | Frontend (Angular) |
+| http://localhost:4200/api | API via Nginx proxy |
 
 ## Common Commands
 
-### Start Services
+### Start Services (no code changes)
 ```bash
 docker-compose up -d
 ```
+
+### Start Services After Code Changes
+```bash
+# Rebuild all services
+docker-compose up --build -d
+
+# Rebuild only the service you changed (faster)
+docker-compose up --build -d frontend    # Frontend code changed
+docker-compose up --build -d backend     # Backend code changed
+```
+
+> **Note:** Use `--build` only when you changed source code. Without it, Docker reuses existing images which is faster.
 
 ### Stop Services
 ```bash
@@ -66,12 +77,6 @@ docker-compose down
 ### Stop and Remove Volumes (Reset Database)
 ```bash
 docker-compose down -v
-```
-
-### Rebuild Specific Service
-```bash
-docker-compose up --build -d backend
-docker-compose up --build -d frontend
 ```
 
 ### View Running Containers

@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: travel_srilanka_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -30,15 +30,19 @@ services:
       # Database Configuration
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_srilanka_db
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       # JPA Configuration
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       # JWT Configuration
-      JWT_SECRET: ${JWT_SECRET:-dGhpc2lzYXZlcnlzZWN1cmVzZWNyZXRrZXlmb3J0cmF2ZWxzcmlsYW5rYW5vd2FwcGxpY2F0aW9uMjAyNA==}
+      JWT_SECRET: ${JWT_SECRET}
       # Cloudinary Configuration
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-dqsmid3tg}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-384683498784571}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-wGfR4-xbGHnLoY4ybUaVYs4RFII}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      # Admin User Configuration
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@travelsrilankanow.com}
     restart: unless-stopped
     depends_on:
       postgres:
