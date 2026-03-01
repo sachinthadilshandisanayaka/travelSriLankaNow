@@ -64,6 +64,12 @@ public class Event {
     @Column(nullable = false)
     private Boolean featured = false;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
+
+    @PrePersist
+    private void setDefaults() {
+        if (displayOrder == null) displayOrder = 0;
+        if (featured == null) featured = false;
+    }
 }

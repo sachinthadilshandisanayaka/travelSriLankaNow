@@ -36,7 +36,7 @@ public class MoreSectionItem {
 
     private String link;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
 
     @Column(nullable = false)
@@ -47,6 +47,8 @@ public class MoreSectionItem {
 
     @PrePersist
     protected void onCreate() {
+        if (displayOrder == null) displayOrder = 0;
+        if (active == null) active = true;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
