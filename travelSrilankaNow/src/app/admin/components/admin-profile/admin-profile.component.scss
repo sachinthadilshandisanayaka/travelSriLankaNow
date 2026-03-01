@@ -1,0 +1,73 @@
+@import '../../styles/admin-shared';
+
+.profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+}
+
+.profile-card {
+  @include admin-card;
+  padding: 1.5rem;
+  animation: slideUp 0.4s ease both;
+
+  &:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $admin-gray-200;
+
+    h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: $admin-gray-900;
+      margin: 0 0 0.125rem 0;
+    }
+
+    p {
+      font-size: 0.8125rem;
+      color: $admin-gray-500;
+      margin: 0;
+    }
+  }
+
+  &__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: $admin-radius-lg;
+    background: $admin-navy-dark-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: $admin-navy-dark;
+    }
+
+    &--security {
+      background: $admin-warning-light;
+
+      svg {
+        color: darken($admin-warning, 10%);
+      }
+    }
+  }
+
+  &__actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid $admin-gray-100;
+    display: flex;
+    justify-content: flex-end;
+  }
+}

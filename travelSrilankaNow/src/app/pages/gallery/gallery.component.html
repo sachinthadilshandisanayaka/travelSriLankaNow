@@ -26,34 +26,20 @@
     </div>
 
     <div class="filters-wrapper">
-      <!-- Category Filters -->
+      <!-- Category Filter -->
       <div class="filter-group">
         <label class="filter-label">Category</label>
-        <div class="category-filters">
-          <button
-            *ngFor="let category of categories"
-            [class.active]="selectedCategory === category.value"
-            (click)="filterByCategory(category.value)"
-            class="filter-btn"
-          >
-            {{ category.label }}
-          </button>
-        </div>
+        <select class="filter-select" [value]="selectedCategory" (change)="filterByCategory($event.target.value)">
+          <option *ngFor="let category of categories" [value]="category.value">{{ category.label }}</option>
+        </select>
       </div>
 
-      <!-- Media Type Filters -->
+      <!-- Media Type Filter -->
       <div class="filter-group">
         <label class="filter-label">Media Type</label>
-        <div class="category-filters">
-          <button
-            *ngFor="let type of mediaTypes"
-            [class.active]="selectedType === type.value"
-            (click)="filterByType(type.value)"
-            class="filter-btn"
-          >
-            {{ type.label }}
-          </button>
-        </div>
+        <select class="filter-select" [value]="selectedType" (change)="filterByType($event.target.value)">
+          <option *ngFor="let type of mediaTypes" [value]="type.value">{{ type.label }}</option>
+        </select>
       </div>
     </div>
 

@@ -1,18 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminApiService } from '../../services/admin-api.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-layout',
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.scss']
 })
-export class AdminLayoutComponent implements OnInit {
-  username: string | null = '';
+export class AdminLayoutComponent implements OnInit, OnDestroy {
+  displayName = '';
   isSidebarOpen = false;
   showLogoutConfirm = false;
+  private displayNameSub!: Subscription;
 
   stats = {
     locations: { total: 0 },
@@ -28,8 +29,16 @@ export class AdminLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.username = this.authService.getUsername();
+    this.displayNameSub = this.authService.displayName$.subscribe(name => {
+      this.displayName = name;
+    });
     this.loadStats();
+  }
+
+  ngOnDestroy(): void {
+    if (this.displayNameSub) {
+      this.displayNameSub.unsubscribe();
+    }
   }
 
   private loadStats(): void {

@@ -37,7 +37,8 @@ public class DataInitializer implements CommandLineRunner {
                     .username(adminUsername)
                     .password(passwordEncoder.encode(adminPassword))
                     .email(adminEmail)
-                    .fullName(adminUsername)
+                    .firstName("Admin")
+                    .lastName("User")
                     .role(User.Role.ADMIN)
                     .build();
 

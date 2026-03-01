@@ -17,6 +17,7 @@ import { PageHeaderBackgroundsComponent } from './components/page-header-backgro
 import { AdminSocialMediaComponent } from './components/admin-social-media/admin-social-media.component';
 import { AdminHomepageSectionsComponent } from './components/admin-homepage-sections/admin-homepage-sections.component';
 import { AdminMoreSectionsComponent } from './components/admin-more-sections/admin-more-sections.component';
+import { AdminProfileComponent } from './components/admin-profile/admin-profile.component';
 
 const routes: Routes = [
   {
@@ -40,6 +41,7 @@ const routes: Routes = [
       { path: 'social-media', component: AdminSocialMediaComponent },
       { path: 'homepage-sections', component: AdminHomepageSectionsComponent },
       { path: 'more-sections', component: AdminMoreSectionsComponent },
+      { path: 'profile', component: AdminProfileComponent },
       { path: 'order/:type', component: AdminItemOrderComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

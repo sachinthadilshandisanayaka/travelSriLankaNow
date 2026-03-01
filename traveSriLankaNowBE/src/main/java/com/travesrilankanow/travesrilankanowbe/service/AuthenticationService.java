@@ -49,6 +49,7 @@ public class AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .username(user.getUsername())
+                .firstName(user.getFirstName())
                 .role(user.getRole().name())
                 .build();
     }
@@ -68,6 +69,7 @@ public class AuthenticationService {
                         .accessToken(newAccessToken)
                         .refreshToken(refreshToken)
                         .username(user.getUsername())
+                        .firstName(user.getFirstName())
                         .role(user.getRole().name())
                         .build();
             }
@@ -81,7 +83,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    public User createAdminUser(String username, String password, String email, String fullName) {
+    public User createAdminUser(String username, String password, String email, String firstName, String lastName) {
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already exists");
         }
@@ -90,7 +92,8 @@ public class AuthenticationService {
                 .username(username)
                 .password(passwordEncoder.encode(password))
                 .email(email)
-                .fullName(fullName)
+                .firstName(firstName)
+                .lastName(lastName)
                 .role(User.Role.ADMIN)
                 .build();
 

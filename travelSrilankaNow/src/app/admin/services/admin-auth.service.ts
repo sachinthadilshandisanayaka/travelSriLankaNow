@@ -10,6 +10,7 @@ export interface AuthResponse {
   access_token?: string;
   refresh_token?: string;
   username?: string;
+  first_name?: string;
   role?: string;
 }
 
@@ -21,9 +22,13 @@ export class AdminAuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
+  private displayNameSubject = new BehaviorSubject<string>(this.getFirstName() || this.getUsername() || '');
+  public displayName$ = this.displayNameSubject.asObservable();
+
   private readonly ACCESS_TOKEN_KEY = 'adminAccessToken';
   private readonly REFRESH_TOKEN_KEY = 'adminRefreshToken';
   private readonly USER_KEY = 'adminUser';
+  private readonly FIRST_NAME_KEY = 'adminFirstName';
   private readonly ROLE_KEY = 'adminRole';
 
   constructor(private http: HttpClient) {}
@@ -71,19 +76,25 @@ export class AdminAuthService {
     if (response.username) {
       localStorage.setItem(this.USER_KEY, response.username);
     }
+    if (response.first_name) {
+      localStorage.setItem(this.FIRST_NAME_KEY, response.first_name);
+    }
     if (response.role) {
       localStorage.setItem(this.ROLE_KEY, response.role);
     }
+    this.displayNameSubject.next(this.getFirstName() || this.getUsername() || '');
   }
 
   clearAuth(): void {
     localStorage.removeItem(this.ACCESS_TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.FIRST_NAME_KEY);
     localStorage.removeItem(this.ROLE_KEY);
     // Also remove legacy token key if exists
     localStorage.removeItem('adminToken');
     this.isAuthenticatedSubject.next(false);
+    this.displayNameSubject.next('');
   }
 
   getAccessToken(): string | null {
@@ -103,6 +114,10 @@ export class AdminAuthService {
     return localStorage.getItem(this.USER_KEY);
   }
 
+  getFirstName(): string | null {
+    return localStorage.getItem(this.FIRST_NAME_KEY);
+  }
+
   getRole(): string | null {
     return localStorage.getItem(this.ROLE_KEY);
   }
@@ -117,5 +132,11 @@ export class AdminAuthService {
 
   isAdmin(): boolean {
     return this.getRole() === 'ADMIN';
+  }
+
+  updateStoredProfile(firstName: string, username: string): void {
+    localStorage.setItem(this.FIRST_NAME_KEY, firstName);
+    localStorage.setItem(this.USER_KEY, username);
+    this.displayNameSubject.next(firstName || username);
   }
 }

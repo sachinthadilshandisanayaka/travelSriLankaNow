@@ -1,0 +1,147 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Profile Settings</h1>
+        <p>Manage your account information and security settings</p>
+      </div>
+    </header>
+
+    <!-- Loading -->
+    <div *ngIf="isLoadingProfile" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <div *ngIf="!isLoadingProfile" class="profile-sections">
+      <!-- Profile Information Card -->
+      <div class="profile-card">
+        <div class="profile-card__header">
+          <div class="profile-card__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2>Profile Information</h2>
+            <p>Update your personal details</p>
+          </div>
+        </div>
+
+        <!-- Profile Success -->
+        <div *ngIf="profileSuccess" class="admin-toast admin-toast--success">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          {{ profileSuccess }}
+        </div>
+
+        <!-- Profile Error -->
+        <div *ngIf="profileError" class="admin-toast admin-toast--error">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          {{ profileError }}
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <div class="admin-form__grid">
+            <div class="admin-form__group">
+              <label class="admin-form__label">First Name</label>
+              <input class="admin-input" type="text" formControlName="first_name" placeholder="Enter first name">
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Last Name</label>
+              <input class="admin-input" type="text" formControlName="last_name" placeholder="Enter last name">
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Login Username</label>
+              <input class="admin-input" type="text" formControlName="username" placeholder="Enter username">
+              <span class="admin-form__hint">This is used to log in to the admin panel</span>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Email</label>
+              <input class="admin-input" type="email" formControlName="email" placeholder="Enter email (optional)">
+            </div>
+          </div>
+          <div class="profile-card__actions">
+            <button type="submit" class="admin-btn admin-btn--primary" [disabled]="profileForm.invalid || isSavingProfile">
+              <svg *ngIf="!isSavingProfile" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <svg *ngIf="isSavingProfile" class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="width:1.25rem;height:1.25rem;margin-right:0.5rem;">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>{{ isSavingProfile ? 'Saving...' : 'Save Changes' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="profile-card">
+        <div class="profile-card__header">
+          <div class="profile-card__icon profile-card__icon--security">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2>Change Password</h2>
+            <p>Update your account password</p>
+          </div>
+        </div>
+
+        <!-- Password Success -->
+        <div *ngIf="passwordSuccess" class="admin-toast admin-toast--success">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          {{ passwordSuccess }}
+        </div>
+
+        <!-- Password Error -->
+        <div *ngIf="passwordError" class="admin-toast admin-toast--error">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          {{ passwordError }}
+        </div>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="savePassword()">
+          <div class="admin-form__grid">
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Current Password</label>
+              <input class="admin-input" type="password" formControlName="current_password" placeholder="Enter current password">
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">New Password</label>
+              <input class="admin-input" type="password" formControlName="new_password" placeholder="Enter new password">
+              <span class="admin-form__hint">Minimum 6 characters</span>
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Confirm New Password</label>
+              <input class="admin-input" type="password" formControlName="confirm_password" placeholder="Confirm new password">
+            </div>
+          </div>
+          <div class="profile-card__actions">
+            <button type="submit" class="admin-btn admin-btn--primary" [disabled]="passwordForm.invalid || isSavingPassword">
+              <svg *ngIf="!isSavingPassword" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <svg *ngIf="isSavingPassword" class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="width:1.25rem;height:1.25rem;margin-right:0.5rem;">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>{{ isSavingPassword ? 'Changing...' : 'Change Password' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -414,7 +414,12 @@
   align-items: center;
   justify-content: center;
   z-index: 2;
-  padding: calc(#{$spacing-4xl} + 80px) $spacing-xl $spacing-3xl; // Extra top padding for fixed navbar
+  // Horizontal padding accounts for nav arrows (48px) + arrow offset + gap
+  padding: calc(#{$spacing-4xl} + 80px) calc(#{$spacing-xl} + 60px) $spacing-3xl;
+
+  @include respond-to('lg') {
+    padding: calc(#{$spacing-4xl} + 80px) calc(#{$spacing-3xl} + 64px) $spacing-3xl;
+  }
 }
 
 .slide-content-inner {
