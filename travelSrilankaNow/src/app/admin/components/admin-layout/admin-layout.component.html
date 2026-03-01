@@ -156,15 +156,15 @@
 
     <!-- User Profile & Logout -->
     <div class="sidebar__footer">
-      <div class="user-profile">
+      <a routerLink="/admin/profile" class="user-profile" (click)="closeSidebar()">
         <div class="user-profile__avatar">
-          {{ username?.charAt(0)?.toUpperCase() }}
+          {{ displayName?.charAt(0)?.toUpperCase() }}
         </div>
         <div class="user-profile__info">
-          <span class="user-profile__name">{{ username }}</span>
+          <span class="user-profile__name">{{ displayName }}</span>
           <span class="user-profile__role">Administrator</span>
         </div>
-      </div>
+      </a>
       <button class="logout-btn" (click)="openLogoutConfirm()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
@@ -185,7 +185,7 @@
           </svg>
         </button>
         <div class="header__title">
-          <p>Welcome, <strong>{{ username }}</strong></p>
+          <p>Welcome, <strong>{{ displayName }}</strong></p>
         </div>
       </div>
       <div class="header__right">

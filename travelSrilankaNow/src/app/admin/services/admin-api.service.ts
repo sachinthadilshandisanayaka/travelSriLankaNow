@@ -343,6 +343,19 @@ export class AdminApiService {
     return this.http.patch(`${this.apiUrl}/more-sections/${id}/toggle-active`, {});
   }
 
+  // Profile
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/profile`);
+  }
+
+  updateProfile(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile`, data);
+  }
+
+  changePassword(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile/password`, data);
+  }
+
   // More Section Items
   getMoreSectionItems(sectionId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/more-sections/${sectionId}/items`);

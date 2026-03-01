@@ -23,16 +23,12 @@
         <span class="search-icon">🔍</span>
       </div>
 
-      <!-- Category Filters -->
-      <div class="category-filters">
-        <button
-          *ngFor="let category of categories"
-          [class.active]="selectedCategory === category.value"
-          (click)="filterByCategory(category.value)"
-          class="filter-btn"
-        >
-          {{ category.label }}
-        </button>
+      <!-- Category Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <select class="filter-select" [value]="selectedCategory" (change)="filterByCategory($event.target.value)">
+          <option *ngFor="let category of categories" [value]="category.value">{{ category.label }}</option>
+        </select>
       </div>
     </div>
 

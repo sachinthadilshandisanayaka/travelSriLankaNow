@@ -180,6 +180,13 @@ $transition: 0.2s ease;
   background: $gray-50;
   border-radius: 10px;
   margin-bottom: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background $transition;
+
+  &:hover {
+    background: $gray-200;
+  }
 
   &__avatar {
     width: 40px;

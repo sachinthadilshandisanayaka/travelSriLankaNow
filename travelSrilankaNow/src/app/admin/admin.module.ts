@@ -19,6 +19,7 @@ import { AdminSocialMediaComponent } from './components/admin-social-media/admin
 import { AdminHomepageSectionsComponent } from './components/admin-homepage-sections/admin-homepage-sections.component';
 import { AdminLayoutComponent } from './components/admin-layout/admin-layout.component';
 import { AdminMoreSectionsComponent } from './components/admin-more-sections/admin-more-sections.component';
+import { AdminProfileComponent } from './components/admin-profile/admin-profile.component';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -46,6 +47,7 @@ import { MediaService } from './services/media.service';
     AdminHomepageSectionsComponent,
     AdminLayoutComponent,
     AdminMoreSectionsComponent,
+    AdminProfileComponent,
     // New Advanced Upload Components
     AdvancedImageUploadComponent,
     ImageEditorComponent

@@ -10,21 +10,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
-
-    private boolean success;
-    private String message;
-
-    @JsonProperty("access_token")
-    private String accessToken;
-
-    @JsonProperty("refresh_token")
-    private String refreshToken;
+public class ProfileResponse {
 
     private String username;
+    private String email;
 
     @JsonProperty("first_name")
     private String firstName;
+
+    @JsonProperty("last_name")
+    private String lastName;
 
     private String role;
 }
