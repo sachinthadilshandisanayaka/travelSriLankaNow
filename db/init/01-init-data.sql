@@ -4,6 +4,47 @@
 -- PostgreSQL skips it if the database volume already has data.
 -- ============================================================
 
+-- Create tables (Hibernate will manage them later, but we need them for initial data)
+CREATE TABLE IF NOT EXISTS master_data (
+    id BIGSERIAL PRIMARY KEY,
+    type VARCHAR(255) NOT NULL,
+    code VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    sort_order INTEGER NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    color VARCHAR(255),
+    icon VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP,
+    UNIQUE (type, code)
+);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+    id BIGSERIAL PRIMARY KEY,
+    category VARCHAR(255) NOT NULL,
+    setting_key VARCHAR(255) NOT NULL UNIQUE,
+    label VARCHAR(255) NOT NULL,
+    value TEXT,
+    icon VARCHAR(255),
+    sort_order INTEGER,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS homepage_sections (
+    id BIGSERIAL PRIMARY KEY,
+    section_type VARCHAR(255) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    subtitle VARCHAR(255),
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    config TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 -- Master Data: Event Categories
 INSERT INTO master_data (type, code, display_name, sort_order, is_active, color, created_at, updated_at) VALUES
 ('EVENT_CATEGORY', 'cultural', 'Cultural', 1, true, '#8B5CF6', NOW(), NOW()),
