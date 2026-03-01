@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { LocationService } from '../../services/location.service';
 import { EventService } from '../../services/event.service';
 import { PlaceService } from '../../services/place.service';
@@ -37,21 +38,48 @@ export class LandingComponent implements OnInit, OnDestroy {
   sectionsLoaded = false;
   useFallbackLayout = false;
 
+  // Loading overlay
+  showLoadingOverlay = true;
+  loadingFadeOut = false;
+  private minDisplayTimeMet = false;
+  private dataReady = false;
+  private readonly MIN_DISPLAY_TIME = 2500;
+
   constructor(
     private locationService: LocationService,
     private eventService: EventService,
     private placeService: PlaceService,
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
-    private socialMediaContentService: SocialMediaContentService
+    private socialMediaContentService: SocialMediaContentService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
+    this.renderer.addClass(this.document.body, 'loading-active');
+
+    setTimeout(() => {
+      this.minDisplayTimeMet = true;
+      this.checkDismissOverlay();
+    }, this.MIN_DISPLAY_TIME);
+
     this.loadHomepageSections();
   }
 
   ngOnDestroy(): void {
     this.stopSlideTimer();
+    this.renderer.removeClass(this.document.body, 'loading-active');
+  }
+
+  private checkDismissOverlay(): void {
+    if (this.minDisplayTimeMet && this.dataReady) {
+      this.loadingFadeOut = true;
+      setTimeout(() => {
+        this.showLoadingOverlay = false;
+        this.renderer.removeClass(this.document.body, 'loading-active');
+      }, 600);
+    }
   }
 
   private loadHomepageSections(): void {
@@ -59,6 +87,8 @@ export class LandingComponent implements OnInit, OnDestroy {
       next: (sections) => {
         this.homepageSections = sections;
         this.sectionsLoaded = true;
+        this.dataReady = true;
+        this.checkDismissOverlay();
 
         // Parse configs
         sections.forEach(section => {
@@ -78,6 +108,8 @@ export class LandingComponent implements OnInit, OnDestroy {
         // Fallback: load all data with defaults
         this.useFallbackLayout = true;
         this.sectionsLoaded = true;
+        this.dataReady = true;
+        this.checkDismissOverlay();
         this.loadHeroSlides();
         this.loadFallbackData();
       }

@@ -96,6 +96,7 @@
       <div
         *ngFor="let item of galleryItems; let i = index"
         class="gallery-item reveal stagger-{{i % 6 + 1}}"
+        (click)="openLightbox(item)"
       >
         <div class="gallery-image-wrapper">
           <img [src]="(item.thumbnailUrl || item.url) | cloudinaryOptimize:400:400:80" [alt]="item.title" />
@@ -179,3 +180,108 @@
     </div>
   </div>
 </section>
+
+<!-- Lightbox Modal -->
+<div *ngIf="selectedItem" class="lightbox" (click)="closeLightbox()">
+  <div class="lightbox__backdrop"></div>
+
+  <!-- Close button -->
+  <button class="lightbox__close" (click)="closeLightbox()" title="Close (Esc)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+
+  <!-- Navigation arrows -->
+  <button
+    *ngIf="currentItemIndex > 0"
+    class="lightbox__nav lightbox__nav--prev"
+    (click)="$event.stopPropagation(); navigateLightbox(-1)"
+    title="Previous (←)"
+  >
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
+
+  <button
+    *ngIf="currentItemIndex < galleryItems.length - 1"
+    class="lightbox__nav lightbox__nav--next"
+    (click)="$event.stopPropagation(); navigateLightbox(1)"
+    title="Next (→)"
+  >
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
+
+  <!-- Content -->
+  <div class="lightbox__content" (click)="$event.stopPropagation()">
+    <!-- Image -->
+    <div class="lightbox__media">
+      <!-- Loading spinner -->
+      <div *ngIf="!lightboxImageLoaded" class="lightbox__loader">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <img
+        *ngIf="selectedItem.type === 'image'"
+        [src]="selectedItem.url | cloudinaryOptimize:1200:0:90"
+        [alt]="selectedItem.title"
+        [class.loaded]="lightboxImageLoaded"
+        (load)="onLightboxImageLoad()"
+      />
+
+      <video
+        *ngIf="selectedItem.type === 'video'"
+        [src]="selectedItem.url"
+        controls
+        autoplay
+        class="loaded"
+      ></video>
+    </div>
+
+    <!-- Details panel -->
+    <div class="lightbox__details">
+      <h2 class="lightbox__title">{{ selectedItem.title }}</h2>
+
+      <p *ngIf="selectedItem.description" class="lightbox__description">
+        {{ selectedItem.description }}
+      </p>
+
+      <div class="lightbox__meta">
+        <div *ngIf="selectedItem.category" class="lightbox__meta-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+          </svg>
+          <span class="lightbox__category-tag">{{ selectedItem.category }}</span>
+        </div>
+
+        <div *ngIf="selectedItem.location" class="lightbox__meta-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span>{{ selectedItem.location }}</span>
+        </div>
+
+        <div *ngIf="selectedItem.photographer" class="lightbox__meta-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span>{{ selectedItem.photographer }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="selectedItem.tags && selectedItem.tags.length > 0" class="lightbox__tags">
+        <span *ngFor="let tag of selectedItem.tags" class="lightbox__tag">#{{ tag }}</span>
+      </div>
+
+      <!-- Counter -->
+      <div class="lightbox__counter">
+        {{ currentItemIndex + 1 }} / {{ galleryItems.length }}
+      </div>
+    </div>
+  </div>
+</div>

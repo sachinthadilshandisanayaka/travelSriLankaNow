@@ -55,7 +55,8 @@ export class AdminPlacesComponent implements OnInit {
       amenities: [''],
       lat: [null, [Validators.min(-90), Validators.max(90)]],
       lng: [null, [Validators.min(-180), Validators.max(180)]],
-      featured: [false]
+      featured: [false],
+      orderNumber: [0, [Validators.min(0)]]
     });
   }
 
@@ -117,7 +118,8 @@ export class AdminPlacesComponent implements OnInit {
       region: this.regions.length > 0 ? this.regions[0].code : '',
       priceRange: this.priceRanges.length > 1 ? this.priceRanges[1].code : '',
       rating: 0,
-      featured: false
+      featured: false,
+      orderNumber: 0
     });
     this.showModal = true;
   }

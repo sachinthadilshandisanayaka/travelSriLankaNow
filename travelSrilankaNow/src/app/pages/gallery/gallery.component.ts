@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { GalleryService, PageResponse } from '../../services/gallery.service';
@@ -17,6 +17,10 @@ export class GalleryComponent implements OnInit, AfterViewInit, OnDestroy {
   searchTerm: string = '';
   isLoading: boolean = true;
   errorMessage: string = '';
+
+  // Lightbox
+  selectedItem: GalleryItem | null = null;
+  lightboxImageLoaded: boolean = false;
 
   // Pagination properties
   currentPage: number = 0;
@@ -171,6 +175,49 @@ export class GalleryComponent implements OnInit, AfterViewInit, OnDestroy {
       pages.push(i);
     }
     return pages;
+  }
+
+  openLightbox(item: GalleryItem): void {
+    this.selectedItem = item;
+    this.lightboxImageLoaded = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(): void {
+    this.selectedItem = null;
+    this.lightboxImageLoaded = false;
+    document.body.style.overflow = '';
+  }
+
+  onLightboxImageLoad(): void {
+    this.lightboxImageLoaded = true;
+  }
+
+  navigateLightbox(direction: number): void {
+    if (!this.selectedItem) return;
+    const currentIndex = this.galleryItems.findIndex(item => item.id === this.selectedItem!.id);
+    const newIndex = currentIndex + direction;
+    if (newIndex >= 0 && newIndex < this.galleryItems.length) {
+      this.lightboxImageLoaded = false;
+      this.selectedItem = this.galleryItems[newIndex];
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent): void {
+    if (!this.selectedItem) return;
+    if (event.key === 'Escape') {
+      this.closeLightbox();
+    } else if (event.key === 'ArrowLeft') {
+      this.navigateLightbox(-1);
+    } else if (event.key === 'ArrowRight') {
+      this.navigateLightbox(1);
+    }
+  }
+
+  get currentItemIndex(): number {
+    if (!this.selectedItem) return -1;
+    return this.galleryItems.findIndex(item => item.id === this.selectedItem!.id);
   }
 
   private setupScrollAnimations(): void {

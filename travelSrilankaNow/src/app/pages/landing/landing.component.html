@@ -1,3 +1,33 @@
+<!-- ========== LOADING OVERLAY ========== -->
+<div *ngIf="showLoadingOverlay"
+     class="loading-overlay"
+     [class.loading-overlay--fade-out]="loadingFadeOut">
+
+  <!-- Traveling Lines Animation -->
+  <div class="traveling-lines">
+    <div class="traveling-line traveling-line--1"></div>
+    <div class="traveling-line traveling-line--2"></div>
+    <div class="traveling-line traveling-line--3"></div>
+    <div class="traveling-line traveling-line--4"></div>
+    <div class="traveling-line traveling-line--5"></div>
+  </div>
+
+  <!-- Site Name -->
+  <div class="loading-brand">
+    <h1 class="loading-brand__title">
+      Travel<span>SriLankaNow</span>
+    </h1>
+    <p class="loading-brand__tagline">Discover the Wonder of Sri Lanka</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="loading-progress">
+    <div class="loading-progress__track">
+      <div class="loading-progress__bar"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Dynamic Sections Rendering -->
 <ng-container *ngFor="let section of homepageSections">
 

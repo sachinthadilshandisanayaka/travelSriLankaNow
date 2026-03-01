@@ -48,7 +48,8 @@ export class AdminEventsComponent implements OnInit {
       included: [''],
       requirements: [''],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
-      featured: [false]
+      featured: [false],
+      orderNumber: [0, [Validators.min(0)]]
     });
   }
 
@@ -96,7 +97,8 @@ export class AdminEventsComponent implements OnInit {
       maxParticipants: 0,
       availableSpots: 0,
       rating: 0,
-      featured: false
+      featured: false,
+      orderNumber: 0
     });
     this.showModal = true;
   }

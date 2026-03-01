@@ -85,7 +85,7 @@
 
   .logo-text {
     font-family: $font-primary;
-    font-size: $font-size-xl;
+    font-size: $font-size-base;
     font-weight: $font-weight-bold;
     color: $white;
     margin: 0;
@@ -98,6 +98,10 @@
       color: $primary-navy-dark;
       font-weight: $font-weight-semibold;
       text-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
+    }
+
+    @include respond-to('sm') {
+      font-size: $font-size-xl;
     }
 
     @include respond-to('lg') {
@@ -298,8 +302,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -388,18 +392,23 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 120px $spacing-xl $spacing-3xl;
+    padding: 100px $spacing-lg $spacing-2xl;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     box-shadow: -20px 0 60px rgba($primary-navy-dark, 0.15);
+
+    @include respond-to('sm') {
+      padding: 120px $spacing-xl $spacing-3xl;
+    }
 
     &.active {
       right: 0;
     }
 
     .nav-link {
-      padding: $spacing-lg $spacing-xl;
-      font-size: $font-size-lg;
+      padding: $spacing-md $spacing-lg;
+      font-size: $font-size-base;
       color: $warm-gray;
       text-shadow: none;
       border-radius: $radius-lg;
@@ -407,6 +416,14 @@
       border: 1px solid transparent;
       transition: all 0.3s ease;
       overflow: visible;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+
+      @include respond-to('sm') {
+        padding: $spacing-lg $spacing-xl;
+        font-size: $font-size-lg;
+      }
 
       // Hide all border segments and shine on mobile
       .nav-link__border,
