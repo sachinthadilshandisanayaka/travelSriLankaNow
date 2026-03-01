@@ -30,7 +30,7 @@ public class HeroSlide {
 
     private String buttonLink;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
 
     @Column(nullable = false)
@@ -45,6 +45,9 @@ public class HeroSlide {
 
     @PrePersist
     protected void onCreate() {
+        if (displayOrder == null) displayOrder = 0;
+        if (active == null) active = true;
+        if (displayDuration == null) displayDuration = 5000;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

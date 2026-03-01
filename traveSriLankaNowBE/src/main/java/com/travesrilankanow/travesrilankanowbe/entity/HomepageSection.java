@@ -31,7 +31,7 @@ public class HomepageSection {
 
     private String subtitle;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     @Builder.Default
     private Integer displayOrder = 0;
 
@@ -49,6 +49,14 @@ public class HomepageSection {
     @Column(nullable = false)
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @PrePersist
+    protected void onCreate() {
+        if (displayOrder == null) displayOrder = 0;
+        if (isActive == null) isActive = true;
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = LocalDateTime.now();
+    }
 
     @PreUpdate
     protected void onUpdate() {

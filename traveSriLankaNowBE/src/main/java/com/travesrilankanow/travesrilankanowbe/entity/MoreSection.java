@@ -31,7 +31,7 @@ public class MoreSection {
 
     private String imageUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
 
     @Column(nullable = false)
@@ -46,6 +46,8 @@ public class MoreSection {
 
     @PrePersist
     protected void onCreate() {
+        if (displayOrder == null) displayOrder = 0;
+        if (active == null) active = true;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

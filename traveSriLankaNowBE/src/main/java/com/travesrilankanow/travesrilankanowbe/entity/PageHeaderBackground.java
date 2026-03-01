@@ -36,7 +36,7 @@ public class PageHeaderBackground {
     @Column(nullable = false)
     private Boolean isActive = false;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
 
     private LocalDateTime createdAt;
@@ -45,6 +45,10 @@ public class PageHeaderBackground {
 
     @PrePersist
     protected void onCreate() {
+        if (displayOrder == null) displayOrder = 0;
+        if (isActive == null) isActive = false;
+        if (overlayColor == null) overlayColor = "rgba(28, 77, 141, 0.7)";
+        if (overlayOpacity == null) overlayOpacity = 0.7;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
