@@ -232,6 +232,7 @@
   transform: translateY(20px);
   display: flex;
   flex-direction: column;
+  height: 520px;
 
   &.revealed {
     opacity: 1;
@@ -294,14 +295,22 @@
     color: $text-dark;
     font-weight: $font-weight-semibold;
     letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  p {
+  .place-description {
     color: $warm-gray;
     line-height: $line-height-relaxed;
     margin-bottom: $spacing-md;
     font-size: $font-size-base;
     flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -312,6 +321,9 @@
   color: $warm-gray;
   font-size: $font-size-sm;
   margin-bottom: $spacing-lg;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .place-meta {
