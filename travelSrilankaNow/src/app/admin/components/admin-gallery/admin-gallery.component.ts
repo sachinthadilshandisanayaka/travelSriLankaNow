@@ -45,7 +45,8 @@ export class AdminGalleryComponent implements OnInit {
       location: [''],
       photographer: [''],
       tags: [''],
-      featured: [false]
+      featured: [false],
+      orderNumber: [0, [Validators.min(0)]]
     });
   }
 
@@ -96,7 +97,8 @@ export class AdminGalleryComponent implements OnInit {
     this.galleryForm.reset({
       type: this.types.length > 0 ? this.types[0].code : '',
       category: this.categories.length > 0 ? this.categories[0].code : '',
-      featured: false
+      featured: false,
+      orderNumber: 0
     });
     this.showModal = true;
   }
