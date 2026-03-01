@@ -31,7 +31,10 @@
       </div>
 
       <!-- Lottie/SVG Animation Container (only when no background image) -->
-      <div class="header-animation" *ngIf="showAnimation && !backgroundImage && !isLoadingBackground" #lottieContainer>
+      <div class="header-animation"
+           *ngIf="showAnimation && !backgroundImage"
+           [class.animation-ready]="!isLoadingBackground"
+           #lottieContainer>
         <!-- Animation will be inserted here -->
       </div>
     </div>

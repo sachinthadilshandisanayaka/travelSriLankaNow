@@ -43,18 +43,22 @@
     <!-- Gallery Content -->
     <div *ngIf="!isLoading">
       <!-- Empty State -->
-      <div *ngIf="galleryItems.length === 0" class="gallery-empty">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        <h3>No gallery items found</h3>
-        <p>Get started by adding your first image or video</p>
-        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>
-          Add First Item
-        </button>
+      <div *ngIf="galleryItems.length === 0" class="admin-table">
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <div class="admin-table__empty">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <h3>No gallery items found</h3>
+                  <p>Get started by adding your first image or video</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Gallery Grid -->
@@ -252,8 +256,15 @@
             <p class="admin-form__hint">Separate tags with commas for better organization</p>
           </div>
 
+          <!-- Order Number -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Order Number</label>
+            <input type="number" formControlName="orderNumber" class="admin-input" min="0" placeholder="0">
+            <p class="admin-form__hint">Lower numbers appear first</p>
+          </div>
+
           <!-- Featured -->
-          <div class="admin-form__group admin-form__group--full">
+          <div class="admin-form__group">
             <label class="admin-checkbox">
               <input type="checkbox" formControlName="featured">
               <span>Feature this item on the homepage</span>

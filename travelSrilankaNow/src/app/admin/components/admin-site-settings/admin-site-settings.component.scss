@@ -74,11 +74,41 @@
   table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 
     th, td {
       padding: 0.875rem 1rem;
       text-align: left;
       border-bottom: 1px solid #e2e8f0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    // Fixed column widths for consistent alignment across all sections
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 22%;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 20%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 33%;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 12%;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+      width: 13%;
     }
 
     th {
@@ -138,10 +168,8 @@
 }
 
 .setting-value {
-  max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 code {
