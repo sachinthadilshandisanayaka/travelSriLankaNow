@@ -44,6 +44,7 @@ export class AdminLocationsComponent implements OnInit {
       region: ['', Validators.required],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
       featured: [false],
+      orderNumber: [0, [Validators.min(0)]],
       bestTimeToVisit: [''],
       activities: [''],
       highlights: ['']
@@ -98,7 +99,8 @@ export class AdminLocationsComponent implements OnInit {
       category: this.categories.length > 0 ? this.categories[0].code : '',
       region: this.regions.length > 0 ? this.regions[0].code : '',
       rating: 0,
-      featured: false
+      featured: false,
+      orderNumber: 0
     });
     this.showModal = true;
   }

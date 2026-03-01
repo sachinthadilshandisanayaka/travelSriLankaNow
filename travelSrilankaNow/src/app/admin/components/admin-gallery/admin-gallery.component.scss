@@ -3,33 +3,6 @@
 
 // Gallery-specific styles
 
-// Empty State
-.gallery-empty {
-  @include admin-card;
-  padding: 4rem 2rem;
-  text-align: center;
-
-  svg {
-    width: 5rem;
-    height: 5rem;
-    color: $admin-gray-300;
-    margin: 0 auto 1.5rem;
-  }
-
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: $admin-gray-700;
-    margin: 0 0 0.5rem 0;
-  }
-
-  p {
-    font-size: 0.9375rem;
-    color: $admin-gray-500;
-    margin: 0 0 1.5rem 0;
-  }
-}
-
 // Gallery Grid
 .gallery-grid {
   display: grid;
