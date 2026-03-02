@@ -30,6 +30,11 @@ public class Event {
 
     private String imageUrl;
 
+    @ElementCollection
+    @CollectionTable(name = "event_images", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "image_url")
+    private List<String> images = new ArrayList<>();
+
     @Column(nullable = false)
     private String category;
 

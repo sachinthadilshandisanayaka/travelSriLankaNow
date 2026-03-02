@@ -24,6 +24,7 @@ import { AdminProfileComponent } from './components/admin-profile/admin-profile.
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
 import { ImageEditorComponent } from './components/image-editor/image-editor.component';
+import { EntityImageManagerComponent } from './components/entity-image-manager/entity-image-manager.component';
 
 // Services
 import { MediaService } from './services/media.service';
@@ -50,7 +51,8 @@ import { MediaService } from './services/media.service';
     AdminProfileComponent,
     // New Advanced Upload Components
     AdvancedImageUploadComponent,
-    ImageEditorComponent
+    ImageEditorComponent,
+    EntityImageManagerComponent
   ],
   imports: [
     CommonModule,

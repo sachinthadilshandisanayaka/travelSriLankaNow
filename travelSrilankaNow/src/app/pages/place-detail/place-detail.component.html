@@ -78,18 +78,23 @@
           <section class="detail-section" *ngIf="place.images && place.images.length > 0">
             <h2>Photo Gallery</h2>
             <div class="gallery-section">
-              <div class="gallery-main">
-                <img [src]="place.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="place.name" />
+              <div class="gallery-main" (click)="openLightbox(selectedImageIndex)" style="cursor: pointer;">
+                <img [src]="place.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="place.name" loading="lazy" />
               </div>
               <div class="gallery-thumbnails">
                 <div *ngFor="let image of place.images; let i = index"
                      class="thumbnail"
                      [class.active]="i === selectedImageIndex"
                      (click)="selectImage(i)">
-                  <img [src]="image | cloudinaryThumbnail:100" [alt]="place.name + ' - ' + (i + 1)" />
+                  <img [src]="image | cloudinaryThumbnail:100" [alt]="place.name + ' - ' + (i + 1)" loading="lazy" />
                 </div>
               </div>
             </div>
+            <app-image-lightbox
+              #lightbox
+              [images]="place.images"
+              [entityName]="place.name">
+            </app-image-lightbox>
           </section>
         </div>
 

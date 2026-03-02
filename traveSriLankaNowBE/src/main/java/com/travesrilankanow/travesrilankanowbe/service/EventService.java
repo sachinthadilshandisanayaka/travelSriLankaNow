@@ -111,6 +111,9 @@ public class EventService {
         if (event.getDisplayOrder() != null) {
             existing.setDisplayOrder(event.getDisplayOrder());
         }
+        if (event.getImages() != null) {
+            existing.setImages(event.getImages());
+        }
 
         return eventRepository.save(existing);
     }

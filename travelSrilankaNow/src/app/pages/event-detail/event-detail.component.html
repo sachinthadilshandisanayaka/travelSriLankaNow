@@ -75,6 +75,29 @@
             </ul>
           </section>
 
+          <!-- Photo Gallery -->
+          <section class="detail-section" *ngIf="event.images && event.images.length > 0">
+            <h2>Photo Gallery</h2>
+            <div class="gallery-section">
+              <div class="gallery-main" (click)="openLightbox(selectedImageIndex)" style="cursor: pointer;">
+                <img [src]="event.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="event.title" loading="lazy" />
+              </div>
+              <div class="gallery-thumbnails">
+                <div *ngFor="let image of event.images; let i = index"
+                     class="thumbnail"
+                     [class.active]="i === selectedImageIndex"
+                     (click)="selectImage(i)">
+                  <img [src]="image | cloudinaryThumbnail:100" [alt]="event.title + ' - ' + (i + 1)" loading="lazy" />
+                </div>
+              </div>
+            </div>
+            <app-image-lightbox
+              #lightbox
+              [images]="event.images"
+              [entityName]="event.title">
+            </app-image-lightbox>
+          </section>
+
           <!-- Event Dates Section -->
           <section class="detail-section" *ngIf="event.dates && event.dates.length > 0">
             <h2>Available Dates</h2>

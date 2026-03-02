@@ -27,6 +27,7 @@ export class AdminEventsComponent implements OnInit {
   errorMessage = '';
 
   categories: MasterData[] = [];
+  galleryImages: string[] = [];
 
   constructor(
     private apiService: AdminApiService,
@@ -100,6 +101,7 @@ export class AdminEventsComponent implements OnInit {
       featured: false,
       orderNumber: 0
     });
+    this.galleryImages = [];
     this.showModal = true;
   }
 
@@ -110,6 +112,7 @@ export class AdminEventsComponent implements OnInit {
       included: event.included ? event.included.join(', ') : '',
       requirements: event.requirements ? event.requirements.join(', ') : ''
     });
+    this.galleryImages = event.images || [];
     this.showModal = true;
   }
 
@@ -129,7 +132,8 @@ export class AdminEventsComponent implements OnInit {
     const eventData = {
       ...formValue,
       included: formValue.included ? formValue.included.split(',').map((i: string) => i.trim()).filter((i: string) => i) : [],
-      requirements: formValue.requirements ? formValue.requirements.split(',').map((r: string) => r.trim()).filter((r: string) => r) : []
+      requirements: formValue.requirements ? formValue.requirements.split(',').map((r: string) => r.trim()).filter((r: string) => r) : [],
+      images: this.galleryImages
     };
 
     this.isLoading = true;
@@ -222,7 +226,11 @@ export class AdminEventsComponent implements OnInit {
     }, 3000);
   }
 
-  onImageUploaded(imageUrl: string): void {
+  onPrimaryImageChanged(imageUrl: string): void {
     this.eventForm.patchValue({ imageUrl });
+  }
+
+  onGalleryImagesChanged(images: string[]): void {
+    this.galleryImages = images;
   }
 }

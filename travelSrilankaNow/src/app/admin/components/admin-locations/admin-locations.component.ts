@@ -28,6 +28,7 @@ export class AdminLocationsComponent implements OnInit {
 
   categories: MasterData[] = [];
   regions: MasterData[] = [];
+  galleryImages: string[] = [];
 
   constructor(
     private apiService: AdminApiService,
@@ -102,6 +103,7 @@ export class AdminLocationsComponent implements OnInit {
       featured: false,
       orderNumber: 0
     });
+    this.galleryImages = [];
     this.showModal = true;
   }
 
@@ -112,6 +114,7 @@ export class AdminLocationsComponent implements OnInit {
       activities: location.activities ? location.activities.join(', ') : '',
       highlights: location.highlights ? location.highlights.join(', ') : ''
     });
+    this.galleryImages = location.images || [];
     this.showModal = true;
   }
 
@@ -131,7 +134,8 @@ export class AdminLocationsComponent implements OnInit {
     const locationData = {
       ...formValue,
       activities: formValue.activities ? formValue.activities.split(',').map((a: string) => a.trim()).filter((a: string) => a) : [],
-      highlights: formValue.highlights ? formValue.highlights.split(',').map((h: string) => h.trim()).filter((h: string) => h) : []
+      highlights: formValue.highlights ? formValue.highlights.split(',').map((h: string) => h.trim()).filter((h: string) => h) : [],
+      images: this.galleryImages
     };
 
     this.isLoading = true;
@@ -224,7 +228,11 @@ export class AdminLocationsComponent implements OnInit {
     }, 3000);
   }
 
-  onImageUploaded(imageUrl: string): void {
+  onPrimaryImageChanged(imageUrl: string): void {
     this.locationForm.patchValue({ imageUrl });
+  }
+
+  onGalleryImagesChanged(images: string[]): void {
+    this.galleryImages = images;
   }
 }

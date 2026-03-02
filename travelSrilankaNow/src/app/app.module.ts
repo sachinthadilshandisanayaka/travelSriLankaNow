@@ -21,6 +21,7 @@ import { PlaceDetailComponent } from './pages/place-detail/place-detail.componen
 import { MoreSectionDetailComponent } from './pages/more-section-detail/more-section-detail.component';
 import { CloudinaryOptimizePipe, CloudinaryThumbnailPipe } from './pipes/cloudinary.pipe';
 import { PageHeaderComponent } from './shared/components/page-header/page-header.component';
+import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { PageHeaderComponent } from './shared/components/page-header/page-header
     MoreSectionDetailComponent,
     CloudinaryOptimizePipe,
     CloudinaryThumbnailPipe,
-    PageHeaderComponent
+    PageHeaderComponent,
+    ImageLightboxComponent
   ],
   imports: [
     BrowserModule,
