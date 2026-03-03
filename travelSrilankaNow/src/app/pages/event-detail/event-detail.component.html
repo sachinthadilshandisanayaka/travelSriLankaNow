@@ -25,7 +25,8 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <button (click)="goBack()" class="back-button">
-        <span class="arrow">←</span> Back to Events
+        <span class="arrow">←</span>
+        <span class="back-text">Back to Events</span>
       </button>
       <div class="hero-image">
         <img [src]="event.imageUrl | cloudinaryOptimize:1200:600:85" [alt]="event.title" />
@@ -167,7 +168,7 @@
                 <span class="btn-corner btn-corner--bl"></span>
                 <span class="btn-corner btn-corner--br"></span>
               </button>
-              <button class="btn-secondary btn-block" (click)="goBack()">
+              <button class="btn-secondary btn-block back-btn-sidebar" (click)="goBack()">
                 <span>Back to Events</span>
                 <span class="btn-shine"></span>
                 <span class="btn-corner btn-corner--tl"></span>

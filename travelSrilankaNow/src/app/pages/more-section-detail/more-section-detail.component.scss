@@ -225,3 +225,55 @@
     font-size: $font-size-base;
   }
 }
+
+// ===== Mobile Responsive =====
+@media (max-width: $breakpoint-md) {
+  .section-hero {
+    min-height: 220px;
+
+    &__content {
+      padding: 3rem $spacing-lg $spacing-lg;
+    }
+
+    &__title {
+      font-size: $font-size-xl;
+      margin-bottom: $spacing-sm;
+    }
+
+    &__desc {
+      font-size: $font-size-sm;
+    }
+  }
+
+  .container {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .item-card {
+    &__image {
+      height: 160px;
+    }
+
+    &__content {
+      padding: $spacing-md;
+    }
+
+    &__title {
+      font-size: $font-size-base;
+      margin-bottom: $spacing-xs;
+    }
+
+    &__short-desc,
+    &__desc {
+      font-size: $font-size-xs;
+    }
+
+    &__link {
+      font-size: $font-size-xs;
+    }
+  }
+
+  .empty-state {
+    padding: $spacing-2xl $spacing-md;
+  }
+}
