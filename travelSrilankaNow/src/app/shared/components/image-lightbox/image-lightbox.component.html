@@ -1,0 +1,54 @@
+<div *ngIf="isOpen" class="lightbox__backdrop" (click)="onBackdropClick($event)">
+  <!-- Close Button -->
+  <button class="lightbox__close" (click)="close()" title="Close (Esc)">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M18 6L6 18M6 6l12 12"></path>
+    </svg>
+  </button>
+
+  <!-- Counter -->
+  <div class="lightbox__counter">
+    {{ currentIndex + 1 }} of {{ images.length }}
+  </div>
+
+  <!-- Previous Button -->
+  <button
+    *ngIf="currentIndex > 0"
+    class="lightbox__nav lightbox__nav--prev"
+    (click)="prev()"
+    title="Previous (Left Arrow)"
+  >
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+
+  <!-- Image -->
+  <div class="lightbox__image-container">
+    <div *ngIf="!imageLoaded" class="lightbox__spinner">
+      <svg class="lightbox__spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+    <img
+      [src]="getOptimizedUrl(images[currentIndex])"
+      [alt]="entityName + ' - Photo ' + (currentIndex + 1)"
+      [class.lightbox__image--loaded]="imageLoaded"
+      class="lightbox__image"
+      (load)="onImageLoad()"
+    />
+  </div>
+
+  <!-- Next Button -->
+  <button
+    *ngIf="currentIndex < images.length - 1"
+    class="lightbox__nav lightbox__nav--next"
+    (click)="next()"
+    title="Next (Right Arrow)"
+  >
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </button>
+</div>

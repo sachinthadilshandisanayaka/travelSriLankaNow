@@ -199,12 +199,15 @@
 
           <!-- Image Upload -->
           <div class="admin-form__group admin-form__group--full">
-            <app-image-upload
-              [currentImageUrl]="locationForm.get('imageUrl')?.value"
+            <app-entity-image-manager
+              [entityType]="'location'"
+              [primaryImageUrl]="locationForm.get('imageUrl')?.value"
+              [existingImages]="galleryImages"
               [folder]="'locations'"
-              [label]="'Location Image'"
-              (imageUploaded)="onImageUploaded($event)"
-            ></app-image-upload>
+              [label]="'Location Images'"
+              (primaryImageChanged)="onPrimaryImageChanged($event)"
+              (imagesChanged)="onGalleryImagesChanged($event)"
+            ></app-entity-image-manager>
           </div>
 
           <!-- Short Description -->

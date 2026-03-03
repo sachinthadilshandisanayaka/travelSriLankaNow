@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { Location } from '../../models/location.model';
+import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
 
 @Component({
   selector: 'app-location-detail',
@@ -13,6 +14,7 @@ export class LocationDetailComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
   selectedImageIndex: number = 0;
+  @ViewChild('lightbox') lightbox!: ImageLightboxComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +52,12 @@ export class LocationDetailComponent implements OnInit {
 
   selectImage(index: number): void {
     this.selectedImageIndex = index;
+  }
+
+  openLightbox(index: number): void {
+    if (this.lightbox) {
+      this.lightbox.open(index);
+    }
   }
 
   goBack(): void {

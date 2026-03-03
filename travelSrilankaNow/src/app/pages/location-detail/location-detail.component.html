@@ -25,7 +25,8 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <button (click)="goBack()" class="back-button">
-        <span class="arrow">←</span> Back to Locations
+        <span class="arrow">←</span>
+        <span class="back-text">Back to Locations</span>
       </button>
       <div class="hero-image">
         <img [src]="location.imageUrl | cloudinaryOptimize:1200:600:85" [alt]="location.name" />
@@ -79,18 +80,23 @@
           <section class="detail-section" *ngIf="location.images && location.images.length > 0">
             <h2>Photo Gallery</h2>
             <div class="gallery-section">
-              <div class="gallery-main">
-                <img [src]="location.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="location.name" />
+              <div class="gallery-main" (click)="openLightbox(selectedImageIndex)" style="cursor: pointer;">
+                <img [src]="location.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="location.name" loading="lazy" />
               </div>
               <div class="gallery-thumbnails">
                 <div *ngFor="let image of location.images; let i = index"
                      class="thumbnail"
                      [class.active]="i === selectedImageIndex"
                      (click)="selectImage(i)">
-                  <img [src]="image | cloudinaryThumbnail:100" [alt]="location.name + ' - ' + (i + 1)" />
+                  <img [src]="image | cloudinaryThumbnail:100" [alt]="location.name + ' - ' + (i + 1)" loading="lazy" />
                 </div>
               </div>
             </div>
+            <app-image-lightbox
+              #lightbox
+              [images]="location.images"
+              [entityName]="location.name">
+            </app-image-lightbox>
           </section>
         </div>
 
@@ -131,7 +137,7 @@
                 <span class="btn-corner btn-corner--bl"></span>
                 <span class="btn-corner btn-corner--br"></span>
               </button>
-              <button class="btn-secondary btn-block" (click)="goBack()">
+              <button class="btn-secondary btn-block back-btn-sidebar" (click)="goBack()">
                 <span>Back to Locations</span>
                 <span class="btn-shine"></span>
                 <span class="btn-corner btn-corner--tl"></span>

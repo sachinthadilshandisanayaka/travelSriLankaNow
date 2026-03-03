@@ -1,0 +1,93 @@
+<div class="image-manager">
+  <label class="image-manager__label">{{ label }}</label>
+
+  <!-- Image Grid -->
+  <div *ngIf="images.length > 0" class="image-manager__grid">
+    <div
+      *ngFor="let img of images; let i = index"
+      class="image-manager__item"
+      [class.image-manager__item--primary]="isPrimary(img)"
+      [class.image-manager__item--drag-over]="dragOverIndex === i"
+      [class.image-manager__item--dragging]="dragIndex === i"
+      draggable="true"
+      (dragstart)="onDragStart($event, i)"
+      (dragover)="onDragOver($event, i)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event, i)"
+      (dragend)="onDragEnd()"
+    >
+      <img [src]="getThumbnail(img, 200)" [alt]="entityType + ' image ' + (i + 1)" />
+
+      <!-- Primary Badge -->
+      <span *ngIf="isPrimary(img)" class="image-manager__badge">Primary</span>
+
+      <!-- Drag Handle -->
+      <span class="image-manager__drag-handle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="5" r="1.5"></circle>
+          <circle cx="15" cy="5" r="1.5"></circle>
+          <circle cx="9" cy="12" r="1.5"></circle>
+          <circle cx="15" cy="12" r="1.5"></circle>
+          <circle cx="9" cy="19" r="1.5"></circle>
+          <circle cx="15" cy="19" r="1.5"></circle>
+        </svg>
+      </span>
+
+      <!-- Actions Overlay -->
+      <div class="image-manager__actions">
+        <button
+          *ngIf="!isPrimary(img)"
+          type="button"
+          class="image-manager__action-btn image-manager__action-btn--primary"
+          (click)="setAsPrimary(img)"
+          title="Set as Primary"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="image-manager__action-btn image-manager__action-btn--remove"
+          (click)="removeImage(i)"
+          title="Remove"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Order Number -->
+      <span class="image-manager__order">{{ i + 1 }}</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="images.length === 0" class="image-manager__empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+      <polyline points="21 15 16 10 5 21"></polyline>
+    </svg>
+    <p>No images yet. Upload images below.</p>
+  </div>
+
+  <!-- Upload Section -->
+  <div *ngIf="canAddMore" class="image-manager__upload">
+    <app-image-upload
+      [folder]="folder"
+      [label]="'Add ' + entityType + ' images'"
+      [multiple]="true"
+      [currentImages]="[]"
+      (imagesUploaded)="onNewImagesUploaded($event)"
+      (imageUploaded)="onSingleImageUploaded($event)"
+    ></app-image-upload>
+  </div>
+
+  <!-- Image Count -->
+  <div class="image-manager__info">
+    <span>{{ images.length }} / {{ maxImages }} images</span>
+    <span *ngIf="images.length > 1" class="image-manager__hint">Drag to reorder. First image or starred image is primary.</span>
+  </div>
+</div>

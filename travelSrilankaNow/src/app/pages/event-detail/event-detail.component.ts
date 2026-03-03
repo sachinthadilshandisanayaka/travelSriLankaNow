@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../services/event.service';
 import { Event } from '../../models/event.model';
+import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
 
 @Component({
   selector: 'app-event-detail',
@@ -12,6 +13,8 @@ export class EventDetailComponent implements OnInit {
   event: Event | null = null;
   loading: boolean = true;
   error: string | null = null;
+  selectedImageIndex: number = 0;
+  @ViewChild('lightbox') lightbox!: ImageLightboxComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,6 +48,16 @@ export class EventDetailComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  selectImage(index: number): void {
+    this.selectedImageIndex = index;
+  }
+
+  openLightbox(index: number): void {
+    if (this.lightbox) {
+      this.lightbox.open(index);
+    }
   }
 
   goBack(): void {
