@@ -29,6 +29,7 @@ export class AdminPlacesComponent implements OnInit {
   placeTypes: MasterData[] = [];
   regions: MasterData[] = [];
   priceRanges: MasterData[] = [];
+  galleryImages: string[] = [];
 
   constructor(
     private apiService: AdminApiService,
@@ -121,6 +122,7 @@ export class AdminPlacesComponent implements OnInit {
       featured: false,
       orderNumber: 0
     });
+    this.galleryImages = [];
     this.showModal = true;
   }
 
@@ -136,6 +138,7 @@ export class AdminPlacesComponent implements OnInit {
       lat: place.coordinates?.lat || null,
       lng: place.coordinates?.lng || null
     });
+    this.galleryImages = place.images || [];
     this.showModal = true;
   }
 
@@ -165,7 +168,7 @@ export class AdminPlacesComponent implements OnInit {
         lat: formValue.lat || 0,
         lng: formValue.lng || 0
       },
-      images: []
+      images: this.galleryImages
     };
 
     // Remove the flat fields that are now nested
@@ -265,8 +268,12 @@ export class AdminPlacesComponent implements OnInit {
     }, 3000);
   }
 
-  onImageUploaded(imageUrl: string): void {
+  onPrimaryImageChanged(imageUrl: string): void {
     this.placeForm.patchValue({ imageUrl });
+  }
+
+  onGalleryImagesChanged(images: string[]): void {
+    this.galleryImages = images;
   }
 
   // Helper method to get place type icon

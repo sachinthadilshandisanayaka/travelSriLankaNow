@@ -25,7 +25,8 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <button (click)="goBack()" class="back-button">
-        <span class="arrow">←</span> Back to Events
+        <span class="arrow">←</span>
+        <span class="back-text">Back to Events</span>
       </button>
       <div class="hero-image">
         <img [src]="event.imageUrl | cloudinaryOptimize:1200:600:85" [alt]="event.title" />
@@ -73,6 +74,29 @@
                 <span class="bullet">ℹ️</span> {{ req }}
               </li>
             </ul>
+          </section>
+
+          <!-- Photo Gallery -->
+          <section class="detail-section" *ngIf="event.images && event.images.length > 0">
+            <h2>Photo Gallery</h2>
+            <div class="gallery-section">
+              <div class="gallery-main" (click)="openLightbox(selectedImageIndex)" style="cursor: pointer;">
+                <img [src]="event.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="event.title" loading="lazy" />
+              </div>
+              <div class="gallery-thumbnails">
+                <div *ngFor="let image of event.images; let i = index"
+                     class="thumbnail"
+                     [class.active]="i === selectedImageIndex"
+                     (click)="selectImage(i)">
+                  <img [src]="image | cloudinaryThumbnail:100" [alt]="event.title + ' - ' + (i + 1)" loading="lazy" />
+                </div>
+              </div>
+            </div>
+            <app-image-lightbox
+              #lightbox
+              [images]="event.images"
+              [entityName]="event.title">
+            </app-image-lightbox>
           </section>
 
           <!-- Event Dates Section -->
@@ -144,7 +168,7 @@
                 <span class="btn-corner btn-corner--bl"></span>
                 <span class="btn-corner btn-corner--br"></span>
               </button>
-              <button class="btn-secondary btn-block" (click)="goBack()">
+              <button class="btn-secondary btn-block back-btn-sidebar" (click)="goBack()">
                 <span>Back to Events</span>
                 <span class="btn-shine"></span>
                 <span class="btn-corner btn-corner--tl"></span>

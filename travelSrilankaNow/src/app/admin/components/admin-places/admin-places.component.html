@@ -233,12 +233,15 @@
 
             <!-- Image Upload -->
             <div class="admin-form__group admin-form__group--full">
-              <app-image-upload
-                [currentImageUrl]="placeForm.get('imageUrl')?.value"
+              <app-entity-image-manager
+                [entityType]="'place'"
+                [primaryImageUrl]="placeForm.get('imageUrl')?.value"
+                [existingImages]="galleryImages"
                 [folder]="'places'"
-                [label]="'Place Image'"
-                (imageUploaded)="onImageUploaded($event)"
-              ></app-image-upload>
+                [label]="'Place Images'"
+                (primaryImageChanged)="onPrimaryImageChanged($event)"
+                (imagesChanged)="onGalleryImagesChanged($event)"
+              ></app-entity-image-manager>
             </div>
 
             <!-- Short Description -->

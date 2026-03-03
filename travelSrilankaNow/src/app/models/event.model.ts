@@ -4,6 +4,7 @@ export interface Event {
   description: string;
   shortDescription: string;
   imageUrl: string;
+  images: string[];
   category: 'cultural' | 'adventure' | 'food' | 'festival' | 'tour';
   location: string;
   dates: EventDate[];

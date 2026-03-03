@@ -134,68 +134,58 @@
 .filters-container {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: $spacing-lg;
   width: 100%;
 
-  @include respond-to('lg') {
+  @include respond-to('md') {
     flex-direction: row;
-    gap: $spacing-lg;
+    gap: $spacing-xl;
   }
 }
 
-.category-filters {
+.filter-group {
   display: flex;
-  gap: $spacing-sm;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: $spacing-xs;
+  flex: 1;
+
+  @include respond-to('md') {
+    max-width: 240px;
+  }
 }
 
-.filter-btn {
-  padding: $spacing-sm $spacing-lg;
+.filter-label {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $primary-navy-dark;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.filter-select {
+  width: 100%;
+  padding: $spacing-sm $spacing-2xl $spacing-sm $spacing-md;
   border: 1px solid $light-gray;
-  border-radius: $radius-full;
+  border-radius: $radius-lg;
   background: $white;
-  color: $warm-gray;
+  color: $text-dark;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   cursor: pointer;
-  text-transform: capitalize;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6762' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $spacing-md center;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 
-  // Smooth left-to-right entrance animation on page load
-  opacity: 0;
-  animation: filterSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-
-  // Staggered delays for cascading effect
-  @for $i from 1 through 10 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{($i - 1) * 0.08}s;
-    }
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+    box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
   }
-
-  // Smooth hover transitions (applied after entrance animation)
-  transition: border-color 0.25s ease,
-              color 0.25s ease,
-              background-color 0.25s ease,
-              box-shadow 0.25s ease,
-              transform 0.2s ease;
 
   &:hover {
     border-color: $primary-navy;
-    color: $primary-navy;
-    background: rgba($primary-sky, 0.1);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba($primary-navy, 0.12);
-  }
-
-  &:active {
-    transform: translateY(0);
-    transition: transform 0.1s ease;
-  }
-
-  &.active {
-    border-color: $primary-navy;
-    background: $primary-navy;
-    color: $white;
-    box-shadow: 0 4px 16px rgba($primary-navy, 0.25);
   }
 }
 
@@ -242,6 +232,7 @@
   transform: translateY(20px);
   display: flex;
   flex-direction: column;
+  height: 520px;
 
   &.revealed {
     opacity: 1;
@@ -304,14 +295,22 @@
     color: $text-dark;
     font-weight: $font-weight-semibold;
     letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  p {
+  .place-description {
     color: $warm-gray;
     line-height: $line-height-relaxed;
     margin-bottom: $spacing-md;
     font-size: $font-size-base;
     flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -322,6 +321,9 @@
   color: $warm-gray;
   font-size: $font-size-sm;
   margin-bottom: $spacing-lg;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .place-meta {

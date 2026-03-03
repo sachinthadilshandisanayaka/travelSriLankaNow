@@ -132,12 +132,54 @@
   }
 }
 
+// --- Logo ---
+.loading-logo {
+  position: relative;
+  z-index: 2;
+  width: 80px;
+  height: 80px;
+  margin-bottom: $spacing-lg;
+  animation: loadingLogoAppear 1s ease-out 0.2s both;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: invert(1) brightness(2);
+  }
+
+  @include respond-to('md') {
+    width: 100px;
+    height: 100px;
+  }
+
+  @include respond-to('lg') {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@keyframes loadingLogoAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 // --- Brand / Site Name ---
 .loading-brand {
   position: relative;
   z-index: 2;
   text-align: center;
-  animation: loadingBrandAppear 0.8s ease-out 0.3s both;
+  animation: loadingBrandAppear 0.8s ease-out 0.6s both;
 }
 
 .loading-brand__title {
@@ -372,7 +414,12 @@
   align-items: center;
   justify-content: center;
   z-index: 2;
-  padding: calc(#{$spacing-4xl} + 80px) $spacing-xl $spacing-3xl; // Extra top padding for fixed navbar
+  // Horizontal padding accounts for nav arrows (48px) + arrow offset + gap
+  padding: calc(#{$spacing-4xl} + 80px) calc(#{$spacing-xl} + 60px) $spacing-3xl;
+
+  @include respond-to('lg') {
+    padding: calc(#{$spacing-4xl} + 80px) calc(#{$spacing-3xl} + 64px) $spacing-3xl;
+  }
 }
 
 .slide-content-inner {

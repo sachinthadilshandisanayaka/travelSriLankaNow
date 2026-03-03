@@ -232,12 +232,15 @@
 
           <!-- Image Upload -->
           <div class="admin-form__group admin-form__group--full">
-            <app-image-upload
-              [currentImageUrl]="eventForm.get('imageUrl')?.value"
+            <app-entity-image-manager
+              [entityType]="'event'"
+              [primaryImageUrl]="eventForm.get('imageUrl')?.value"
+              [existingImages]="galleryImages"
               [folder]="'events'"
-              [label]="'Event Image'"
-              (imageUploaded)="onImageUploaded($event)"
-            ></app-image-upload>
+              [label]="'Event Images'"
+              (primaryImageChanged)="onPrimaryImageChanged($event)"
+              (imagesChanged)="onGalleryImagesChanged($event)"
+            ></app-entity-image-manager>
           </div>
 
           <!-- Short Description -->

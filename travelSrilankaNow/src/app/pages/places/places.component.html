@@ -25,28 +25,20 @@
 
       <!-- Filters Container -->
       <div class="filters-container">
-        <!-- Type Filters -->
-        <div class="category-filters">
-          <button
-            *ngFor="let type of placeTypes"
-            [class.active]="selectedType === type.value"
-            (click)="filterByType(type.value)"
-            class="filter-btn"
-          >
-            {{ type.label }}
-          </button>
+        <!-- Type Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <select class="filter-select" [value]="selectedType" (change)="filterByType($event.target.value)">
+            <option *ngFor="let type of placeTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
         </div>
 
-        <!-- Price Range Filters -->
-        <div class="category-filters">
-          <button
-            *ngFor="let range of priceRanges"
-            [class.active]="selectedPriceRange === range.value"
-            (click)="filterByPriceRange(range.value)"
-            class="filter-btn"
-          >
-            {{ range.label }}
-          </button>
+        <!-- Price Range Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Price Range</label>
+          <select class="filter-select" [value]="selectedPriceRange" (change)="filterByPriceRange($event.target.value)">
+            <option *ngFor="let range of priceRanges" [value]="range.value">{{ range.label }}</option>
+          </select>
         </div>
       </div>
     </div>
@@ -110,7 +102,7 @@
             </div>
           </div>
 
-          <p>{{ place.description }}</p>
+          <p class="place-description">{{ place.description }}</p>
 
           <div class="contact-info">
             <span>📞</span>

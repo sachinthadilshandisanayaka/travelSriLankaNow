@@ -231,22 +231,22 @@ $navbar-height: 80px;
 
 // Activities Grid
 .activities-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: $spacing-md;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
 
   .activity-card {
     background: $navy-bg-lightest;
-    border: 2px solid $primary-sky;
-    border-radius: $radius-lg;
-    padding: $spacing-lg;
-    display: flex;
+    border: 1.5px solid $primary-sky;
+    border-radius: $radius-md;
+    padding: $spacing-sm $spacing-md;
+    display: inline-flex;
     align-items: center;
-    gap: $spacing-md;
+    gap: $spacing-sm;
     transition: all $transition-base;
 
     .activity-icon {
-      font-size: $font-size-2xl;
+      font-size: $font-size-lg;
     }
 
     span:last-child {
@@ -487,5 +487,212 @@ $navbar-height: 80px;
     color: $warm-gray;
     line-height: $line-height-relaxed;
     font-size: $font-size-sm;
+  }
+}
+
+// ===== Mobile Responsive =====
+@media (max-width: $breakpoint-md) {
+  .hero-section {
+    height: calc(40vh + #{$navbar-height});
+    min-height: calc(280px + #{$navbar-height});
+
+    .back-button {
+      top: calc(#{$spacing-md} + #{$navbar-height});
+      left: $spacing-md;
+      padding: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-base;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+      .arrow {
+        margin-right: 0;
+        font-size: $font-size-lg;
+        line-height: 1;
+      }
+
+      .back-text {
+        display: none;
+      }
+    }
+
+    .hero-image .hero-content {
+      bottom: $spacing-lg;
+      left: $spacing-md;
+      right: $spacing-md;
+
+      .category-badge {
+        font-size: 0.6875rem;
+        padding: 3px $spacing-sm;
+        margin-bottom: $spacing-xs;
+      }
+
+      h1 {
+        font-size: $font-size-xl;
+        margin-bottom: $spacing-xs;
+        line-height: $line-height-tight;
+      }
+
+      .hero-meta {
+        gap: $spacing-md;
+        font-size: $font-size-xs;
+        flex-wrap: wrap;
+      }
+    }
+  }
+
+  .container {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .content-grid {
+    gap: $spacing-lg;
+  }
+
+  .main-content .detail-section {
+    padding: $spacing-lg;
+    margin-bottom: $spacing-md;
+    border-radius: $radius-lg;
+
+    h2 {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-md;
+      padding-bottom: $spacing-sm;
+      border-bottom-width: 2px;
+    }
+
+    .description {
+      font-size: $font-size-sm;
+      line-height: $line-height-relaxed;
+    }
+  }
+
+  .cuisine-grid {
+    gap: $spacing-sm;
+
+    .cuisine-tag {
+      padding: $spacing-xs $spacing-md;
+      font-size: $font-size-xs;
+    }
+  }
+
+  .amenities-list li {
+    padding: $spacing-sm 0;
+    font-size: $font-size-sm;
+
+    .bullet {
+      font-size: $font-size-base;
+    }
+  }
+
+  .gallery-section {
+    .gallery-main {
+      height: 200px;
+      border-radius: $radius-md;
+      margin-bottom: $spacing-sm;
+    }
+
+    .gallery-thumbnails {
+      display: flex;
+      gap: $spacing-sm;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: $spacing-xs;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .thumbnail {
+        flex: 0 0 60px;
+        height: 48px;
+        border-width: 2px;
+        border-radius: $radius-sm;
+      }
+    }
+  }
+
+  .sidebar .info-card {
+    position: static;
+    padding: $spacing-md $spacing-lg;
+    border-radius: $radius-lg;
+
+    h3 {
+      font-size: $font-size-base;
+      margin-bottom: $spacing-md;
+      padding-bottom: $spacing-sm;
+    }
+
+    .info-item {
+      padding: $spacing-sm 0;
+
+      .info-label {
+        font-size: $font-size-xs;
+      }
+
+      .info-value {
+        font-size: $font-size-sm;
+        text-align: right;
+        max-width: 55%;
+      }
+    }
+
+    .action-buttons {
+      margin-top: $spacing-md;
+    }
+
+    .back-btn-sidebar {
+      display: none;
+    }
+  }
+
+  .contact-details {
+    margin-top: $spacing-lg;
+    padding-top: $spacing-md;
+
+    h4 {
+      font-size: $font-size-sm;
+      margin-bottom: $spacing-md;
+    }
+
+    .contact-link {
+      padding: $spacing-sm $spacing-md;
+      font-size: $font-size-sm;
+      margin-bottom: $spacing-xs;
+    }
+  }
+
+  .address-section {
+    margin-top: $spacing-md;
+    padding-top: $spacing-md;
+
+    h4 {
+      font-size: $font-size-sm;
+      margin-bottom: $spacing-sm;
+    }
+
+    p {
+      font-size: $font-size-xs;
+    }
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.625rem 1rem;
+    font-size: $font-size-sm;
+    text-transform: none;
+  }
+}
+
+// ===== Small Phone (< 375px) =====
+@media (max-width: 375px) {
+  .hero-section .hero-image .hero-content h1 {
+    font-size: $font-size-lg;
   }
 }

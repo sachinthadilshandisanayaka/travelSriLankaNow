@@ -22,5 +22,9 @@ public class AuthenticationResponse {
     private String refreshToken;
 
     private String username;
+
+    @JsonProperty("first_name")
+    private String firstName;
+
     private String role;
 }

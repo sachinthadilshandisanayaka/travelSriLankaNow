@@ -33,16 +33,23 @@ public class DataInitializer implements CommandLineRunner {
 
     private void initializeAdminUser() {
         if (!userRepository.existsByUsername(adminUsername)) {
-            User adminUser = User.builder()
-                    .username(adminUsername)
-                    .password(passwordEncoder.encode(adminPassword))
-                    .email(adminEmail)
-                    .fullName(adminUsername)
-                    .role(User.Role.ADMIN)
-                    .build();
+            try {
+                User adminUser = User.builder()
+                        .username(adminUsername)
+                        .password(passwordEncoder.encode(adminPassword))
+                        .email(adminEmail)
+                        .firstName("Admin")
+                        .lastName("User")
+                        .role(User.Role.ADMIN)
+                        .build();
 
-            userRepository.save(adminUser);
-            log.info("Admin user created - Username: {}", adminUsername);
+                userRepository.save(adminUser);
+                log.info("Admin user created - Username: {}", adminUsername);
+            } catch (Exception e) {
+                log.warn("Admin user already exists or could not be created: {}", e.getMessage());
+            }
+        } else {
+            log.info("Admin user already exists - Username: {}", adminUsername);
         }
     }
 }
