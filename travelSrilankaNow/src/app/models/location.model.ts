@@ -12,4 +12,5 @@ export interface Location {
   rating: number;
   featured: boolean;
   highlights: string[];
+  additionalDetails?: { [key: string]: any };
 }

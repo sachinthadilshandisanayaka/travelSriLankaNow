@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AdminApiService, PageResponse } from '../../services/admin-api.service';
+import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
+import { FieldDefinition } from '../../../models/more-section.model';
 
 @Component({
   selector: 'app-admin-locations',
@@ -30,6 +31,21 @@ export class AdminLocationsComponent implements OnInit {
   regions: MasterData[] = [];
   galleryImages: string[] = [];
 
+  // Dynamic field config
+  fieldDefinitions: FieldDefinition[] = [];
+  showFieldConfigModal = false;
+  tempFieldDefinitions: FieldDefinition[] = [];
+  additionalDetails: { [key: string]: any } = {};
+  fieldTypes = [
+    { value: 'text', label: 'Text' },
+    { value: 'number', label: 'Number' },
+    { value: 'date', label: 'Date' },
+    { value: 'date_range', label: 'Date Range' },
+    { value: 'number_range', label: 'Number Range' },
+    { value: 'select', label: 'Single Select' },
+    { value: 'multi_select', label: 'Multi Select' }
+  ];
+
   constructor(
     private apiService: AdminApiService,
     private fb: FormBuilder,
@@ -55,6 +71,14 @@ export class AdminLocationsComponent implements OnInit {
   ngOnInit(): void {
     this.loadMasterData();
     this.loadLocations();
+    this.loadFieldConfig();
+  }
+
+  loadFieldConfig(): void {
+    this.apiService.getEntityFieldConfig('location').subscribe({
+      next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
+      error: () => {}
+    });
   }
 
   loadMasterData(): void {
@@ -94,6 +118,22 @@ export class AdminLocationsComponent implements OnInit {
     });
   }
 
+  initAdditionalDetails(): { [key: string]: any } {
+    const details: { [key: string]: any } = {};
+    for (const field of this.fieldDefinitions) {
+      if (field.type === 'date_range') {
+        details[field.key] = { from: '', to: '' };
+      } else if (field.type === 'number_range') {
+        details[field.key] = { min: null, max: null };
+      } else if (field.type === 'multi_select') {
+        details[field.key] = [];
+      } else {
+        details[field.key] = null;
+      }
+    }
+    return details;
+  }
+
   openAddModal(): void {
     this.isEditMode = false;
     this.locationForm.reset({
@@ -104,6 +144,7 @@ export class AdminLocationsComponent implements OnInit {
       orderNumber: 0
     });
     this.galleryImages = [];
+    this.additionalDetails = this.initAdditionalDetails();
     this.showModal = true;
   }
 
@@ -115,6 +156,15 @@ export class AdminLocationsComponent implements OnInit {
       highlights: location.highlights ? location.highlights.join(', ') : ''
     });
     this.galleryImages = location.images || [];
+    this.additionalDetails = location.additionalDetails ? { ...location.additionalDetails } : this.initAdditionalDetails();
+    for (const field of this.fieldDefinitions) {
+      if (this.additionalDetails[field.key] === undefined) {
+        if (field.type === 'date_range') this.additionalDetails[field.key] = { from: '', to: '' };
+        else if (field.type === 'number_range') this.additionalDetails[field.key] = { min: null, max: null };
+        else if (field.type === 'multi_select') this.additionalDetails[field.key] = [];
+        else this.additionalDetails[field.key] = null;
+      }
+    }
     this.showModal = true;
   }
 
@@ -135,7 +185,8 @@ export class AdminLocationsComponent implements OnInit {
       ...formValue,
       activities: formValue.activities ? formValue.activities.split(',').map((a: string) => a.trim()).filter((a: string) => a) : [],
       highlights: formValue.highlights ? formValue.highlights.split(',').map((h: string) => h.trim()).filter((h: string) => h) : [],
-      images: this.galleryImages
+      images: this.galleryImages,
+      additionalDetails: this.additionalDetails
     };
 
     this.isLoading = true;
@@ -168,6 +219,82 @@ export class AdminLocationsComponent implements OnInit {
           this.hideMessageAfterDelay();
         }
       });
+    }
+  }
+
+  openFieldConfigModal(): void {
+    this.tempFieldDefinitions = this.fieldDefinitions.map(f => ({ ...f, options: f.options ? [...f.options] : [] }));
+    this.showFieldConfigModal = true;
+  }
+
+  closeFieldConfigModal(): void {
+    this.showFieldConfigModal = false;
+    this.tempFieldDefinitions = [];
+  }
+
+  saveFieldConfig(): void {
+    this.apiService.upsertEntityFieldConfig('location', this.tempFieldDefinitions).subscribe({
+      next: (config) => {
+        this.fieldDefinitions = config.fieldDefinitions || [];
+        this.closeFieldConfigModal();
+        this.successMessage = 'Field configuration saved!';
+        this.hideMessageAfterDelay();
+      },
+      error: () => {
+        this.errorMessage = 'Failed to save field configuration';
+        this.hideMessageAfterDelay();
+      }
+    });
+  }
+
+  addFieldDefinition(): void {
+    this.tempFieldDefinitions.push({
+      key: '',
+      label: '',
+      type: 'text',
+      required: false,
+      options: []
+    });
+  }
+
+  removeFieldDefinition(index: number): void {
+    this.tempFieldDefinitions.splice(index, 1);
+  }
+
+  onFieldLabelChange(field: FieldDefinition): void {
+    field.key = field.label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+  }
+
+  onFieldTypeChange(field: FieldDefinition): void {
+    if (field.type !== 'select' && field.type !== 'multi_select') {
+      field.options = [];
+    }
+  }
+
+  getOptionsString(field: FieldDefinition): string {
+    return field.options ? field.options.join(', ') : '';
+  }
+
+  setOptionsFromString(field: FieldDefinition, value: string): void {
+    field.options = value.split(',').map((o: string) => o.trim()).filter((o: string) => o);
+  }
+
+  isOptionSelected(fieldKey: string, option: string): boolean {
+    const val = this.additionalDetails?.[fieldKey];
+    return Array.isArray(val) && val.includes(option);
+  }
+
+  toggleMultiSelectOption(fieldKey: string, option: string): void {
+    if (!this.additionalDetails) this.additionalDetails = {};
+    if (!Array.isArray(this.additionalDetails[fieldKey])) {
+      this.additionalDetails[fieldKey] = [];
+    }
+    const arr = this.additionalDetails[fieldKey];
+    const idx = arr.indexOf(option);
+    if (idx > -1) {
+      arr.splice(idx, 1);
+    } else {
+      arr.push(option);
     }
   }
 

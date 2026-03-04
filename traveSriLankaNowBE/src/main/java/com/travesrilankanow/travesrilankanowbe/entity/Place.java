@@ -1,12 +1,15 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
+import com.travesrilankanow.travesrilankanowbe.entity.converter.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "places")
@@ -47,6 +50,8 @@ public class Place {
 
     private String priceRange;
 
+    private Double price;
+
     @ElementCollection
     @CollectionTable(name = "place_cuisine", joinColumns = @JoinColumn(name = "place_id"))
     @Column(name = "cuisine")
@@ -72,6 +77,10 @@ public class Place {
 
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> additionalDetails = new HashMap<>();
 
     @PrePersist
     private void setDefaults() {

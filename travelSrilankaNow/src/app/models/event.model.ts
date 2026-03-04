@@ -18,6 +18,7 @@ export interface Event {
   featured: boolean;
   type: string;
   name: string;
+  additionalDetails?: { [key: string]: any };
 }
 
 export interface EventDate {

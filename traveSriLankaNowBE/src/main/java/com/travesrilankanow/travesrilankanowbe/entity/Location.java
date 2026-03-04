@@ -1,12 +1,15 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
+import com.travesrilankanow.travesrilankanowbe.entity.converter.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "locations")
@@ -66,4 +69,8 @@ public class Location {
     @CollectionTable(name = "location_highlights", joinColumns = @JoinColumn(name = "location_id"))
     @Column(name = "highlight")
     private List<String> highlights = new ArrayList<>();
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> additionalDetails = new HashMap<>();
 }

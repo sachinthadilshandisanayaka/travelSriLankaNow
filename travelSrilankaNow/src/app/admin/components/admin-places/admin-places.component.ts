@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AdminApiService, PageResponse } from '../../services/admin-api.service';
+import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
+import { FieldDefinition } from '../../../models/more-section.model';
 
 @Component({
   selector: 'app-admin-places',
@@ -31,6 +32,21 @@ export class AdminPlacesComponent implements OnInit {
   priceRanges: MasterData[] = [];
   galleryImages: string[] = [];
 
+  // Dynamic field config
+  fieldDefinitions: FieldDefinition[] = [];
+  showFieldConfigModal = false;
+  tempFieldDefinitions: FieldDefinition[] = [];
+  additionalDetails: { [key: string]: any } = {};
+  fieldTypes = [
+    { value: 'text', label: 'Text' },
+    { value: 'number', label: 'Number' },
+    { value: 'date', label: 'Date' },
+    { value: 'date_range', label: 'Date Range' },
+    { value: 'number_range', label: 'Number Range' },
+    { value: 'select', label: 'Single Select' },
+    { value: 'multi_select', label: 'Multi Select' }
+  ];
+
   constructor(
     private apiService: AdminApiService,
     private fb: FormBuilder,
@@ -47,6 +63,7 @@ export class AdminPlacesComponent implements OnInit {
       region: ['', Validators.required],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
       priceRange: ['', Validators.required],
+      price: [null, [Validators.min(0)]],
       phone: [''],
       email: ['', Validators.email],
       website: [''],
@@ -64,6 +81,94 @@ export class AdminPlacesComponent implements OnInit {
   ngOnInit(): void {
     this.loadMasterData();
     this.loadPlaces();
+    this.loadFieldConfig();
+  }
+
+  loadFieldConfig(): void {
+    this.apiService.getEntityFieldConfig('place').subscribe({
+      next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
+      error: () => {}
+    });
+  }
+
+  initAdditionalDetails(): { [key: string]: any } {
+    const details: { [key: string]: any } = {};
+    for (const field of this.fieldDefinitions) {
+      if (field.type === 'date_range') details[field.key] = { from: '', to: '' };
+      else if (field.type === 'number_range') details[field.key] = { min: null, max: null };
+      else if (field.type === 'multi_select') details[field.key] = [];
+      else details[field.key] = null;
+    }
+    return details;
+  }
+
+  openFieldConfigModal(): void {
+    this.tempFieldDefinitions = this.fieldDefinitions.map(f => ({ ...f, options: f.options ? [...f.options] : [] }));
+    this.showFieldConfigModal = true;
+  }
+
+  closeFieldConfigModal(): void {
+    this.showFieldConfigModal = false;
+  }
+
+  saveFieldConfig(): void {
+    this.apiService.upsertEntityFieldConfig('place', this.tempFieldDefinitions).subscribe({
+      next: (config) => {
+        this.fieldDefinitions = config.fieldDefinitions || [];
+        this.closeFieldConfigModal();
+        this.successMessage = 'Field configuration saved!';
+        this.hideMessageAfterDelay();
+      },
+      error: () => {
+        this.errorMessage = 'Failed to save field configuration';
+        this.hideMessageAfterDelay();
+      }
+    });
+  }
+
+  addFieldDefinition(): void {
+    this.tempFieldDefinitions.push({ key: '', label: '', type: 'text', required: false, options: [] });
+  }
+
+  removeFieldDefinition(index: number): void {
+    this.tempFieldDefinitions.splice(index, 1);
+  }
+
+  onFieldLabelChange(field: FieldDefinition): void {
+    field.key = field.label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+  }
+
+  onFieldTypeChange(field: FieldDefinition): void {
+    if (field.type !== 'select' && field.type !== 'multi_select') {
+      field.options = [];
+    }
+  }
+
+  getOptionsString(field: FieldDefinition): string {
+    return field.options ? field.options.join(', ') : '';
+  }
+
+  setOptionsFromString(field: FieldDefinition, value: string): void {
+    field.options = value.split(',').map((o: string) => o.trim()).filter((o: string) => o);
+  }
+
+  isOptionSelected(fieldKey: string, option: string): boolean {
+    const val = this.additionalDetails?.[fieldKey];
+    return Array.isArray(val) && val.includes(option);
+  }
+
+  toggleMultiSelectOption(fieldKey: string, option: string): void {
+    if (!this.additionalDetails) this.additionalDetails = {};
+    if (!Array.isArray(this.additionalDetails[fieldKey])) {
+      this.additionalDetails[fieldKey] = [];
+    }
+    const arr = this.additionalDetails[fieldKey];
+    const idx = arr.indexOf(option);
+    if (idx > -1) {
+      arr.splice(idx, 1);
+    } else {
+      arr.push(option);
+    }
   }
 
   loadMasterData(): void {
@@ -123,6 +228,7 @@ export class AdminPlacesComponent implements OnInit {
       orderNumber: 0
     });
     this.galleryImages = [];
+    this.additionalDetails = this.initAdditionalDetails();
     this.showModal = true;
   }
 
@@ -139,6 +245,16 @@ export class AdminPlacesComponent implements OnInit {
       lng: place.coordinates?.lng || null
     });
     this.galleryImages = place.images || [];
+    this.additionalDetails = place.additionalDetails ? { ...place.additionalDetails } : this.initAdditionalDetails();
+    // Ensure all field definitions have entries
+    for (const field of this.fieldDefinitions) {
+      if (this.additionalDetails[field.key] === undefined) {
+        if (field.type === 'date_range') this.additionalDetails[field.key] = { from: '', to: '' };
+        else if (field.type === 'number_range') this.additionalDetails[field.key] = { min: null, max: null };
+        else if (field.type === 'multi_select') this.additionalDetails[field.key] = [];
+        else this.additionalDetails[field.key] = null;
+      }
+    }
     this.showModal = true;
   }
 
@@ -168,7 +284,8 @@ export class AdminPlacesComponent implements OnInit {
         lat: formValue.lat || 0,
         lng: formValue.lng || 0
       },
-      images: this.galleryImages
+      images: this.galleryImages,
+      additionalDetails: this.additionalDetails
     };
 
     // Remove the flat fields that are now nested

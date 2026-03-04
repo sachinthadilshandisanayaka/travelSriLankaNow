@@ -106,6 +106,9 @@ public class LocationService {
         if (location.getHighlights() != null && !location.getHighlights().isEmpty()) {
             existing.setHighlights(location.getHighlights());
         }
+        if (location.getAdditionalDetails() != null) {
+            existing.setAdditionalDetails(location.getAdditionalDetails());
+        }
 
         return locationRepository.save(existing);
     }
