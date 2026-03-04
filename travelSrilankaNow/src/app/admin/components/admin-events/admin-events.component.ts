@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AdminApiService, PageResponse } from '../../services/admin-api.service';
+import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
+import { FieldDefinition } from '../../../models/more-section.model';
 
 @Component({
   selector: 'app-admin-events',
@@ -28,6 +29,21 @@ export class AdminEventsComponent implements OnInit {
 
   categories: MasterData[] = [];
   galleryImages: string[] = [];
+
+  // Dynamic field config
+  fieldDefinitions: FieldDefinition[] = [];
+  showFieldConfigModal = false;
+  tempFieldDefinitions: FieldDefinition[] = [];
+  additionalDetails: { [key: string]: any } = {};
+  fieldTypes = [
+    { value: 'text', label: 'Text' },
+    { value: 'number', label: 'Number' },
+    { value: 'date', label: 'Date' },
+    { value: 'date_range', label: 'Date Range' },
+    { value: 'number_range', label: 'Number Range' },
+    { value: 'select', label: 'Single Select' },
+    { value: 'multi_select', label: 'Multi Select' }
+  ];
 
   constructor(
     private apiService: AdminApiService,
@@ -57,6 +73,14 @@ export class AdminEventsComponent implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
     this.loadEvents();
+    this.loadFieldConfig();
+  }
+
+  loadFieldConfig(): void {
+    this.apiService.getEntityFieldConfig('event').subscribe({
+      next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
+      error: () => {}
+    });
   }
 
   loadCategories(): void {
@@ -95,13 +119,14 @@ export class AdminEventsComponent implements OnInit {
     this.eventForm.reset({
       category: this.categories.length > 0 ? this.categories[0].code : '',
       price: 0,
-      maxParticipants: 0,
+      maxParticipants: 1,
       availableSpots: 0,
       rating: 0,
       featured: false,
       orderNumber: 0
     });
     this.galleryImages = [];
+    this.additionalDetails = this.initAdditionalDetails();
     this.showModal = true;
   }
 
@@ -113,6 +138,16 @@ export class AdminEventsComponent implements OnInit {
       requirements: event.requirements ? event.requirements.join(', ') : ''
     });
     this.galleryImages = event.images || [];
+    this.additionalDetails = event.additionalDetails ? { ...event.additionalDetails } : this.initAdditionalDetails();
+    // Ensure all field definitions have entries
+    for (const field of this.fieldDefinitions) {
+      if (this.additionalDetails[field.key] === undefined) {
+        if (field.type === 'date_range') this.additionalDetails[field.key] = { from: '', to: '' };
+        else if (field.type === 'number_range') this.additionalDetails[field.key] = { min: null, max: null };
+        else if (field.type === 'multi_select') this.additionalDetails[field.key] = [];
+        else this.additionalDetails[field.key] = null;
+      }
+    }
     this.showModal = true;
   }
 
@@ -133,7 +168,8 @@ export class AdminEventsComponent implements OnInit {
       ...formValue,
       included: formValue.included ? formValue.included.split(',').map((i: string) => i.trim()).filter((i: string) => i) : [],
       requirements: formValue.requirements ? formValue.requirements.split(',').map((r: string) => r.trim()).filter((r: string) => r) : [],
-      images: this.galleryImages
+      images: this.galleryImages,
+      additionalDetails: this.additionalDetails
     };
 
     this.isLoading = true;
@@ -232,5 +268,81 @@ export class AdminEventsComponent implements OnInit {
 
   onGalleryImagesChanged(images: string[]): void {
     this.galleryImages = images;
+  }
+
+  initAdditionalDetails(): { [key: string]: any } {
+    const details: { [key: string]: any } = {};
+    for (const field of this.fieldDefinitions) {
+      if (field.type === 'date_range') details[field.key] = { from: '', to: '' };
+      else if (field.type === 'number_range') details[field.key] = { min: null, max: null };
+      else if (field.type === 'multi_select') details[field.key] = [];
+      else details[field.key] = null;
+    }
+    return details;
+  }
+
+  openFieldConfigModal(): void {
+    this.tempFieldDefinitions = this.fieldDefinitions.map(f => ({ ...f, options: f.options ? [...f.options] : [] }));
+    this.showFieldConfigModal = true;
+  }
+
+  closeFieldConfigModal(): void {
+    this.showFieldConfigModal = false;
+  }
+
+  saveFieldConfig(): void {
+    this.apiService.upsertEntityFieldConfig('event', this.tempFieldDefinitions).subscribe({
+      next: (config) => {
+        this.fieldDefinitions = config.fieldDefinitions || [];
+        this.showFieldConfigModal = false;
+        this.successMessage = 'Field configuration saved successfully!';
+        this.hideMessageAfterDelay();
+      },
+      error: () => {
+        this.errorMessage = 'Failed to save field configuration';
+        this.hideMessageAfterDelay();
+      }
+    });
+  }
+
+  addFieldDefinition(): void {
+    this.tempFieldDefinitions.push({ key: '', label: '', type: 'text', required: false, options: [] });
+  }
+
+  removeFieldDefinition(index: number): void {
+    this.tempFieldDefinitions.splice(index, 1);
+  }
+
+  onFieldLabelChange(field: FieldDefinition): void {
+    field.key = field.label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+  }
+
+  onFieldTypeChange(field: FieldDefinition): void {
+    if (field.type !== 'select' && field.type !== 'multi_select') {
+      field.options = [];
+    }
+  }
+
+  getOptionsString(field: FieldDefinition): string {
+    return field.options ? field.options.join(', ') : '';
+  }
+
+  setOptionsFromString(field: FieldDefinition, value: string): void {
+    field.options = value.split(',').map(o => o.trim()).filter(o => o);
+  }
+
+  isOptionSelected(fieldKey: string, option: string): boolean {
+    const val = this.additionalDetails[fieldKey];
+    return Array.isArray(val) && val.includes(option);
+  }
+
+  toggleMultiSelectOption(fieldKey: string, option: string): void {
+    if (!Array.isArray(this.additionalDetails[fieldKey])) {
+      this.additionalDetails[fieldKey] = [];
+    }
+    const arr = this.additionalDetails[fieldKey];
+    const idx = arr.indexOf(option);
+    if (idx > -1) arr.splice(idx, 1);
+    else arr.push(option);
   }
 }

@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/social-media-content/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/homepage-sections/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/more-sections/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/entity-field-configs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bookings/**").permitAll()
 
                         // Admin endpoints - require ADMIN role

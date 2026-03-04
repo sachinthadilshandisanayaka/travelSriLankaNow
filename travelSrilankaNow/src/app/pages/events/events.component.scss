@@ -311,6 +311,11 @@
     margin-bottom: $spacing-lg;
     font-size: $font-size-base;
     flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

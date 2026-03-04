@@ -1,12 +1,15 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.travesrilankanow.travesrilankanowbe.entity.converter.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "more_section_items")
@@ -35,6 +38,10 @@ public class MoreSectionItem {
     private String imageUrl;
 
     private String link;
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> additionalDetails = new HashMap<>();
 
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;

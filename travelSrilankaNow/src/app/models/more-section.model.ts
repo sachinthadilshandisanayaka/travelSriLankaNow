@@ -1,3 +1,11 @@
+export interface FieldDefinition {
+  key: string;
+  label: string;
+  type: 'text' | 'number' | 'date' | 'date_range' | 'number_range' | 'select' | 'multi_select';
+  required: boolean;
+  options?: string[];
+}
+
 export interface MoreSection {
   id?: number;
   name: string;
@@ -6,6 +14,7 @@ export interface MoreSection {
   imageUrl?: string;
   displayOrder: number;
   active: boolean;
+  additionalFieldDefinitions?: FieldDefinition[];
   items?: MoreSectionItem[];
   createdAt?: string;
   updatedAt?: string;
@@ -18,6 +27,7 @@ export interface MoreSectionItem {
   description?: string;
   imageUrl?: string;
   link?: string;
+  additionalDetails?: { [key: string]: any };
   displayOrder: number;
   active: boolean;
   createdAt?: string;

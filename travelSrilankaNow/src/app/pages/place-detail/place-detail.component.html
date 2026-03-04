@@ -75,6 +75,19 @@
             </ul>
           </section>
 
+          <!-- Additional Information -->
+          <section class="detail-section additional-details" *ngIf="place && hasDetails(place)">
+            <h2>Additional Information</h2>
+            <div class="additional-details__grid">
+              <ng-container *ngFor="let entry of place.additionalDetails | keyvalue">
+                <div class="additional-details__item" *ngIf="isNonEmpty(entry.value)">
+                  <span class="additional-details__label">{{ getFieldLabel(entry.key) }}</span>
+                  <span class="additional-details__value">{{ formatValue(entry.value) }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </section>
+
           <!-- Image Gallery -->
           <section class="detail-section" *ngIf="place.images && place.images.length > 0">
             <h2>Photo Gallery</h2>

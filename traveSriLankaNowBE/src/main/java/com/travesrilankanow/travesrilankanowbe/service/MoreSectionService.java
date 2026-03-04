@@ -61,6 +61,7 @@ public class MoreSectionService {
         section.setImageUrl(sectionDetails.getImageUrl());
         section.setDisplayOrder(sectionDetails.getDisplayOrder());
         section.setActive(sectionDetails.getActive());
+        section.setAdditionalFieldDefinitions(sectionDetails.getAdditionalFieldDefinitions());
         return moreSectionRepository.save(section);
     }
 
@@ -112,6 +113,7 @@ public class MoreSectionService {
         item.setDescription(itemDetails.getDescription());
         item.setImageUrl(itemDetails.getImageUrl());
         item.setLink(itemDetails.getLink());
+        item.setAdditionalDetails(itemDetails.getAdditionalDetails());
         item.setDisplayOrder(itemDetails.getDisplayOrder());
         item.setActive(itemDetails.getActive());
         return moreSectionItemRepository.save(item);

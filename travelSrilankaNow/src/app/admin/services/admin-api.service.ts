@@ -2,6 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { FieldDefinition } from '../../models/more-section.model';
+
+export interface EntityFieldConfig {
+  id?: number;
+  entityType: string;
+  fieldDefinitions: FieldDefinition[];
+}
 
 export interface PageResponse<T> {
   content: T[];
@@ -375,5 +382,14 @@ export class AdminApiService {
 
   toggleMoreSectionItemActive(itemId: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/more-sections/items/${itemId}/toggle-active`, {});
+  }
+
+  // Entity Field Configs
+  getEntityFieldConfig(entityType: string): Observable<EntityFieldConfig> {
+    return this.http.get<EntityFieldConfig>(`${this.apiUrl}/entity-field-configs/${entityType}`);
+  }
+
+  upsertEntityFieldConfig(entityType: string, fieldDefinitions: FieldDefinition[]): Observable<EntityFieldConfig> {
+    return this.http.put<EntityFieldConfig>(`${this.apiUrl}/entity-field-configs/${entityType}`, fieldDefinitions);
   }
 }
