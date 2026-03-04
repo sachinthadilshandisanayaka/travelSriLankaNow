@@ -7,6 +7,11 @@
         <p>Add, edit, or remove events and activities</p>
       </div>
       <div class="admin-header__actions">
+        <button type="button" class="admin-btn admin-btn--outline" (click)="openFieldConfigModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Manage Fields
+          <span *ngIf="fieldDefinitions.length > 0" class="field-count-badge">{{ fieldDefinitions.length }}</span>
+        </button>
         <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -269,6 +274,73 @@
             <p class="admin-form__hint">Separate items with commas</p>
           </div>
         </div>
+
+        <!-- Dynamic Additional Details -->
+        <div *ngIf="fieldDefinitions.length > 0" class="dynamic-fields">
+          <div class="dynamic-fields__header">
+            <h4>Additional Details</h4>
+          </div>
+          <div class="dynamic-fields__grid">
+            <div *ngFor="let field of fieldDefinitions" class="form-group">
+              <label>{{ field.label }}<span *ngIf="field.required" class="required">*</span></label>
+
+              <!-- text -->
+              <input *ngIf="field.type === 'text'" type="text" class="admin-input"
+                     [value]="additionalDetails[field.key] || ''"
+                     (input)="additionalDetails[field.key] = $any($event.target).value">
+
+              <!-- number -->
+              <input *ngIf="field.type === 'number'" type="number" class="admin-input"
+                     [value]="additionalDetails[field.key]"
+                     (input)="additionalDetails[field.key] = +$any($event.target).value">
+
+              <!-- date -->
+              <input *ngIf="field.type === 'date'" type="date" class="admin-input"
+                     [value]="additionalDetails[field.key] || ''"
+                     (input)="additionalDetails[field.key] = $any($event.target).value">
+
+              <!-- date_range -->
+              <div *ngIf="field.type === 'date_range'" class="range-inputs">
+                <input type="date" class="admin-input"
+                       [value]="additionalDetails[field.key]?.from || ''"
+                       (input)="additionalDetails[field.key] = {from: $any($event.target).value, to: additionalDetails[field.key]?.to || ''}">
+                <span class="range-separator">to</span>
+                <input type="date" class="admin-input"
+                       [value]="additionalDetails[field.key]?.to || ''"
+                       (input)="additionalDetails[field.key] = {from: additionalDetails[field.key]?.from || '', to: $any($event.target).value}">
+              </div>
+
+              <!-- number_range -->
+              <div *ngIf="field.type === 'number_range'" class="range-inputs">
+                <input type="number" class="admin-input" placeholder="Min"
+                       [value]="additionalDetails[field.key]?.min"
+                       (input)="additionalDetails[field.key] = {min: +$any($event.target).value, max: additionalDetails[field.key]?.max}">
+                <span class="range-separator">to</span>
+                <input type="number" class="admin-input" placeholder="Max"
+                       [value]="additionalDetails[field.key]?.max"
+                       (input)="additionalDetails[field.key] = {min: additionalDetails[field.key]?.min, max: +$any($event.target).value}">
+              </div>
+
+              <!-- select -->
+              <select *ngIf="field.type === 'select'" class="admin-select"
+                      [value]="additionalDetails[field.key] || ''"
+                      (change)="additionalDetails[field.key] = $any($event.target).value">
+                <option value="">-- Select --</option>
+                <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <!-- multi_select -->
+              <div *ngIf="field.type === 'multi_select'" class="multi-select-options">
+                <label *ngFor="let opt of field.options" class="multi-select-option">
+                  <input type="checkbox"
+                         [checked]="isOptionSelected(field.key, opt)"
+                         (change)="toggleMultiSelectOption(field.key, opt)">
+                  <span>{{ opt }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="admin-modal__footer">
@@ -296,6 +368,67 @@
         <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
         <button class="admin-btn admin-btn--danger" (click)="deleteEvent()">Delete</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Field Config Modal -->
+<div *ngIf="showFieldConfigModal" class="admin-modal field-config-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>Manage Additional Fields for Events</h2>
+      <button class="admin-modal__close" (click)="closeFieldConfigModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <p class="field-config-hint">Define custom fields that will appear in every event form. Changes apply to all events.</p>
+
+      <div class="field-def-list">
+        <div *ngFor="let field of tempFieldDefinitions; let i = index" class="field-def-row">
+          <div class="field-def-row__main">
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Label</label>
+              <input class="admin-input admin-input--sm" [value]="field.label"
+                     (input)="field.label = $any($event.target).value; onFieldLabelChange(field)" placeholder="e.g., Difficulty Level">
+            </div>
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Key</label>
+              <input class="admin-input admin-input--sm" [value]="field.key" readonly placeholder="auto_generated">
+            </div>
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Type</label>
+              <select class="admin-select admin-select--sm" [value]="field.type"
+                      (change)="field.type = $any($event.target).value; onFieldTypeChange(field)">
+                <option *ngFor="let ft of fieldTypes" [value]="ft.value">{{ ft.label }}</option>
+              </select>
+            </div>
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Required</label>
+              <input type="checkbox" [checked]="field.required" (change)="field.required = $any($event.target).checked">
+            </div>
+            <button type="button" class="admin-btn admin-btn--ghost-danger field-def-row__remove" (click)="removeFieldDefinition(i)" title="Remove field">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+          <div *ngIf="field.type === 'select' || field.type === 'multi_select'" class="field-def-row__options">
+            <label class="admin-form__label">Options (comma-separated)</label>
+            <input class="admin-input admin-input--sm" [value]="getOptionsString(field)"
+                   (input)="setOptionsFromString(field, $any($event.target).value)" placeholder="Option 1, Option 2, Option 3">
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="admin-btn admin-btn--outline" (click)="addFieldDefinition()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Field
+      </button>
+    </div>
+    <div class="admin-modal__footer">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeFieldConfigModal()">Cancel</button>
+      <button type="button" class="admin-btn admin-btn--primary" (click)="saveFieldConfig()">Save Field Configuration</button>
     </div>
   </div>
 </div>

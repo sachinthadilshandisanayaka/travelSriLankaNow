@@ -1,12 +1,15 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
+import com.travesrilankanow.travesrilankanowbe.entity.converter.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "events")
@@ -71,6 +74,10 @@ public class Event {
 
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer displayOrder = 0;
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> additionalDetails = new HashMap<>();
 
     @PrePersist
     private void setDefaults() {

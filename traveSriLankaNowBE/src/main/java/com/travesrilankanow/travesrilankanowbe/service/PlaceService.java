@@ -128,6 +128,9 @@ public class PlaceService {
         if (place.getDisplayOrder() != null) {
             existing.setDisplayOrder(place.getDisplayOrder());
         }
+        if (place.getAdditionalDetails() != null) {
+            existing.setAdditionalDetails(place.getAdditionalDetails());
+        }
 
         return placeRepository.save(existing);
     }

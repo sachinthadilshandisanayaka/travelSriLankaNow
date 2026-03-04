@@ -25,4 +25,5 @@ export interface Place {
   };
   openingHours?: string;
   featured: boolean;
+  additionalDetails?: { [key: string]: any };
 }

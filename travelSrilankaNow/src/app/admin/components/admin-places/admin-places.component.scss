@@ -28,3 +28,200 @@
     text-decoration: underline;
   }
 }
+
+// Field count badge on Manage Fields button
+.field-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  background: $admin-navy;
+  color: $admin-white;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: $admin-radius-full;
+  margin-left: 0.25rem;
+}
+
+// Field Config Modal
+.field-config-modal {
+  .admin-modal__content {
+    max-width: 56rem;
+  }
+}
+
+.field-config-hint {
+  font-size: 0.875rem;
+  color: $admin-gray-600;
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+  padding: 0.75rem 1rem;
+  background: $admin-gray-50;
+  border-left: 3px solid $admin-navy;
+  border-radius: 0 $admin-radius $admin-radius 0;
+}
+
+// Field Definition List
+.field-def-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  &__empty {
+    padding: 1.5rem;
+    text-align: center;
+    background: $admin-gray-50;
+    border: 1px dashed $admin-gray-300;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    color: $admin-gray-500;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.field-def-row {
+  background: $admin-gray-50;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  padding: 0.75rem;
+  animation: fadeIn 0.2s ease;
+
+  &__main {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__input-group {
+    flex: 1;
+    min-width: 120px;
+
+    &--small {
+      flex: 0 0 auto;
+      min-width: 100px;
+      max-width: 140px;
+    }
+
+    &--toggle {
+      flex: 0 0 auto;
+      min-width: 70px;
+    }
+
+    .admin-form__label {
+      font-size: 0.6875rem;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  &__remove {
+    flex: 0 0 auto;
+    margin-bottom: 0.125rem;
+  }
+
+  &__options {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed $admin-gray-200;
+
+    .admin-form__label {
+      font-size: 0.6875rem;
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+// Dynamic Fields Section in Add/Edit Modal
+.dynamic-fields {
+  &__header {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: $admin-gray-800;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: $admin-navy;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Range inputs (date range, number range)
+.range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .admin-input {
+    flex: 1;
+  }
+
+  &__separator {
+    font-size: 0.75rem;
+    color: $admin-gray-500;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+}
+
+// Multi-select options
+.multi-select-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.multi-select-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: $admin-white;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  font-size: 0.8125rem;
+  color: $admin-gray-700;
+  cursor: pointer;
+  transition: all $admin-transition;
+
+  input[type="checkbox"] {
+    accent-color: $admin-navy;
+    cursor: pointer;
+  }
+
+  &:hover {
+    border-color: $admin-navy;
+    background: $admin-sky-light;
+  }
+}
+
+// Smaller input/select variants for field config rows
+.admin-input--sm {
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.625rem;
+}
+
+.admin-select--sm {
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.625rem;
+}

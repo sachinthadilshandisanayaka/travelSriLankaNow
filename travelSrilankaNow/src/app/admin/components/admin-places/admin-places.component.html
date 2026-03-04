@@ -7,6 +7,13 @@
         <p>Hotels, restaurants, cafes, and more</p>
       </div>
       <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="openFieldConfigModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+          </svg>
+          <span>Manage Fields</span>
+          <span *ngIf="fieldDefinitions.length > 0" class="field-count-badge">{{ fieldDefinitions.length }}</span>
+        </button>
         <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -339,6 +346,101 @@
             Use <a href="https://www.google.com/maps" target="_blank" class="admin-link">Google Maps</a> to find coordinates
           </p>
         </div>
+
+        <!-- Dynamic Additional Details Section -->
+        <div class="admin-form__section dynamic-fields" *ngIf="fieldDefinitions.length > 0">
+          <div class="dynamic-fields__header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            Additional Details
+          </div>
+          <div class="dynamic-fields__grid">
+            <ng-container *ngFor="let field of fieldDefinitions">
+              <!-- Text -->
+              <div class="admin-form__group" *ngIf="field.type === 'text'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <input class="admin-input"
+                       [value]="additionalDetails[field.key] || ''"
+                       (input)="additionalDetails[field.key] = $any($event.target).value"
+                       [placeholder]="'Enter ' + field.label">
+              </div>
+
+              <!-- Number -->
+              <div class="admin-form__group" *ngIf="field.type === 'number'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <input class="admin-input" type="number"
+                       [value]="additionalDetails[field.key] || ''"
+                       (input)="additionalDetails[field.key] = $any($event.target).value === '' ? null : +$any($event.target).value"
+                       [placeholder]="'Enter ' + field.label">
+              </div>
+
+              <!-- Date -->
+              <div class="admin-form__group" *ngIf="field.type === 'date'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <input class="admin-input" type="date"
+                       [value]="additionalDetails[field.key] || ''"
+                       (input)="additionalDetails[field.key] = $any($event.target).value">
+              </div>
+
+              <!-- Date Range -->
+              <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'date_range'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <div class="range-inputs">
+                  <input class="admin-input" type="date"
+                         [value]="additionalDetails[field.key]?.from || ''"
+                         (input)="additionalDetails[field.key].from = $any($event.target).value"
+                         placeholder="From">
+                  <span class="range-inputs__separator">to</span>
+                  <input class="admin-input" type="date"
+                         [value]="additionalDetails[field.key]?.to || ''"
+                         (input)="additionalDetails[field.key].to = $any($event.target).value"
+                         placeholder="To">
+                </div>
+              </div>
+
+              <!-- Number Range -->
+              <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'number_range'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <div class="range-inputs">
+                  <input class="admin-input" type="number"
+                         [value]="additionalDetails[field.key]?.min || ''"
+                         (input)="additionalDetails[field.key].min = $any($event.target).value === '' ? null : +$any($event.target).value"
+                         placeholder="Min">
+                  <span class="range-inputs__separator">to</span>
+                  <input class="admin-input" type="number"
+                         [value]="additionalDetails[field.key]?.max || ''"
+                         (input)="additionalDetails[field.key].max = $any($event.target).value === '' ? null : +$any($event.target).value"
+                         placeholder="Max">
+                </div>
+              </div>
+
+              <!-- Select -->
+              <div class="admin-form__group" *ngIf="field.type === 'select'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <select class="admin-select"
+                        [value]="additionalDetails[field.key] || ''"
+                        (change)="additionalDetails[field.key] = $any($event.target).value || null">
+                  <option value="">-- Select --</option>
+                  <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+                </select>
+              </div>
+
+              <!-- Multi Select -->
+              <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'multi_select'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <div class="multi-select-options">
+                  <label class="multi-select-option" *ngFor="let opt of field.options">
+                    <input type="checkbox"
+                           [checked]="isOptionSelected(field.key, opt)"
+                           (change)="toggleMultiSelectOption(field.key, opt)">
+                    <span>{{ opt }}</span>
+                  </label>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
       </div>
 
       <div class="admin-modal__footer">
@@ -348,6 +450,93 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Field Config Modal -->
+<div *ngIf="showFieldConfigModal" class="admin-modal field-config-modal">
+  <div class="admin-modal__content admin-modal__content--large">
+    <div class="admin-modal__header">
+      <h2>Manage Additional Fields for Places</h2>
+      <button class="admin-modal__close" (click)="closeFieldConfigModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <p class="field-config-hint">
+        Define custom fields that appear in the add/edit form for every place. These allow you to capture structured data such as Entry Fee, Best Season, Facilities, etc.
+      </p>
+
+      <div class="field-def-list">
+        <div class="field-def-row" *ngFor="let field of tempFieldDefinitions; let i = index">
+          <div class="field-def-row__main">
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Label</label>
+              <input class="admin-input admin-input--sm"
+                     [value]="field.label"
+                     (input)="field.label = $any($event.target).value; onFieldLabelChange(field)"
+                     placeholder="e.g., Entry Fee">
+            </div>
+            <div class="field-def-row__input-group field-def-row__input-group--small">
+              <label class="admin-form__label">Key</label>
+              <input class="admin-input admin-input--sm"
+                     [value]="field.key"
+                     placeholder="auto_generated"
+                     readonly>
+            </div>
+            <div class="field-def-row__input-group field-def-row__input-group--small">
+              <label class="admin-form__label">Type</label>
+              <select class="admin-select admin-select--sm"
+                      [value]="field.type"
+                      (change)="field.type = $any($event.target).value; onFieldTypeChange(field)">
+                <option *ngFor="let ft of fieldTypes" [value]="ft.value">{{ ft.label }}</option>
+              </select>
+            </div>
+            <div class="field-def-row__input-group field-def-row__input-group--toggle">
+              <label class="admin-form__label">Required</label>
+              <label class="admin-toggle admin-toggle--sm">
+                <input type="checkbox"
+                       [checked]="field.required"
+                       (change)="field.required = $any($event.target).checked">
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <button type="button"
+                    class="admin-btn admin-btn--ghost-danger field-def-row__remove"
+                    (click)="removeFieldDefinition(i)"
+                    title="Remove field">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="field-def-row__options" *ngIf="field.type === 'select' || field.type === 'multi_select'">
+            <label class="admin-form__label">Options (comma-separated)</label>
+            <input class="admin-input"
+                   [value]="getOptionsString(field)"
+                   (input)="setOptionsFromString(field, $any($event.target).value)"
+                   placeholder="Option 1, Option 2, Option 3">
+          </div>
+        </div>
+
+        <div *ngIf="tempFieldDefinitions.length === 0" class="field-def-list__empty">
+          <p>No fields defined yet. Click "Add Field" to create custom fields for places.</p>
+        </div>
+      </div>
+
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="addFieldDefinition()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Field
+      </button>
+    </div>
+    <div class="admin-modal__footer">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeFieldConfigModal()">Cancel</button>
+      <button type="button" class="admin-btn admin-btn--primary" (click)="saveFieldConfig()">Save Field Configuration</button>
+    </div>
   </div>
 </div>
 

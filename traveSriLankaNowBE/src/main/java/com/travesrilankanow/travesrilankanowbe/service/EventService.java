@@ -114,6 +114,9 @@ public class EventService {
         if (event.getImages() != null) {
             existing.setImages(event.getImages());
         }
+        if (event.getAdditionalDetails() != null) {
+            existing.setAdditionalDetails(event.getAdditionalDetails());
+        }
 
         return eventRepository.save(existing);
     }
