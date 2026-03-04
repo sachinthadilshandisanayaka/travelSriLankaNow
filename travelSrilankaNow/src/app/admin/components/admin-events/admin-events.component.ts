@@ -95,7 +95,7 @@ export class AdminEventsComponent implements OnInit {
     this.eventForm.reset({
       category: this.categories.length > 0 ? this.categories[0].code : '',
       price: 0,
-      maxParticipants: 0,
+      maxParticipants: 1,
       availableSpots: 0,
       rating: 0,
       featured: false,

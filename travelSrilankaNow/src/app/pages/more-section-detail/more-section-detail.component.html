@@ -34,6 +34,15 @@
             <h3 class="item-card__title">{{ item.title }}</h3>
             <p class="item-card__short-desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
             <p class="item-card__desc" *ngIf="item.description">{{ item.description }}</p>
+            <!-- Additional Details -->
+            <div class="item-card__details" *ngIf="item.additionalDetails && hasDetails(item)">
+              <div class="item-card__detail-row" *ngFor="let entry of item.additionalDetails | keyvalue">
+                <ng-container *ngIf="isNonEmpty(entry.value)">
+                  <span class="item-card__detail-label">{{ getFieldLabel(entry.key) }}</span>
+                  <span class="item-card__detail-value">{{ formatValue(entry.value) }}</span>
+                </ng-container>
+              </div>
+            </div>
             <a *ngIf="item.link" [href]="item.link" target="_blank" class="item-card__link">
               Learn More
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

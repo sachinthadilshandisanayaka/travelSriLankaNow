@@ -1,5 +1,6 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
+import com.travesrilankanow.travesrilankanowbe.entity.converter.JsonListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "more_sections")
@@ -36,6 +38,10 @@ public class MoreSection {
 
     @Column(nullable = false)
     private Boolean active = true;
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonListConverter.class)
+    private List<Map<String, Object>> additionalFieldDefinitions = new ArrayList<>();
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")

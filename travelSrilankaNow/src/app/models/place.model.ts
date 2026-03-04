@@ -10,6 +10,7 @@ export interface Place {
   region: 'north' | 'south' | 'east' | 'west' | 'central';
   rating: number;
   priceRange: '$' | '$$' | '$$$' | '$$$$';
+  price?: number;
   cuisine?: string[];
   amenities: string[];
   contact: {

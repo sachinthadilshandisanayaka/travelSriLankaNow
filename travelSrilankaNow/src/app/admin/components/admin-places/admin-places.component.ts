@@ -47,6 +47,7 @@ export class AdminPlacesComponent implements OnInit {
       region: ['', Validators.required],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
       priceRange: ['', Validators.required],
+      price: [null, [Validators.min(0)]],
       phone: [''],
       email: ['', Validators.email],
       website: [''],

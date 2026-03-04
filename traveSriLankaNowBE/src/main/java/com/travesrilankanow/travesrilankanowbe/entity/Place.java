@@ -47,6 +47,8 @@ public class Place {
 
     private String priceRange;
 
+    private Double price;
+
     @ElementCollection
     @CollectionTable(name = "place_cuisine", joinColumns = @JoinColumn(name = "place_id"))
     @Column(name = "cuisine")

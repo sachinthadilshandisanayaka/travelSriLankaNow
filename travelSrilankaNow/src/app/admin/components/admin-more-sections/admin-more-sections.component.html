@@ -161,6 +161,13 @@
             </div>
             <p class="item-card__desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
             <span class="item-card__link" *ngIf="item.link">{{ item.link }}</span>
+            <!-- Additional Details -->
+            <div class="item-card__details" *ngIf="hasAdditionalDetails(item)">
+              <div class="item-card__detail" *ngFor="let key of (item.additionalDetails | keyvalue)">
+                <span class="item-card__detail-label">{{ getFieldLabel(key.key) }}</span>
+                <span class="item-card__detail-value">{{ formatDetailValue(key.value, key.key) }}</span>
+              </div>
+            </div>
             <div class="item-card__actions">
               <button class="admin-btn admin-btn--ghost" (click)="openEditItem(item)" title="Edit">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -228,6 +235,57 @@
           </label>
         </div>
       </div>
+
+      <!-- Additional Field Definitions -->
+      <div class="field-defs">
+        <div class="field-defs__header">
+          <h4 class="field-defs__title">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            Additional Fields
+          </h4>
+          <button type="button" class="admin-btn admin-btn--sky" (click)="addFieldDefinition()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Field
+          </button>
+        </div>
+        <p class="field-defs__hint" *ngIf="sectionForm.additionalFieldDefinitions?.length === 0">
+          Define custom fields that items in this section can fill in (e.g., Entry Fee, Best Season, Duration).
+        </p>
+        <div class="field-defs__list">
+          <div class="field-def-row" *ngFor="let field of sectionForm.additionalFieldDefinitions; let i = index">
+            <div class="field-def-row__main">
+              <div class="field-def-row__input-group">
+                <label class="admin-form__label">Label</label>
+                <input class="admin-input" [(ngModel)]="field.label" (ngModelChange)="onFieldLabelChange(field)" placeholder="e.g., Entry Fee">
+              </div>
+              <div class="field-def-row__input-group field-def-row__input-group--small">
+                <label class="admin-form__label">Key</label>
+                <input class="admin-input" [(ngModel)]="field.key" placeholder="auto_generated" readonly>
+              </div>
+              <div class="field-def-row__input-group field-def-row__input-group--small">
+                <label class="admin-form__label">Type</label>
+                <select class="admin-select" [(ngModel)]="field.type" (ngModelChange)="onFieldTypeChange(field)">
+                  <option *ngFor="let ft of fieldTypes" [value]="ft.value">{{ ft.label }}</option>
+                </select>
+              </div>
+              <div class="field-def-row__input-group field-def-row__input-group--toggle">
+                <label class="admin-form__label">Required</label>
+                <label class="admin-toggle admin-toggle--sm">
+                  <input type="checkbox" [(ngModel)]="field.required">
+                  <span class="admin-toggle__slider"></span>
+                </label>
+              </div>
+              <button type="button" class="admin-btn admin-btn--ghost-danger field-def-row__remove" (click)="removeFieldDefinition(i)" title="Remove field">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+            <div class="field-def-row__options" *ngIf="hasSelectType(field)">
+              <label class="admin-form__label">Options (comma-separated)</label>
+              <input class="admin-input" [ngModel]="getOptionsString(field)" (ngModelChange)="setOptionsFromString(field, $event)" placeholder="Option 1, Option 2, Option 3">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="admin-modal__footer">
       <button class="admin-btn admin-btn--secondary" (click)="closeSectionModal()">Cancel</button>
@@ -274,6 +332,76 @@
         <input class="admin-input" [(ngModel)]="itemForm.link" placeholder="https://example.com/page">
         <span class="admin-form__hint">Full URL including https://. Leave empty if no link needed.</span>
       </div>
+
+      <!-- Dynamic Additional Details Fields -->
+      <div class="dynamic-fields" *ngIf="getFieldDefinitions().length > 0">
+        <div class="dynamic-fields__header">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+          Additional Details
+        </div>
+        <div class="dynamic-fields__grid">
+          <ng-container *ngFor="let field of getFieldDefinitions()">
+            <!-- Text -->
+            <div class="admin-form__group" *ngIf="field.type === 'text'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <input class="admin-input" [(ngModel)]="itemForm.additionalDetails[field.key]" [placeholder]="'Enter ' + field.label">
+            </div>
+
+            <!-- Number -->
+            <div class="admin-form__group" *ngIf="field.type === 'number'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <input class="admin-input" type="number" [(ngModel)]="itemForm.additionalDetails[field.key]" [placeholder]="'Enter ' + field.label">
+            </div>
+
+            <!-- Date -->
+            <div class="admin-form__group" *ngIf="field.type === 'date'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <input class="admin-input" type="date" [(ngModel)]="itemForm.additionalDetails[field.key]">
+            </div>
+
+            <!-- Date Range -->
+            <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'date_range'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <div class="range-inputs">
+                <input class="admin-input" type="date" [(ngModel)]="itemForm.additionalDetails[field.key].from" placeholder="From">
+                <span class="range-inputs__separator">to</span>
+                <input class="admin-input" type="date" [(ngModel)]="itemForm.additionalDetails[field.key].to" placeholder="To">
+              </div>
+            </div>
+
+            <!-- Number Range -->
+            <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'number_range'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <div class="range-inputs">
+                <input class="admin-input" type="number" [(ngModel)]="itemForm.additionalDetails[field.key].min" placeholder="Min">
+                <span class="range-inputs__separator">to</span>
+                <input class="admin-input" type="number" [(ngModel)]="itemForm.additionalDetails[field.key].max" placeholder="Max">
+              </div>
+            </div>
+
+            <!-- Select -->
+            <div class="admin-form__group" *ngIf="field.type === 'select'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <select class="admin-select" [(ngModel)]="itemForm.additionalDetails[field.key]">
+                <option [ngValue]="null">-- Select --</option>
+                <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+
+            <!-- Multi Select -->
+            <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'multi_select'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <div class="multi-select-options">
+                <label class="multi-select-option" *ngFor="let opt of field.options">
+                  <input type="checkbox" [checked]="isOptionSelected(field.key, opt)" (change)="toggleMultiSelectOption(field.key, opt)">
+                  <span>{{ opt }}</span>
+                </label>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
       <div class="admin-form__grid">
         <div class="admin-form__group">
           <label class="admin-form__label">Display Order</label>
