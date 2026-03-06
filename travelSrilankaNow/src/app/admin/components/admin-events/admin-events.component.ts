@@ -42,7 +42,8 @@ export class AdminEventsComponent implements OnInit {
     { value: 'date_range', label: 'Date Range' },
     { value: 'number_range', label: 'Number Range' },
     { value: 'select', label: 'Single Select' },
-    { value: 'multi_select', label: 'Multi Select' }
+    { value: 'multi_select', label: 'Multi Select' },
+    { value: 'link', label: 'Link' }
   ];
 
   constructor(
