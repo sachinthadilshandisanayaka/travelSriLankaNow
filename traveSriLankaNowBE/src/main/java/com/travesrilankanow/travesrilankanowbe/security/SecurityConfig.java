@@ -74,7 +74,9 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "https://travelsrilankanow.lk",
-                "https://www.travelsrilankanow.lk"
+                "https://www.travelsrilankanow.lk",
+                "http://95.216.188.135",
+                "https://95.216.188.135"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList(
