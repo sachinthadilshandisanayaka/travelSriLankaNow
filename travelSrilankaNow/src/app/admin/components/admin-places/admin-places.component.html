@@ -415,6 +415,15 @@
                 </div>
               </div>
 
+              <!-- Link -->
+              <div class="admin-form__group" *ngIf="field.type === 'link'">
+                <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+                <input class="admin-input" type="url"
+                       [value]="additionalDetails[field.key] || ''"
+                       (input)="additionalDetails[field.key] = $any($event.target).value"
+                       placeholder="https://example.com">
+              </div>
+
               <!-- Select -->
               <div class="admin-form__group" *ngIf="field.type === 'select'">
                 <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>

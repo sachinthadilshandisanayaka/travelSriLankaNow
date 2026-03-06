@@ -1,7 +1,7 @@
 export interface FieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'date_range' | 'number_range' | 'select' | 'multi_select';
+  type: 'text' | 'number' | 'date' | 'date_range' | 'number_range' | 'select' | 'multi_select' | 'link';
   required: boolean;
   options?: string[];
 }

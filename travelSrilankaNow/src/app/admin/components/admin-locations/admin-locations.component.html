@@ -267,6 +267,7 @@
                 <span class="range-separator">to</span>
                 <input type="number" class="admin-input" placeholder="Max" [value]="additionalDetails[field.key]?.max" (input)="additionalDetails[field.key] = {min: additionalDetails[field.key]?.min, max: +$any($event.target).value}">
               </div>
+              <input *ngIf="field.type === 'link'" type="url" class="admin-input" [value]="additionalDetails[field.key] || ''" (input)="additionalDetails[field.key] = $any($event.target).value" placeholder="https://example.com">
               <select *ngIf="field.type === 'select'" class="admin-select" [value]="additionalDetails[field.key] || ''" (change)="additionalDetails[field.key] = $any($event.target).value">
                 <option value="">-- Select --</option>
                 <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>

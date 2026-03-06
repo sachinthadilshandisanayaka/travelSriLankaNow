@@ -321,6 +321,12 @@
                        (input)="additionalDetails[field.key] = {min: additionalDetails[field.key]?.min, max: +$any($event.target).value}">
               </div>
 
+              <!-- link -->
+              <input *ngIf="field.type === 'link'" type="url" class="admin-input"
+                     [value]="additionalDetails[field.key] || ''"
+                     (input)="additionalDetails[field.key] = $any($event.target).value"
+                     placeholder="https://example.com">
+
               <!-- select -->
               <select *ngIf="field.type === 'select'" class="admin-select"
                       [value]="additionalDetails[field.key] || ''"

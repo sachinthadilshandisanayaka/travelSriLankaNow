@@ -27,10 +27,10 @@
 
       <!-- Loading -->
       <div class="admin-loader" *ngIf="isLoading">
-        <svg viewBox="0 0 50 50">
-          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80,200" stroke-dashoffset="0"></circle>
+        <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p>Loading sections<span class="admin-loader__dots">...</span></p>
       </div>
 
       <!-- Empty State -->
@@ -117,10 +117,10 @@
       </header>
 
       <div class="admin-loader" *ngIf="isLoadingItems">
-        <svg viewBox="0 0 50 50">
-          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80,200" stroke-dashoffset="0"></circle>
+        <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p>Loading items<span class="admin-loader__dots">...</span></p>
       </div>
 
       <div class="sections-empty" *ngIf="!isLoadingItems && items.length === 0">
@@ -307,30 +307,32 @@
       </button>
     </div>
     <div class="admin-modal__body">
-      <div class="admin-form__group">
-        <label class="admin-form__label">Title *</label>
-        <input class="admin-input" [(ngModel)]="itemForm.title" placeholder="Item title">
-      </div>
-      <div class="admin-form__group">
-        <label class="admin-form__label">Short Description</label>
-        <input class="admin-input" [(ngModel)]="itemForm.shortDescription" placeholder="Brief summary">
-      </div>
-      <div class="admin-form__group">
-        <label class="admin-form__label">Description</label>
-        <textarea class="admin-textarea" [(ngModel)]="itemForm.description" rows="4" placeholder="Full description"></textarea>
-      </div>
-      <div class="admin-form__group">
-        <app-image-upload
-          [folder]="'more-sections/items'"
-          [label]="'Item Image'"
-          [currentImageUrl]="itemForm.imageUrl"
-          (imageUploaded)="onItemImageUploaded($event)">
-        </app-image-upload>
-      </div>
-      <div class="admin-form__group">
-        <label class="admin-form__label">Link URL</label>
-        <input class="admin-input" [(ngModel)]="itemForm.link" placeholder="https://example.com/page">
-        <span class="admin-form__hint">Full URL including https://. Leave empty if no link needed.</span>
+      <div class="admin-form__grid">
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Title *</label>
+          <input class="admin-input" [(ngModel)]="itemForm.title" placeholder="Item title">
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Short Description</label>
+          <input class="admin-input" [(ngModel)]="itemForm.shortDescription" placeholder="Brief summary">
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Description</label>
+          <textarea class="admin-textarea" [(ngModel)]="itemForm.description" rows="4" placeholder="Full description"></textarea>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <app-image-upload
+            [folder]="'more-sections/items'"
+            [label]="'Item Image'"
+            [currentImageUrl]="itemForm.imageUrl"
+            (imageUploaded)="onItemImageUploaded($event)">
+          </app-image-upload>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Link URL</label>
+          <input class="admin-input" [(ngModel)]="itemForm.link" placeholder="https://example.com/page">
+          <span class="admin-form__hint">Full URL including https://. Leave empty if no link needed.</span>
+        </div>
       </div>
 
       <!-- Dynamic Additional Details Fields -->
@@ -377,6 +379,13 @@
                 <span class="range-inputs__separator">to</span>
                 <input class="admin-input" type="number" [(ngModel)]="itemForm.additionalDetails[field.key].max" placeholder="Max">
               </div>
+            </div>
+
+            <!-- Link -->
+            <div class="admin-form__group" *ngIf="field.type === 'link'">
+              <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
+              <input class="admin-input" type="url" [(ngModel)]="itemForm.additionalDetails[field.key]" [placeholder]="'https://example.com'">
+              <span class="admin-form__hint">Enter a full URL including https://</span>
             </div>
 
             <!-- Select -->

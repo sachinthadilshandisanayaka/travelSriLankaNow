@@ -101,6 +101,11 @@ export class LocationDetailComponent implements OnInit {
     return def?.label || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
+  isLinkField(key: string): boolean {
+    const def = this.fieldDefinitions.find(d => d.key === key);
+    return def?.type === 'link';
+  }
+
   getCategoryIcon(category: string): string {
     const icons: { [key: string]: string } = {
       'beach': '🏖️',

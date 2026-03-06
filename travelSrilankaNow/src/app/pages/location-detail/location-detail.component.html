@@ -83,7 +83,8 @@
               <ng-container *ngFor="let entry of location.additionalDetails | keyvalue">
                 <div class="additional-details__item" *ngIf="isNonEmpty(entry.value)">
                   <span class="additional-details__label">{{ getFieldLabel(entry.key) }}</span>
-                  <span class="additional-details__value">{{ formatValue(entry.value) }}</span>
+                  <a *ngIf="isLinkField(entry.key)" class="additional-details__link" [href]="entry.value" target="_blank" rel="noopener noreferrer">{{ entry.value }}</a>
+                  <span *ngIf="!isLinkField(entry.key)" class="additional-details__value">{{ formatValue(entry.value) }}</span>
                 </div>
               </ng-container>
             </div>
