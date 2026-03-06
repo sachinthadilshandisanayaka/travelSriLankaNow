@@ -298,6 +298,20 @@ $navbar-height: 80px;
     color: #1e293b;
     font-weight: 500;
   }
+
+  &__link {
+    font-size: 0.95rem;
+    color: #2563eb;
+    font-weight: 500;
+    text-decoration: none;
+    word-break: break-all;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+  }
 }
 
 // Gallery Section

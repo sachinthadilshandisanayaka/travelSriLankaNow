@@ -230,6 +230,20 @@
     line-height: $line-height-relaxed;
   }
 
+  &__detail-link {
+    color: #2563eb;
+    font-weight: 500;
+    text-decoration: none;
+    word-break: break-all;
+    line-height: $line-height-relaxed;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+  }
+
   &__link {
     display: inline-flex;
     align-items: center;

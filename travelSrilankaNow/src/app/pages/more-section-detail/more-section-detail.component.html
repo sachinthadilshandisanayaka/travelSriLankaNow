@@ -39,7 +39,8 @@
               <div class="item-card__detail-row" *ngFor="let entry of item.additionalDetails | keyvalue">
                 <ng-container *ngIf="isNonEmpty(entry.value)">
                   <span class="item-card__detail-label">{{ getFieldLabel(entry.key) }}</span>
-                  <span class="item-card__detail-value">{{ formatValue(entry.value) }}</span>
+                  <a *ngIf="isLinkField(entry.key)" class="item-card__detail-link" [href]="entry.value" target="_blank" rel="noopener noreferrer">{{ entry.value }}</a>
+                  <span *ngIf="!isLinkField(entry.key)" class="item-card__detail-value">{{ formatValue(entry.value) }}</span>
                 </ng-container>
               </div>
             </div>

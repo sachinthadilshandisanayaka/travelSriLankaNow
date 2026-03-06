@@ -75,4 +75,10 @@ export class MoreSectionDetailComponent implements OnInit {
     const def = defs.find(d => d.key === key);
     return def?.label || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
+
+  isLinkField(key: string): boolean {
+    const defs = this.section?.additionalFieldDefinitions || [];
+    const def = defs.find(d => d.key === key);
+    return def?.type === 'link';
+  }
 }
