@@ -81,14 +81,10 @@
 
 // Grid view toggle
 .grid-toggle {
-  display: none;
+  display: flex;
   align-items: center;
   gap: $spacing-xs;
   margin-left: auto;
-
-  @include respond-to('md') {
-    display: flex;
-  }
 
   button {
     display: flex;
@@ -113,6 +109,14 @@
       background: $primary-navy;
       border-color: $primary-navy;
       color: $white;
+    }
+
+    &.grid-btn-desktop {
+      display: none;
+
+      @include respond-to('md') {
+        display: flex;
+      }
     }
   }
 }
@@ -327,13 +331,35 @@
   }
 
   // Dynamic grid columns
+  &.grid-1 {
+    grid-template-columns: 1fr;
+
+    @include respond-to('md') {
+      grid-template-columns: 1fr;
+    }
+
+    @include respond-to('lg') {
+      grid-template-columns: 1fr;
+    }
+
+    @include respond-to('xl') {
+      grid-template-columns: 1fr;
+    }
+  }
+
   &.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+
     @include respond-to('md') {
       grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-xl;
     }
+
     @include respond-to('lg') {
       grid-template-columns: repeat(2, 1fr);
     }
+
     @include respond-to('xl') {
       grid-template-columns: repeat(2, 1fr);
     }
