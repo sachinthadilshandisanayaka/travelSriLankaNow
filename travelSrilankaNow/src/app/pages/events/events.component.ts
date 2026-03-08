@@ -17,6 +17,12 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = true;
   errorMessage: string = '';
 
+  // Mobile search toggle
+  isSearchOpen: boolean = false;
+
+  // Grid view options
+  gridColumns: number = 3;
+
   // Pagination properties
   currentPage: number = 0;
   totalPages: number = 0;
@@ -112,6 +118,25 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.searchSubject.next(event.target.value);
   }
 
+  toggleSearch(): void {
+    this.isSearchOpen = !this.isSearchOpen;
+  }
+
+  setGridColumns(columns: number): void {
+    this.gridColumns = columns;
+  }
+
+  hasActiveFilters(): boolean {
+    return this.searchTerm.trim() !== '' || this.selectedCategory !== 'all';
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = '';
+    this.selectedCategory = 'all';
+    this.currentPage = 0;
+    this.loadData();
+  }
+
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
       this.currentPage = page;
@@ -126,7 +151,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     let startPage = Math.max(0, this.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(this.totalPages - 1, startPage + maxVisiblePages - 1);
 
-    if (endPage - startPage + 1 < maxVisiblePages) {
+    if (endPage - startPage < maxVisiblePages - 1) {
       startPage = Math.max(0, endPage - maxVisiblePages + 1);
     }
 
@@ -151,7 +176,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }, options);
 
-    const revealElements = document.querySelectorAll('.reveal:not(.revealed)');
+    const revealElements = document.querySelectorAll('.card-stagger:not(.revealed)');
     revealElements.forEach(element => {
       if (this.observer) {
         this.observer.observe(element);

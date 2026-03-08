@@ -42,12 +42,16 @@ public class LocationService {
     }
 
     public org.springframework.data.domain.Page<Location> getLocationsPaginatedWithFilter(
-            String search, String category, org.springframework.data.domain.Pageable pageable) {
+            String search, String category, String region, org.springframework.data.domain.Pageable pageable) {
         String categoryFilter = null;
         if (category != null && !category.isEmpty() && !category.equalsIgnoreCase("all")) {
             categoryFilter = category;
         }
-        return locationRepository.findBySearchAndCategory(search, categoryFilter, pageable);
+        String regionFilter = null;
+        if (region != null && !region.isEmpty() && !region.equalsIgnoreCase("all")) {
+            regionFilter = region;
+        }
+        return locationRepository.findBySearchAndCategoryAndRegion(search, categoryFilter, regionFilter, pageable);
     }
 
     // Admin CRUD methods

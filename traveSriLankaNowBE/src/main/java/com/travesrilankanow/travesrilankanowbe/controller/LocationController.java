@@ -24,10 +24,11 @@ public class LocationController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String category) {
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String region) {
         Sort sort = Sort.by(Sort.Order.desc("featured"), Sort.Order.asc("displayOrder"), Sort.Order.desc("id"));
         Pageable pageable = PageRequest.of(page, size, sort);
-        return ResponseEntity.ok(locationService.getLocationsPaginatedWithFilter(search, category, pageable));
+        return ResponseEntity.ok(locationService.getLocationsPaginatedWithFilter(search, category, region, pageable));
     }
 
     @GetMapping("/{id}")

@@ -32,4 +32,14 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             @Param("search") String search,
             @Param("category") String category,
             Pageable pageable);
+
+    @Query("SELECT l FROM Location l WHERE " +
+           "(:search IS NULL OR :search = '' OR LOWER(l.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(l.description) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:category IS NULL OR l.category = :category) " +
+           "AND (:region IS NULL OR l.region = :region)")
+    Page<Location> findBySearchAndCategoryAndRegion(
+            @Param("search") String search,
+            @Param("category") String category,
+            @Param("region") String region,
+            Pageable pageable);
 }

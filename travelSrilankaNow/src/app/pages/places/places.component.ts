@@ -18,6 +18,12 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = true;
   errorMessage: string = '';
 
+  // Mobile search toggle
+  isSearchOpen: boolean = false;
+
+  // Grid view options
+  gridColumns: number = 3;
+
   // Pagination properties
   currentPage: number = 0;
   totalPages: number = 0;
@@ -136,6 +142,26 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.searchSubject.next(event.target.value);
   }
 
+  toggleSearch(): void {
+    this.isSearchOpen = !this.isSearchOpen;
+  }
+
+  setGridColumns(columns: number): void {
+    this.gridColumns = columns;
+  }
+
+  hasActiveFilters(): boolean {
+    return this.searchTerm.trim() !== '' || this.selectedType !== 'all' || this.selectedPriceRange !== 'all';
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = '';
+    this.selectedType = 'all';
+    this.selectedPriceRange = 'all';
+    this.currentPage = 0;
+    this.loadData();
+  }
+
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
       this.currentPage = page;
@@ -175,7 +201,7 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }, options);
 
-    const revealElements = document.querySelectorAll('.reveal:not(.revealed)');
+    const revealElements = document.querySelectorAll('.card-stagger:not(.revealed)');
     revealElements.forEach(element => {
       if (this.observer) {
         this.observer.observe(element);
