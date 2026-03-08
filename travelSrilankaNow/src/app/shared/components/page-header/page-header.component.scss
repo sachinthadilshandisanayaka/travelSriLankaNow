@@ -14,6 +14,12 @@ $navbar-height: 80px;
   background: linear-gradient(135deg, $primary-navy-dark 0%, $primary-navy 50%, $primary-blue 100%);
   overflow: hidden;
 
+  // Compact header on mobile so users see content immediately
+  @media (max-width: $breakpoint-md) {
+    min-height: calc(160px + #{$navbar-height});
+    padding: calc(#{$spacing-xl} + #{$navbar-height}) 0 $spacing-lg;
+  }
+
   // Theme variations (used when no background image)
   &.theme-locations {
     background: linear-gradient(135deg, #0F2854 0%, #1C4D8D 60%, #4988C4 100%);
@@ -64,6 +70,10 @@ $navbar-height: 80px;
   // Loading state
   &.is-loading {
     min-height: calc(280px + #{$navbar-height});
+
+    @media (max-width: $breakpoint-md) {
+      min-height: calc(160px + #{$navbar-height});
+    }
   }
 }
 
@@ -184,6 +194,7 @@ $navbar-height: 80px;
 
     @media (max-width: $breakpoint-md) {
       margin: 0 auto;
+      display: none; // Hide description on mobile for compact header
     }
   }
 }
@@ -208,9 +219,8 @@ $navbar-height: 80px;
     order: -1;
   }
 
-  @media (max-width: $breakpoint-sm) {
-    width: 120px;
-    height: 120px;
+  @media (max-width: $breakpoint-md) {
+    display: none; // Hide animation on mobile for compact header
   }
 }
 

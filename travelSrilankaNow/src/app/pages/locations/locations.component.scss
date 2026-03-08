@@ -5,99 +5,167 @@
 // Host element - add padding for fixed navbar
 :host {
   display: block;
-  padding-top: 80px; // Space for fixed navbar
-}
-
-// ==================== Page Header ====================
-.page-header {
-  padding: $spacing-3xl 0; // Normal padding, navbar space handled by :host
-  background: $gradient-primary;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    opacity: 0.5;
-  }
-
-  .header-content {
-    max-width: 700px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  .subtitle {
-    display: inline-block;
-    margin-bottom: $spacing-md;
-    font-size: $font-size-sm;
-    color: $primary-sky;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: $font-weight-medium;
-    background: rgba(255, 255, 255, 0.1);
-    padding: $spacing-xs $spacing-md;
-    border-radius: $radius-full;
-  }
-
-  h1 {
-    font-family: $font-primary;
-    font-size: $font-size-4xl;
-    font-weight: $font-weight-bold;
-    margin-bottom: $spacing-lg;
-    color: $white;
-    letter-spacing: -0.02em;
-
-    @include respond-to('lg') {
-      font-size: $font-size-5xl;
-    }
-  }
-
-  .lead {
-    font-size: $font-size-lg;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: $line-height-relaxed;
-  }
+  padding-top: 80px;
 }
 
 // ==================== Filter Section ====================
 .filter-section {
-  padding: $spacing-3xl 0;
+  padding: $spacing-lg 0;
   background: $white;
   border-bottom: 1px solid $light-gray;
+}
+
+// Toolbar: search toggle (mobile) + grid toggle
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+// Mobile search toggle button
+.search-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $navy-bg-lightest;
+  border: 1px solid $light-gray;
+  border-radius: $radius-lg;
+  color: $text-dark;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover, &.active {
+    background: $navy-bg-light;
+    border-color: $primary-blue;
+    color: $primary-navy;
+  }
+
+  .chevron {
+    transition: transform 0.3s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  // Hide on desktop - search panel is always visible
+  @include respond-to('lg') {
+    display: none;
+  }
+}
+
+// Active filter badge
+.filter-badge {
+  padding: $spacing-xs $spacing-sm;
+  background: rgba($primary-blue, 0.1);
+  color: $primary-navy;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-full;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba($primary-blue, 0.2);
+  }
+
+  @include respond-to('lg') {
+    display: none;
+  }
+}
+
+// Grid view toggle
+.grid-toggle {
+  display: none;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-left: auto;
+
+  @include respond-to('md') {
+    display: flex;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid $light-gray;
+    border-radius: $radius-md;
+    background: $white;
+    color: $medium-gray;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: $primary-blue;
+      color: $primary-navy;
+    }
+
+    &.active {
+      background: $primary-navy;
+      border-color: $primary-navy;
+      color: $white;
+    }
+  }
+}
+
+// Expandable filter panel
+.filter-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+  opacity: 0;
+
+  &.open {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+  // Always visible on desktop
+  @include respond-to('lg') {
+    max-height: none;
+    opacity: 1;
+    overflow: visible;
+  }
 }
 
 .filter-wrapper {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xl;
-  margin-bottom: $spacing-xl;
+  gap: $spacing-lg;
+  padding: $spacing-md 0;
 
   @include respond-to('lg') {
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
+    gap: $spacing-xl;
+    padding: 0 0 $spacing-md;
   }
 }
 
 .search-box {
   position: relative;
   flex: 1;
-  max-width: 400px;
+  max-width: 100%;
+
+  @include respond-to('lg') {
+    max-width: 360px;
+  }
 
   .search-input {
     width: 100%;
-    padding: $spacing-md $spacing-lg $spacing-md $spacing-4xl;
+    padding: $spacing-sm $spacing-lg $spacing-sm $spacing-3xl;
     border: 1px solid $light-gray;
     border-radius: $radius-lg;
-    font-size: $font-size-base;
+    font-size: $font-size-sm;
     color: $text-dark;
     background: $white;
     transition: all 0.3s ease;
@@ -105,35 +173,33 @@
     &:focus {
       outline: none;
       border-color: $primary-blue;
-      box-shadow: 0 0 0 3px rgba($primary-blue, 0.1),
-                  0 4px 12px rgba($primary-navy, 0.08);
-      transform: translateY(-1px);
+      box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
     }
 
     &::placeholder {
       color: $medium-gray;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    &:focus::placeholder {
-      opacity: 0.5;
-      transform: translateX(4px);
     }
   }
 
-  .search-icon {
+  .search-icon-svg {
     position: absolute;
-    left: $spacing-lg;
+    left: $spacing-md;
     top: 50%;
     transform: translateY(-50%);
-    font-size: $font-size-lg;
+    color: $medium-gray;
     pointer-events: none;
-    transition: transform 0.2s ease, opacity 0.2s ease;
   }
+}
 
-  &:focus-within .search-icon {
-    transform: translateY(-50%) scale(1.1);
-    opacity: 0.7;
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  width: 100%;
+
+  @include respond-to('md') {
+    flex-direction: row;
+    gap: $spacing-lg;
   }
 }
 
@@ -142,10 +208,9 @@
   flex-direction: column;
   gap: $spacing-xs;
   flex: 1;
-  max-width: 100%;
 
   @include respond-to('md') {
-    max-width: 240px;
+    max-width: 200px;
   }
 }
 
@@ -184,6 +249,23 @@
   }
 }
 
+.btn-clear-filters {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  margin-top: $spacing-sm;
+  background: none;
+  border: none;
+  color: $primary-blue;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: $primary-navy;
+  }
+}
+
 .results-info {
   p {
     color: $warm-gray;
@@ -198,22 +280,47 @@
 
 // ==================== Locations Grid ====================
 .locations-section {
-  padding: $spacing-4xl 0;
+  padding: $spacing-3xl 0;
   background: $navy-bg-lightest;
 }
 
 .location-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: $spacing-2xl;
+  gap: $spacing-xl;
 
   @include respond-to('md') {
     grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-3xl;
+    gap: $spacing-2xl;
   }
 
   @include respond-to('lg') {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  // Dynamic grid columns
+  &.grid-2 {
+    @include respond-to('md') {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @include respond-to('lg') {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &.grid-3 {
+    @include respond-to('lg') {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &.grid-4 {
+    @include respond-to('lg') {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @include respond-to('xl') {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 }
 
@@ -228,23 +335,44 @@
 
   &:hover {
     box-shadow: $shadow-xl;
-    transform: translateY(-4px) scale(1) !important;
+    transform: translateY(-4px);
+  }
+}
+
+// Card stagger animation
+.card-stagger {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+
+  &.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      transition-delay: #{($i - 1) * 0.06}s;
+    }
   }
 }
 
 .location-image {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 220px;
   overflow: hidden;
   background: $light-gray;
+
+  @include respond-to('md') {
+    height: 240px;
+  }
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform $transition-slow;
-    filter: saturate(0.85);
   }
 
   &:hover img {
@@ -261,30 +389,30 @@
   background: transparent;
   display: flex;
   align-items: flex-end;
-  padding: $spacing-lg;
+  padding: $spacing-md;
 }
 
 .category-badge {
   background: $white;
   color: $text-dark;
-  padding: $spacing-xs $spacing-md;
+  padding: $spacing-xs $spacing-sm;
   border-radius: $radius-full;
   font-size: $font-size-xs;
   font-weight: $font-weight-semibold;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   box-shadow: $shadow-sm;
 }
 
 .location-content {
-  padding: $spacing-xl;
+  padding: $spacing-lg;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 
   h3 {
-    font-size: $font-size-xl;
-    margin-bottom: $spacing-sm;
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-xs;
     color: $text-dark;
     font-weight: $font-weight-semibold;
     letter-spacing: -0.01em;
@@ -293,11 +421,11 @@
   p {
     color: $warm-gray;
     line-height: $line-height-relaxed;
-    margin-bottom: $spacing-md;
-    font-size: $font-size-base;
+    margin-bottom: $spacing-sm;
+    font-size: $font-size-sm;
     flex-grow: 1;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -310,14 +438,16 @@
   gap: $spacing-xs;
   color: $warm-gray;
   font-size: $font-size-sm;
-  margin-bottom: $spacing-lg;
+  margin-bottom: $spacing-md;
 
   .location-pin {
-    font-size: $font-size-base;
+    display: flex;
+    align-items: center;
+    color: $primary-blue;
   }
 }
 
-// View Details Button - Fixed at bottom of card
+// View Details Button
 .btn-view-details {
   @include button-view-details;
   margin-top: auto;
@@ -325,7 +455,7 @@
 
 // ==================== No Results ====================
 .no-results {
-  padding: $spacing-4xl 0;
+  padding: $spacing-3xl 0;
   text-align: center;
 }
 
@@ -334,22 +464,21 @@
   margin: 0 auto;
 
   .no-results-icon {
-    font-size: 4rem;
     display: block;
     margin-bottom: $spacing-lg;
-    opacity: 0.5;
+    color: $medium-gray;
   }
 
   h3 {
-    font-size: $font-size-2xl;
+    font-size: $font-size-xl;
     font-weight: $font-weight-semibold;
     color: $text-dark;
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-sm;
   }
 
   p {
     color: $warm-gray;
-    margin-bottom: $spacing-2xl;
+    margin-bottom: $spacing-xl;
     line-height: $line-height-relaxed;
   }
 
@@ -393,6 +522,7 @@
   .error-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
+    color: $warning;
   }
 
   h3 {

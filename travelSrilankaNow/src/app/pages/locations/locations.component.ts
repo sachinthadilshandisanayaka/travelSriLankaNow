@@ -2,6 +2,8 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { LocationService, PageResponse } from '../../services/location.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
 import { Location } from '../../models/location.model';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-locations',
@@ -11,9 +13,16 @@ import { Location } from '../../models/location.model';
 export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   locations: Location[] = [];
   selectedCategory: string = 'all';
+  selectedRegion: string = 'all';
   searchTerm: string = '';
   isLoading: boolean = true;
   errorMessage: string = '';
+
+  // Mobile search toggle
+  isSearchOpen: boolean = false;
+
+  // Grid view options
+  gridColumns: number = 3;
 
   // Pagination properties
   currentPage: number = 0;
@@ -21,11 +30,12 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   totalElements: number = 0;
   pageSize: number = 10;
 
-  // Categories loaded from MasterData
+  // Categories and Regions loaded from MasterData
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Locations' }];
+  regions: { value: string; label: string }[] = [{ value: 'all', label: 'All Regions' }];
 
   private observer: IntersectionObserver | null = null;
-  private searchTimeout: any;
+  private searchSubject = new Subject<string>();
 
   constructor(
     private locationService: LocationService,
@@ -34,6 +44,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadMasterData();
+    this.setupSearchDebounce();
     this.loadData();
   }
 
@@ -50,6 +61,19 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: (err) => console.error('Failed to load location categories:', err)
     });
+
+    this.masterDataService.getRegions().subscribe({
+      next: (data: MasterData[]) => {
+        this.regions = [
+          { value: 'all', label: 'All Regions' },
+          ...data.map(item => ({
+            value: item.code,
+            label: item.displayName
+          }))
+        ];
+      },
+      error: (err) => console.error('Failed to load regions:', err)
+    });
   }
 
   ngAfterViewInit(): void {
@@ -60,9 +84,18 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.observer) {
       this.observer.disconnect();
     }
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
+    this.searchSubject.complete();
+  }
+
+  private setupSearchDebounce(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      this.searchTerm = searchTerm;
+      this.currentPage = 0;
+      this.loadData();
+    });
   }
 
   loadData(): void {
@@ -73,7 +106,8 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.currentPage,
       this.pageSize,
       this.searchTerm,
-      this.selectedCategory
+      this.selectedCategory,
+      this.selectedRegion
     ).subscribe({
       next: (response: PageResponse<Location>) => {
         this.locations = response.content || [];
@@ -96,16 +130,34 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadData();
   }
 
+  filterByRegion(region: string): void {
+    this.selectedRegion = region;
+    this.currentPage = 0;
+    this.loadData();
+  }
+
   onSearchChange(event: any): void {
-    this.searchTerm = event.target.value;
-    // Debounce search
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-    this.searchTimeout = setTimeout(() => {
-      this.currentPage = 0;
-      this.loadData();
-    }, 300);
+    this.searchSubject.next(event.target.value);
+  }
+
+  toggleSearch(): void {
+    this.isSearchOpen = !this.isSearchOpen;
+  }
+
+  setGridColumns(columns: number): void {
+    this.gridColumns = columns;
+  }
+
+  hasActiveFilters(): boolean {
+    return this.searchTerm.trim() !== '' || this.selectedCategory !== 'all' || this.selectedRegion !== 'all';
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = '';
+    this.selectedCategory = 'all';
+    this.selectedRegion = 'all';
+    this.currentPage = 0;
+    this.loadData();
   }
 
   goToPage(page: number): void {
@@ -147,7 +199,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }, options);
 
-    const revealElements = document.querySelectorAll('.reveal:not(.revealed)');
+    const revealElements = document.querySelectorAll('.card-stagger:not(.revealed)');
     revealElements.forEach(element => {
       if (this.observer) {
         this.observer.observe(element);

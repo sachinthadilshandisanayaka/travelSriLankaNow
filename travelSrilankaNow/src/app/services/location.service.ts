@@ -48,7 +48,8 @@ export class LocationService {
     page: number = 0,
     size: number = 10,
     search?: string,
-    category?: string
+    category?: string,
+    region?: string
   ): Observable<PageResponse<Location>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -59,6 +60,9 @@ export class LocationService {
     }
     if (category && category !== 'all') {
       params = params.set('category', category);
+    }
+    if (region && region !== 'all') {
+      params = params.set('region', region);
     }
 
     return this.http.get<PageResponse<Location>>(this.apiUrl, { params });
