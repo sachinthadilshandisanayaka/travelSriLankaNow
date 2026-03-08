@@ -406,6 +406,44 @@
   cursor: pointer;
   transition: all $transition-base;
 
+  // Compact for 2-column mobile grid
+  .grid-2 & {
+    border-radius: $radius-md;
+
+    @media (max-width: 767px) {
+      .gallery-overlay {
+        padding: $spacing-sm;
+      }
+
+      .gallery-info {
+        h3 {
+          font-size: $font-size-sm;
+          margin-bottom: 2px;
+        }
+
+        p {
+          font-size: $font-size-xs;
+          margin-bottom: $spacing-xs;
+        }
+
+        .category-tag {
+          font-size: 0.625rem;
+          padding: 2px $spacing-xs;
+        }
+      }
+
+      .video-indicator {
+        width: 40px;
+        height: 40px;
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
   &:hover {
     box-shadow: $shadow-xl;
     transform: translateY(-4px);

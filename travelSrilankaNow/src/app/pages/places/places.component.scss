@@ -358,6 +358,83 @@
     box-shadow: $shadow-xl;
     transform: translateY(-4px);
   }
+
+  // Compact card styles for 2-column mobile grid
+  .grid-2 & {
+    border-radius: $radius-md;
+
+    @media (max-width: 767px) {
+      .place-image {
+        height: 120px;
+      }
+
+      .place-badge-wrapper {
+        top: $spacing-xs;
+        left: $spacing-xs;
+      }
+
+      .type-badge {
+        font-size: 0.625rem;
+        padding: 2px $spacing-xs;
+      }
+
+      .place-content {
+        padding: $spacing-sm;
+
+        h3 {
+          font-size: $font-size-sm;
+          margin-bottom: 2px;
+        }
+
+        .place-description {
+          font-size: $font-size-xs;
+          -webkit-line-clamp: 2;
+          margin-bottom: $spacing-xs;
+          line-height: $line-height-normal;
+        }
+      }
+
+      .contact-info {
+        font-size: $font-size-xs;
+        margin-bottom: $spacing-xs;
+        gap: 2px;
+
+        svg {
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      .place-meta {
+        font-size: $font-size-xs;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-xs;
+      }
+
+      .meta-item {
+        gap: 2px;
+
+        svg {
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      .rating {
+        font-size: $font-size-xs;
+
+        svg {
+          width: 12px;
+          height: 12px;
+        }
+      }
+
+      .btn-view-details {
+        padding: 0.5rem 0.75rem;
+        font-size: $font-size-xs;
+      }
+    }
+  }
 }
 
 // Card stagger animation
