@@ -18,6 +18,12 @@ export class GalleryComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = true;
   errorMessage: string = '';
 
+  // Mobile search toggle
+  isSearchOpen: boolean = false;
+
+  // Grid view options
+  gridColumns: number = 4;
+
   // Lightbox
   selectedItem: GalleryItem | null = null;
   lightboxImageLoaded: boolean = false;
@@ -56,6 +62,26 @@ export class GalleryComponent implements OnInit, AfterViewInit, OnDestroy {
       this.observer.disconnect();
     }
     this.searchSubject.complete();
+  }
+
+  toggleSearch(): void {
+    this.isSearchOpen = !this.isSearchOpen;
+  }
+
+  setGridColumns(columns: number): void {
+    this.gridColumns = columns;
+  }
+
+  hasActiveFilters(): boolean {
+    return this.searchTerm.trim() !== '' || this.selectedCategory !== 'all' || this.selectedType !== 'all';
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = '';
+    this.selectedCategory = 'all';
+    this.selectedType = 'all';
+    this.currentPage = 0;
+    this.loadData();
   }
 
   private loadMasterData(): void {
