@@ -30,19 +30,25 @@
 
       <!-- Grid View Toggle -->
       <div class="grid-toggle">
+        <button [class.active]="gridColumns === 1" (click)="setGridColumns(1)" title="1 column">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="2" y="0" width="12" height="7" rx="1.5"/>
+            <rect x="2" y="9" width="12" height="7" rx="1.5"/>
+          </svg>
+        </button>
         <button [class.active]="gridColumns === 2" (click)="setGridColumns(2)" title="2 columns">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
             <rect x="0" y="0" width="7" height="7" rx="1.5"/><rect x="9" y="0" width="7" height="7" rx="1.5"/>
             <rect x="0" y="9" width="7" height="7" rx="1.5"/><rect x="9" y="9" width="7" height="7" rx="1.5"/>
           </svg>
         </button>
-        <button [class.active]="gridColumns === 3" (click)="setGridColumns(3)" title="3 columns">
+        <button class="grid-btn-desktop" [class.active]="gridColumns === 3" (click)="setGridColumns(3)" title="3 columns">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
             <rect x="0" y="0" width="4" height="7" rx="1"/><rect x="6" y="0" width="4" height="7" rx="1"/><rect x="12" y="0" width="4" height="7" rx="1"/>
             <rect x="0" y="9" width="4" height="7" rx="1"/><rect x="6" y="9" width="4" height="7" rx="1"/><rect x="12" y="9" width="4" height="7" rx="1"/>
           </svg>
         </button>
-        <button [class.active]="gridColumns === 4" (click)="setGridColumns(4)" title="4 columns">
+        <button class="grid-btn-desktop" [class.active]="gridColumns === 4" (click)="setGridColumns(4)" title="4 columns">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
             <rect x="0" y="0" width="3" height="7" rx="0.75"/><rect x="4.33" y="0" width="3" height="7" rx="0.75"/><rect x="8.66" y="0" width="3" height="7" rx="0.75"/><rect x="13" y="0" width="3" height="7" rx="0.75"/>
             <rect x="0" y="9" width="3" height="7" rx="0.75"/><rect x="4.33" y="9" width="3" height="7" rx="0.75"/><rect x="8.66" y="9" width="3" height="7" rx="0.75"/><rect x="13" y="9" width="3" height="7" rx="0.75"/>
@@ -138,6 +144,7 @@
 
     <div *ngIf="!isLoading && !errorMessage"
          class="gallery-grid"
+         [class.grid-1]="gridColumns === 1"
          [class.grid-2]="gridColumns === 2"
          [class.grid-3]="gridColumns === 3"
          [class.grid-4]="gridColumns === 4">

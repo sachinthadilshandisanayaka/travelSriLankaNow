@@ -22,7 +22,7 @@ export class GalleryComponent implements OnInit, AfterViewInit, OnDestroy {
   isSearchOpen: boolean = false;
 
   // Grid view options
-  gridColumns: number = 4;
+  gridColumns: number = window.innerWidth < 768 ? 2 : 4;
 
   // Lightbox
   selectedItem: GalleryItem | null = null;
