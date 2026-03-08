@@ -21,7 +21,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   isSearchOpen: boolean = false;
 
   // Grid view options
-  gridColumns: number = 3;
+  gridColumns: number = window.innerWidth < 768 ? 1 : 3;
 
   // Pagination properties
   currentPage: number = 0;
