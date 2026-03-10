@@ -17,6 +17,7 @@ import java.util.List;
 public class HeroSlideService {
 
     private final HeroSlideRepository heroSlideRepository;
+    private final CloudinaryService cloudinaryService;
 
     public List<HeroSlide> getActiveHeroSlides() {
         return heroSlideRepository.findByActiveTrueOrderByDisplayOrderAsc();
@@ -58,9 +59,12 @@ public class HeroSlideService {
 
     @Transactional
     public void deleteHeroSlide(Long id) {
-        if (!heroSlideRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Hero slide not found with id: " + id);
-        }
+        HeroSlide heroSlide = heroSlideRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Hero slide not found with id: " + id));
+
+        // Delete image from Cloudinary
+        cloudinaryService.deleteImageByUrl(heroSlide.getImageUrl());
+
         heroSlideRepository.deleteById(id);
     }
 
