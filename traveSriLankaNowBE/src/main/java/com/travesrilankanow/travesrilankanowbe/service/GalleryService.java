@@ -15,6 +15,7 @@ import java.util.List;
 public class GalleryService {
 
     private final GalleryItemRepository galleryItemRepository;
+    private final CloudinaryService cloudinaryService;
 
     public List<GalleryItem> getAllGalleryItems() {
         return galleryItemRepository.findAll();
@@ -109,9 +110,13 @@ public class GalleryService {
 
     @Transactional
     public void deleteGalleryItem(Long id) {
-        if (!galleryItemRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Gallery item not found with id: " + id);
-        }
+        GalleryItem item = galleryItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Gallery item not found with id: " + id));
+
+        // Delete images from Cloudinary
+        cloudinaryService.deleteImageByUrl(item.getUrl());
+        cloudinaryService.deleteImageByUrl(item.getThumbnailUrl());
+
         galleryItemRepository.deleteById(id);
     }
 }

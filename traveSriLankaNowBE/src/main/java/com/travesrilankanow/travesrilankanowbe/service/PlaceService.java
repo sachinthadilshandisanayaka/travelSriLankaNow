@@ -15,6 +15,7 @@ import java.util.List;
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
+    private final CloudinaryService cloudinaryService;
 
     public List<Place> getAllPlaces() {
         return placeRepository.findAll();
@@ -137,9 +138,13 @@ public class PlaceService {
 
     @Transactional
     public void deletePlace(Long id) {
-        if (!placeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Place not found with id: " + id);
-        }
+        Place place = placeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Place not found with id: " + id));
+
+        // Delete images from Cloudinary
+        cloudinaryService.deleteImageByUrl(place.getImageUrl());
+        cloudinaryService.deleteImagesByUrls(place.getImages());
+
         placeRepository.deleteById(id);
     }
 }

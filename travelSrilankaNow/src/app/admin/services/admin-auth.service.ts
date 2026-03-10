@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subscription, timer } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 export interface AuthResponse {
@@ -17,7 +18,7 @@ export interface AuthResponse {
 @Injectable({
   providedIn: 'root'
 })
-export class AdminAuthService {
+export class AdminAuthService implements OnDestroy {
   private apiUrl = `${environment.apiUrl}/admin/auth`;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
@@ -31,7 +32,19 @@ export class AdminAuthService {
   private readonly FIRST_NAME_KEY = 'adminFirstName';
   private readonly ROLE_KEY = 'adminRole';
 
-  constructor(private http: HttpClient) {}
+  private tokenExpirySubscription: Subscription | null = null;
+  private readonly TOKEN_CHECK_INTERVAL = 30000; // Check every 30 seconds
+
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this.startTokenExpiryMonitor();
+  }
+
+  ngOnDestroy(): void {
+    this.stopTokenExpiryMonitor();
+  }
 
   login(username: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { username, password })
@@ -127,7 +140,7 @@ export class AdminAuthService {
   }
 
   isLoggedIn(): boolean {
-    return this.hasToken();
+    return this.hasToken() && !this.isTokenExpired();
   }
 
   isAdmin(): boolean {
@@ -138,5 +151,36 @@ export class AdminAuthService {
     localStorage.setItem(this.FIRST_NAME_KEY, firstName);
     localStorage.setItem(this.USER_KEY, username);
     this.displayNameSubject.next(firstName || username);
+  }
+
+  isTokenExpired(): boolean {
+    const token = this.getAccessToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiryTime = payload.exp * 1000; // Convert to milliseconds
+      return Date.now() >= expiryTime;
+    } catch {
+      return true;
+    }
+  }
+
+  startTokenExpiryMonitor(): void {
+    this.stopTokenExpiryMonitor();
+
+    this.tokenExpirySubscription = timer(0, this.TOKEN_CHECK_INTERVAL).subscribe(() => {
+      if (this.hasToken() && this.isTokenExpired()) {
+        this.clearAuth();
+        this.router.navigate(['/admin/login']);
+      }
+    });
+  }
+
+  stopTokenExpiryMonitor(): void {
+    if (this.tokenExpirySubscription) {
+      this.tokenExpirySubscription.unsubscribe();
+      this.tokenExpirySubscription = null;
+    }
   }
 }

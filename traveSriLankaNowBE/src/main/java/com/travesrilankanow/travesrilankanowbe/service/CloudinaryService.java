@@ -78,6 +78,48 @@ public class CloudinaryService {
         }
     }
 
+    public String extractPublicId(String url) {
+        if (url == null || !url.contains("cloudinary.com")) {
+            return null;
+        }
+        try {
+            String[] parts = url.split("/upload/");
+            if (parts.length == 2) {
+                String path = parts[1];
+                // Remove version prefix (e.g., v1234567890/)
+                if (path.matches("^v\\d+/.*")) {
+                    path = path.substring(path.indexOf('/') + 1);
+                }
+                // Remove file extension
+                int lastDot = path.lastIndexOf('.');
+                if (lastDot > 0) {
+                    path = path.substring(0, lastDot);
+                }
+                return path;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract public ID from URL: {}", url);
+        }
+        return null;
+    }
+
+    public void deleteImageByUrl(String imageUrl) {
+        String publicId = extractPublicId(imageUrl);
+        if (publicId != null) {
+            try {
+                deleteImage(publicId);
+            } catch (Exception e) {
+                log.warn("Failed to delete image from Cloudinary: {} - {}", imageUrl, e.getMessage());
+            }
+        }
+    }
+
+    public void deleteImagesByUrls(List<String> imageUrls) {
+        if (imageUrls != null) {
+            imageUrls.forEach(this::deleteImageByUrl);
+        }
+    }
+
     public String getOptimizedUrl(String url, Integer width, Integer height, Integer quality) {
         if (url == null || !url.contains("cloudinary.com")) {
             return url;

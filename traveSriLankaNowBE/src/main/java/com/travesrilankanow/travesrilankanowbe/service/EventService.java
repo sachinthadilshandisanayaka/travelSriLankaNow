@@ -15,6 +15,7 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final CloudinaryService cloudinaryService;
 
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
@@ -123,9 +124,13 @@ public class EventService {
 
     @Transactional
     public void deleteEvent(Long id) {
-        if (!eventRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Event not found with id: " + id);
-        }
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
+
+        // Delete images from Cloudinary
+        cloudinaryService.deleteImageByUrl(event.getImageUrl());
+        cloudinaryService.deleteImagesByUrls(event.getImages());
+
         eventRepository.deleteById(id);
     }
 }

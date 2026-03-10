@@ -17,6 +17,7 @@ import java.util.List;
 public class SocialMediaContentService {
 
     private final SocialMediaContentRepository socialMediaContentRepository;
+    private final CloudinaryService cloudinaryService;
 
     public List<SocialMediaContent> getActiveSocialMediaContent() {
         return socialMediaContentRepository.findByActiveTrueOrderByDisplayOrderAsc();
@@ -57,9 +58,12 @@ public class SocialMediaContentService {
 
     @Transactional
     public void deleteSocialMediaContent(Long id) {
-        if (!socialMediaContentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Social media content not found with id: " + id);
-        }
+        SocialMediaContent content = socialMediaContentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Social media content not found with id: " + id));
+
+        // Delete thumbnail from Cloudinary
+        cloudinaryService.deleteImageByUrl(content.getThumbnailUrl());
+
         socialMediaContentRepository.deleteById(id);
     }
 
