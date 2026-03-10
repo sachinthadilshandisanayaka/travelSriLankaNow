@@ -17,6 +17,7 @@ import java.util.Optional;
 public class PageHeaderBackgroundService {
 
     private final PageHeaderBackgroundRepository repository;
+    private final CloudinaryService cloudinaryService;
 
     public List<PageHeaderBackground> getAllBackgrounds() {
         return repository.findAllByOrderByPageTypeAscDisplayOrderAsc();
@@ -72,9 +73,12 @@ public class PageHeaderBackgroundService {
 
     @Transactional
     public void deleteBackground(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Page header background not found with id: " + id);
-        }
+        PageHeaderBackground background = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Page header background not found with id: " + id));
+
+        // Delete image from Cloudinary
+        cloudinaryService.deleteImageByUrl(background.getImageUrl());
+
         repository.deleteById(id);
     }
 

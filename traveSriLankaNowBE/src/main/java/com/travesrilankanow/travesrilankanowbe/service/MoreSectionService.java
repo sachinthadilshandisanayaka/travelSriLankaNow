@@ -20,6 +20,7 @@ public class MoreSectionService {
 
     private final MoreSectionRepository moreSectionRepository;
     private final MoreSectionItemRepository moreSectionItemRepository;
+    private final CloudinaryService cloudinaryService;
 
     public List<MoreSection> getActiveSections() {
         return moreSectionRepository.findByActiveTrueOrderByDisplayOrderAsc();
@@ -67,9 +68,18 @@ public class MoreSectionService {
 
     @Transactional
     public void deleteSection(Long id) {
-        if (!moreSectionRepository.existsById(id)) {
-            throw new ResourceNotFoundException("More section not found with id: " + id);
+        MoreSection section = moreSectionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("More section not found with id: " + id));
+
+        // Delete section image from Cloudinary
+        cloudinaryService.deleteImageByUrl(section.getImageUrl());
+
+        // Delete all item images from Cloudinary
+        List<MoreSectionItem> items = moreSectionItemRepository.findBySectionIdOrderByDisplayOrderAsc(id);
+        for (MoreSectionItem item : items) {
+            cloudinaryService.deleteImageByUrl(item.getImageUrl());
         }
+
         moreSectionRepository.deleteById(id);
     }
 
@@ -121,9 +131,12 @@ public class MoreSectionService {
 
     @Transactional
     public void deleteItem(Long itemId) {
-        if (!moreSectionItemRepository.existsById(itemId)) {
-            throw new ResourceNotFoundException("More section item not found with id: " + itemId);
-        }
+        MoreSectionItem item = moreSectionItemRepository.findById(itemId)
+                .orElseThrow(() -> new ResourceNotFoundException("More section item not found with id: " + itemId));
+
+        // Delete item image from Cloudinary
+        cloudinaryService.deleteImageByUrl(item.getImageUrl());
+
         moreSectionItemRepository.deleteById(itemId);
     }
 
