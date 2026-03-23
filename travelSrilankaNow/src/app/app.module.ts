@@ -19,6 +19,7 @@ import { LandingSimpleComponent } from './pages/landing/landing-simple.component
 import { LocationDetailComponent } from './pages/location-detail/location-detail.component';
 import { PlaceDetailComponent } from './pages/place-detail/place-detail.component';
 import { MoreSectionDetailComponent } from './pages/more-section-detail/more-section-detail.component';
+import { MoreSectionItemDetailComponent } from './pages/more-section-item-detail/more-section-item-detail.component';
 import { CloudinaryOptimizePipe, CloudinaryThumbnailPipe } from './pipes/cloudinary.pipe';
 import { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
@@ -38,6 +39,7 @@ import { ImageLightboxComponent } from './shared/components/image-lightbox/image
     LocationDetailComponent,
     PlaceDetailComponent,
     MoreSectionDetailComponent,
+    MoreSectionItemDetailComponent,
     CloudinaryOptimizePipe,
     CloudinaryThumbnailPipe,
     PageHeaderComponent,

@@ -27,6 +27,8 @@ export interface MoreSectionItem {
   description?: string;
   imageUrl?: string;
   link?: string;
+  contentType?: 'simple' | 'article';
+  articleContent?: string;
   additionalDetails?: { [key: string]: any };
   displayOrder: number;
   active: boolean;

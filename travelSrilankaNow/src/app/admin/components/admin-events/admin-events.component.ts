@@ -56,7 +56,7 @@ export class AdminEventsComponent implements OnInit {
       title: ['', Validators.required],
       description: ['', Validators.required],
       shortDescription: ['', Validators.required],
-      imageUrl: ['', Validators.required],
+      imageUrl: [''],
       category: ['cultural', Validators.required],
       location: ['', Validators.required],
       price: [0, [Validators.required, Validators.min(0)]],

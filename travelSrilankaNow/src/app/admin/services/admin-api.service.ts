@@ -384,6 +384,11 @@ export class AdminApiService {
     return this.http.patch(`${this.apiUrl}/more-sections/items/${itemId}/toggle-active`, {});
   }
 
+  // File Upload
+  uploadImage(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload/image`, formData);
+  }
+
   // Entity Field Configs
   getEntityFieldConfig(entityType: string): Observable<EntityFieldConfig> {
     return this.http.get<EntityFieldConfig>(`${this.apiUrl}/entity-field-configs/${entityType}`);
