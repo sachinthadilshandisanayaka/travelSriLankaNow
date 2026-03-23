@@ -37,8 +37,7 @@ export class AdminGalleryComponent implements OnInit {
     this.galleryForm = this.fb.group({
       id: [null],
       type: ['', Validators.required],
-      url: ['', Validators.required],
-      thumbnailUrl: ['', Validators.required],
+      url: [''],
       title: ['', Validators.required],
       description: [''],
       category: ['', Validators.required],
@@ -225,9 +224,6 @@ export class AdminGalleryComponent implements OnInit {
     this.galleryForm.patchValue({ url });
   }
 
-  onThumbnailUploaded(thumbnailUrl: string): void {
-    this.galleryForm.patchValue({ thumbnailUrl });
-  }
 
   getCategoryColor(category: string): string {
     const categoryData = this.categories.find(c => c.code === category);

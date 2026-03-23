@@ -77,9 +77,6 @@ public class GalleryService {
         if (galleryItem.getUrl() != null) {
             existingItem.setUrl(galleryItem.getUrl());
         }
-        if (galleryItem.getThumbnailUrl() != null) {
-            existingItem.setThumbnailUrl(galleryItem.getThumbnailUrl());
-        }
         if (galleryItem.getTitle() != null) {
             existingItem.setTitle(galleryItem.getTitle());
         }
@@ -113,9 +110,8 @@ public class GalleryService {
         GalleryItem item = galleryItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Gallery item not found with id: " + id));
 
-        // Delete images from Cloudinary
+        // Delete image from Cloudinary
         cloudinaryService.deleteImageByUrl(item.getUrl());
-        cloudinaryService.deleteImageByUrl(item.getThumbnailUrl());
 
         galleryItemRepository.deleteById(id);
     }

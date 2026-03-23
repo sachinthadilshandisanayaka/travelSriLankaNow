@@ -132,8 +132,9 @@
          [class.grid-2]="gridColumns === 2"
          [class.grid-3]="gridColumns === 3"
          [class.grid-4]="gridColumns === 4">
-      <div
+      <a
         *ngFor="let event of events; let i = index"
+        [routerLink]="['/events', event.id]"
         class="event-card card-stagger"
       >
         <div class="event-image">
@@ -166,16 +167,8 @@
 
           <p>{{ event.shortDescription }}</p>
 
-          <a [routerLink]="['/events', event.id]" class="btn-view-details">
-            <span>View Details</span>
-            <span class="btn-shine"></span>
-            <span class="btn-corner btn-corner--tl"></span>
-            <span class="btn-corner btn-corner--tr"></span>
-            <span class="btn-corner btn-corner--bl"></span>
-            <span class="btn-corner btn-corner--br"></span>
-          </a>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- No Results Message -->

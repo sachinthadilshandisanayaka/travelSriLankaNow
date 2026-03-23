@@ -353,6 +353,9 @@
   transition: box-shadow $transition-base, transform $transition-base;
   display: flex;
   flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 
   &:hover {
     box-shadow: $shadow-xl;
@@ -415,10 +418,6 @@
         }
       }
 
-      .btn-view-details {
-        padding: 0.5rem 0.75rem;
-        font-size: $font-size-xs;
-      }
     }
   }
 }
@@ -545,11 +544,6 @@
   }
 }
 
-// View Details Button - Fixed at bottom of card
-.btn-view-details {
-  @include button-view-details;
-  margin-top: auto;
-}
 
 // ==================== No Results ====================
 .no-results {

@@ -498,7 +498,7 @@
     position: absolute;
     top: 100%;
     right: 0;
-    min-width: 220px;
+    width: 240px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border-radius: $radius-lg;
@@ -542,9 +542,10 @@
     font-size: 0.75rem;
     color: $warm-gray;
     margin-top: 2px;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 

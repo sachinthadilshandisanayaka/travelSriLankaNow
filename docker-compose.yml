@@ -33,7 +33,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       # JPA Configuration
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       # JWT Configuration
       JWT_SECRET: ${JWT_SECRET}
       # Cloudinary Configuration
