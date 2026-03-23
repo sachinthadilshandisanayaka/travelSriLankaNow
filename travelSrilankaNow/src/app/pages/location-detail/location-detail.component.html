@@ -10,24 +10,12 @@
     <div class="error-icon">⚠️</div>
     <h2>Error Loading Location</h2>
     <p>{{ error }}</p>
-    <button (click)="goBack()" class="btn-primary">
-      <span>Back to Locations</span>
-      <span class="btn-shine"></span>
-      <span class="btn-corner btn-corner--tl"></span>
-      <span class="btn-corner btn-corner--tr"></span>
-      <span class="btn-corner btn-corner--bl"></span>
-      <span class="btn-corner btn-corner--br"></span>
-    </button>
   </div>
 
   <!-- Location Details -->
   <div *ngIf="location && !loading" class="location-detail">
     <!-- Hero Section -->
     <div class="hero-section">
-      <button (click)="goBack()" class="back-button">
-        <span class="arrow">←</span>
-        <span class="back-text">Back to Locations</span>
-      </button>
       <div class="hero-image">
         <img [src]="location.imageUrl | cloudinaryOptimize:1200:600:85" [alt]="location.name" />
         <div class="hero-overlay"></div>
@@ -145,14 +133,6 @@
             <div class="action-buttons">
               <button class="btn-primary btn-block">
                 <span>Book a Tour</span>
-                <span class="btn-shine"></span>
-                <span class="btn-corner btn-corner--tl"></span>
-                <span class="btn-corner btn-corner--tr"></span>
-                <span class="btn-corner btn-corner--bl"></span>
-                <span class="btn-corner btn-corner--br"></span>
-              </button>
-              <button class="btn-secondary btn-block back-btn-sidebar" (click)="goBack()">
-                <span>Back to Locations</span>
                 <span class="btn-shine"></span>
                 <span class="btn-corner btn-corner--tl"></span>
                 <span class="btn-corner btn-corner--tr"></span>

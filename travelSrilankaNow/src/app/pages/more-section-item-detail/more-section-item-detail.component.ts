@@ -1,17 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MoreSectionService } from '../../services/more-section.service';
-import { MoreSection, FieldDefinition } from '../../models/more-section.model';
+import { MoreSection, MoreSectionItem } from '../../models/more-section.model';
 
 @Component({
-  selector: 'app-more-section-detail',
-  templateUrl: './more-section-detail.component.html',
-  styleUrls: ['./more-section-detail.component.scss']
+  selector: 'app-more-section-item-detail',
+  templateUrl: './more-section-item-detail.component.html',
+  styleUrls: ['./more-section-item-detail.component.scss']
 })
-export class MoreSectionDetailComponent implements OnInit {
+export class MoreSectionItemDetailComponent implements OnInit {
   section: MoreSection | null = null;
+  item: MoreSectionItem | null = null;
   isLoading = true;
   error = false;
+  slug = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -21,19 +23,24 @@ export class MoreSectionDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      const slug = params['slug'];
-      if (slug) {
-        this.loadSection(slug);
+      this.slug = params['slug'];
+      const itemId = +params['id'];
+      if (this.slug && itemId) {
+        this.loadItem(this.slug, itemId);
       }
     });
   }
 
-  private loadSection(slug: string): void {
+  private loadItem(slug: string, itemId: number): void {
     this.isLoading = true;
     this.error = false;
     this.moreSectionService.getSectionBySlug(slug).subscribe({
       next: (section) => {
         this.section = section;
+        this.item = section.items?.find(i => i.id === itemId) || null;
+        if (!this.item) {
+          this.error = true;
+        }
         this.isLoading = false;
       },
       error: () => {
@@ -43,9 +50,13 @@ export class MoreSectionDetailComponent implements OnInit {
     });
   }
 
-  hasDetails(item: any): boolean {
+  goBack(): void {
+    this.router.navigate(['/more', this.slug]);
+  }
+
+  hasDetails(item: MoreSectionItem): boolean {
     if (!item.additionalDetails) return false;
-    return Object.keys(item.additionalDetails).some(key => this.isNonEmpty(item.additionalDetails[key]));
+    return Object.keys(item.additionalDetails).some(key => this.isNonEmpty(item.additionalDetails![key]));
   }
 
   isNonEmpty(value: any): boolean {
@@ -62,10 +73,10 @@ export class MoreSectionDetailComponent implements OnInit {
     if (Array.isArray(value)) return value.join(', ');
     if (typeof value === 'object') {
       if (value.from !== undefined && value.to !== undefined) {
-        return `${value.from || '?'} - ${value.to || '?'}`;
+        return `${value.from || '?'} – ${value.to || '?'}`;
       }
       if (value.min !== undefined && value.max !== undefined) {
-        return `${value.min ?? '?'} - ${value.max ?? '?'}`;
+        return `${value.min ?? '?'} – ${value.max ?? '?'}`;
       }
     }
     return String(value);
@@ -81,15 +92,5 @@ export class MoreSectionDetailComponent implements OnInit {
     const defs = this.section?.additionalFieldDefinitions || [];
     const def = defs.find(d => d.key === key);
     return def?.type === 'link';
-  }
-
-  navigateToItem(item: any, event: MouseEvent): void {
-    this.router.navigate(['/more', this.section!.slug, item.id]);
-  }
-
-  getArticleExcerpt(item: any): string {
-    if (!item.articleContent) return '';
-    const text = item.articleContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    return text.length > 160 ? text.substring(0, 160) + '...' : text;
   }
 }

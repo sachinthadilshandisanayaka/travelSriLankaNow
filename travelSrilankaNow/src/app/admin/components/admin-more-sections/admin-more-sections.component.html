@@ -155,6 +155,7 @@
           <div class="item-card__content">
             <div class="item-card__header">
               <h4 class="item-card__title">{{ item.title }}</h4>
+              <span class="admin-badge admin-badge--info" *ngIf="item.contentType === 'article'">Article</span>
               <span class="admin-badge" [class.admin-badge--success]="item.active" [class.admin-badge--gray]="!item.active">
                 {{ item.active ? 'Active' : 'Inactive' }}
               </span>
@@ -297,42 +298,254 @@
 </div>
 
 <!-- Item Modal -->
-<div class="admin-modal" *ngIf="showItemModal">
+<div class="admin-modal" *ngIf="showItemModal" [class.admin-modal--fullscreen]="isFullscreen">
   <div class="admin-modal__backdrop" (click)="closeItemModal()"></div>
-  <div class="admin-modal__content">
+  <div class="admin-modal__content" [class.admin-modal__content--fullscreen]="isFullscreen">
     <div class="admin-modal__header">
       <h2>{{ isEditingItem ? 'Edit Item' : 'Add Item' }}</h2>
-      <button class="admin-btn admin-btn--ghost" (click)="closeItemModal()">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-      </button>
+      <div class="admin-modal__header-actions">
+        <!-- Auto-save status (article mode only) -->
+        <span class="autosave-indicator" *ngIf="itemForm.contentType === 'article'">
+          <span class="autosave-indicator__dot" [class.autosave-indicator__dot--saved]="autoSaveStatus === 'saved'" [class.autosave-indicator__dot--saving]="autoSaveStatus === 'saving'" [class.autosave-indicator__dot--unsaved]="autoSaveStatus === 'unsaved'"></span>
+          <span class="autosave-indicator__text">{{ autoSaveStatus === 'saved' ? 'Saved' : autoSaveStatus === 'saving' ? 'Saving...' : 'Unsaved changes' }}</span>
+        </span>
+        <!-- Fullscreen toggle (article mode only) -->
+        <button class="admin-btn admin-btn--ghost" *ngIf="itemForm.contentType === 'article'" (click)="toggleFullscreen()" [title]="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'">
+          <!-- Expand icon -->
+          <svg *ngIf="!isFullscreen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path></svg>
+          <!-- Collapse icon -->
+          <svg *ngIf="isFullscreen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4H4m0 0l5 5M9 20v-5H4m0 0l5-5m11-1V4h-5m0 0l5 5m-5 11v-5h5m0 0l-5-5"></path></svg>
+        </button>
+        <button class="admin-btn admin-btn--ghost" (click)="closeItemModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
     </div>
     <div class="admin-modal__body">
+      <!-- Content Type Toggle -->
+      <div class="content-type-toggle">
+        <button class="content-type-toggle__btn" [class.content-type-toggle__btn--active]="itemForm.contentType === 'simple'" (click)="onContentTypeChange('simple')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+          Simple
+        </button>
+        <button class="content-type-toggle__btn" [class.content-type-toggle__btn--active]="itemForm.contentType === 'article'" (click)="onContentTypeChange('article')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+          Article
+        </button>
+      </div>
+
       <div class="admin-form__grid">
         <div class="admin-form__group admin-form__group--full">
           <label class="admin-form__label">Title *</label>
-          <input class="admin-input" [(ngModel)]="itemForm.title" placeholder="Item title">
+          <input class="admin-input" [(ngModel)]="itemForm.title" placeholder="Item title" [class.article-title-input]="itemForm.contentType === 'article' && isFullscreen">
         </div>
-        <div class="admin-form__group admin-form__group--full">
-          <label class="admin-form__label">Short Description</label>
-          <input class="admin-input" [(ngModel)]="itemForm.shortDescription" placeholder="Brief summary">
-        </div>
-        <div class="admin-form__group admin-form__group--full">
-          <label class="admin-form__label">Description</label>
-          <textarea class="admin-textarea" [(ngModel)]="itemForm.description" rows="4" placeholder="Full description"></textarea>
-        </div>
-        <div class="admin-form__group admin-form__group--full">
-          <app-image-upload
-            [folder]="'more-sections/items'"
-            [label]="'Item Image'"
-            [currentImageUrl]="itemForm.imageUrl"
-            (imageUploaded)="onItemImageUploaded($event)">
-          </app-image-upload>
-        </div>
-        <div class="admin-form__group admin-form__group--full">
-          <label class="admin-form__label">Link URL</label>
-          <input class="admin-input" [(ngModel)]="itemForm.link" placeholder="https://example.com/page">
-          <span class="admin-form__hint">Full URL including https://. Leave empty if no link needed.</span>
-        </div>
+
+        <!-- Simple Mode Fields -->
+        <ng-container *ngIf="itemForm.contentType === 'simple'">
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Short Description</label>
+            <input class="admin-input" [(ngModel)]="itemForm.shortDescription" placeholder="Brief summary">
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Description</label>
+            <textarea class="admin-textarea" [(ngModel)]="itemForm.description" rows="4" placeholder="Full description"></textarea>
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <app-image-upload
+              [folder]="'more-sections/items'"
+              [label]="'Item Image'"
+              [currentImageUrl]="itemForm.imageUrl"
+              (imageUploaded)="onItemImageUploaded($event)">
+            </app-image-upload>
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Link URL</label>
+            <input class="admin-input" [(ngModel)]="itemForm.link" placeholder="https://example.com/page">
+            <span class="admin-form__hint">Full URL including https://. Leave empty if no link needed.</span>
+          </div>
+        </ng-container>
+
+        <!-- Article Mode -->
+        <ng-container *ngIf="itemForm.contentType === 'article'">
+          <div class="admin-form__group admin-form__group--full">
+            <app-image-upload
+              [folder]="'more-sections/items'"
+              [label]="'Cover Image'"
+              [currentImageUrl]="itemForm.imageUrl"
+              (imageUploaded)="onItemImageUploaded($event)">
+            </app-image-upload>
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Article Content</label>
+            <!-- Editor toolbar actions -->
+            <div class="editor-actions">
+              <div class="editor-actions__left">
+                <button class="editor-action-btn" (click)="editorUndo()" title="Undo (Ctrl+Z)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2M3 10l4-4m-4 4l4 4"></path></svg>
+                </button>
+                <button class="editor-action-btn" (click)="editorRedo()" title="Redo (Ctrl+Shift+Z)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m15-7l-4-4m4 4l-4 4"></path></svg>
+                </button>
+                <span class="editor-actions__separator"></span>
+                <button class="editor-action-btn" [class.editor-action-btn--active]="isFocusMode" (click)="toggleFocusMode()" title="Focus mode">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+                <button class="editor-action-btn" (click)="toggleShortcutsPanel()" title="Keyboard shortcuts">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path></svg>
+                </button>
+              </div>
+              <div class="editor-actions__right">
+                <span class="editor-stat">{{ wordCount }} words</span>
+                <span class="editor-stat">{{ charCount }} chars</span>
+                <span class="editor-stat">{{ readingTime }} min read</span>
+              </div>
+            </div>
+
+            <!-- Keyboard shortcuts panel -->
+            <div class="shortcuts-panel" *ngIf="showShortcutsPanel">
+              <div class="shortcuts-panel__header">
+                <h4>Keyboard Shortcuts</h4>
+                <button class="admin-btn admin-btn--ghost" (click)="toggleShortcutsPanel()">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+              <div class="shortcuts-panel__body">
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>B</kbd></span>
+                  <span class="shortcut-desc">Bold</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>I</kbd></span>
+                  <span class="shortcut-desc">Italic</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>U</kbd></span>
+                  <span class="shortcut-desc">Underline</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd></span>
+                  <span class="shortcut-desc">Heading 1</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd></span>
+                  <span class="shortcut-desc">Heading 2</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>3</kbd></span>
+                  <span class="shortcut-desc">Heading 3</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd></span>
+                  <span class="shortcut-desc">Ordered List</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd></span>
+                  <span class="shortcut-desc">Bullet List</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>K</kbd></span>
+                  <span class="shortcut-desc">Insert Link</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Z</kbd></span>
+                  <span class="shortcut-desc">Undo</span>
+                </div>
+                <div class="shortcut-row">
+                  <span class="shortcut-keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></span>
+                  <span class="shortcut-desc">Redo</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editor wrapper with floating toolbar, side menu, link tooltip -->
+            <div class="editor-wrapper" [class.editor-wrapper--fullscreen]="isFullscreen">
+
+              <!-- Floating Selection Toolbar (Medium-style) -->
+              <div class="floating-toolbar" *ngIf="floatingToolbar.visible"
+                [style.top.px]="floatingToolbar.top"
+                [style.left.px]="floatingToolbar.left"
+                (mousedown)="$event.preventDefault()">
+                <button class="floating-toolbar__btn" [class.floating-toolbar__btn--active]="getSelectionFormat('bold')" (click)="floatingFormat('bold')" title="Bold">
+                  <strong>B</strong>
+                </button>
+                <button class="floating-toolbar__btn" [class.floating-toolbar__btn--active]="getSelectionFormat('italic')" (click)="floatingFormat('italic')" title="Italic">
+                  <em>I</em>
+                </button>
+                <button class="floating-toolbar__btn" [class.floating-toolbar__btn--active]="getSelectionFormat('link')" (click)="floatingFormat('link')" title="Link">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                </button>
+                <span class="floating-toolbar__sep"></span>
+                <button class="floating-toolbar__btn floating-toolbar__btn--heading" [class.floating-toolbar__btn--active]="getSelectionFormat('header') === 1" (click)="floatingFormat('header', 1)" title="Heading 1">
+                  H1
+                </button>
+                <button class="floating-toolbar__btn floating-toolbar__btn--heading" [class.floating-toolbar__btn--active]="getSelectionFormat('header') === 2" (click)="floatingFormat('header', 2)" title="Heading 2">
+                  H2
+                </button>
+                <button class="floating-toolbar__btn floating-toolbar__btn--heading" [class.floating-toolbar__btn--active]="getSelectionFormat('header') === 3" (click)="floatingFormat('header', 3)" title="Heading 3">
+                  H3
+                </button>
+                <span class="floating-toolbar__sep"></span>
+                <button class="floating-toolbar__btn" [class.floating-toolbar__btn--active]="getSelectionFormat('blockquote')" (click)="floatingFormat('blockquote')" title="Quote">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                </button>
+              </div>
+
+              <!-- Side "+" Insert Menu (Medium-style) -->
+              <div class="side-menu" *ngIf="sideMenu.visible"
+                [style.top.px]="sideMenu.top">
+                <button class="side-menu__trigger" (click)="toggleSideMenuExpand()" [class.side-menu__trigger--open]="sideMenu.expanded" title="Add content">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+                <div class="side-menu__options" *ngIf="sideMenu.expanded">
+                  <button class="side-menu__option" (click)="sideInsert('image')" title="Add image">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  </button>
+                  <button class="side-menu__option" (click)="sideInsert('video')" title="Add video embed">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </button>
+                  <button class="side-menu__option" (click)="sideInsert('divider')" title="Add divider">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                  </button>
+                  <button class="side-menu__option" (click)="sideInsert('code')" title="Add code block">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Link Hover Tooltip -->
+              <div class="link-tooltip" *ngIf="linkTooltip.visible"
+                [style.top.px]="linkTooltip.top"
+                [style.left.px]="linkTooltip.left"
+                (mouseenter)="onLinkTooltipEnter()"
+                (mouseleave)="onLinkTooltipLeave()">
+                <a class="link-tooltip__url" [href]="linkTooltip.url" target="_blank" rel="noopener">{{ linkTooltip.url }}</a>
+                <span class="link-tooltip__sep"></span>
+                <button class="link-tooltip__btn" (click)="editLink()" title="Edit link">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </button>
+                <button class="link-tooltip__btn link-tooltip__btn--danger" (click)="removeLink()" title="Remove link">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+
+              <!-- Editor container with drag-drop zone -->
+              <div class="editor-container" [class.editor-container--focus]="isFocusMode" [class.editor-container--fullscreen]="isFullscreen" [class.editor-container--dragging]="isDraggingOver">
+                <div class="editor-drop-overlay" *ngIf="isDraggingOver">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <span>Drop image here</span>
+                </div>
+                <quill-editor
+                  [(ngModel)]="itemForm.articleContent"
+                  [modules]="quillModules"
+                  [styles]="{ minHeight: isFullscreen ? 'calc(100vh - 320px)' : '300px' }"
+                  placeholder="Start writing your article... Drop images or use the toolbar above. Type --- for a divider."
+                  (onEditorCreated)="onEditorCreated($event)"
+                  (onContentChanged)="onContentChanged($event)">
+                </quill-editor>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
       <!-- Dynamic Additional Details Fields -->

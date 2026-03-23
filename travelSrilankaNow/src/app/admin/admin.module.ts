@@ -26,6 +26,9 @@ import { AdvancedImageUploadComponent } from './components/advanced-image-upload
 import { ImageEditorComponent } from './components/image-editor/image-editor.component';
 import { EntityImageManagerComponent } from './components/entity-image-manager/entity-image-manager.component';
 
+// Rich Text Editor
+import { QuillModule } from 'ngx-quill';
+
 // Services
 import { MediaService } from './services/media.service';
 
@@ -58,7 +61,8 @@ import { MediaService } from './services/media.service';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    AdminRoutingModule
+    AdminRoutingModule,
+    QuillModule.forRoot()
   ],
   providers: [
     MediaService

@@ -1,13 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { AdminApiService } from '../../services/admin-api.service';
 import { FieldDefinition } from '../../../models/more-section.model';
+
+// Register Quill image resize module dynamically to avoid webpack 'imports' error
+declare var require: any;
+const Quill = require('quill');
+// @ts-ignore
+const ImageResize = require('quill-image-resize-module--fix-imports-error').default;
+Quill.register('modules/imageResize', ImageResize);
+
+// Register custom Divider blot for horizontal rule
+const BlockEmbed = Quill.import('blots/block/embed');
+class DividerBlot extends BlockEmbed {
+  static blotName = 'divider';
+  static tagName = 'hr';
+}
+Quill.register(DividerBlot);
 
 @Component({
   selector: 'app-admin-more-sections',
   templateUrl: './admin-more-sections.component.html',
   styleUrls: ['./admin-more-sections.component.scss']
 })
-export class AdminMoreSectionsComponent implements OnInit {
+export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   // Sections
   sections: any[] = [];
   isLoading = true;
@@ -39,7 +54,70 @@ export class AdminMoreSectionsComponent implements OnInit {
   showItemModal = false;
   isEditingItem = false;
   editingItemId: number | null = null;
-  itemForm: any = { title: '', shortDescription: '', description: '', imageUrl: '', link: '', displayOrder: 0, active: true, additionalDetails: {} };
+  itemForm: any = { title: '', shortDescription: '', description: '', imageUrl: '', link: '', contentType: 'simple', articleContent: '', displayOrder: 0, active: true, additionalDetails: {} };
+
+  // Fullscreen & editor state
+  isFullscreen = false;
+  isFocusMode = false;
+  showShortcutsPanel = false;
+  wordCount = 0;
+  charCount = 0;
+  readingTime = 0;
+  autoSaveStatus: 'saved' | 'saving' | 'unsaved' = 'saved';
+  private autoSaveTimer: any = null;
+  private lastSavedContent = '';
+  private quillInstance: any = null;
+  isDraggingOver = false;
+
+  // Floating selection toolbar
+  floatingToolbar = { visible: false, top: 0, left: 0 };
+  private selectionChangeHandler: any = null;
+
+  // Side insert menu
+  sideMenu = { visible: false, top: 0, expanded: false };
+  private cursorChangeHandler: any = null;
+
+  // Link tooltip
+  linkTooltip = { visible: false, top: 0, left: 0, url: '' };
+  private linkHoverHandler: any = null;
+  private linkLeaveHandler: any = null;
+  private linkTooltipTimer: any = null;
+
+  // Quill editor config — enhanced Medium-like toolbar
+  quillModules = {
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ script: 'sub' }, { script: 'super' }],
+        [{ color: [] }, { background: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image', 'video'],
+        [{ align: [] }],
+        ['divider'],
+        ['clean']
+      ],
+      handlers: {
+        divider: null as any // will be set in onEditorCreated
+      }
+    },
+    imageResize: {
+      displaySize: true,
+      modules: ['Resize', 'DisplaySize', 'Toolbar']
+    },
+    keyboard: {
+      bindings: {
+        // Ctrl/Cmd+Shift+1 = H1
+        header1: { key: '1', shortKey: true, shiftKey: true, handler: function(this: any) { this.quill.format('header', 1); } },
+        // Ctrl/Cmd+Shift+2 = H2
+        header2: { key: '2', shortKey: true, shiftKey: true, handler: function(this: any) { this.quill.format('header', 2); } },
+        // Ctrl/Cmd+Shift+3 = H3
+        header3: { key: '3', shortKey: true, shiftKey: true, handler: function(this: any) { this.quill.format('header', 3); } }
+      }
+    }
+  };
 
   // Delete confirmation
   showDeleteConfirm = false;
@@ -49,7 +127,9 @@ export class AdminMoreSectionsComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  constructor(private adminApi: AdminApiService) {}
+  constructor(
+    private adminApi: AdminApiService
+  ) {}
 
   // Image upload handlers
   onSectionImageUploaded(url: string): void {
@@ -58,6 +138,368 @@ export class AdminMoreSectionsComponent implements OnInit {
 
   onItemImageUploaded(url: string): void {
     this.itemForm.imageUrl = url;
+  }
+
+  // --- Fullscreen & Editor Features ---
+
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
+    if (this.isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      this.isFocusMode = false;
+    }
+  }
+
+  toggleFocusMode(): void {
+    this.isFocusMode = !this.isFocusMode;
+  }
+
+  toggleShortcutsPanel(): void {
+    this.showShortcutsPanel = !this.showShortcutsPanel;
+  }
+
+  onEditorCreated(editor: any): void {
+    this.quillInstance = editor;
+    this.lastSavedContent = this.itemForm.articleContent || '';
+
+    // Register divider handler
+    const toolbar = editor.getModule('toolbar');
+    toolbar.addHandler('divider', () => {
+      const range = editor.getSelection(true);
+      editor.insertText(range.index, '\n', 'user');
+      editor.insertEmbed(range.index + 1, 'divider', true, 'user');
+      editor.setSelection(range.index + 2, 'silent');
+    });
+
+    // Setup drag-and-drop for images
+    const editorEl = editor.root;
+    editorEl.addEventListener('dragover', (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.isDraggingOver = true;
+    });
+    editorEl.addEventListener('dragleave', (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.isDraggingOver = false;
+    });
+    editorEl.addEventListener('drop', (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.isDraggingOver = false;
+      if (e.dataTransfer?.files?.length) {
+        this.handleDroppedFiles(e.dataTransfer.files, editor);
+      }
+    });
+
+    // --- Floating selection toolbar ---
+    this.selectionChangeHandler = () => {
+      const sel = editor.getSelection();
+      if (sel && sel.length > 0) {
+        this.showFloatingToolbar(editor, sel);
+      } else {
+        this.floatingToolbar.visible = false;
+      }
+    };
+    editor.on('selection-change', this.selectionChangeHandler);
+
+    // --- Side "+" insert menu ---
+    this.cursorChangeHandler = (range: any) => {
+      if (!range || range.length > 0) {
+        this.sideMenu.visible = false;
+        this.sideMenu.expanded = false;
+        return;
+      }
+      this.updateSideMenu(editor, range);
+    };
+    editor.on('selection-change', this.cursorChangeHandler);
+
+    // --- Link hover tooltip ---
+    this.linkHoverHandler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a');
+      if (anchor) {
+        const href = anchor.getAttribute('href') || '';
+        const rect = anchor.getBoundingClientRect();
+        const containerRect = editorEl.closest('.editor-wrapper')?.getBoundingClientRect() ||
+                              editorEl.closest('.editor-container')?.getBoundingClientRect();
+        if (containerRect) {
+          this.linkTooltip = {
+            visible: true,
+            top: rect.bottom - containerRect.top + 4,
+            left: rect.left - containerRect.left + (rect.width / 2),
+            url: href
+          };
+        }
+        if (this.linkTooltipTimer) { clearTimeout(this.linkTooltipTimer); }
+      }
+    };
+    this.linkLeaveHandler = (e: MouseEvent) => {
+      const related = e.relatedTarget as HTMLElement;
+      if (related?.closest('.link-tooltip')) return;
+      this.linkTooltipTimer = setTimeout(() => {
+        this.linkTooltip.visible = false;
+      }, 300);
+    };
+    editorEl.addEventListener('mouseover', this.linkHoverHandler);
+    editorEl.addEventListener('mouseout', this.linkLeaveHandler);
+
+    // --- Markdown auto-shortcuts ---
+    editor.keyboard.addBinding({ key: 'Enter' }, {
+      collapsed: true,
+      prefix: /^---$/
+    }, (range: any) => {
+      const lineStart = range.index - 3;
+      editor.deleteText(lineStart, 3, 'user');
+      editor.insertEmbed(lineStart, 'divider', true, 'user');
+      editor.setSelection(lineStart + 1, 0, 'silent');
+      return false;
+    });
+  }
+
+  private handleDroppedFiles(files: FileList, editor: any): void {
+    Array.from(files).forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const range = editor.getSelection(true);
+          editor.insertEmbed(range.index, 'image', reader.result, 'user');
+          editor.setSelection(range.index + 1, 'silent');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  onContentChanged(event: any): void {
+    if (!event?.text) return;
+    const text = event.text.trim();
+    this.charCount = text.length;
+    this.wordCount = text ? text.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
+    this.readingTime = Math.max(1, Math.ceil(this.wordCount / 200));
+
+    // Auto-save indicator
+    if (this.itemForm.articleContent !== this.lastSavedContent) {
+      this.autoSaveStatus = 'unsaved';
+      this.startAutoSaveTimer();
+    }
+  }
+
+  private startAutoSaveTimer(): void {
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+    }
+    this.autoSaveTimer = setTimeout(() => {
+      this.autoSaveStatus = 'saving';
+      // Simulate save delay — in real scenario this would call API
+      setTimeout(() => {
+        this.lastSavedContent = this.itemForm.articleContent;
+        this.autoSaveStatus = 'saved';
+      }, 500);
+    }, 2000);
+  }
+
+  editorUndo(): void {
+    if (this.quillInstance) {
+      this.quillInstance.history.undo();
+    }
+  }
+
+  editorRedo(): void {
+    if (this.quillInstance) {
+      this.quillInstance.history.redo();
+    }
+  }
+
+  // --- Floating toolbar helpers ---
+
+  private showFloatingToolbar(editor: any, selection: any): void {
+    const bounds = editor.getBounds(selection.index, selection.length);
+    const editorEl = editor.root;
+    const containerRect = editorEl.closest('.editor-wrapper')?.getBoundingClientRect() ||
+                          editorEl.closest('.editor-container')?.getBoundingClientRect();
+    if (!containerRect) return;
+
+    const editorRect = editorEl.getBoundingClientRect();
+    this.floatingToolbar = {
+      visible: true,
+      top: bounds.top + (editorRect.top - containerRect.top) - 48,
+      left: bounds.left + (editorRect.left - containerRect.left) + (bounds.width / 2)
+    };
+  }
+
+  floatingFormat(format: string, value: any = true): void {
+    if (!this.quillInstance) return;
+    const sel = this.quillInstance.getSelection();
+    if (!sel) return;
+
+    if (format === 'header') {
+      const current = this.quillInstance.getFormat(sel);
+      this.quillInstance.format('header', current.header === value ? false : value, 'user');
+    } else if (format === 'blockquote') {
+      const current = this.quillInstance.getFormat(sel);
+      this.quillInstance.format('blockquote', !current.blockquote, 'user');
+    } else if (format === 'link') {
+      const current = this.quillInstance.getFormat(sel);
+      if (current.link) {
+        this.quillInstance.format('link', false, 'user');
+      } else {
+        const url = prompt('Enter URL:');
+        if (url) {
+          this.quillInstance.format('link', url, 'user');
+        }
+      }
+    } else {
+      const current = this.quillInstance.getFormat(sel);
+      this.quillInstance.format(format, !current[format], 'user');
+    }
+  }
+
+  getSelectionFormat(format: string): any {
+    if (!this.quillInstance) return false;
+    const sel = this.quillInstance.getSelection();
+    if (!sel) return false;
+    const formats = this.quillInstance.getFormat(sel);
+    return formats[format];
+  }
+
+  // --- Side insert menu helpers ---
+
+  private updateSideMenu(editor: any, range: any): void {
+    const [line] = editor.getLine(range.index);
+    if (!line) {
+      this.sideMenu.visible = false;
+      return;
+    }
+
+    const lineText = line.domNode?.textContent || '';
+    const isEmptyLine = lineText.trim() === '' || lineText === '\n';
+
+    if (isEmptyLine) {
+      const bounds = editor.getBounds(range.index, 0);
+      const editorEl = editor.root;
+      const editorRect = editorEl.getBoundingClientRect();
+      const containerRect = editorEl.closest('.editor-wrapper')?.getBoundingClientRect() ||
+                            editorEl.closest('.editor-container')?.getBoundingClientRect();
+      if (containerRect) {
+        this.sideMenu = {
+          visible: true,
+          top: bounds.top + (editorRect.top - containerRect.top),
+          expanded: false
+        };
+      }
+    } else {
+      this.sideMenu.visible = false;
+      this.sideMenu.expanded = false;
+    }
+  }
+
+  toggleSideMenuExpand(): void {
+    this.sideMenu.expanded = !this.sideMenu.expanded;
+  }
+
+  sideInsert(type: string): void {
+    if (!this.quillInstance) return;
+    const range = this.quillInstance.getSelection(true);
+    if (!range) return;
+
+    switch (type) {
+      case 'image': {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = () => {
+          const file = input.files?.[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              this.quillInstance.insertEmbed(range.index, 'image', reader.result, 'user');
+              this.quillInstance.setSelection(range.index + 1, 0, 'silent');
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+        input.click();
+        break;
+      }
+      case 'video': {
+        const url = prompt('Paste a video URL (YouTube, Vimeo, etc.):');
+        if (url) {
+          this.quillInstance.insertEmbed(range.index, 'video', url, 'user');
+          this.quillInstance.setSelection(range.index + 1, 0, 'silent');
+        }
+        break;
+      }
+      case 'divider': {
+        this.quillInstance.insertEmbed(range.index, 'divider', true, 'user');
+        this.quillInstance.insertText(range.index + 1, '\n', 'user');
+        this.quillInstance.setSelection(range.index + 2, 0, 'silent');
+        break;
+      }
+      case 'code': {
+        this.quillInstance.insertText(range.index, '\n', 'user');
+        this.quillInstance.formatLine(range.index + 1, 1, 'code-block', true, 'user');
+        this.quillInstance.setSelection(range.index + 1, 0, 'silent');
+        break;
+      }
+    }
+    this.sideMenu.expanded = false;
+    this.sideMenu.visible = false;
+  }
+
+  // --- Link tooltip helpers ---
+
+  onLinkTooltipEnter(): void {
+    if (this.linkTooltipTimer) { clearTimeout(this.linkTooltipTimer); }
+  }
+
+  onLinkTooltipLeave(): void {
+    this.linkTooltipTimer = setTimeout(() => {
+      this.linkTooltip.visible = false;
+    }, 300);
+  }
+
+  editLink(): void {
+    if (!this.quillInstance || !this.linkTooltip.url) return;
+    const newUrl = prompt('Edit URL:', this.linkTooltip.url);
+    if (newUrl !== null) {
+      // Find the link at the current position and update it
+      const delta = this.quillInstance.getContents();
+      let pos = 0;
+      for (const op of delta.ops) {
+        const len = typeof op.insert === 'string' ? op.insert.length : 1;
+        if (op.attributes?.link === this.linkTooltip.url) {
+          this.quillInstance.formatText(pos, len, 'link', newUrl || false, 'user');
+          break;
+        }
+        pos += len;
+      }
+    }
+    this.linkTooltip.visible = false;
+  }
+
+  removeLink(): void {
+    if (!this.quillInstance || !this.linkTooltip.url) return;
+    const delta = this.quillInstance.getContents();
+    let pos = 0;
+    for (const op of delta.ops) {
+      const len = typeof op.insert === 'string' ? op.insert.length : 1;
+      if (op.attributes?.link === this.linkTooltip.url) {
+        this.quillInstance.formatText(pos, len, 'link', false, 'user');
+        break;
+      }
+      pos += len;
+    }
+    this.linkTooltip.visible = false;
+  }
+
+  ngOnDestroy(): void {
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+    }
+    document.body.style.overflow = '';
   }
 
   getItemCount(section: any): number {
@@ -73,6 +515,10 @@ export class AdminMoreSectionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSections();
+  }
+
+  onContentTypeChange(type: string): void {
+    this.itemForm.contentType = type;
   }
 
   loadSections(): void {
@@ -172,7 +618,7 @@ export class AdminMoreSectionsComponent implements OnInit {
   }
 
   openAddItem(): void {
-    this.itemForm = { title: '', shortDescription: '', description: '', imageUrl: '', link: '', displayOrder: 0, active: true, additionalDetails: {} };
+    this.itemForm = { title: '', shortDescription: '', description: '', imageUrl: '', link: '', contentType: 'simple', articleContent: '', displayOrder: 0, active: true, additionalDetails: {} };
     // Pre-populate additionalDetails keys from section field definitions
     if (this.selectedSection?.additionalFieldDefinitions) {
       for (const field of this.selectedSection.additionalFieldDefinitions) {
@@ -217,6 +663,20 @@ export class AdminMoreSectionsComponent implements OnInit {
 
   closeItemModal(): void {
     this.showItemModal = false;
+    this.isFullscreen = false;
+    this.isFocusMode = false;
+    this.showShortcutsPanel = false;
+    document.body.style.overflow = '';
+    this.floatingToolbar.visible = false;
+    this.sideMenu.visible = false;
+    this.sideMenu.expanded = false;
+    this.linkTooltip.visible = false;
+    if (this.linkTooltipTimer) { clearTimeout(this.linkTooltipTimer); }
+    this.quillInstance = null;
+    this.wordCount = 0;
+    this.charCount = 0;
+    this.readingTime = 0;
+    this.autoSaveStatus = 'saved';
   }
 
   saveItem(): void {
