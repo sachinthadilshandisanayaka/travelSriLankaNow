@@ -306,88 +306,66 @@
   }
 }
 
-// ==================== Gallery Grid ====================
+// ==================== Gallery Grid (Masonry Collage) ====================
 .gallery-section {
   padding: $spacing-4xl 0;
   background: $navy-bg-lightest;
 }
 
 .gallery-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: $spacing-lg;
+  column-count: 2;
+  column-gap: $spacing-md;
 
   @include respond-to('md') {
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-xl;
+    column-count: 3;
+    column-gap: $spacing-lg;
   }
 
   @include respond-to('lg') {
-    grid-template-columns: repeat(3, 1fr);
+    column-count: 3;
   }
 
   @include respond-to('xl') {
-    grid-template-columns: repeat(4, 1fr);
+    column-count: 4;
   }
 
-  // Dynamic grid columns
+  // Dynamic column counts
   &.grid-1 {
-    grid-template-columns: 1fr;
-
-    @include respond-to('md') {
-      grid-template-columns: 1fr;
-    }
-
-    @include respond-to('lg') {
-      grid-template-columns: 1fr;
-    }
-
-    @include respond-to('xl') {
-      grid-template-columns: 1fr;
-    }
+    column-count: 1;
+    @include respond-to('md') { column-count: 1; }
+    @include respond-to('lg') { column-count: 1; }
+    @include respond-to('xl') { column-count: 1; }
   }
 
   &.grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-md;
-
-    @include respond-to('md') {
-      grid-template-columns: repeat(2, 1fr);
-      gap: $spacing-xl;
-    }
-
-    @include respond-to('lg') {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @include respond-to('xl') {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    column-count: 2;
+    column-gap: $spacing-sm;
+    @include respond-to('md') { column-count: 2; column-gap: $spacing-lg; }
+    @include respond-to('lg') { column-count: 2; }
+    @include respond-to('xl') { column-count: 2; }
   }
 
   &.grid-3 {
-    @include respond-to('lg') {
-      grid-template-columns: repeat(3, 1fr);
-    }
-    @include respond-to('xl') {
-      grid-template-columns: repeat(3, 1fr);
-    }
+    @include respond-to('lg') { column-count: 3; }
+    @include respond-to('xl') { column-count: 3; }
   }
 
   &.grid-4 {
-    @include respond-to('lg') {
-      grid-template-columns: repeat(3, 1fr);
-    }
-    @include respond-to('xl') {
-      grid-template-columns: repeat(4, 1fr);
-    }
+    @include respond-to('lg') { column-count: 3; }
+    @include respond-to('xl') { column-count: 4; }
   }
 }
 
 .gallery-item {
+  break-inside: avoid;
+  margin-bottom: $spacing-md;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+
+  @include respond-to('md') {
+    margin-bottom: $spacing-lg;
+  }
 
   &.revealed {
     opacity: 1;
@@ -398,9 +376,8 @@
 .gallery-image-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: $radius-xl;
+  border-radius: $radius-lg;
   background: $light-gray;
   box-shadow: $shadow-md;
   cursor: pointer;
@@ -446,23 +423,21 @@
 
   &:hover {
     box-shadow: $shadow-xl;
-    transform: translateY(-4px);
 
     .gallery-overlay {
       opacity: 1;
     }
 
     img {
-      transform: scale(1.05);
+      transform: scale(1.03);
     }
   }
 
   img {
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
     transition: transform $transition-slow;
-    filter: saturate(0.85);
   }
 }
 

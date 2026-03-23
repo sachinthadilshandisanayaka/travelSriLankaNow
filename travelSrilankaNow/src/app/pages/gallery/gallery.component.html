@@ -154,7 +154,7 @@
         (click)="openLightbox(item)"
       >
         <div class="gallery-image-wrapper">
-          <img [src]="(item.thumbnailUrl || item.url) | cloudinaryOptimize:400:400:80" [alt]="item.title" />
+          <img [src]="item.url | cloudinaryOptimize:600:0:80" [alt]="item.title" />
 
           <!-- Video indicator -->
           <div *ngIf="item.type === 'video'" class="video-indicator">

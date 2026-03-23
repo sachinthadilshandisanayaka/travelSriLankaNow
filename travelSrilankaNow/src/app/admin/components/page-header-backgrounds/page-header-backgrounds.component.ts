@@ -39,7 +39,7 @@ export class PageHeaderBackgroundsComponent implements OnInit {
     this.backgroundForm = this.fb.group({
       id: [null],
       pageType: [this.selectedPageType, Validators.required],
-      imageUrl: ['', Validators.required],
+      imageUrl: [''],
       title: [''],
       overlayColor: [this.defaultOverlayColor],
       overlayOpacity: [this.defaultOverlayOpacity, [Validators.min(0), Validators.max(1)]],
@@ -109,12 +109,9 @@ export class PageHeaderBackgroundsComponent implements OnInit {
   saveBackground(): void {
     if (this.backgroundForm.invalid) {
       // Show specific error messages based on which field is invalid
-      const imageUrl = this.backgroundForm.get('imageUrl');
       const pageType = this.backgroundForm.get('pageType');
 
-      if (imageUrl?.invalid && !imageUrl?.value) {
-        this.errorMessage = 'Please upload a background image';
-      } else if (pageType?.invalid) {
+      if (pageType?.invalid) {
         this.errorMessage = 'Please select a page type';
       } else {
         this.errorMessage = 'Please check all required fields';

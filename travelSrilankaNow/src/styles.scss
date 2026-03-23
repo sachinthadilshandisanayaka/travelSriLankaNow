@@ -99,3 +99,12 @@ img {
     display: none;
   }
 }
+
+// Quill editor — image resize handles
+.ql-editor img {
+  cursor: pointer;
+}
+.ql-editor img.selected,
+img.ql-selected {
+  outline: 2px solid #4f7ac7;
+}

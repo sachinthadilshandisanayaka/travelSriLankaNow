@@ -18,7 +18,8 @@ export class CloudinaryOptimizePipe implements PipeTransform {
     if (height) {
       transformations.push(`h_${height}`);
     }
-    transformations.push('c_fill');
+    // Use c_fill when both dimensions are set (crop to fit), c_limit when only width (preserve aspect ratio)
+    transformations.push(width && height ? 'c_fill' : 'c_limit');
 
     const parts = url.split('/upload/');
     if (parts.length === 2) {

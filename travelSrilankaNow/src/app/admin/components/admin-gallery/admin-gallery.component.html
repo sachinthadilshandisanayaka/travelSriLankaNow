@@ -66,7 +66,7 @@
         <div *ngFor="let item of galleryItems" class="gallery-card">
           <!-- Image Preview -->
           <div class="gallery-card__image">
-            <img [src]="item.thumbnailUrl || item.url" [alt]="item.title">
+            <img [src]="item.url" [alt]="item.title">
 
             <!-- Type Badge -->
             <div class="gallery-card__type-badge" [class.gallery-card__type-badge--video]="item.type === 'video'">
@@ -219,16 +219,6 @@
             <label class="admin-form__label">Video URL *</label>
             <input type="url" formControlName="url" class="admin-input" placeholder="https://example.com/video.mp4">
             <p class="admin-form__hint">Enter the full URL of the video</p>
-          </div>
-
-          <!-- Thumbnail Upload -->
-          <div class="admin-form__group admin-form__group--full">
-            <app-image-upload
-              [currentImageUrl]="galleryForm.get('thumbnailUrl')?.value"
-              [folder]="'gallery/thumbnails'"
-              [label]="'Thumbnail Image'"
-              (imageUploaded)="onThumbnailUploaded($event)"
-            ></app-image-upload>
           </div>
 
           <!-- Description -->

@@ -56,7 +56,7 @@ export class AdminHeroSlidesComponent implements OnInit {
       id: [null],
       title: ['', Validators.required],
       subtitle: [''],
-      imageUrl: ['', Validators.required],
+      imageUrl: [''],
       buttonText: [''],
       buttonLink: [''],
       displayOrder: [0],

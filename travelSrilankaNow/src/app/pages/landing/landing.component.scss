@@ -780,6 +780,9 @@
   transition: all $transition-base;
   display: flex;
   flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 
   &:hover {
     box-shadow: $shadow-xl;
@@ -932,11 +935,6 @@
   }
 }
 
-// View Details Button - Fixed at bottom of card
-.btn-view-details {
-  @include button-view-details;
-  margin-top: auto;
-}
 
 // ==================== Utilities ====================
 .text-center {

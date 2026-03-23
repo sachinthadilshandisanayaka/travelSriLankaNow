@@ -54,7 +54,7 @@ export class AdminSocialMediaComponent implements OnInit {
       id: [null],
       platform: ['INSTAGRAM', Validators.required],
       url: ['', [Validators.required]],
-      thumbnailUrl: ['', Validators.required],
+      thumbnailUrl: [''],
       title: [''],
       description: [''],
       displayOrder: [0],
