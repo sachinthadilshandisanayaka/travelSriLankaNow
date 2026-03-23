@@ -32,8 +32,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_srilanka_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # JPA Configuration
-      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       # JWT Configuration
       JWT_SECRET: ${JWT_SECRET}
       # Cloudinary Configuration
