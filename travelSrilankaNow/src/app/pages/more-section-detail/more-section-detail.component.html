@@ -9,7 +9,6 @@
   <div class="error-state" *ngIf="error && !isLoading">
     <h2>Section Not Found</h2>
     <p>The section you're looking for doesn't exist or is no longer available.</p>
-    <a routerLink="/" class="back-link">Back to Home</a>
   </div>
 
   <!-- Content -->
@@ -26,32 +25,61 @@
     <!-- Items Grid -->
     <div class="container">
       <div class="items-grid" *ngIf="section.items && section.items.length > 0">
-        <div class="item-card" *ngFor="let item of section.items">
+
+        <div class="item-card"
+             *ngFor="let item of section.items"
+             [class.item-card--article]="item.contentType === 'article'"
+             (click)="navigateToItem(item, $event)"
+             role="button"
+             tabindex="0"
+             (keydown.enter)="navigateToItem(item, $event)">
+
+          <!-- Card image -->
           <div class="item-card__image" *ngIf="item.imageUrl">
             <img [src]="item.imageUrl" [alt]="item.title">
+            <span class="item-card__article-badge" *ngIf="item.contentType === 'article'">Article</span>
           </div>
+
           <div class="item-card__content">
             <h3 class="item-card__title">{{ item.title }}</h3>
-            <p class="item-card__short-desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
-            <p class="item-card__desc" *ngIf="item.description">{{ item.description }}</p>
-            <!-- Additional Details -->
-            <div class="item-card__details" *ngIf="item.additionalDetails && hasDetails(item)">
-              <div class="item-card__detail-row" *ngFor="let entry of item.additionalDetails | keyvalue">
-                <ng-container *ngIf="isNonEmpty(entry.value)">
-                  <span class="item-card__detail-label">{{ getFieldLabel(entry.key) }}</span>
-                  <a *ngIf="isLinkField(entry.key)" class="item-card__detail-link" [href]="entry.value" target="_blank" rel="noopener noreferrer">{{ entry.value }}</a>
-                  <span *ngIf="!isLinkField(entry.key)" class="item-card__detail-value">{{ formatValue(entry.value) }}</span>
-                </ng-container>
+
+            <!-- Simple mode -->
+            <ng-container *ngIf="item.contentType !== 'article'">
+              <p class="item-card__short-desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+              <p class="item-card__desc" *ngIf="item.description && !item.shortDescription">{{ item.description }}</p>
+
+              <!-- Additional details (non-link fields only in card) -->
+              <div class="item-card__details" *ngIf="hasDetails(item)">
+                <div class="item-card__detail-row" *ngFor="let entry of item.additionalDetails | keyvalue">
+                  <ng-container *ngIf="isNonEmpty(entry.value) && !isLinkField(entry.key)">
+                    <span class="item-card__detail-label">{{ getFieldLabel(entry.key) }}</span>
+                    <span class="item-card__detail-value">{{ formatValue(entry.value) }}</span>
+                  </ng-container>
+                </div>
               </div>
-            </div>
-            <a *ngIf="item.link" [href]="item.link" target="_blank" class="item-card__link">
-              Learn More
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
+
+              <!-- External URL button — stops card navigation -->
+              <a *ngIf="item.link"
+                 [href]="item.link"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="item-card__ext-link"
+                 (click)="$event.stopPropagation()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                Visit Link
+              </a>
+            </ng-container>
+
+            <!-- Article mode — excerpt only, not full HTML -->
+            <ng-container *ngIf="item.contentType === 'article'">
+              <p class="item-card__excerpt" *ngIf="item.articleContent">{{ getArticleExcerpt(item) }}</p>
+            </ng-container>
+
           </div>
         </div>
+
       </div>
 
       <div class="empty-state" *ngIf="!section.items || section.items.length === 0">

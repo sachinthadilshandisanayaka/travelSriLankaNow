@@ -39,6 +39,12 @@ public class MoreSectionItem {
 
     private String link;
 
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'simple'")
+    private String contentType = "simple";
+
+    @Column(columnDefinition = "TEXT")
+    private String articleContent;
+
     @Column(columnDefinition = "TEXT")
     @Convert(converter = JsonMapConverter.class)
     private Map<String, Object> additionalDetails = new HashMap<>();

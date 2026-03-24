@@ -265,7 +265,7 @@
   }
 }
 
-// View Details Button - for cards
+// DEPRECATED: No longer used — cards are now fully clickable <a> tags
 @mixin button-view-details {
   @include button-base;
   width: 100%;

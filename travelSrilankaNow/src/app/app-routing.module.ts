@@ -10,6 +10,7 @@ import { PlacesComponent } from './pages/places/places.component';
 import { PlaceDetailComponent } from './pages/place-detail/place-detail.component';
 import { LandingSimpleComponent } from './pages/landing/landing-simple.component';
 import { MoreSectionDetailComponent } from './pages/more-section-detail/more-section-detail.component';
+import { MoreSectionItemDetailComponent } from './pages/more-section-item-detail/more-section-item-detail.component';
 
 const routes: Routes = [
   { path: '', component: LandingComponent, data: { animation: 'HomePage' } },
@@ -22,6 +23,7 @@ const routes: Routes = [
   { path: 'places', component: PlacesComponent, data: { animation: 'PlacesPage' } },
   { path: 'places/:id', component: PlaceDetailComponent, data: { animation: 'PlaceDetailPage' } },
   { path: 'more/:slug', component: MoreSectionDetailComponent, data: { animation: 'MoreSectionPage' } },
+  { path: 'more/:slug/:id', component: MoreSectionItemDetailComponent, data: { animation: 'MoreSectionItemPage' } },
   {
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),

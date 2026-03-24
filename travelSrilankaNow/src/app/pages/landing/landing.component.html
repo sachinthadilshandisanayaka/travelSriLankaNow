@@ -148,8 +148,9 @@
         </div>
 
         <div class="location-grid">
-          <div *ngFor="let location of featuredLocations; let i = index"
-               class="location-card card-stagger">
+          <a *ngFor="let location of featuredLocations; let i = index"
+             [routerLink]="['/locations', location.id]"
+             class="location-card card-stagger">
             <div class="location-image image-zoom">
               <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
               <div class="image-overlay">
@@ -163,16 +164,8 @@
                 <span class="location-pin">📍</span>
                 <span>{{ location.region }}</span>
               </div>
-              <a [routerLink]="['/locations', location.id]" class="btn-view-details">
-                <span>View Details</span>
-                <span class="btn-shine"></span>
-                <span class="btn-corner btn-corner--tl"></span>
-                <span class="btn-corner btn-corner--tr"></span>
-                <span class="btn-corner btn-corner--bl"></span>
-                <span class="btn-corner btn-corner--br"></span>
-              </a>
             </div>
-          </div>
+          </a>
         </div>
 
         <div *ngIf="getSectionConfig('FEATURED_LOCATIONS').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
@@ -200,8 +193,9 @@
         </div>
 
         <div class="events-grid">
-          <div *ngFor="let event of featuredEvents; let i = index"
-               class="event-card card-stagger">
+          <a *ngFor="let event of featuredEvents; let i = index"
+             [routerLink]="['/events', event.id]"
+             class="event-card card-stagger">
             <div class="event-image image-zoom">
               <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
               <div class="event-badge-wrapper">
@@ -222,16 +216,8 @@
                 </div>
               </div>
               <p>{{ event.shortDescription }}</p>
-              <a [routerLink]="['/events', event.id]" class="btn-view-details">
-                <span>Learn More</span>
-                <span class="btn-shine"></span>
-                <span class="btn-corner btn-corner--tl"></span>
-                <span class="btn-corner btn-corner--tr"></span>
-                <span class="btn-corner btn-corner--bl"></span>
-                <span class="btn-corner btn-corner--br"></span>
-              </a>
             </div>
-          </div>
+          </a>
         </div>
 
         <div *ngIf="getSectionConfig('UPCOMING_EVENTS').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
@@ -259,8 +245,9 @@
         </div>
 
         <div class="places-grid">
-          <div *ngFor="let place of featuredPlaces; let i = index"
-               class="place-card card-stagger">
+          <a *ngFor="let place of featuredPlaces; let i = index"
+             [routerLink]="['/places', place.id]"
+             class="place-card card-stagger">
             <div class="place-image image-zoom">
               <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
               <div class="place-badge-wrapper">
@@ -282,16 +269,8 @@
                 </div>
               </div>
               <p>{{ place.shortDescription }}</p>
-              <a [routerLink]="['/places', place.id]" class="btn-view-details">
-                <span>View Details</span>
-                <span class="btn-shine"></span>
-                <span class="btn-corner btn-corner--tl"></span>
-                <span class="btn-corner btn-corner--tr"></span>
-                <span class="btn-corner btn-corner--bl"></span>
-                <span class="btn-corner btn-corner--br"></span>
-              </a>
             </div>
-          </div>
+          </a>
         </div>
 
         <div *ngIf="getSectionConfig('PLACES').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
@@ -417,7 +396,9 @@
         <p class="lead">Discover the most breathtaking places in Sri Lanka</p>
       </div>
       <div class="location-grid">
-        <div *ngFor="let location of featuredLocations" class="location-card card-stagger">
+        <a *ngFor="let location of featuredLocations"
+           [routerLink]="['/locations', location.id]"
+           class="location-card card-stagger">
           <div class="location-image image-zoom">
             <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
             <div class="image-overlay"><span class="category-badge">{{ location.category }}</span></div>
@@ -426,13 +407,8 @@
             <h3>{{ location.name }}</h3>
             <p>{{ location.shortDescription }}</p>
             <div class="location-meta"><span class="location-pin">📍</span><span>{{ location.region }}</span></div>
-            <a [routerLink]="['/locations', location.id]" class="btn-view-details">
-              <span>View Details</span><span class="btn-shine"></span>
-              <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
-              <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
-            </a>
           </div>
-        </div>
+        </a>
       </div>
       <div class="text-center mt-2xl animate-fadeIn delay-6">
         <a routerLink="/locations" class="btn-primary">
@@ -453,7 +429,9 @@
         <p class="lead">Join exciting events and festivals across Sri Lanka</p>
       </div>
       <div class="events-grid">
-        <div *ngFor="let event of featuredEvents" class="event-card card-stagger">
+        <a *ngFor="let event of featuredEvents"
+           [routerLink]="['/events', event.id]"
+           class="event-card card-stagger">
           <div class="event-image image-zoom">
             <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
             <div class="event-badge-wrapper">
@@ -463,13 +441,8 @@
           <div class="event-content">
             <h3>{{ event.title || event.name }}</h3>
             <p>{{ event.shortDescription }}</p>
-            <a [routerLink]="['/events', event.id]" class="btn-view-details">
-              <span>Learn More</span><span class="btn-shine"></span>
-              <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
-              <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
-            </a>
           </div>
-        </div>
+        </a>
       </div>
       <div class="text-center mt-2xl animate-fadeIn delay-6">
         <a routerLink="/events" class="btn-primary">
@@ -490,7 +463,9 @@
         <p class="lead">Find the perfect place to rest during your journey</p>
       </div>
       <div class="places-grid">
-        <div *ngFor="let place of featuredPlaces" class="place-card card-stagger">
+        <a *ngFor="let place of featuredPlaces"
+           [routerLink]="['/places', place.id]"
+           class="place-card card-stagger">
           <div class="place-image image-zoom">
             <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
             <div class="place-badge-wrapper"><span class="type-badge">{{ place.type }}</span></div>
@@ -498,13 +473,8 @@
           <div class="place-content">
             <h3>{{ place.name }}</h3>
             <p>{{ place.shortDescription }}</p>
-            <a [routerLink]="['/places', place.id]" class="btn-view-details">
-              <span>View Details</span><span class="btn-shine"></span>
-              <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
-              <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
-            </a>
           </div>
-        </div>
+        </a>
       </div>
       <div class="text-center mt-2xl animate-fadeIn delay-6">
         <a routerLink="/places" class="btn-primary">

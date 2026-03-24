@@ -123,6 +123,8 @@ public class MoreSectionService {
         item.setDescription(itemDetails.getDescription());
         item.setImageUrl(itemDetails.getImageUrl());
         item.setLink(itemDetails.getLink());
+        item.setContentType(itemDetails.getContentType());
+        item.setArticleContent(itemDetails.getArticleContent());
         item.setAdditionalDetails(itemDetails.getAdditionalDetails());
         item.setDisplayOrder(itemDetails.getDisplayOrder());
         item.setActive(itemDetails.getActive());

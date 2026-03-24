@@ -32,8 +32,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel_srilanka_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # JPA Configuration
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       # JWT Configuration
       JWT_SECRET: ${JWT_SECRET}
       # Cloudinary Configuration
@@ -52,8 +50,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/locations"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 60s
+      retries: 5
+      start_period: 120s
     networks:
       - travel-network
 

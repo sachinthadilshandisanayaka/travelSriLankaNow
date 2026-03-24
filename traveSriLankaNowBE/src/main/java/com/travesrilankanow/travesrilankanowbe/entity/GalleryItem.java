@@ -26,7 +26,7 @@ public class GalleryItem {
     @Column(nullable = false)
     private String url;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String thumbnailUrl;
 
     @Column(nullable = false)

@@ -57,7 +57,7 @@ export class AdminLocationsComponent implements OnInit {
       name: ['', Validators.required],
       description: ['', Validators.required],
       shortDescription: ['', Validators.required],
-      imageUrl: ['', Validators.required],
+      imageUrl: [''],
       category: ['', Validators.required],
       region: ['', Validators.required],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
