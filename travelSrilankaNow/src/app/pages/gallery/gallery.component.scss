@@ -158,18 +158,18 @@
 .search-box {
   position: relative;
   flex: 1;
-  max-width: 100%;
+  min-width: 0;
 
   @include respond-to('lg') {
-    max-width: 400px;
+    max-width: 480px;
   }
 
   .search-input {
     width: 100%;
-    padding: $spacing-sm $spacing-3xl $spacing-sm $spacing-3xl;
+    padding: $spacing-md 2.75rem $spacing-md 2.5rem;
     border: 1px solid $light-gray;
     border-radius: $radius-lg;
-    font-size: $font-size-sm;
+    font-size: $font-size-base;
     color: $text-dark;
     background: $white;
     transition: all 0.3s ease;
@@ -229,6 +229,11 @@
     flex-direction: row;
     gap: $spacing-lg;
   }
+
+  @include respond-to('lg') {
+    width: auto;
+    flex-shrink: 0;
+  }
 }
 
 .filter-group {
@@ -238,7 +243,7 @@
   flex: 1;
 
   @include respond-to('md') {
-    max-width: 200px;
+    min-width: 200px;
   }
 }
 
@@ -252,12 +257,12 @@
 
 .filter-select {
   width: 100%;
-  padding: $spacing-sm $spacing-2xl $spacing-sm $spacing-md;
+  padding: $spacing-md $spacing-xl $spacing-md $spacing-md;
   border: 1px solid $light-gray;
   border-radius: $radius-lg;
   background: $white;
   color: $text-dark;
-  font-size: $font-size-sm;
+  font-size: $font-size-base;
   font-weight: $font-weight-medium;
   cursor: pointer;
   appearance: none;
