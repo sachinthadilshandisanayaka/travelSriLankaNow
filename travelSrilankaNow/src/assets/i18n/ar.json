@@ -1,0 +1,50 @@
+{
+  "nav.home": "الرئيسية",
+  "nav.locations": "المواقع",
+  "nav.events": "الفعاليات",
+  "nav.gallery": "المعرض",
+  "nav.places": "الفنادق",
+  "nav.more": "المزيد",
+
+  "hero.explore": "استكشف الوجهات",
+  "hero.events": "عرض الفعاليات",
+  "hero.title1": "رحلة عبر",
+  "hero.title2": "سريلانكا القديمة",
+  "hero.subtitle": "اختبر التراث المهيب واكتشف الثقافة الغنية لمملكة قديمة",
+
+  "section.subtitle.locations": "وجهات شعبية",
+  "section.subtitle.events": "تجارب",
+  "section.subtitle.places": "أماكن الإقامة",
+  "section.viewAll.locations": "عرض جميع المواقع",
+  "section.viewAll.events": "عرض جميع الفعاليات",
+  "section.viewAll.places": "عرض جميع الفنادق",
+
+  "common.bookTour": "احجز جولة",
+  "common.loading": "جاري التحميل...",
+  "common.error": "حدث خطأ ما",
+
+  "loading.tagline": "اكتشف روائع سريلانكا",
+
+  "locations.title": "المواقع",
+  "locations.search": "البحث عن مواقع...",
+  "locations.filter.category": "جميع الفئات",
+  "locations.filter.region": "جميع المناطق",
+
+  "events.title": "الفعاليات",
+  "events.search": "البحث عن فعاليات...",
+
+  "gallery.title": "المعرض",
+  "gallery.search": "البحث في المعرض...",
+
+  "places.title": "الفنادق",
+  "places.search": "البحث عن فنادق...",
+
+  "footer.description": "اكتشف لؤلؤة المحيط الهندي. استكشف الشواطئ البكر والمعابد القديمة ومزارع الشاي الخضراء والحياة البرية النابضة.",
+  "footer.quickLinks": "روابط سريعة",
+  "footer.contact": "اتصل بنا",
+  "footer.followUs": "تابعنا",
+  "footer.email": "البريد الإلكتروني",
+  "footer.phone": "الهاتف",
+  "footer.rights": "جميع الحقوق محفوظة",
+  "footer.tagline": "اكتشف روائع سريلانكا"
+}

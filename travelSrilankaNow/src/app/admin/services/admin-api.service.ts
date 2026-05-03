@@ -307,8 +307,16 @@ export class AdminApiService {
     return this.http.get(`${this.apiUrl}/homepage-sections/${id}`);
   }
 
+  createHomepageSection(section: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/homepage-sections`, section);
+  }
+
   updateHomepageSection(id: number, section: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/homepage-sections/${id}`, section);
+  }
+
+  deleteHomepageSection(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/homepage-sections/${id}`);
   }
 
   toggleHomepageSectionActive(id: number): Observable<any> {

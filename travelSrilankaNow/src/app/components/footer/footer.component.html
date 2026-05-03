@@ -3,34 +3,32 @@
     <div class="footer-content">
       <div class="footer-section">
         <h3>Travel<span>SriLankaNow</span></h3>
-        <p class="footer-description">
-          Discover the pearl of the Indian Ocean. Explore pristine beaches, ancient temples,  lush tea plantations, and vibrant wildlife.
-        </p>
+        <p class="footer-description">{{ 'footer.description' | translate }}</p>
       </div>
 
       <div class="footer-section">
-        <h4>Quick Links</h4>
+        <h4>{{ 'footer.quickLinks' | translate }}</h4>
         <ul class="footer-links">
           <li *ngFor="let link of quickLinks">
-            <a [routerLink]="link.path">{{ link.label }}</a>
+            <a [routerLink]="link.path">{{ link.key | translate }}</a>
           </li>
         </ul>
       </div>
 
       <div class="footer-section">
-        <h4>Contact</h4>
-        <p *ngIf="contactEmail">Email: {{ contactEmail }}</p>
-        <p *ngIf="contactPhone">Phone: {{ contactPhone }}</p>
+        <h4>{{ 'footer.contact' | translate }}</h4>
+        <p *ngIf="contactEmail">{{ 'footer.email' | translate }}: {{ contactEmail }}</p>
+        <p *ngIf="contactPhone">{{ 'footer.phone' | translate }}: {{ contactPhone }}</p>
         <p *ngIf="contactAddress">{{ contactAddress }}</p>
       </div>
 
       <div class="footer-section">
-        <h4>Follow Us</h4>
+        <h4>{{ 'footer.followUs' | translate }}</h4>
         <div class="social-links">
-          <a *ngFor="let social of socialLinks" 
-             [href]="social.url" 
+          <a *ngFor="let social of socialLinks"
+             [href]="social.url"
              [attr.aria-label]="social.label"
-             target="_blank" 
+             target="_blank"
              rel="noopener noreferrer">
             {{ social.label }}
           </a>
@@ -39,7 +37,7 @@
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; {{ currentYear }} TravelSriLankaNow. All rights reserved.</p>
+      <p>&copy; {{ currentYear }} TravelSriLankaNow. {{ 'footer.rights' | translate }}.</p>
     </div>
   </div>
 </footer>

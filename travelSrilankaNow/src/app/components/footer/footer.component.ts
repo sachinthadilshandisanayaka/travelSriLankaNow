@@ -10,10 +10,10 @@ export class FooterComponent implements OnInit {
   currentYear = new Date().getFullYear();
 
   quickLinks = [
-    { path: '/locations', label: 'Locations' },
-    { path: '/events', label: 'Events' },
-    { path: '/gallery', label: 'Gallery' },
-    { path: '/places', label: 'Hotels & Restaurants' }
+    { path: '/locations', key: 'nav.locations' },
+    { path: '/events', key: 'nav.events' },
+    { path: '/gallery', key: 'nav.gallery' },
+    { path: '/places', key: 'nav.places' }
   ];
 
   socialLinks: { icon: string; url: string; label: string }[] = [];

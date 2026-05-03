@@ -1,0 +1,50 @@
+{
+  "nav.home": "Início",
+  "nav.locations": "Destinos",
+  "nav.events": "Eventos",
+  "nav.gallery": "Galeria",
+  "nav.places": "Hospedagens",
+  "nav.more": "Mais",
+
+  "hero.explore": "Explorar destinos",
+  "hero.events": "Ver eventos",
+  "hero.title1": "Viagem pelo",
+  "hero.title2": "Antigo Sri Lanka",
+  "hero.subtitle": "Experimente o majestoso patrimônio e descubra a rica cultura de um antigo reino",
+
+  "section.subtitle.locations": "Destinos populares",
+  "section.subtitle.events": "Experiências",
+  "section.subtitle.places": "Hospedagens",
+  "section.viewAll.locations": "Ver todos os destinos",
+  "section.viewAll.events": "Ver todos os eventos",
+  "section.viewAll.places": "Ver todas as hospedagens",
+
+  "common.bookTour": "Reservar um tour",
+  "common.loading": "Carregando...",
+  "common.error": "Algo deu errado",
+
+  "loading.tagline": "Descubra as maravilhas do Sri Lanka",
+
+  "locations.title": "Destinos",
+  "locations.search": "Pesquisar destinos...",
+  "locations.filter.category": "Todas as categorias",
+  "locations.filter.region": "Todas as regiões",
+
+  "events.title": "Eventos",
+  "events.search": "Pesquisar eventos...",
+
+  "gallery.title": "Galeria",
+  "gallery.search": "Pesquisar na galeria...",
+
+  "places.title": "Hospedagens",
+  "places.search": "Pesquisar hospedagens...",
+
+  "footer.description": "Descubra a pérola do Oceano Índico. Explore praias intocadas, templos antigos, exuberantes plantações de chá e fauna vibrante.",
+  "footer.quickLinks": "Links rápidos",
+  "footer.contact": "Contato",
+  "footer.followUs": "Siga-nos",
+  "footer.email": "E-mail",
+  "footer.phone": "Telefone",
+  "footer.rights": "Todos os direitos reservados",
+  "footer.tagline": "Descubra as maravilhas do Sri Lanka"
+}

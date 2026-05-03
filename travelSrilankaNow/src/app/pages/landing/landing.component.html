@@ -22,7 +22,7 @@
     <h1 class="loading-brand__title">
       Travel<span>SriLankaNow</span>
     </h1>
-    <p class="loading-brand__tagline">Discover the Wonder of Sri Lanka</p>
+    <p class="loading-brand__tagline">{{ 'loading.tagline' | translate }}</p>
   </div>
 
   <!-- Progress Bar -->
@@ -44,15 +44,13 @@
       <div *ngIf="heroSlides.length === 0" class="hero hero-fallback">
         <div class="hero-content animate-fadeInUp">
           <h1 class="hero-title">
-            <span class="title-line-1">Journey Through</span>
-            <span class="title-line-2">Ancient Sri Lanka</span>
+            <span class="title-line-1">{{ 'hero.title1' | translate }}</span>
+            <span class="title-line-2">{{ 'hero.title2' | translate }}</span>
           </h1>
-          <p class="hero-subtitle">
-            Experience the majestic heritage and discover the rich culture of an ancient kingdom
-          </p>
+          <p class="hero-subtitle">{{ 'hero.subtitle' | translate }}</p>
           <div class="hero-buttons">
             <a routerLink="/locations" class="btn-primary">
-              <span>Explore Destinations</span>
+              <span>{{ 'hero.explore' | translate }}</span>
               <span class="btn-shine"></span>
               <span class="btn-corner btn-corner--tl"></span>
               <span class="btn-corner btn-corner--tr"></span>
@@ -60,7 +58,7 @@
               <span class="btn-corner btn-corner--br"></span>
             </a>
             <a routerLink="/events" class="btn-secondary">
-              <span>View Events</span>
+              <span>{{ 'hero.events' | translate }}</span>
               <span class="btn-shine"></span>
               <span class="btn-corner btn-corner--tl"></span>
               <span class="btn-corner btn-corner--tr"></span>
@@ -142,7 +140,7 @@
     <section class="section animate-fadeIn">
       <div class="container">
         <div class="section-header animate-fadeInUp">
-          <span class="subtitle">Popular Destinations</span>
+          <span class="subtitle">{{ 'section.subtitle.locations' | translate }}</span>
           <h2>{{ section.title }}</h2>
           <p class="lead">{{ section.subtitle }}</p>
         </div>
@@ -170,7 +168,7 @@
 
         <div *ngIf="getSectionConfig('FEATURED_LOCATIONS').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
           <a routerLink="/locations" class="btn-primary">
-            <span>View All Locations</span>
+            <span>{{ 'section.viewAll.locations' | translate }}</span>
             <span class="btn-shine"></span>
             <span class="btn-corner btn-corner--tl"></span>
             <span class="btn-corner btn-corner--tr"></span>
@@ -187,7 +185,7 @@
     <section class="section section-light animate-fadeIn">
       <div class="container">
         <div class="section-header animate-fadeInUp">
-          <span class="subtitle">Experiences</span>
+          <span class="subtitle">{{ 'section.subtitle.events' | translate }}</span>
           <h2>{{ section.title }}</h2>
           <p class="lead">{{ section.subtitle }}</p>
         </div>
@@ -222,7 +220,7 @@
 
         <div *ngIf="getSectionConfig('UPCOMING_EVENTS').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
           <a routerLink="/events" class="btn-primary">
-            <span>View All Events</span>
+            <span>{{ 'section.viewAll.events' | translate }}</span>
             <span class="btn-shine"></span>
             <span class="btn-corner btn-corner--tl"></span>
             <span class="btn-corner btn-corner--tr"></span>
@@ -239,7 +237,7 @@
     <section class="section animate-fadeIn">
       <div class="container">
         <div class="section-header animate-fadeInUp">
-          <span class="subtitle">Accommodations</span>
+          <span class="subtitle">{{ 'section.subtitle.places' | translate }}</span>
           <h2>{{ section.title }}</h2>
           <p class="lead">{{ section.subtitle }}</p>
         </div>
@@ -275,7 +273,7 @@
 
         <div *ngIf="getSectionConfig('PLACES').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
           <a routerLink="/places" class="btn-primary">
-            <span>View All Places</span>
+            <span>{{ 'section.viewAll.places' | translate }}</span>
             <span class="btn-shine"></span>
             <span class="btn-corner btn-corner--tl"></span>
             <span class="btn-corner btn-corner--tr"></span>
@@ -285,6 +283,42 @@
         </div>
       </div>
     </section>
+  </ng-container>
+
+  <!-- ========== IMAGE GALLERY SLIDER ========== -->
+  <ng-container *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
+    <ng-container *ngIf="getGalleryConfig(section.id) as galleryConf">
+      <section class="gallery-slider-section" *ngIf="galleryConf.images && galleryConf.images.length > 0">
+        <div class="gallery-slider-header" *ngIf="section.title">
+          <h2>{{ section.title }}</h2>
+          <p *ngIf="section.subtitle">{{ section.subtitle }}</p>
+        </div>
+        <div class="gallery-slider-wrapper" [class.gallery-slider-wrapper--pause-on-hover]="galleryConf.pauseOnHover">
+          <div class="gallery-slider-track"
+               [style.animation-duration]="galleryConf.speed + 's'">
+            <div class="gallery-slide" *ngFor="let img of galleryConf.images">
+              <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
+            </div>
+            <!-- Duplicate for seamless loop -->
+            <div class="gallery-slide" *ngFor="let img of galleryConf.images">
+              <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+
+  <!-- ========== CUSTOM CONTENT ========== -->
+  <ng-container *ngIf="section.sectionType === 'CUSTOM_CONTENT'">
+    <ng-container *ngIf="getCustomConfig(section.id) as customConf">
+      <section class="custom-content-section custom-content-section--{{ customConf.template || 'minimal' }}"
+               [ngStyle]="getCustomSectionStyle(customConf)">
+        <div class="custom-content-section__inner container">
+          <div class="custom-content-section__text" [innerHTML]="customConf.content"></div>
+        </div>
+      </section>
+    </ng-container>
   </ng-container>
 
   <!-- ========== SOCIAL MEDIA ========== -->

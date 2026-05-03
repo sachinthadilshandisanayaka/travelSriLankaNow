@@ -23,8 +23,8 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip adding token for auth endpoints (login, refresh)
-    if (this.isAuthEndpoint(request.url)) {
+    // Skip adding token for auth endpoints and external APIs
+    if (this.isAuthEndpoint(request.url) || this.isExternalUrl(request.url)) {
       return next.handle(request);
     }
 
@@ -54,6 +54,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private isAuthEndpoint(url: string): boolean {
     return url.includes('/admin/auth/login') || url.includes('/admin/auth/refresh');
+  }
+
+  private isExternalUrl(url: string): boolean {
+    return url.startsWith('http') && !url.includes('localhost') && !url.includes('127.0.0.1');
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

@@ -21,8 +21,10 @@ import { PlaceDetailComponent } from './pages/place-detail/place-detail.componen
 import { MoreSectionDetailComponent } from './pages/more-section-detail/more-section-detail.component';
 import { MoreSectionItemDetailComponent } from './pages/more-section-item-detail/more-section-item-detail.component';
 import { CloudinaryOptimizePipe, CloudinaryThumbnailPipe } from './pipes/cloudinary.pipe';
+import { TranslatePipe } from './pipes/translate.pipe';
 import { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
+import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
 
 @NgModule({
   declarations: [
@@ -42,8 +44,10 @@ import { ImageLightboxComponent } from './shared/components/image-lightbox/image
     MoreSectionItemDetailComponent,
     CloudinaryOptimizePipe,
     CloudinaryThumbnailPipe,
+    TranslatePipe,
     PageHeaderComponent,
-    ImageLightboxComponent
+    ImageLightboxComponent,
+    LanguageSwitcherComponent
   ],
   imports: [
     BrowserModule,

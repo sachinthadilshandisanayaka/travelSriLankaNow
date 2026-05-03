@@ -14,11 +14,11 @@ export class NavbarComponent implements OnInit {
   isMoreOpen = false;
 
   navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/locations', label: 'Locations' },
-    { path: '/events', label: 'Events' },
-    { path: '/gallery', label: 'Gallery' },
-    { path: '/places', label: 'Hotels & Restaurants' }
+    { path: '/', label: 'Home', key: 'nav.home' },
+    { path: '/locations', label: 'Locations', key: 'nav.locations' },
+    { path: '/events', label: 'Events', key: 'nav.events' },
+    { path: '/gallery', label: 'Gallery', key: 'nav.gallery' },
+    { path: '/places', label: 'Hotels & Restaurants', key: 'nav.places' }
   ];
 
   moreSections: MoreSection[] = [];

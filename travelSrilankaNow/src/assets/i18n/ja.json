@@ -1,0 +1,50 @@
+{
+  "nav.home": "ホーム",
+  "nav.locations": "スポット",
+  "nav.events": "イベント",
+  "nav.gallery": "ギャラリー",
+  "nav.places": "宿泊",
+  "nav.more": "もっと見る",
+
+  "hero.explore": "目的地を探す",
+  "hero.events": "イベントを見る",
+  "hero.title1": "旅する",
+  "hero.title2": "古代スリランカ",
+  "hero.subtitle": "壮大な遺産を体験し、古代王国の豊かな文化を発見しましょう",
+
+  "section.subtitle.locations": "人気の目的地",
+  "section.subtitle.events": "体験",
+  "section.subtitle.places": "宿泊施設",
+  "section.viewAll.locations": "全スポットを見る",
+  "section.viewAll.events": "全イベントを見る",
+  "section.viewAll.places": "全宿泊施設を見る",
+
+  "common.bookTour": "ツアーを予約",
+  "common.loading": "読み込み中...",
+  "common.error": "エラーが発生しました",
+
+  "loading.tagline": "スリランカの驚きを発見",
+
+  "locations.title": "スポット",
+  "locations.search": "スポットを検索...",
+  "locations.filter.category": "全カテゴリー",
+  "locations.filter.region": "全地域",
+
+  "events.title": "イベント",
+  "events.search": "イベントを検索...",
+
+  "gallery.title": "ギャラリー",
+  "gallery.search": "ギャラリーを検索...",
+
+  "places.title": "宿泊",
+  "places.search": "宿泊施設を検索...",
+
+  "footer.description": "インド洋の真珠を発見しましょう。手つかずのビーチ、古代の寺院、緑豊かな茶畑、そして活気ある野生動物を探索してください。",
+  "footer.quickLinks": "クイックリンク",
+  "footer.contact": "お問い合わせ",
+  "footer.followUs": "フォローする",
+  "footer.email": "メール",
+  "footer.phone": "電話",
+  "footer.rights": "全著作権所有",
+  "footer.tagline": "スリランカの驚きを発見"
+}

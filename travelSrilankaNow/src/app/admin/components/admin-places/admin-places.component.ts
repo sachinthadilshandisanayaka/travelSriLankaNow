@@ -98,6 +98,7 @@ export class AdminPlacesComponent implements OnInit {
       if (field.type === 'date_range') details[field.key] = { from: '', to: '' };
       else if (field.type === 'number_range') details[field.key] = { min: null, max: null };
       else if (field.type === 'multi_select') details[field.key] = [];
+      else if (field.type === 'link') details[field.key] = { url: '', displayName: '' };
       else details[field.key] = null;
     }
     return details;
@@ -253,6 +254,7 @@ export class AdminPlacesComponent implements OnInit {
         if (field.type === 'date_range') this.additionalDetails[field.key] = { from: '', to: '' };
         else if (field.type === 'number_range') this.additionalDetails[field.key] = { min: null, max: null };
         else if (field.type === 'multi_select') this.additionalDetails[field.key] = [];
+        else if (field.type === 'link') this.additionalDetails[field.key] = { url: '', displayName: '' };
         else this.additionalDetails[field.key] = null;
       }
     }
@@ -392,6 +394,28 @@ export class AdminPlacesComponent implements OnInit {
 
   onGalleryImagesChanged(images: string[]): void {
     this.galleryImages = images;
+  }
+
+  getLinkUrl(key: string): string {
+    const val = this.additionalDetails?.[key];
+    if (!val) return '';
+    return typeof val === 'object' ? (val.url || '') : val;
+  }
+
+  getLinkDisplayName(key: string): string {
+    const val = this.additionalDetails?.[key];
+    if (!val || typeof val !== 'object') return '';
+    return val.displayName || '';
+  }
+
+  setLinkUrl(key: string, url: string): void {
+    const cur = this.additionalDetails[key];
+    this.additionalDetails[key] = typeof cur === 'object' && cur ? { ...cur, url } : { url, displayName: '' };
+  }
+
+  setLinkDisplayName(key: string, displayName: string): void {
+    const cur = this.additionalDetails[key];
+    this.additionalDetails[key] = typeof cur === 'object' && cur ? { ...cur, displayName } : { url: '', displayName };
   }
 
   // Helper method to get place type icon

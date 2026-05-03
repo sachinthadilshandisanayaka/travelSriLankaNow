@@ -1,0 +1,50 @@
+{
+  "nav.home": "Inicio",
+  "nav.locations": "Destinos",
+  "nav.events": "Eventos",
+  "nav.gallery": "Galería",
+  "nav.places": "Alojamientos",
+  "nav.more": "Más",
+
+  "hero.explore": "Explorar destinos",
+  "hero.events": "Ver eventos",
+  "hero.title1": "Viaje por",
+  "hero.title2": "El antiguo Sri Lanka",
+  "hero.subtitle": "Experimenta la majestuosa herencia y descubre la rica cultura de un antiguo reino",
+
+  "section.subtitle.locations": "Destinos populares",
+  "section.subtitle.events": "Experiencias",
+  "section.subtitle.places": "Alojamientos",
+  "section.viewAll.locations": "Ver todos los destinos",
+  "section.viewAll.events": "Ver todos los eventos",
+  "section.viewAll.places": "Ver todos los alojamientos",
+
+  "common.bookTour": "Reservar un tour",
+  "common.loading": "Cargando...",
+  "common.error": "Algo salió mal",
+
+  "loading.tagline": "Descubre la maravilla de Sri Lanka",
+
+  "locations.title": "Destinos",
+  "locations.search": "Buscar destinos...",
+  "locations.filter.category": "Todas las categorías",
+  "locations.filter.region": "Todas las regiones",
+
+  "events.title": "Eventos",
+  "events.search": "Buscar eventos...",
+
+  "gallery.title": "Galería",
+  "gallery.search": "Buscar en la galería...",
+
+  "places.title": "Alojamientos",
+  "places.search": "Buscar alojamientos...",
+
+  "footer.description": "Descubre la perla del Océano Índico. Explora playas vírgenes, templos antiguos, exuberantes plantaciones de té y fauna vibrante.",
+  "footer.quickLinks": "Enlaces rápidos",
+  "footer.contact": "Contacto",
+  "footer.followUs": "Síguenos",
+  "footer.email": "Correo electrónico",
+  "footer.phone": "Teléfono",
+  "footer.rights": "Todos los derechos reservados",
+  "footer.tagline": "Descubre la maravilla de Sri Lanka"
+}

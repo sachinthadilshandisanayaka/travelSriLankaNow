@@ -10,7 +10,7 @@ import { Location } from '../../models/location.model';
 import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
 import { HeroSlide } from '../../models/hero-slide.model';
-import { HomepageSection, HomepageSectionConfig } from '../../models/homepage-section.model';
+import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
 
 @Component({
@@ -35,6 +35,8 @@ export class LandingComponent implements OnInit, OnDestroy {
   // Dynamic Sections
   homepageSections: HomepageSection[] = [];
   sectionConfigs: Map<string, HomepageSectionConfig> = new Map();
+  gallerySectionConfig: Map<number, GallerySliderConfig> = new Map();
+  customSectionConfigs: Map<number, CustomContentConfig> = new Map();
   sectionsLoaded = false;
   useFallbackLayout = false;
 
@@ -94,7 +96,14 @@ export class LandingComponent implements OnInit, OnDestroy {
         sections.forEach(section => {
           if (section.config) {
             try {
-              this.sectionConfigs.set(section.sectionType, JSON.parse(section.config));
+              const parsed = JSON.parse(section.config);
+              if (section.sectionType === 'IMAGE_GALLERY_SLIDER') {
+                this.gallerySectionConfig.set(section.id!, parsed);
+              } else if (section.sectionType === 'CUSTOM_CONTENT') {
+                this.customSectionConfigs.set(section.id!, parsed);
+              } else {
+                this.sectionConfigs.set(section.sectionType, parsed);
+              }
             } catch {
               this.sectionConfigs.set(section.sectionType, {});
             }
@@ -136,6 +145,10 @@ export class LandingComponent implements OnInit, OnDestroy {
           break;
         case 'SOCIAL_MEDIA':
           this.loadSocialMedia();
+          break;
+        case 'IMAGE_GALLERY_SLIDER':
+        case 'CUSTOM_CONTENT':
+          // no data loading needed; config holds everything
           break;
       }
     });
@@ -227,6 +240,26 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   getSectionConfig(sectionType: string): HomepageSectionConfig {
     return this.sectionConfigs.get(sectionType) || {};
+  }
+
+  getGalleryConfig(sectionId: number | undefined): GallerySliderConfig {
+    return this.gallerySectionConfig.get(sectionId!) || { images: [], speed: 30, pauseOnHover: true };
+  }
+
+  getCustomConfig(sectionId: number | undefined): CustomContentConfig {
+    return this.customSectionConfigs.get(sectionId!) || { template: 'minimal' };
+  }
+
+  getCustomSectionStyle(config: CustomContentConfig): { [key: string]: string } {
+    const style: { [key: string]: string } = {};
+    if (config.backgroundColor) style['background-color'] = config.backgroundColor;
+    if (config.backgroundImage) {
+      style['background-image'] = `url(${config.backgroundImage})`;
+      style['background-size'] = 'cover';
+      style['background-position'] = 'center';
+    }
+    if (config.textColor) style['color'] = config.textColor;
+    return style;
   }
 
   getPlatformClass(platform: string): string {

@@ -5,12 +5,6 @@
       <h2 class="logo-text">Travel<span>SriLankaNow</span></h2>
     </a>
 
-    <button class="menu-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen" aria-label="Toggle menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
     <div class="nav-links" [class.active]="isMenuOpen">
       <a *ngFor="let link of navLinks"
          [routerLink]="link.path"
@@ -18,7 +12,7 @@
          [routerLinkActiveOptions]="{exact: link.path === '/'}"
          (click)="closeMenu()"
          class="nav-link">
-        <span class="nav-link__text">{{ link.label }}</span>
+        <span class="nav-link__text">{{ link.key | translate }}</span>
         <span class="nav-link__border nav-link__border--bottom"></span>
         <span class="nav-link__border nav-link__border--left"></span>
         <span class="nav-link__border nav-link__border--right"></span>
@@ -30,7 +24,7 @@
       <!-- More Dropdown -->
       <div class="more-dropdown" *ngIf="moreSections.length > 0">
         <a class="nav-link" href="#" (click)="toggleMore($event)">
-          <span class="nav-link__text">More</span>
+          <span class="nav-link__text">{{ 'nav.more' | translate }}</span>
           <svg class="more-dropdown__arrow" [class.more-dropdown__arrow--open]="isMoreOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 9l6 6 6-6"/>
           </svg>
@@ -51,6 +45,16 @@
           </a>
         </div>
       </div>
+    </div>
+
+    <!-- Right side: language switcher + hamburger -->
+    <div class="navbar-actions">
+      <app-language-switcher></app-language-switcher>
+      <button class="menu-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
   </div>
 </nav>
