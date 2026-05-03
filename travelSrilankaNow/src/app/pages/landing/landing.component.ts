@@ -259,6 +259,20 @@ export class LandingComponent implements OnInit, OnDestroy {
       style['background-position'] = 'center';
     }
     if (config.textColor) style['color'] = config.textColor;
+    if (config.minHeight) style['min-height'] = config.minHeight;
+    if (config.padding) style['padding'] = config.padding;
+    if (config.verticalAlign) {
+      style['display'] = 'flex';
+      style['flex-direction'] = 'column';
+      const map: Record<string, string> = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
+      style['justify-content'] = map[config.verticalAlign] ?? 'flex-start';
+    }
+    return style;
+  }
+
+  getCustomTextStyle(config: CustomContentConfig): { [key: string]: string } {
+    const style: { [key: string]: string } = {};
+    if (config.textAlign) style['text-align'] = config.textAlign;
     return style;
   }
 

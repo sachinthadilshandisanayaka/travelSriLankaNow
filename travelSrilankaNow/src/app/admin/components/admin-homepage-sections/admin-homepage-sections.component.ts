@@ -93,7 +93,25 @@ export class AdminHomepageSectionsComponent implements OnInit {
   customTitle = '';
   customSubtitle = '';
   customIsActive = true;
-  editorContent = '';
+
+  readonly MIN_HEIGHT_OPTIONS = [
+    { label: 'Auto (fit content)', value: '' },
+    { label: 'Small — 250 px', value: '250px' },
+    { label: 'Medium — 350 px', value: '350px' },
+    { label: 'Large — 500 px', value: '500px' },
+    { label: 'Extra Large — 650 px', value: '650px' },
+    { label: '50% viewport height', value: '50vh' },
+    { label: '60% viewport height', value: '60vh' },
+    { label: '80% viewport height', value: '80vh' },
+    { label: 'Full screen', value: '100vh' },
+  ];
+
+  readonly PADDING_OPTIONS = [
+    { label: 'Normal (48 px)', value: '' },
+    { label: 'Compact (24 px)', value: '24px 20px' },
+    { label: 'Relaxed (80 px)', value: '80px 20px' },
+    { label: 'Extra (120 px)', value: '120px 20px' },
+  ];
 
   sectionTypeLabels: Record<string, string> = {
     HERO_SLIDER: 'Hero Slider',
@@ -360,14 +378,20 @@ export class AdminHomepageSectionsComponent implements OnInit {
       this.customTitle = section.title;
       this.customSubtitle = section.subtitle || '';
       this.customIsActive = section.isActive;
-      this.editorContent = config.content || '';
     } else {
-      this.customConfig = { template: 'minimal', backgroundColor: '#1a3a5c', textColor: '#ffffff', textAlign: 'center', content: '' };
+      this.customConfig = {
+        template: 'minimal',
+        backgroundColor: '#f8fafc',
+        title: '',
+        titleColor: '#1e293b',
+        titleAlign: 'center',
+        description: '',
+        descriptionColor: '#64748b',
+        descriptionAlign: 'center'
+      };
       this.customTitle = 'Custom Section';
       this.customSubtitle = '';
       this.customIsActive = true;
-      this.editorContent = '<h2>Your Title Here</h2><p>Add your content here. You can use the toolbar to format text.</p>';
-      this.customConfig.content = this.editorContent;
     }
     this.showCustomModal = true;
   }
@@ -378,37 +402,31 @@ export class AdminHomepageSectionsComponent implements OnInit {
   }
 
   selectTemplate(templateId: string): void {
-    this.customConfig = { ...this.customConfig, template: templateId as any };
     const defaults: Record<string, Partial<CustomContentConfig>> = {
-      minimal: { backgroundColor: '#f8fafc', textColor: '#1e293b', textAlign: 'center' },
-      dark: { backgroundColor: '#1a3a5c', textColor: '#ffffff', textAlign: 'center' },
-      'image-overlay': { backgroundColor: 'rgba(0,0,0,0.5)', textColor: '#ffffff', textAlign: 'center' },
-      split: { backgroundColor: '#ffffff', textColor: '#1e293b', textAlign: 'left' }
+      minimal: {
+        backgroundColor: '#f8fafc',
+        titleColor: '#1e293b', titleAlign: 'center',
+        descriptionColor: '#64748b', descriptionAlign: 'center'
+      },
+      dark: {
+        backgroundColor: '#1a3a5c',
+        titleColor: '#ffffff', titleAlign: 'center',
+        descriptionColor: 'rgba(255,255,255,0.8)', descriptionAlign: 'center'
+      },
+      'image-overlay': {
+        titleColor: '#ffffff', titleAlign: 'center',
+        descriptionColor: 'rgba(255,255,255,0.85)', descriptionAlign: 'center'
+      },
+      split: {
+        backgroundColor: '#ffffff',
+        titleColor: '#1e293b', titleAlign: 'left',
+        descriptionColor: '#64748b', descriptionAlign: 'left'
+      }
     };
-    this.customConfig = { ...this.customConfig, ...defaults[templateId] };
-  }
-
-  execCommand(command: string, value?: string): void {
-    document.execCommand(command, false, value);
-  }
-
-  onEditorInput(event: Event): void {
-    this.editorContent = (event.target as HTMLElement).innerHTML;
-    this.customConfig.content = this.editorContent;
-  }
-
-  setFontSize(event: Event): void {
-    const size = (event.target as HTMLSelectElement).value;
-    if (size) this.execCommand('fontSize', size);
-  }
-
-  setFontFamily(event: Event): void {
-    const font = (event.target as HTMLSelectElement).value;
-    if (font) this.execCommand('fontName', font);
+    this.customConfig = { ...this.customConfig, template: templateId as any, ...defaults[templateId] };
   }
 
   saveCustomSection(): void {
-    this.customConfig.content = this.editorContent;
     const configStr = JSON.stringify(this.customConfig);
     this.isSaving = true;
 
