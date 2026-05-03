@@ -1,0 +1,44 @@
+<div class="lang-switcher" [class.lang-switcher--open]="isOpen">
+  <button class="lang-switcher__trigger" (click)="toggle()" [attr.aria-expanded]="isOpen" aria-label="Select language">
+    <svg class="lang-switcher__globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span class="lang-switcher__flag">{{ current.flag }}</span>
+    <span class="lang-switcher__code">{{ current.code | uppercase }}</span>
+    <svg class="lang-switcher__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 9l6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div class="lang-switcher__dropdown" role="menu">
+    <div class="lang-switcher__search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text"
+             [(ngModel)]="searchQuery"
+             placeholder="Search language..."
+             class="lang-switcher__search-input"
+             (click)="$event.stopPropagation()">
+    </div>
+
+    <div class="lang-switcher__grid">
+      <button *ngFor="let lang of filteredLanguages"
+              class="lang-switcher__option"
+              [class.lang-switcher__option--active]="lang.code === current.code"
+              (click)="select(lang.code)"
+              role="menuitem"
+              [title]="lang.label">
+        <span class="lang-switcher__option-flag">{{ lang.flag }}</span>
+        <span class="lang-switcher__option-native">{{ lang.nativeLabel }}</span>
+        <span class="lang-switcher__option-label">{{ lang.label }}</span>
+        <svg *ngIf="lang.code === current.code" class="lang-switcher__option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 13l4 4L19 7"/>
+        </svg>
+      </button>
+
+      <p *ngIf="filteredLanguages.length === 0" class="lang-switcher__no-results">No languages found</p>
+    </div>
+  </div>
+</div>

@@ -246,7 +246,354 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
+  to { transform: rotate(360deg); }
+}
+
+// ---- Gallery Picker Modal ----
+.gallery-picker-modal {
+  &__content {
+    max-width: 900px;
+    width: 95vw;
+  }
+
+  &__body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  &__sub-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: $admin-gray-800;
+    margin: 1rem 0 0.5rem;
+  }
+}
+
+.gallery-settings {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.gallery-picker-search {
+  margin-bottom: 0.75rem;
+}
+
+.gallery-picker-loading {
+  padding: 2rem;
+  text-align: center;
+  color: $admin-gray-500;
+}
+
+.gallery-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.gallery-picker-item {
+  position: relative;
+  border-radius: $admin-radius;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all $admin-transition;
+  aspect-ratio: 4/3;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &:hover {
+    border-color: $admin-blue;
+    transform: scale(1.02);
+  }
+
+  &--selected {
+    border-color: $admin-success;
+
+    .gallery-picker-item__overlay {
+      background: rgba($admin-success, 0.35);
+    }
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background $admin-transition;
+  }
+
+  &__check {
+    background: $admin-success;
+    color: $admin-white;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: $admin-radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &__info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    padding: 1.5rem 0.5rem 0.375rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__title {
+    font-size: 0.6875rem;
+    color: $admin-white;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__type {
+    font-size: 0.625rem;
+    color: rgba($admin-white, 0.7);
+    text-transform: capitalize;
+  }
+}
+
+.selected-images-strip {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  margin-bottom: 0.75rem;
+}
+
+.selected-image-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 60px;
+  border-radius: $admin-radius-sm;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    background: rgba(0,0,0,0.7);
+    color: $admin-white;
+    border: none;
+    border-radius: $admin-radius-full;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+
+    &:hover { background: $admin-error; }
+  }
+}
+
+// ---- Custom Content Modal ----
+.custom-content-modal {
+  &__content {
+    max-width: 860px;
+    width: 95vw;
+  }
+
+  &__body {
+    max-height: 75vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+}
+
+.custom-section-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: $admin-gray-700;
+  margin: 0 0 0.625rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid $admin-gray-200;
+}
+
+.custom-template-section, .custom-bg-section, .custom-editor-section {
+  padding: 0;
+}
+
+.custom-templates-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.custom-template-card {
+  border: 2px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all $admin-transition;
+  text-align: center;
+
+  &:hover { border-color: $admin-blue; }
+
+  &--active {
+    border-color: $admin-blue;
+    background: rgba($admin-blue, 0.05);
+  }
+
+  &__preview {
+    height: 50px;
+    border-radius: $admin-radius-sm;
+    margin-bottom: 0.5rem;
+
+    &--bg-light { background: linear-gradient(135deg, #f8fafc, #e2e8f0); }
+    &--bg-dark { background: linear-gradient(135deg, #1a3a5c, #2d5a8e); }
+    &--bg-image {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      position: relative;
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        border-radius: inherit;
+      }
+    }
+    &--bg-split {
+      background: linear-gradient(90deg, #e2e8f0 50%, #ffffff 50%);
+      border: 1px solid $admin-gray-200;
+    }
+  }
+
+  &__name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $admin-gray-800;
+    margin-bottom: 0.25rem;
+  }
+
+  &__desc {
+    font-size: 0.6875rem;
+    color: $admin-gray-500;
+    line-height: 1.4;
+  }
+}
+
+.color-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .color-picker {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid $admin-gray-200;
+    border-radius: $admin-radius-sm;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .admin-input {
+    flex: 1;
+  }
+}
+
+// Rich Text Editor
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: $admin-gray-50;
+  border: 1px solid $admin-gray-200;
+  border-bottom: none;
+  border-radius: $admin-radius $admin-radius 0 0;
+  flex-wrap: wrap;
+
+  &__sep {
+    width: 1px;
+    height: 1.25rem;
+    background: $admin-gray-300;
+    margin: 0 0.25rem;
+  }
+}
+
+.editor-btn {
+  padding: 0.25rem 0.5rem;
+  min-width: 2rem;
+  height: 1.75rem;
+  border: 1px solid transparent;
+  border-radius: $admin-radius-sm;
+  background: transparent;
+  color: $admin-gray-700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover { background: $admin-gray-200; border-color: $admin-gray-300; }
+}
+
+.editor-select {
+  height: 1.75rem;
+  padding: 0 0.375rem;
+  font-size: 0.75rem;
+  border: 1px solid $admin-gray-300;
+  border-radius: $admin-radius-sm;
+  background: $admin-white;
+  color: $admin-gray-700;
+  cursor: pointer;
+}
+
+.editor-preview-wrapper {
+  border: 1px solid $admin-gray-200;
+  border-radius: 0 0 $admin-radius $admin-radius;
+  min-height: 180px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor-content {
+  width: 100%;
+  min-height: 120px;
+  outline: none;
+  font-size: 1rem;
+  line-height: 1.6;
+
+  &:focus {
+    outline: none;
   }
 }

@@ -117,6 +117,17 @@ export class EventDetailComponent implements OnInit {
     return def?.type === 'link';
   }
 
+  getLinkHref(value: any): string {
+    if (!value) return '#';
+    return typeof value === 'object' ? (value.url || '#') : value;
+  }
+
+  getLinkText(value: any): string {
+    if (!value) return '';
+    if (typeof value === 'object') return value.displayName || value.url || '';
+    return value;
+  }
+
   getAvailabilityStatus(): string {
     if (!this.event) return '';
 

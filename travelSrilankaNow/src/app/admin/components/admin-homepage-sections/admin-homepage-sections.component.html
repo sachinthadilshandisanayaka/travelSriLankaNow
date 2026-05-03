@@ -1,45 +1,36 @@
 <div class="admin-page">
   <div class="admin-page__container">
+
     <!-- Header -->
     <header class="admin-header">
       <div class="admin-header__info">
         <h1>Homepage Sections</h1>
-        <p>Manage the order, visibility, and configuration of homepage sections</p>
+        <p>Manage order, visibility, and content of homepage sections</p>
       </div>
-      <div class="admin-header__actions" *ngIf="hasOrderChanged">
-        <button class="admin-btn admin-btn--primary" (click)="saveOrder()" [disabled]="isSaving">
-          <svg *ngIf="!isSaving" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+      <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="openCustomModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Add Custom Section
+        </button>
+        <button *ngIf="hasOrderChanged" class="admin-btn admin-btn--primary" (click)="saveOrder()" [disabled]="isSaving">
+          <svg *ngIf="!isSaving" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           <span *ngIf="!isSaving">Save Order</span>
-          <span *ngIf="isSaving" class="admin-btn__loading">
-            <svg class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Saving...
-          </span>
+          <span *ngIf="isSaving">Saving...</span>
         </button>
       </div>
     </header>
 
-    <!-- Success Message -->
+    <!-- Messages -->
     <div *ngIf="successMessage" class="admin-toast admin-toast--success">
-      <svg fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-      </svg>
+      <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
       {{ successMessage }}
     </div>
-
-    <!-- Error Message -->
     <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
-      <svg fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-      </svg>
+      <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
       {{ errorMessage }}
     </div>
 
-    <!-- Loading Spinner -->
+    <!-- Loading -->
     <div *ngIf="isLoading" class="admin-loader">
       <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -50,10 +41,8 @@
     <!-- Sections List -->
     <div *ngIf="!isLoading" class="sections-list">
       <div class="sections-list__hint" *ngIf="sections.length > 0">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <span>Drag sections or use arrows to reorder. Changes are saved when you click "Save Order".</span>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>Drag sections or use arrows to reorder. Click edit to configure each section.</span>
       </div>
 
       <div *ngFor="let section of sections; let i = index"
@@ -67,71 +56,57 @@
            (drop)="onDrop($event, i)"
            (dragend)="onDragEnd()">
 
-        <!-- Drag Handle -->
         <div class="section-card__handle">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
-          </svg>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
         </div>
 
-        <!-- Position Number -->
         <div class="section-card__position">{{ i + 1 }}</div>
 
-        <!-- Section Icon -->
         <div class="section-card__icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getSectionIcon(section.sectionType)"></path>
-          </svg>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getSectionIcon(section.sectionType)"></path></svg>
         </div>
 
-        <!-- Section Info -->
         <div class="section-card__info">
           <div class="section-card__header">
             <h3 class="section-card__title">{{ section.title }}</h3>
             <span class="section-card__type">{{ getSectionLabel(section.sectionType) }}</span>
           </div>
           <p *ngIf="section.subtitle" class="section-card__subtitle">{{ section.subtitle }}</p>
+          <div class="section-card__config" *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
+            <span class="section-card__config-item">{{ parseGalleryConfig(section.config).images.length }} images</span>
+          </div>
+          <div class="section-card__config" *ngIf="section.sectionType === 'CUSTOM_CONTENT'">
+            <span class="section-card__config-item">Template: {{ parseCustomConfig(section.config).template || 'minimal' }}</span>
+          </div>
           <div class="section-card__config" *ngIf="parseConfig(section.config) as config">
             <span *ngIf="config.itemsCount" class="section-card__config-item">{{ config.itemsCount }} items</span>
             <span *ngIf="config.showViewAll" class="section-card__config-item">View All link</span>
-            <span *ngIf="config.autoPlay" class="section-card__config-item">Auto-play</span>
           </div>
         </div>
 
-        <!-- Status Badge -->
         <div class="section-card__status" [class.section-card__status--active]="section.isActive" [class.section-card__status--inactive]="!section.isActive">
           {{ section.isActive ? 'Active' : 'Hidden' }}
         </div>
 
-        <!-- Order Controls -->
         <div class="section-card__order-controls">
           <button class="admin-btn admin-btn--ghost" (click)="moveUp(i)" [disabled]="i === 0" title="Move Up">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-            </svg>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
           </button>
           <button class="admin-btn admin-btn--ghost" (click)="moveDown(i)" [disabled]="i === sections.length - 1" title="Move Down">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </button>
         </div>
 
-        <!-- Actions -->
         <div class="section-card__actions">
           <button class="admin-btn admin-btn--ghost" (click)="toggleActive(section)" [title]="section.isActive ? 'Hide section' : 'Show section'">
-            <svg *ngIf="section.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-            </svg>
-            <svg *ngIf="!section.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-            </svg>
+            <svg *ngIf="section.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            <svg *ngIf="!section.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
           </button>
           <button class="admin-btn admin-btn--ghost" (click)="openEditModal(section)" title="Edit">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-            </svg>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          </button>
+          <button *ngIf="isDeletable(section)" class="admin-btn admin-btn--ghost-danger" (click)="deleteSection(section)" title="Delete">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
         </div>
       </div>
@@ -139,74 +114,263 @@
   </div>
 </div>
 
-<!-- Edit Section Modal -->
+<!-- ======== Standard Edit Modal ======== -->
 <div *ngIf="showEditModal" class="admin-modal">
   <div class="admin-modal__content">
     <div class="admin-modal__header">
       <h2>Edit Section: {{ editingSection ? getSectionLabel(editingSection.sectionType) : '' }}</h2>
       <button class="admin-modal__close" (click)="closeEditModal()">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
-
     <form [formGroup]="editForm" (ngSubmit)="saveSection()">
       <div class="admin-modal__body">
         <div class="admin-form__grid">
-          <!-- Title -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Section Title *</label>
             <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Featured Locations">
-            <p class="admin-form__hint">Title displayed above the section on the homepage</p>
           </div>
-
-          <!-- Subtitle -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Subtitle</label>
-            <input type="text" formControlName="subtitle" class="admin-input" placeholder="e.g., Discover amazing destinations">
-            <p class="admin-form__hint">Optional subtitle shown below the section title</p>
+            <input type="text" formControlName="subtitle" class="admin-input" placeholder="Optional subtitle">
           </div>
-
-          <!-- Items Count -->
           <div class="admin-form__group">
             <label class="admin-form__label">Items to Display</label>
             <input type="number" formControlName="itemsCount" class="admin-input" min="1" max="20">
-            <p class="admin-form__hint">Number of items shown in this section</p>
           </div>
-
-          <!-- Show View All -->
           <div class="admin-form__group">
             <label class="admin-checkbox">
               <input type="checkbox" formControlName="showViewAll">
               <span>Show "View All" link</span>
             </label>
           </div>
-
-          <!-- Active Status -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-checkbox">
               <input type="checkbox" formControlName="isActive">
-              <span>Active - Show this section on the homepage</span>
+              <span>Active - Show on homepage</span>
             </label>
           </div>
         </div>
       </div>
-
       <div class="admin-modal__footer">
         <button type="button" class="admin-btn admin-btn--secondary" (click)="closeEditModal()">Cancel</button>
-        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="editForm.invalid || isLoading">
-          <span *ngIf="!isLoading">Save Changes</span>
-          <span *ngIf="isLoading" class="admin-btn__loading">
-            <svg class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Saving...
-          </span>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="editForm.invalid || isSaving">
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
         </button>
       </div>
     </form>
   </div>
 </div>
 
+<!-- ======== Gallery Image Picker Modal ======== -->
+<div *ngIf="showGalleryPickerModal" class="admin-modal gallery-picker-modal">
+  <div class="admin-modal__content gallery-picker-modal__content">
+    <div class="admin-modal__header">
+      <h2>Configure Image Gallery Slider</h2>
+      <button class="admin-modal__close" (click)="closeGalleryPickerModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body gallery-picker-modal__body">
+      <!-- Settings row -->
+      <div class="gallery-settings">
+        <div class="admin-form__group">
+          <label class="admin-form__label">Scroll Speed (seconds for full loop)</label>
+          <input type="number" class="admin-input" [(ngModel)]="gallerySpeed" min="10" max="120">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="galleryPauseOnHover">
+            <span>Pause on hover</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Selected images preview -->
+      <div class="selected-images-section" *ngIf="selectedImages.length > 0">
+        <h4 class="gallery-picker-modal__sub-title">Selected Images ({{ selectedImages.length }})</h4>
+        <div class="selected-images-strip">
+          <div *ngFor="let img of selectedImages; let i = index" class="selected-image-thumb">
+            <img [src]="img.url" [alt]="img.title">
+            <button class="selected-image-thumb__remove" (click)="removeSelectedImage(i)">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image picker -->
+      <h4 class="gallery-picker-modal__sub-title">Available Images</h4>
+      <div class="gallery-picker-search">
+        <input type="text" class="admin-input" [(ngModel)]="imageSearchTerm" placeholder="Search by title or type (location, event, place, gallery)...">
+      </div>
+
+      <div *ngIf="isLoadingImages" class="gallery-picker-loading">Loading images...</div>
+
+      <div class="gallery-picker-grid" *ngIf="!isLoadingImages">
+        <div *ngFor="let image of filteredImages"
+             class="gallery-picker-item"
+             [class.gallery-picker-item--selected]="image.selected"
+             (click)="toggleImageSelection(image)">
+          <img [src]="image.url" [alt]="image.title" loading="lazy">
+          <div class="gallery-picker-item__overlay">
+            <span class="gallery-picker-item__check" *ngIf="image.selected">✓</span>
+          </div>
+          <div class="gallery-picker-item__info">
+            <span class="gallery-picker-item__title">{{ image.title }}</span>
+            <span class="gallery-picker-item__type">{{ image.sourceType }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeGalleryPickerModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveGalleryConfig()" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Save Gallery (' + selectedImages.length + ' images)' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== Custom Content Section Modal ======== -->
+<div *ngIf="showCustomModal" class="admin-modal custom-content-modal">
+  <div class="admin-modal__content custom-content-modal__content">
+    <div class="admin-modal__header">
+      <h2>{{ editingCustomSection ? 'Edit' : 'Create' }} Custom Content Section</h2>
+      <button class="admin-modal__close" (click)="closeCustomModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body custom-content-modal__body">
+
+      <!-- Basic Info -->
+      <div class="admin-form__grid">
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Section Title *</label>
+          <input type="text" class="admin-input" [(ngModel)]="customTitle" placeholder="Section title">
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Subtitle</label>
+          <input type="text" class="admin-input" [(ngModel)]="customSubtitle" placeholder="Optional subtitle">
+        </div>
+      </div>
+
+      <!-- Template Selection -->
+      <div class="custom-template-section">
+        <h4 class="custom-section-label">Choose Template</h4>
+        <div class="custom-templates-grid">
+          <div *ngFor="let tmpl of customTemplates"
+               class="custom-template-card"
+               [class.custom-template-card--active]="customConfig.template === tmpl.id"
+               (click)="selectTemplate(tmpl.id)">
+            <div class="custom-template-card__preview custom-template-card__preview--{{ tmpl.preview }}"></div>
+            <div class="custom-template-card__name">{{ tmpl.name }}</div>
+            <div class="custom-template-card__desc">{{ tmpl.description }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background Settings -->
+      <div class="custom-bg-section">
+        <h4 class="custom-section-label">Background</h4>
+        <div class="admin-form__grid">
+          <div class="admin-form__group">
+            <label class="admin-form__label">Background Color</label>
+            <div class="color-input-group">
+              <input type="color" class="color-picker" [(ngModel)]="customConfig.backgroundColor">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.backgroundColor" placeholder="#1a3a5c">
+            </div>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Text Color</label>
+            <div class="color-input-group">
+              <input type="color" class="color-picker" [(ngModel)]="customConfig.textColor">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.textColor" placeholder="#ffffff">
+            </div>
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Background Image URL (optional)</label>
+            <input type="url" class="admin-input" [(ngModel)]="customConfig.backgroundImage" placeholder="https://example.com/image.jpg">
+          </div>
+        </div>
+      </div>
+
+      <!-- Rich Text Editor -->
+      <div class="custom-editor-section">
+        <h4 class="custom-section-label">Content</h4>
+
+        <!-- Toolbar -->
+        <div class="editor-toolbar">
+          <button type="button" class="editor-btn" (click)="execCommand('bold')" title="Bold"><b>B</b></button>
+          <button type="button" class="editor-btn" (click)="execCommand('italic')" title="Italic"><i>I</i></button>
+          <button type="button" class="editor-btn" (click)="execCommand('underline')" title="Underline"><u>U</u></button>
+          <div class="editor-toolbar__sep"></div>
+          <button type="button" class="editor-btn" (click)="execCommand('justifyLeft')" title="Align Left">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+          </button>
+          <button type="button" class="editor-btn" (click)="execCommand('justifyCenter')" title="Align Center">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+          </button>
+          <button type="button" class="editor-btn" (click)="execCommand('justifyRight')" title="Align Right">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M6 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm4-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+          </button>
+          <div class="editor-toolbar__sep"></div>
+          <select class="editor-select" (change)="setFontSize($event)">
+            <option value="">Size</option>
+            <option value="1">XS</option>
+            <option value="2">S</option>
+            <option value="3">M</option>
+            <option value="4">L</option>
+            <option value="5">XL</option>
+            <option value="6">XXL</option>
+            <option value="7">3XL</option>
+          </select>
+          <select class="editor-select" (change)="setFontFamily($event)">
+            <option value="">Font</option>
+            <option value="Arial">Arial</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Verdana">Verdana</option>
+          </select>
+          <div class="editor-toolbar__sep"></div>
+          <button type="button" class="editor-btn" (click)="execCommand('insertUnorderedList')" title="Bullet List">• List</button>
+          <button type="button" class="editor-btn" (click)="execCommand('insertOrderedList')" title="Numbered List">1. List</button>
+        </div>
+
+        <!-- Editor area preview with background -->
+        <div class="editor-preview-wrapper"
+             [style.backgroundColor]="customConfig.backgroundColor || '#f8fafc'"
+             [style.backgroundImage]="customConfig.backgroundImage ? 'url(' + customConfig.backgroundImage + ')' : ''"
+             [style.backgroundSize]="'cover'"
+             [style.backgroundPosition]="'center'">
+          <div class="editor-content"
+               contenteditable="true"
+               [style.color]="customConfig.textColor || '#1e293b'"
+               [innerHTML]="editorContent"
+               (input)="onEditorInput($event)"
+               (blur)="onEditorInput($event)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Toggle -->
+      <div class="admin-form__group">
+        <label class="admin-checkbox">
+          <input type="checkbox" [(ngModel)]="customIsActive">
+          <span>Active - Show on homepage</span>
+        </label>
+      </div>
+
+    </div>
+
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeCustomModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary" (click)="saveCustomSection()" [disabled]="isSaving || !customTitle">
+        {{ isSaving ? 'Saving...' : (editingCustomSection ? 'Update Section' : 'Create Section') }}
+      </button>
+    </div>
+  </div>
+</div>

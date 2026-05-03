@@ -1,0 +1,50 @@
+{
+  "nav.home": "Главная",
+  "nav.locations": "Места",
+  "nav.events": "События",
+  "nav.gallery": "Галерея",
+  "nav.places": "Отели",
+  "nav.more": "Ещё",
+
+  "hero.explore": "Исследовать направления",
+  "hero.events": "Посмотреть события",
+  "hero.title1": "Путешествие по",
+  "hero.title2": "Древней Шри-Ланке",
+  "hero.subtitle": "Откройте величественное наследие и богатую культуру древнего королевства",
+
+  "section.subtitle.locations": "Популярные направления",
+  "section.subtitle.events": "Впечатления",
+  "section.subtitle.places": "Размещение",
+  "section.viewAll.locations": "Все места",
+  "section.viewAll.events": "Все события",
+  "section.viewAll.places": "Все отели",
+
+  "common.bookTour": "Забронировать тур",
+  "common.loading": "Загрузка...",
+  "common.error": "Что-то пошло не так",
+
+  "loading.tagline": "Откройте чудеса Шри-Ланки",
+
+  "locations.title": "Места",
+  "locations.search": "Поиск мест...",
+  "locations.filter.category": "Все категории",
+  "locations.filter.region": "Все регионы",
+
+  "events.title": "События",
+  "events.search": "Поиск событий...",
+
+  "gallery.title": "Галерея",
+  "gallery.search": "Поиск в галерее...",
+
+  "places.title": "Отели",
+  "places.search": "Поиск отелей...",
+
+  "footer.description": "Откройте жемчужину Индийского океана. Исследуйте нетронутые пляжи, древние храмы, пышные чайные плантации и богатую дикую природу.",
+  "footer.quickLinks": "Быстрые ссылки",
+  "footer.contact": "Контакты",
+  "footer.followUs": "Подписывайтесь",
+  "footer.email": "Эл. почта",
+  "footer.phone": "Телефон",
+  "footer.rights": "Все права защищены",
+  "footer.tagline": "Откройте чудеса Шри-Ланки"
+}

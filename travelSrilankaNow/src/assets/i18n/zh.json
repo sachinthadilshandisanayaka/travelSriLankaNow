@@ -1,0 +1,50 @@
+{
+  "nav.home": "首页",
+  "nav.locations": "景点",
+  "nav.events": "活动",
+  "nav.gallery": "图库",
+  "nav.places": "住宿",
+  "nav.more": "更多",
+
+  "hero.explore": "探索目的地",
+  "hero.events": "查看活动",
+  "hero.title1": "穿越",
+  "hero.title2": "古老的斯里兰卡",
+  "hero.subtitle": "体验壮丽的历史遗产，探索古代王国的丰富文化",
+
+  "section.subtitle.locations": "热门目的地",
+  "section.subtitle.events": "精彩体验",
+  "section.subtitle.places": "住宿推荐",
+  "section.viewAll.locations": "查看全部景点",
+  "section.viewAll.events": "查看全部活动",
+  "section.viewAll.places": "查看全部住宿",
+
+  "common.bookTour": "预订旅游",
+  "common.loading": "加载中...",
+  "common.error": "出现错误",
+
+  "loading.tagline": "探索斯里兰卡的奇迹",
+
+  "locations.title": "景点",
+  "locations.search": "搜索景点...",
+  "locations.filter.category": "所有类别",
+  "locations.filter.region": "所有地区",
+
+  "events.title": "活动",
+  "events.search": "搜索活动...",
+
+  "gallery.title": "图库",
+  "gallery.search": "搜索图库...",
+
+  "places.title": "住宿",
+  "places.search": "搜索住宿...",
+
+  "footer.description": "探索印度洋的明珠。探寻原始海滩、古代寺庙、郁郁葱葱的茶园和充满活力的野生动植物。",
+  "footer.quickLinks": "快速链接",
+  "footer.contact": "联系我们",
+  "footer.followUs": "关注我们",
+  "footer.email": "电子邮件",
+  "footer.phone": "电话",
+  "footer.rights": "版权所有",
+  "footer.tagline": "探索斯里兰卡的奇迹"
+}

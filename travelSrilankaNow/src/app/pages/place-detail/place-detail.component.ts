@@ -106,6 +106,17 @@ export class PlaceDetailComponent implements OnInit {
     return def?.type === 'link';
   }
 
+  getLinkHref(value: any): string {
+    if (!value) return '#';
+    return typeof value === 'object' ? (value.url || '#') : value;
+  }
+
+  getLinkText(value: any): string {
+    if (!value) return '';
+    if (typeof value === 'object') return value.displayName || value.url || '';
+    return value;
+  }
+
   getTypeIcon(type: string): string {
     const icons: { [key: string]: string } = {
       'hotel': '🏨',

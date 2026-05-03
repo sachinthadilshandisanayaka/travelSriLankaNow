@@ -3,7 +3,7 @@
   <!-- Loading -->
   <div class="loading-state" *ngIf="isLoading">
     <div class="loading-spinner"></div>
-    <p>Loading...</p>
+    <p>{{ 'common.loading' | translate }}</p>
   </div>
 
   <!-- Error -->
@@ -20,21 +20,29 @@
   <!-- Content -->
   <div class="item-detail" *ngIf="item && !isLoading">
 
-    <!-- Hero Image (articles & items with images) -->
+    <!-- Translating badge -->
+    <div class="translating-badge" *ngIf="isTranslating">
+      <svg class="translating-badge__spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0" stroke-linecap="round"/>
+      </svg>
+      Translating content...
+    </div>
+
+    <!-- Hero Image -->
     <div class="item-detail__hero" *ngIf="item.imageUrl"
          [style.backgroundImage]="'url(' + item.imageUrl + ')'">
       <div class="item-detail__hero-overlay"></div>
       <div class="item-detail__hero-content">
-        <h1 class="item-detail__hero-title">{{ item.title }}</h1>
-        <p class="item-detail__hero-subtitle" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+        <h1 class="item-detail__hero-title">{{ displayTitle }}</h1>
+        <p class="item-detail__hero-subtitle" *ngIf="displayShortDescription">{{ displayShortDescription }}</p>
       </div>
     </div>
 
     <!-- No hero image: plain header -->
     <div class="item-detail__plain-header" *ngIf="!item.imageUrl">
       <div class="item-detail__plain-header-inner">
-        <h1 class="item-detail__plain-title">{{ item.title }}</h1>
-        <p class="item-detail__plain-subtitle" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+        <h1 class="item-detail__plain-title">{{ displayTitle }}</h1>
+        <p class="item-detail__plain-subtitle" *ngIf="displayShortDescription">{{ displayShortDescription }}</p>
       </div>
     </div>
 
@@ -44,9 +52,8 @@
 
         <!-- ARTICLE MODE -->
         <ng-container *ngIf="item.contentType === 'article'">
-          <div class="article-content ql-editor" [innerHTML]="item.articleContent"></div>
+          <div class="article-content ql-editor" [innerHTML]="displayArticleContent"></div>
 
-          <!-- External link if present -->
           <div class="item-detail__ext-link-row" *ngIf="item.link">
             <a [href]="item.link" target="_blank" rel="noopener noreferrer" class="item-detail__ext-link">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,9 +66,8 @@
 
         <!-- SIMPLE MODE -->
         <ng-container *ngIf="item.contentType !== 'article'">
-          <p class="item-detail__desc" *ngIf="item.description">{{ item.description }}</p>
+          <p class="item-detail__desc" *ngIf="displayDescription">{{ displayDescription }}</p>
 
-          <!-- Additional Details table -->
           <div class="item-detail__details" *ngIf="hasDetails(item)">
             <h3 class="item-detail__details-title">Details</h3>
             <div class="item-detail__details-grid">
@@ -83,7 +89,6 @@
             </div>
           </div>
 
-          <!-- External link button -->
           <div class="item-detail__ext-link-row" *ngIf="item.link">
             <a [href]="item.link" target="_blank" rel="noopener noreferrer" class="item-detail__ext-link">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +98,6 @@
             </a>
           </div>
         </ng-container>
-
 
       </div>
     </div>

@@ -2,7 +2,7 @@
   <!-- Loading -->
   <div class="loading-state" *ngIf="isLoading">
     <div class="loading-spinner"></div>
-    <p>Loading...</p>
+    <p>{{ 'common.loading' | translate }}</p>
   </div>
 
   <!-- Error -->
@@ -22,6 +22,14 @@
       </div>
     </div>
 
+    <!-- Translating indicator -->
+    <div class="translating-bar" *ngIf="isTranslating">
+      <svg class="translating-bar__spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0" stroke-linecap="round"/>
+      </svg>
+      Translating content...
+    </div>
+
     <!-- Items Grid -->
     <div class="container">
       <div class="items-grid" *ngIf="section.items && section.items.length > 0">
@@ -34,21 +42,21 @@
              tabindex="0"
              (keydown.enter)="navigateToItem(item, $event)">
 
-          <!-- Card image -->
           <div class="item-card__image" *ngIf="item.imageUrl">
             <img [src]="item.imageUrl" [alt]="item.title">
             <span class="item-card__article-badge" *ngIf="item.contentType === 'article'">Article</span>
           </div>
 
           <div class="item-card__content">
-            <h3 class="item-card__title">{{ item.title }}</h3>
+            <h3 class="item-card__title">{{ item.id != null ? (displayTitles[item.id] || item.title) : item.title }}</h3>
 
             <!-- Simple mode -->
             <ng-container *ngIf="item.contentType !== 'article'">
-              <p class="item-card__short-desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+              <p class="item-card__short-desc" *ngIf="item.shortDescription">
+                {{ item.id != null ? (displayShortDescs[item.id] || item.shortDescription) : item.shortDescription }}
+              </p>
               <p class="item-card__desc" *ngIf="item.description && !item.shortDescription">{{ item.description }}</p>
 
-              <!-- Additional details (non-link fields only in card) -->
               <div class="item-card__details" *ngIf="hasDetails(item)">
                 <div class="item-card__detail-row" *ngFor="let entry of item.additionalDetails | keyvalue">
                   <ng-container *ngIf="isNonEmpty(entry.value) && !isLinkField(entry.key)">
@@ -58,7 +66,6 @@
                 </div>
               </div>
 
-              <!-- External URL button — stops card navigation -->
               <a *ngIf="item.link"
                  [href]="item.link"
                  target="_blank"
@@ -72,9 +79,11 @@
               </a>
             </ng-container>
 
-            <!-- Article mode — excerpt only, not full HTML -->
+            <!-- Article mode — translated excerpt -->
             <ng-container *ngIf="item.contentType === 'article'">
-              <p class="item-card__excerpt" *ngIf="item.articleContent">{{ getArticleExcerpt(item) }}</p>
+              <p class="item-card__excerpt" *ngIf="item.articleContent">
+                {{ item.id != null ? (displayExcerpts[item.id] || getArticleExcerpt(item)) : getArticleExcerpt(item) }}
+              </p>
             </ng-container>
 
           </div>
