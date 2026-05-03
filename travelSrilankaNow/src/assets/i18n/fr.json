@@ -1,0 +1,50 @@
+{
+  "nav.home": "Accueil",
+  "nav.locations": "Destinations",
+  "nav.events": "Événements",
+  "nav.gallery": "Galerie",
+  "nav.places": "Hébergements",
+  "nav.more": "Plus",
+
+  "hero.explore": "Explorer les destinations",
+  "hero.events": "Voir les événements",
+  "hero.title1": "Voyage à travers",
+  "hero.title2": "L'antique Sri Lanka",
+  "hero.subtitle": "Vivez l'héritage majestueux et découvrez la riche culture d'un ancien royaume",
+
+  "section.subtitle.locations": "Destinations populaires",
+  "section.subtitle.events": "Expériences",
+  "section.subtitle.places": "Hébergements",
+  "section.viewAll.locations": "Voir toutes les destinations",
+  "section.viewAll.events": "Voir tous les événements",
+  "section.viewAll.places": "Voir tous les hébergements",
+
+  "common.bookTour": "Réserver un circuit",
+  "common.loading": "Chargement...",
+  "common.error": "Une erreur s'est produite",
+
+  "loading.tagline": "Découvrez les merveilles du Sri Lanka",
+
+  "locations.title": "Destinations",
+  "locations.search": "Rechercher des destinations...",
+  "locations.filter.category": "Toutes les catégories",
+  "locations.filter.region": "Toutes les régions",
+
+  "events.title": "Événements",
+  "events.search": "Rechercher des événements...",
+
+  "gallery.title": "Galerie",
+  "gallery.search": "Rechercher dans la galerie...",
+
+  "places.title": "Hébergements",
+  "places.search": "Rechercher des hébergements...",
+
+  "footer.description": "Découvrez la perle de l'océan Indien. Explorez des plages vierges, des temples anciens, des plantations de thé luxuriantes et une faune vibrante.",
+  "footer.quickLinks": "Liens rapides",
+  "footer.contact": "Contact",
+  "footer.followUs": "Suivez-nous",
+  "footer.email": "Email",
+  "footer.phone": "Téléphone",
+  "footer.rights": "Tous droits réservés",
+  "footer.tagline": "Découvrez les merveilles du Sri Lanka"
+}

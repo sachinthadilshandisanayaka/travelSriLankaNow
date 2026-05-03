@@ -1,0 +1,50 @@
+{
+  "nav.home": "Home",
+  "nav.locations": "Destinazioni",
+  "nav.events": "Eventi",
+  "nav.gallery": "Galleria",
+  "nav.places": "Alloggi",
+  "nav.more": "Altro",
+
+  "hero.explore": "Esplora le destinazioni",
+  "hero.events": "Vedi gli eventi",
+  "hero.title1": "Viaggio attraverso",
+  "hero.title2": "L'antico Sri Lanka",
+  "hero.subtitle": "Vivi il maestoso patrimonio e scopri la ricca cultura di un antico regno",
+
+  "section.subtitle.locations": "Destinazioni popolari",
+  "section.subtitle.events": "Esperienze",
+  "section.subtitle.places": "Alloggi",
+  "section.viewAll.locations": "Vedi tutte le destinazioni",
+  "section.viewAll.events": "Vedi tutti gli eventi",
+  "section.viewAll.places": "Vedi tutti gli alloggi",
+
+  "common.bookTour": "Prenota un tour",
+  "common.loading": "Caricamento...",
+  "common.error": "Qualcosa è andato storto",
+
+  "loading.tagline": "Scopri le meraviglie dello Sri Lanka",
+
+  "locations.title": "Destinazioni",
+  "locations.search": "Cerca destinazioni...",
+  "locations.filter.category": "Tutte le categorie",
+  "locations.filter.region": "Tutte le regioni",
+
+  "events.title": "Eventi",
+  "events.search": "Cerca eventi...",
+
+  "gallery.title": "Galleria",
+  "gallery.search": "Cerca nella galleria...",
+
+  "places.title": "Alloggi",
+  "places.search": "Cerca alloggi...",
+
+  "footer.description": "Scopri la perla dell'Oceano Indiano. Esplora spiagge incontaminate, templi antichi, lussureggianti piantagioni di tè e fauna vibrante.",
+  "footer.quickLinks": "Link rapidi",
+  "footer.contact": "Contatti",
+  "footer.followUs": "Seguici",
+  "footer.email": "Email",
+  "footer.phone": "Telefono",
+  "footer.rights": "Tutti i diritti riservati",
+  "footer.tagline": "Scopri le meraviglie dello Sri Lanka"
+}

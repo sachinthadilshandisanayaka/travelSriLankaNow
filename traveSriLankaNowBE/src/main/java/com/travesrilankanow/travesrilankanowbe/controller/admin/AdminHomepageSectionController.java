@@ -50,4 +50,16 @@ public class AdminHomepageSectionController {
         homepageSectionService.reorderSections(sectionIds);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping
+    public ResponseEntity<HomepageSection> createSection(@RequestBody HomepageSection section) {
+        HomepageSection created = homepageSectionService.createSection(section);
+        return ResponseEntity.ok(created);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSection(@PathVariable Long id) {
+        homepageSectionService.deleteSection(id);
+        return ResponseEntity.noContent().build();
+    }
 }

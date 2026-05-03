@@ -63,4 +63,17 @@ public class HomepageSectionService {
             homepageSectionRepository.save(section);
         }
     }
+
+    @Transactional
+    public HomepageSection createSection(HomepageSection section) {
+        if (section.getDisplayOrder() == null) section.setDisplayOrder(0);
+        if (section.getIsActive() == null) section.setIsActive(true);
+        return homepageSectionRepository.save(section);
+    }
+
+    @Transactional
+    public void deleteSection(Long id) {
+        HomepageSection section = getSectionById(id);
+        homepageSectionRepository.delete(section);
+    }
 }

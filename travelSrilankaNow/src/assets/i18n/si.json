@@ -1,0 +1,50 @@
+{
+  "nav.home": "මුල් පිටුව",
+  "nav.locations": "ස්ථාන",
+  "nav.events": "සිදුවීම්",
+  "nav.gallery": "ගැලරිය",
+  "nav.places": "නවාතැන්",
+  "nav.more": "තවත්",
+
+  "hero.explore": "ගමනාන්ත සොයන්න",
+  "hero.events": "සිදුවීම් බලන්න",
+  "hero.title1": "ශ්‍රී ලංකාවේ",
+  "hero.title2": "ඓතිහාසික ගමනක්",
+  "hero.subtitle": "ශ්‍රේෂ්ඨ උරුමය අත්දකින්න සහ පුරාණ රාජ්‍යයේ පොහොසත් සංස්කෘතිය සොයා යන්න",
+
+  "section.subtitle.locations": "ජනප්‍රිය ගමනාන්ත",
+  "section.subtitle.events": "අත්දැකීම්",
+  "section.subtitle.places": "නවාතැන් පහසුකම්",
+  "section.viewAll.locations": "සියලු ස්ථාන බලන්න",
+  "section.viewAll.events": "සියලු සිදුවීම් බලන්න",
+  "section.viewAll.places": "සියලු නවාතැන් බලන්න",
+
+  "common.bookTour": "සංචාරය වෙන්කරන්න",
+  "common.loading": "පූරණය වෙමින්...",
+  "common.error": "දෝෂයක් ඇති විය",
+
+  "loading.tagline": "ශ්‍රී ලංකාවේ විස්මය සොයා යන්න",
+
+  "locations.title": "ස්ථාන",
+  "locations.search": "ස්ථාන සොයන්න...",
+  "locations.filter.category": "සියලු ප්‍රවර්ග",
+  "locations.filter.region": "සියලු කලාප",
+
+  "events.title": "සිදුවීම්",
+  "events.search": "සිදුවීම් සොයන්න...",
+
+  "gallery.title": "ගැලරිය",
+  "gallery.search": "ගැලරිය සොයන්න...",
+
+  "places.title": "නවාතැන්",
+  "places.search": "නවාතැන් සොයන්න...",
+
+  "footer.description": "ඉන්දියන් සාගරයේ මුතු ඇටය සොයා යන්න. පිරිසිදු වෙරළ, පුරාණ විහාර, සශ්‍රීක තේ වතු, සහ සජීවී වනජීවී ස්ථාන ගවේෂණය කරන්න.",
+  "footer.quickLinks": "ඉක්මන් සබැඳි",
+  "footer.contact": "සම්බන්ධ වන්න",
+  "footer.followUs": "අප අනුගමනය කරන්න",
+  "footer.email": "විද්‍යුත් තැපෑල",
+  "footer.phone": "දුරකථනය",
+  "footer.rights": "සියලු හිමිකම් ඇවිරිණි",
+  "footer.tagline": "ශ්‍රී ලංකාවේ විස්මය සොයා යන්න"
+}

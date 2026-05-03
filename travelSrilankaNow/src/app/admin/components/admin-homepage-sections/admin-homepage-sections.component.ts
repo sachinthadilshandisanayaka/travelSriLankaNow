@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
+import { GallerySliderConfig, GallerySliderImage, CustomContentConfig } from '../../../models/homepage-section.model';
+import { forkJoin } from 'rxjs';
 
 interface HomepageSection {
   id?: number;
@@ -10,8 +12,6 @@ interface HomepageSection {
   displayOrder: number;
   isActive: boolean;
   config?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 interface SectionConfig {
@@ -20,6 +20,41 @@ interface SectionConfig {
   itemsCount?: number;
   showViewAll?: boolean;
 }
+
+interface AvailableImage {
+  url: string;
+  title: string;
+  sourceType: string;
+  sourceId: number;
+  selected?: boolean;
+}
+
+const CUSTOM_TEMPLATES = [
+  {
+    id: 'minimal',
+    name: 'Minimal',
+    description: 'Clean light background with centered text',
+    preview: 'bg-light'
+  },
+  {
+    id: 'dark',
+    name: 'Dark',
+    description: 'Bold dark background with white text',
+    preview: 'bg-dark'
+  },
+  {
+    id: 'image-overlay',
+    name: 'Image Overlay',
+    description: 'Full background image with text overlay',
+    preview: 'bg-image'
+  },
+  {
+    id: 'split',
+    name: 'Split Layout',
+    description: 'Image on left, text on right',
+    preview: 'bg-split'
+  }
+];
 
 @Component({
   selector: 'app-admin-homepage-sections',
@@ -30,30 +65,59 @@ export class AdminHomepageSectionsComponent implements OnInit {
   sections: HomepageSection[] = [];
   isLoading = false;
   isSaving = false;
-  showEditModal = false;
-  editForm: FormGroup;
-  editingSection: HomepageSection | null = null;
+  hasOrderChanged = false;
 
   successMessage = '';
   errorMessage = '';
 
-  hasOrderChanged = false;
+  // Standard edit modal
+  showEditModal = false;
+  editForm: FormGroup;
+  editingSection: HomepageSection | null = null;
+
+  // Gallery slider image picker modal
+  showGalleryPickerModal = false;
+  gallerySection: HomepageSection | null = null;
+  availableImages: AvailableImage[] = [];
+  selectedImages: GallerySliderImage[] = [];
+  imageSearchTerm = '';
+  isLoadingImages = false;
+  gallerySpeed = 30;
+  galleryPauseOnHover = true;
+
+  // Custom content modal
+  showCustomModal = false;
+  editingCustomSection: HomepageSection | null = null;
+  customConfig: CustomContentConfig = {};
+  customTemplates = CUSTOM_TEMPLATES;
+  customTitle = '';
+  customSubtitle = '';
+  customIsActive = true;
+  editorContent = '';
 
   sectionTypeLabels: Record<string, string> = {
-    'HERO_SLIDER': 'Hero Slider',
-    'FEATURED_LOCATIONS': 'Featured Locations',
-    'UPCOMING_EVENTS': 'Upcoming Events',
-    'PLACES': 'Where to Stay',
-    'SOCIAL_MEDIA': 'Social Media'
+    HERO_SLIDER: 'Hero Slider',
+    FEATURED_LOCATIONS: 'Featured Locations',
+    UPCOMING_EVENTS: 'Upcoming Events',
+    PLACES: 'Where to Stay',
+    SOCIAL_MEDIA: 'Social Media',
+    IMAGE_GALLERY_SLIDER: 'Image Gallery Slider',
+    CUSTOM_CONTENT: 'Custom Content Section'
   };
 
   sectionTypeIcons: Record<string, string> = {
-    'HERO_SLIDER': 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
-    'FEATURED_LOCATIONS': 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z',
-    'UPCOMING_EVENTS': 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-    'PLACES': 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-    'SOCIAL_MEDIA': 'M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m0 0h4a1 1 0 011 1v1a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4'
+    HERO_SLIDER: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+    FEATURED_LOCATIONS: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z',
+    UPCOMING_EVENTS: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+    PLACES: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    SOCIAL_MEDIA: 'M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m0 0h4a1 1 0 011 1v1a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4',
+    IMAGE_GALLERY_SLIDER: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+    CUSTOM_CONTENT: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'
   };
+
+  // Drag and Drop
+  draggedIndex: number | null = null;
+  dragOverIndex = -1;
 
   constructor(
     private apiService: AdminApiService,
@@ -99,14 +163,34 @@ export class AdminHomepageSectionsComponent implements OnInit {
 
   parseConfig(configStr?: string): SectionConfig {
     if (!configStr) return {};
-    try {
-      return JSON.parse(configStr);
-    } catch {
-      return {};
-    }
+    try { return JSON.parse(configStr); } catch { return {}; }
   }
 
+  parseGalleryConfig(configStr?: string): GallerySliderConfig {
+    if (!configStr) return { images: [], speed: 30, pauseOnHover: true };
+    try { return JSON.parse(configStr); } catch { return { images: [], speed: 30, pauseOnHover: true }; }
+  }
+
+  parseCustomConfig(configStr?: string): CustomContentConfig {
+    if (!configStr) return { template: 'minimal' };
+    try { return JSON.parse(configStr); } catch { return { template: 'minimal' }; }
+  }
+
+  isDeletable(section: HomepageSection): boolean {
+    return section.sectionType === 'CUSTOM_CONTENT';
+  }
+
+  // ---- Standard Edit Modal ----
   openEditModal(section: HomepageSection): void {
+    if (section.sectionType === 'IMAGE_GALLERY_SLIDER') {
+      this.openGalleryPickerModal(section);
+      return;
+    }
+    if (section.sectionType === 'CUSTOM_CONTENT') {
+      this.openCustomModal(section);
+      return;
+    }
+
     this.editingSection = section;
     const config = this.parseConfig(section.config);
     this.editForm.patchValue({
@@ -127,15 +211,9 @@ export class AdminHomepageSectionsComponent implements OnInit {
 
   saveSection(): void {
     if (this.editForm.invalid || !this.editingSection) return;
-
     const formValue = this.editForm.value;
     const existingConfig = this.parseConfig(this.editingSection.config);
-    const updatedConfig: SectionConfig = {
-      ...existingConfig,
-      itemsCount: formValue.itemsCount,
-      showViewAll: formValue.showViewAll
-    };
-
+    const updatedConfig = { ...existingConfig, itemsCount: formValue.itemsCount, showViewAll: formValue.showViewAll };
     const updateData: HomepageSection = {
       ...this.editingSection,
       title: formValue.title,
@@ -143,122 +221,306 @@ export class AdminHomepageSectionsComponent implements OnInit {
       isActive: formValue.isActive,
       config: JSON.stringify(updatedConfig)
     };
-
-    this.isLoading = true;
+    this.isSaving = true;
     this.apiService.updateHomepageSection(this.editingSection.id!, updateData).subscribe({
       next: () => {
-        this.successMessage = 'Section updated successfully!';
+        this.successMessage = 'Section updated!';
         this.closeEditModal();
         this.loadSections();
+        this.isSaving = false;
         this.hideMessageAfterDelay();
       },
       error: () => {
         this.errorMessage = 'Failed to update section';
-        this.isLoading = false;
+        this.isSaving = false;
         this.hideMessageAfterDelay();
       }
     });
   }
 
-  toggleActive(section: HomepageSection): void {
-    if (!section.id) return;
+  // ---- Gallery Slider Image Picker ----
+  openGalleryPickerModal(section: HomepageSection): void {
+    this.gallerySection = section;
+    const config = this.parseGalleryConfig(section.config);
+    this.selectedImages = [...(config.images || [])];
+    this.gallerySpeed = config.speed || 30;
+    this.galleryPauseOnHover = config.pauseOnHover !== false;
+    this.imageSearchTerm = '';
+    this.showGalleryPickerModal = true;
+    this.loadAvailableImages();
+  }
 
-    this.apiService.toggleHomepageSectionActive(section.id).subscribe({
-      next: (updated) => {
-        const index = this.sections.findIndex(s => s.id === section.id);
-        if (index !== -1) {
-          this.sections[index] = updated;
-        }
-        this.successMessage = `Section ${updated.isActive ? 'activated' : 'deactivated'} successfully!`;
+  closeGalleryPickerModal(): void {
+    this.showGalleryPickerModal = false;
+    this.gallerySection = null;
+    this.availableImages = [];
+  }
+
+  loadAvailableImages(): void {
+    this.isLoadingImages = true;
+    forkJoin({
+      locations: this.apiService.getLocations(0, 100),
+      events: this.apiService.getEvents(0, 100),
+      places: this.apiService.getPlaces(0, 100),
+      gallery: this.apiService.getGalleryItems(0, 100)
+    }).subscribe({
+      next: ({ locations, events, places, gallery }) => {
+        const imgs: AvailableImage[] = [];
+        (locations?.content || []).forEach((l: any) => {
+          if (l.imageUrl) imgs.push({ url: l.imageUrl, title: l.name, sourceType: 'location', sourceId: l.id });
+          (l.images || []).forEach((img: string) => imgs.push({ url: img, title: l.name, sourceType: 'location', sourceId: l.id }));
+        });
+        (events?.content || []).forEach((e: any) => {
+          if (e.imageUrl) imgs.push({ url: e.imageUrl, title: e.title || e.name, sourceType: 'event', sourceId: e.id });
+          (e.images || []).forEach((img: string) => imgs.push({ url: img, title: e.title || e.name, sourceType: 'event', sourceId: e.id }));
+        });
+        (places?.content || []).forEach((p: any) => {
+          if (p.imageUrl) imgs.push({ url: p.imageUrl, title: p.name, sourceType: 'place', sourceId: p.id });
+          (p.images || []).forEach((img: string) => imgs.push({ url: img, title: p.name, sourceType: 'place', sourceId: p.id }));
+        });
+        (gallery?.content || []).forEach((g: any) => {
+          if (g.imageUrl) imgs.push({ url: g.imageUrl, title: g.title || 'Gallery', sourceType: 'gallery', sourceId: g.id });
+        });
+
+        // De-duplicate by URL
+        const seen = new Set<string>();
+        this.availableImages = imgs.filter(img => {
+          if (seen.has(img.url)) return false;
+          seen.add(img.url);
+          return true;
+        }).map(img => ({
+          ...img,
+          selected: this.selectedImages.some(s => s.url === img.url)
+        }));
+        this.isLoadingImages = false;
+      },
+      error: () => {
+        this.isLoadingImages = false;
+        this.errorMessage = 'Failed to load images';
+        this.hideMessageAfterDelay();
+      }
+    });
+  }
+
+  get filteredImages(): AvailableImage[] {
+    if (!this.imageSearchTerm.trim()) return this.availableImages;
+    const term = this.imageSearchTerm.toLowerCase();
+    return this.availableImages.filter(i =>
+      i.title.toLowerCase().includes(term) || i.sourceType.toLowerCase().includes(term)
+    );
+  }
+
+  toggleImageSelection(image: AvailableImage): void {
+    image.selected = !image.selected;
+    if (image.selected) {
+      this.selectedImages.push({ url: image.url, title: image.title, sourceType: image.sourceType, sourceId: image.sourceId });
+    } else {
+      this.selectedImages = this.selectedImages.filter(s => s.url !== image.url);
+    }
+  }
+
+  removeSelectedImage(index: number): void {
+    const removed = this.selectedImages[index];
+    this.selectedImages.splice(index, 1);
+    const avail = this.availableImages.find(i => i.url === removed.url);
+    if (avail) avail.selected = false;
+  }
+
+  saveGalleryConfig(): void {
+    if (!this.gallerySection) return;
+    const config: GallerySliderConfig = {
+      images: this.selectedImages,
+      speed: this.gallerySpeed,
+      pauseOnHover: this.galleryPauseOnHover
+    };
+    const updateData: HomepageSection = { ...this.gallerySection, config: JSON.stringify(config) };
+    this.isSaving = true;
+    this.apiService.updateHomepageSection(this.gallerySection.id!, updateData).subscribe({
+      next: () => {
+        this.successMessage = 'Gallery slider updated!';
+        this.closeGalleryPickerModal();
+        this.loadSections();
+        this.isSaving = false;
         this.hideMessageAfterDelay();
       },
       error: () => {
-        this.errorMessage = 'Failed to toggle section status';
+        this.errorMessage = 'Failed to save gallery config';
+        this.isSaving = false;
         this.hideMessageAfterDelay();
       }
+    });
+  }
+
+  // ---- Custom Content Sections ----
+  openCustomModal(section?: HomepageSection): void {
+    this.editingCustomSection = section || null;
+    if (section) {
+      const config = this.parseCustomConfig(section.config);
+      this.customConfig = { ...config };
+      this.customTitle = section.title;
+      this.customSubtitle = section.subtitle || '';
+      this.customIsActive = section.isActive;
+      this.editorContent = config.content || '';
+    } else {
+      this.customConfig = { template: 'minimal', backgroundColor: '#1a3a5c', textColor: '#ffffff', textAlign: 'center', content: '' };
+      this.customTitle = 'Custom Section';
+      this.customSubtitle = '';
+      this.customIsActive = true;
+      this.editorContent = '<h2>Your Title Here</h2><p>Add your content here. You can use the toolbar to format text.</p>';
+      this.customConfig.content = this.editorContent;
+    }
+    this.showCustomModal = true;
+  }
+
+  closeCustomModal(): void {
+    this.showCustomModal = false;
+    this.editingCustomSection = null;
+  }
+
+  selectTemplate(templateId: string): void {
+    this.customConfig = { ...this.customConfig, template: templateId as any };
+    const defaults: Record<string, Partial<CustomContentConfig>> = {
+      minimal: { backgroundColor: '#f8fafc', textColor: '#1e293b', textAlign: 'center' },
+      dark: { backgroundColor: '#1a3a5c', textColor: '#ffffff', textAlign: 'center' },
+      'image-overlay': { backgroundColor: 'rgba(0,0,0,0.5)', textColor: '#ffffff', textAlign: 'center' },
+      split: { backgroundColor: '#ffffff', textColor: '#1e293b', textAlign: 'left' }
+    };
+    this.customConfig = { ...this.customConfig, ...defaults[templateId] };
+  }
+
+  execCommand(command: string, value?: string): void {
+    document.execCommand(command, false, value);
+  }
+
+  onEditorInput(event: Event): void {
+    this.editorContent = (event.target as HTMLElement).innerHTML;
+    this.customConfig.content = this.editorContent;
+  }
+
+  setFontSize(event: Event): void {
+    const size = (event.target as HTMLSelectElement).value;
+    if (size) this.execCommand('fontSize', size);
+  }
+
+  setFontFamily(event: Event): void {
+    const font = (event.target as HTMLSelectElement).value;
+    if (font) this.execCommand('fontName', font);
+  }
+
+  saveCustomSection(): void {
+    this.customConfig.content = this.editorContent;
+    const configStr = JSON.stringify(this.customConfig);
+    this.isSaving = true;
+
+    if (this.editingCustomSection?.id) {
+      const updateData: HomepageSection = {
+        ...this.editingCustomSection,
+        title: this.customTitle,
+        subtitle: this.customSubtitle,
+        isActive: this.customIsActive,
+        config: configStr
+      };
+      this.apiService.updateHomepageSection(this.editingCustomSection.id, updateData).subscribe({
+        next: () => {
+          this.successMessage = 'Custom section updated!';
+          this.closeCustomModal();
+          this.loadSections();
+          this.isSaving = false;
+          this.hideMessageAfterDelay();
+        },
+        error: () => { this.errorMessage = 'Failed to update'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    } else {
+      const newSection: any = {
+        sectionType: 'CUSTOM_CONTENT',
+        title: this.customTitle,
+        subtitle: this.customSubtitle,
+        isActive: this.customIsActive,
+        displayOrder: 99,
+        config: configStr
+      };
+      this.apiService.createHomepageSection(newSection).subscribe({
+        next: () => {
+          this.successMessage = 'Custom section created!';
+          this.closeCustomModal();
+          this.loadSections();
+          this.isSaving = false;
+          this.hideMessageAfterDelay();
+        },
+        error: () => { this.errorMessage = 'Failed to create'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    }
+  }
+
+  deleteSection(section: HomepageSection): void {
+    if (!confirm(`Delete "${section.title}"?`)) return;
+    this.apiService.deleteHomepageSection(section.id!).subscribe({
+      next: () => {
+        this.successMessage = 'Section deleted!';
+        this.loadSections();
+        this.hideMessageAfterDelay();
+      },
+      error: () => { this.errorMessage = 'Failed to delete'; this.hideMessageAfterDelay(); }
+    });
+  }
+
+  // ---- Toggle / Reorder ----
+  toggleActive(section: HomepageSection): void {
+    if (!section.id) return;
+    this.apiService.toggleHomepageSectionActive(section.id).subscribe({
+      next: (updated) => {
+        const idx = this.sections.findIndex(s => s.id === section.id);
+        if (idx !== -1) this.sections[idx] = updated;
+        this.successMessage = `Section ${updated.isActive ? 'activated' : 'deactivated'}!`;
+        this.hideMessageAfterDelay();
+      },
+      error: () => { this.errorMessage = 'Failed to toggle'; this.hideMessageAfterDelay(); }
     });
   }
 
   moveUp(index: number): void {
-    if (index > 0) {
-      const temp = this.sections[index];
-      this.sections[index] = this.sections[index - 1];
-      this.sections[index - 1] = temp;
-      this.hasOrderChanged = true;
-    }
+    if (index > 0) { [this.sections[index], this.sections[index - 1]] = [this.sections[index - 1], this.sections[index]]; this.hasOrderChanged = true; }
   }
 
   moveDown(index: number): void {
-    if (index < this.sections.length - 1) {
-      const temp = this.sections[index];
-      this.sections[index] = this.sections[index + 1];
-      this.sections[index + 1] = temp;
-      this.hasOrderChanged = true;
-    }
+    if (index < this.sections.length - 1) { [this.sections[index], this.sections[index + 1]] = [this.sections[index + 1], this.sections[index]]; this.hasOrderChanged = true; }
   }
 
   saveOrder(): void {
     const sectionIds = this.sections.map(s => s.id!);
     this.isSaving = true;
-
     this.apiService.reorderHomepageSections(sectionIds).subscribe({
       next: () => {
-        this.successMessage = 'Section order saved successfully!';
+        this.successMessage = 'Order saved!';
         this.isSaving = false;
         this.hasOrderChanged = false;
         this.loadSections();
         this.hideMessageAfterDelay();
       },
-      error: () => {
-        this.errorMessage = 'Failed to save section order';
-        this.isSaving = false;
-        this.hideMessageAfterDelay();
-      }
+      error: () => { this.errorMessage = 'Failed to save order'; this.isSaving = false; this.hideMessageAfterDelay(); }
     });
   }
 
-  // Drag and Drop
-  draggedIndex: number | null = null;
-  dragOverIndex = -1;
-
   onDragStart(event: DragEvent, index: number): void {
     this.draggedIndex = index;
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', index.toString());
-    }
+    if (event.dataTransfer) { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', index.toString()); }
   }
 
-  onDragOver(event: DragEvent, index: number): void {
-    event.preventDefault();
-    this.dragOverIndex = index;
-  }
-
-  onDragLeave(): void {
-    this.dragOverIndex = -1;
-  }
+  onDragOver(event: DragEvent, index: number): void { event.preventDefault(); this.dragOverIndex = index; }
+  onDragLeave(): void { this.dragOverIndex = -1; }
+  onDragEnd(): void { this.draggedIndex = null; this.dragOverIndex = -1; }
 
   onDrop(event: DragEvent, targetIndex: number): void {
     event.preventDefault();
     this.dragOverIndex = -1;
-
     if (this.draggedIndex === null || this.draggedIndex === targetIndex) return;
-
     const [removed] = this.sections.splice(this.draggedIndex, 1);
     this.sections.splice(targetIndex, 0, removed);
     this.hasOrderChanged = true;
     this.draggedIndex = null;
   }
 
-  onDragEnd(): void {
-    this.draggedIndex = null;
-    this.dragOverIndex = -1;
-  }
-
   hideMessageAfterDelay(): void {
-    setTimeout(() => {
-      this.successMessage = '';
-      this.errorMessage = '';
-    }, 3000);
+    setTimeout(() => { this.successMessage = ''; this.errorMessage = ''; }, 3000);
   }
 }

@@ -1,0 +1,50 @@
+{
+  "nav.home": "முகப்பு",
+  "nav.locations": "இடங்கள்",
+  "nav.events": "நிகழ்வுகள்",
+  "nav.gallery": "படத்தொகுப்பு",
+  "nav.places": "தங்குமிடங்கள்",
+  "nav.more": "மேலும்",
+
+  "hero.explore": "இடங்களை ஆராயுங்கள்",
+  "hero.events": "நிகழ்வுகளை பாருங்கள்",
+  "hero.title1": "இலங்கையின்",
+  "hero.title2": "பண்டைய பயணம்",
+  "hero.subtitle": "பழமையான ராஜ்ஜியத்தின் மகத்தான பாரம்பரியத்தை அனுபவியுங்கள்",
+
+  "section.subtitle.locations": "பிரபலமான இடங்கள்",
+  "section.subtitle.events": "அனுபவங்கள்",
+  "section.subtitle.places": "தங்குமிட வசதிகள்",
+  "section.viewAll.locations": "அனைத்து இடங்களும் பாருங்கள்",
+  "section.viewAll.events": "அனைத்து நிகழ்வுகளும் பாருங்கள்",
+  "section.viewAll.places": "அனைத்து தங்குமிடங்களும் பாருங்கள்",
+
+  "common.bookTour": "சுற்றுலா பதிவு செய்யுங்கள்",
+  "common.loading": "ஏற்றுகிறது...",
+  "common.error": "பிழை ஏற்பட்டது",
+
+  "loading.tagline": "இலங்கையின் அதிசயங்களை கண்டறியுங்கள்",
+
+  "locations.title": "இடங்கள்",
+  "locations.search": "இடங்களை தேடுங்கள்...",
+  "locations.filter.category": "அனைத்து வகைகள்",
+  "locations.filter.region": "அனைத்து பிரதேசங்கள்",
+
+  "events.title": "நிகழ்வுகள்",
+  "events.search": "நிகழ்வுகளை தேடுங்கள்...",
+
+  "gallery.title": "படத்தொகுப்பு",
+  "gallery.search": "படங்களை தேடுங்கள்...",
+
+  "places.title": "தங்குமிடங்கள்",
+  "places.search": "தங்குமிடங்களை தேடுங்கள்...",
+
+  "footer.description": "இந்திய மகா சமுத்திரத்தின் முத்தை கண்டறியுங்கள். தூய கடற்கரைகள், பண்டைய கோயில்கள், பசுமையான தேயிலை தோட்டங்கள், மற்றும் வனவிலங்குகளை ஆராயுங்கள்.",
+  "footer.quickLinks": "விரைவு இணைப்புகள்",
+  "footer.contact": "தொடர்பு",
+  "footer.followUs": "எங்களை பின்தொடருங்கள்",
+  "footer.email": "மின்னஞ்சல்",
+  "footer.phone": "தொலைபேசி",
+  "footer.rights": "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை",
+  "footer.tagline": "இலங்கையின் அதிசயங்களை கண்டறியுங்கள்"
+}

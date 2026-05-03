@@ -1,0 +1,50 @@
+{
+  "nav.home": "Home",
+  "nav.locations": "Locations",
+  "nav.events": "Events",
+  "nav.gallery": "Gallery",
+  "nav.places": "Places",
+  "nav.more": "More",
+
+  "hero.explore": "Explore Destinations",
+  "hero.events": "View Events",
+  "hero.title1": "Journey Through",
+  "hero.title2": "Ancient Sri Lanka",
+  "hero.subtitle": "Experience the majestic heritage and discover the rich culture of an ancient kingdom",
+
+  "section.subtitle.locations": "Popular Destinations",
+  "section.subtitle.events": "Experiences",
+  "section.subtitle.places": "Accommodations",
+  "section.viewAll.locations": "View All Locations",
+  "section.viewAll.events": "View All Events",
+  "section.viewAll.places": "View All Places",
+
+  "common.bookTour": "Book a Tour",
+  "common.loading": "Loading...",
+  "common.error": "Something went wrong",
+
+  "loading.tagline": "Discover the Wonder of Sri Lanka",
+
+  "locations.title": "Locations",
+  "locations.search": "Search locations...",
+  "locations.filter.category": "All Categories",
+  "locations.filter.region": "All Regions",
+
+  "events.title": "Events",
+  "events.search": "Search events...",
+
+  "gallery.title": "Gallery",
+  "gallery.search": "Search gallery...",
+
+  "places.title": "Places",
+  "places.search": "Search places...",
+
+  "footer.description": "Discover the pearl of the Indian Ocean. Explore pristine beaches, ancient temples, lush tea plantations, and vibrant wildlife.",
+  "footer.quickLinks": "Quick Links",
+  "footer.contact": "Contact",
+  "footer.followUs": "Follow Us",
+  "footer.email": "Email",
+  "footer.phone": "Phone",
+  "footer.rights": "All rights reserved",
+  "footer.tagline": "Discover the Wonder of Sri Lanka"
+}

@@ -1,0 +1,50 @@
+{
+  "nav.home": "홈",
+  "nav.locations": "명소",
+  "nav.events": "이벤트",
+  "nav.gallery": "갤러리",
+  "nav.places": "숙소",
+  "nav.more": "더보기",
+
+  "hero.explore": "여행지 탐색",
+  "hero.events": "이벤트 보기",
+  "hero.title1": "여행",
+  "hero.title2": "고대 스리랑카",
+  "hero.subtitle": "장엄한 유산을 경험하고 고대 왕국의 풍요로운 문화를 발견하세요",
+
+  "section.subtitle.locations": "인기 여행지",
+  "section.subtitle.events": "체험",
+  "section.subtitle.places": "숙박 시설",
+  "section.viewAll.locations": "전체 명소 보기",
+  "section.viewAll.events": "전체 이벤트 보기",
+  "section.viewAll.places": "전체 숙소 보기",
+
+  "common.bookTour": "투어 예약",
+  "common.loading": "로딩 중...",
+  "common.error": "오류가 발생했습니다",
+
+  "loading.tagline": "스리랑카의 경이로움을 발견하세요",
+
+  "locations.title": "명소",
+  "locations.search": "명소 검색...",
+  "locations.filter.category": "전체 카테고리",
+  "locations.filter.region": "전체 지역",
+
+  "events.title": "이벤트",
+  "events.search": "이벤트 검색...",
+
+  "gallery.title": "갤러리",
+  "gallery.search": "갤러리 검색...",
+
+  "places.title": "숙소",
+  "places.search": "숙소 검색...",
+
+  "footer.description": "인도양의 진주를 발견하세요. 청정 해변, 고대 사원, 무성한 차 농장, 생동감 넘치는 야생동물을 탐험하세요.",
+  "footer.quickLinks": "빠른 링크",
+  "footer.contact": "연락처",
+  "footer.followUs": "팔로우",
+  "footer.email": "이메일",
+  "footer.phone": "전화",
+  "footer.rights": "모든 권리 보유",
+  "footer.tagline": "스리랑카의 경이로움을 발견하세요"
+}

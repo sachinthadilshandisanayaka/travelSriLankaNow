@@ -322,10 +322,14 @@
               </div>
 
               <!-- link -->
-              <input *ngIf="field.type === 'link'" type="url" class="admin-input"
-                     [value]="additionalDetails[field.key] || ''"
-                     (input)="additionalDetails[field.key] = $any($event.target).value"
-                     placeholder="https://example.com">
+              <div *ngIf="field.type === 'link'" class="link-field-group">
+                <input type="text" class="admin-input" placeholder="Display name (optional)"
+                       [value]="getLinkDisplayName(field.key)"
+                       (input)="setLinkDisplayName(field.key, $any($event.target).value)">
+                <input type="url" class="admin-input" placeholder="https://example.com"
+                       [value]="getLinkUrl(field.key)"
+                       (input)="setLinkUrl(field.key, $any($event.target).value)">
+              </div>
 
               <!-- select -->
               <select *ngIf="field.type === 'select'" class="admin-select"
@@ -406,8 +410,7 @@
             </div>
             <div class="field-def-row__input-group">
               <label class="admin-form__label">Type</label>
-              <select class="admin-select admin-select--sm" [value]="field.type"
-                      (change)="field.type = $any($event.target).value; onFieldTypeChange(field)">
+              <select class="admin-select admin-select--sm" [(ngModel)]="field.type" (ngModelChange)="onFieldTypeChange(field)">
                 <option *ngFor="let ft of fieldTypes" [value]="ft.value">{{ ft.label }}</option>
               </select>
             </div>

@@ -150,6 +150,13 @@
   flex-shrink: 0;
 }
 
+// Link field with display name
+.link-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 // Multi-select checkboxes
 .multi-select-options {
   display: flex;

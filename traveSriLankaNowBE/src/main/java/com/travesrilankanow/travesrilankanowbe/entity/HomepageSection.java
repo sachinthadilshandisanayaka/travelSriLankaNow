@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "homepage_sections", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"section_type"})
-})
+@Table(name = "homepage_sections")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +21,7 @@ public class HomepageSection {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "section_type", nullable = false, unique = true)
+    @Column(name = "section_type", nullable = false)
     private SectionType sectionType;
 
     @Column(nullable = false)
@@ -68,6 +66,8 @@ public class HomepageSection {
         FEATURED_LOCATIONS,
         UPCOMING_EVENTS,
         PLACES,
-        SOCIAL_MEDIA
+        SOCIAL_MEDIA,
+        IMAGE_GALLERY_SLIDER,
+        CUSTOM_CONTENT
     }
 }

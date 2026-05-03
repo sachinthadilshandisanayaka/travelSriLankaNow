@@ -296,6 +296,15 @@
   }
 }
 
+// ==================== Navbar Right Actions ====================
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-shrink: 0;
+  z-index: $z-index-fixed + 1;
+}
+
 // ==================== Premium Hamburger Menu ====================
 .menu-toggle {
   display: flex;

@@ -1,0 +1,50 @@
+{
+  "nav.home": "Startseite",
+  "nav.locations": "Orte",
+  "nav.events": "Veranstaltungen",
+  "nav.gallery": "Galerie",
+  "nav.places": "Unterkünfte",
+  "nav.more": "Mehr",
+
+  "hero.explore": "Ziele entdecken",
+  "hero.events": "Events ansehen",
+  "hero.title1": "Reise durch",
+  "hero.title2": "Das antike Sri Lanka",
+  "hero.subtitle": "Erleben Sie das majestätische Erbe und entdecken Sie die reiche Kultur eines alten Königreichs",
+
+  "section.subtitle.locations": "Beliebte Reiseziele",
+  "section.subtitle.events": "Erlebnisse",
+  "section.subtitle.places": "Unterkünfte",
+  "section.viewAll.locations": "Alle Orte anzeigen",
+  "section.viewAll.events": "Alle Veranstaltungen anzeigen",
+  "section.viewAll.places": "Alle Unterkünfte anzeigen",
+
+  "common.bookTour": "Tour buchen",
+  "common.loading": "Lädt...",
+  "common.error": "Etwas ist schiefgelaufen",
+
+  "loading.tagline": "Entdecken Sie das Wunder Sri Lankas",
+
+  "locations.title": "Orte",
+  "locations.search": "Orte suchen...",
+  "locations.filter.category": "Alle Kategorien",
+  "locations.filter.region": "Alle Regionen",
+
+  "events.title": "Veranstaltungen",
+  "events.search": "Veranstaltungen suchen...",
+
+  "gallery.title": "Galerie",
+  "gallery.search": "Galerie durchsuchen...",
+
+  "places.title": "Unterkünfte",
+  "places.search": "Unterkünfte suchen...",
+
+  "footer.description": "Entdecken Sie die Perle des Indischen Ozeans. Erkunden Sie unberührte Strände, alte Tempel, üppige Teeplantagen und lebendige Tierwelt.",
+  "footer.quickLinks": "Schnelllinks",
+  "footer.contact": "Kontakt",
+  "footer.followUs": "Folgen Sie uns",
+  "footer.email": "E-Mail",
+  "footer.phone": "Telefon",
+  "footer.rights": "Alle Rechte vorbehalten",
+  "footer.tagline": "Entdecken Sie das Wunder Sri Lankas"
+}
