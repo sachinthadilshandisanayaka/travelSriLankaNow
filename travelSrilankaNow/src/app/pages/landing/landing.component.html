@@ -315,7 +315,30 @@
       <section class="custom-content-section custom-content-section--{{ customConf.template || 'minimal' }}"
                [ngStyle]="getCustomSectionStyle(customConf)">
         <div class="custom-content-section__inner container">
-          <div class="custom-content-section__text" [innerHTML]="customConf.content"></div>
+
+          <!-- New structured layout: title + description -->
+          <ng-container *ngIf="customConf.title || customConf.description">
+            <h2 *ngIf="customConf.title"
+                class="custom-content-section__title"
+                [style.color]="customConf.titleColor"
+                [style.textAlign]="customConf.titleAlign || 'left'">
+              {{ customConf.title }}
+            </h2>
+            <p *ngIf="customConf.description"
+               class="custom-content-section__desc"
+               [style.color]="customConf.descriptionColor"
+               [style.textAlign]="customConf.descriptionAlign || 'left'">
+              {{ customConf.description }}
+            </p>
+          </ng-container>
+
+          <!-- Legacy fallback: sections created with the old rich-text editor -->
+          <div *ngIf="!customConf.title && !customConf.description && customConf.content"
+               class="custom-content-section__text"
+               [ngStyle]="getCustomTextStyle(customConf)"
+               [innerHTML]="customConf.content">
+          </div>
+
         </div>
       </section>
     </ng-container>

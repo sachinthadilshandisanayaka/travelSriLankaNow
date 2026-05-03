@@ -586,14 +586,118 @@
   justify-content: center;
 }
 
-.editor-content {
-  width: 100%;
-  min-height: 120px;
-  outline: none;
+// ===== Custom Content Form Blocks =====
+.custom-form-block {
+  padding: 0;
+}
+
+// Large text input for title
+.admin-input--lg {
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.625rem 0.875rem;
+}
+
+// Textarea
+.admin-textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+// Two-column row: color | alignment
+.content-style-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.75rem;
+
+  @media (max-width: 540px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.content-style-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+// Alignment toggle buttons
+.align-btn-group {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.align-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.625rem;
+  border: 1px solid $admin-gray-300;
+  border-radius: $admin-radius-sm;
+  background: $admin-white;
+  color: $admin-gray-600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover { background: $admin-gray-100; }
+
+  &--active {
+    background: $admin-blue;
+    color: $admin-white;
+    border-color: $admin-blue;
+  }
+}
+
+// Live preview box
+.custom-preview-box {
+  position: relative;
+  border-radius: $admin-radius;
+  overflow: hidden;
+  border: 1px dashed $admin-gray-300;
+  transition: all 0.2s;
+}
+
+.custom-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.custom-preview-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.custom-preview-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.custom-preview-desc {
   font-size: 1rem;
   line-height: 1.6;
+  word-break: break-word;
+}
 
-  &:focus {
-    outline: none;
-  }
+.custom-preview-empty {
+  color: $admin-gray-400;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+// Form hint inline label
+.admin-form__hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: $admin-gray-400;
+  margin-left: 0.25rem;
 }
