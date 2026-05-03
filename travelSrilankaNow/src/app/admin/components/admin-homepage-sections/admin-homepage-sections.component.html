@@ -244,21 +244,24 @@
 
     <div class="admin-modal__body custom-content-modal__body">
 
-      <!-- Basic Info -->
-      <div class="admin-form__grid">
-        <div class="admin-form__group admin-form__group--full">
-          <label class="admin-form__label">Section Title *</label>
-          <input type="text" class="admin-input" [(ngModel)]="customTitle" placeholder="Section title">
-        </div>
-        <div class="admin-form__group admin-form__group--full">
-          <label class="admin-form__label">Subtitle</label>
-          <input type="text" class="admin-input" [(ngModel)]="customSubtitle" placeholder="Optional subtitle">
+      <!-- ① Section meta (name in list) -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Section Name</h4>
+        <div class="admin-form__grid">
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Name in admin list *</label>
+            <input type="text" class="admin-input" [(ngModel)]="customTitle" placeholder="e.g. Promo Banner">
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Subtitle <span class="admin-form__hint">(optional)</span></label>
+            <input type="text" class="admin-input" [(ngModel)]="customSubtitle" placeholder="Short description">
+          </div>
         </div>
       </div>
 
-      <!-- Template Selection -->
-      <div class="custom-template-section">
-        <h4 class="custom-section-label">Choose Template</h4>
+      <!-- ② Template quick-start -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Template</h4>
         <div class="custom-templates-grid">
           <div *ngFor="let tmpl of customTemplates"
                class="custom-template-card"
@@ -271,96 +274,166 @@
         </div>
       </div>
 
-      <!-- Background Settings -->
-      <div class="custom-bg-section">
+      <!-- ③ Background -->
+      <div class="custom-form-block">
         <h4 class="custom-section-label">Background</h4>
         <div class="admin-form__grid">
           <div class="admin-form__group">
             <label class="admin-form__label">Background Color</label>
             <div class="color-input-group">
               <input type="color" class="color-picker" [(ngModel)]="customConfig.backgroundColor">
-              <input type="text" class="admin-input" [(ngModel)]="customConfig.backgroundColor" placeholder="#1a3a5c">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.backgroundColor" placeholder="#f8fafc">
             </div>
           </div>
+
           <div class="admin-form__group">
-            <label class="admin-form__label">Text Color</label>
-            <div class="color-input-group">
-              <input type="color" class="color-picker" [(ngModel)]="customConfig.textColor">
-              <input type="text" class="admin-input" [(ngModel)]="customConfig.textColor" placeholder="#ffffff">
+            <label class="admin-form__label">Section Padding</label>
+            <select class="admin-input" [(ngModel)]="customConfig.padding">
+              <option *ngFor="let p of PADDING_OPTIONS" [value]="p.value">{{ p.label }}</option>
+            </select>
+          </div>
+
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Background Image URL <span class="admin-form__hint">(optional)</span></label>
+            <input type="url" class="admin-input" [(ngModel)]="customConfig.backgroundImage" placeholder="https://…/image.jpg">
+          </div>
+
+          <div class="admin-form__group" *ngIf="customConfig.backgroundImage">
+            <label class="admin-form__label">Section Height</label>
+            <select class="admin-input" [(ngModel)]="customConfig.minHeight">
+              <option *ngFor="let h of MIN_HEIGHT_OPTIONS" [value]="h.value">{{ h.label }}</option>
+            </select>
+          </div>
+
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Vertical Content Alignment</label>
+            <div class="align-btn-group">
+              <button type="button" class="align-btn"
+                      [class.align-btn--active]="!customConfig.verticalAlign || customConfig.verticalAlign === 'top'"
+                      (click)="customConfig.verticalAlign = 'top'" title="Top">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2a.5.5 0 01.5.5v11a.5.5 0 01-1 0v-11A.5.5 0 018 2zM2 1.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z"/></svg>
+                Top
+              </button>
+              <button type="button" class="align-btn"
+                      [class.align-btn--active]="customConfig.verticalAlign === 'center'"
+                      (click)="customConfig.verticalAlign = 'center'" title="Middle">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 4a.5.5 0 01.5.5v3h3a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1h3v-3A.5.5 0 018 4zM1 8a.5.5 0 01.5-.5h13a.5.5 0 010 1h-13A.5.5 0 011 8z"/></svg>
+                Middle
+              </button>
+              <button type="button" class="align-btn"
+                      [class.align-btn--active]="customConfig.verticalAlign === 'bottom'"
+                      (click)="customConfig.verticalAlign = 'bottom'" title="Bottom">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 14a.5.5 0 01-.5-.5v-11a.5.5 0 011 0v11a.5.5 0 01-.5.5zM2 14.5a.5.5 0 00.5.5h11a.5.5 0 000-1h-11a.5.5 0 00-.5.5z"/></svg>
+                Bottom
+              </button>
             </div>
           </div>
-          <div class="admin-form__group admin-form__group--full">
-            <label class="admin-form__label">Background Image URL (optional)</label>
-            <input type="url" class="admin-input" [(ngModel)]="customConfig.backgroundImage" placeholder="https://example.com/image.jpg">
+
+        </div>
+      </div>
+
+      <!-- ④ Title field -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Title</h4>
+        <div class="admin-form__group admin-form__group--full">
+          <input type="text" class="admin-input admin-input--lg" [(ngModel)]="customConfig.title" placeholder="Enter title text…">
+        </div>
+        <div class="content-style-row">
+          <div class="content-style-cell">
+            <label class="admin-form__label">Color</label>
+            <div class="color-input-group">
+              <input type="color" class="color-picker" [(ngModel)]="customConfig.titleColor">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.titleColor" placeholder="#1e293b">
+            </div>
+          </div>
+          <div class="content-style-cell">
+            <label class="admin-form__label">Alignment</label>
+            <div class="align-btn-group">
+              <button type="button" class="align-btn" [class.align-btn--active]="!customConfig.titleAlign || customConfig.titleAlign === 'left'" (click)="customConfig.titleAlign = 'left'" title="Left">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+                Left
+              </button>
+              <button type="button" class="align-btn" [class.align-btn--active]="customConfig.titleAlign === 'center'" (click)="customConfig.titleAlign = 'center'" title="Center">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+                Center
+              </button>
+              <button type="button" class="align-btn" [class.align-btn--active]="customConfig.titleAlign === 'right'" (click)="customConfig.titleAlign = 'right'" title="Right">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M6 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm4-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+                Right
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Rich Text Editor -->
-      <div class="custom-editor-section">
-        <h4 class="custom-section-label">Content</h4>
-
-        <!-- Toolbar -->
-        <div class="editor-toolbar">
-          <button type="button" class="editor-btn" (click)="execCommand('bold')" title="Bold"><b>B</b></button>
-          <button type="button" class="editor-btn" (click)="execCommand('italic')" title="Italic"><i>I</i></button>
-          <button type="button" class="editor-btn" (click)="execCommand('underline')" title="Underline"><u>U</u></button>
-          <div class="editor-toolbar__sep"></div>
-          <button type="button" class="editor-btn" (click)="execCommand('justifyLeft')" title="Align Left">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
-          </button>
-          <button type="button" class="editor-btn" (click)="execCommand('justifyCenter')" title="Align Center">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
-          </button>
-          <button type="button" class="editor-btn" (click)="execCommand('justifyRight')" title="Align Right">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M6 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm4-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
-          </button>
-          <div class="editor-toolbar__sep"></div>
-          <select class="editor-select" (change)="setFontSize($event)">
-            <option value="">Size</option>
-            <option value="1">XS</option>
-            <option value="2">S</option>
-            <option value="3">M</option>
-            <option value="4">L</option>
-            <option value="5">XL</option>
-            <option value="6">XXL</option>
-            <option value="7">3XL</option>
-          </select>
-          <select class="editor-select" (change)="setFontFamily($event)">
-            <option value="">Font</option>
-            <option value="Arial">Arial</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Trebuchet MS">Trebuchet MS</option>
-            <option value="Verdana">Verdana</option>
-          </select>
-          <div class="editor-toolbar__sep"></div>
-          <button type="button" class="editor-btn" (click)="execCommand('insertUnorderedList')" title="Bullet List">• List</button>
-          <button type="button" class="editor-btn" (click)="execCommand('insertOrderedList')" title="Numbered List">1. List</button>
+      <!-- ⑤ Description field -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Description</h4>
+        <div class="admin-form__group admin-form__group--full">
+          <textarea class="admin-input admin-textarea" rows="4" [(ngModel)]="customConfig.description" placeholder="Enter description text…"></textarea>
         </div>
+        <div class="content-style-row">
+          <div class="content-style-cell">
+            <label class="admin-form__label">Color</label>
+            <div class="color-input-group">
+              <input type="color" class="color-picker" [(ngModel)]="customConfig.descriptionColor">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.descriptionColor" placeholder="#64748b">
+            </div>
+          </div>
+          <div class="content-style-cell">
+            <label class="admin-form__label">Alignment</label>
+            <div class="align-btn-group">
+              <button type="button" class="align-btn" [class.align-btn--active]="!customConfig.descriptionAlign || customConfig.descriptionAlign === 'left'" (click)="customConfig.descriptionAlign = 'left'" title="Left">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+                Left
+              </button>
+              <button type="button" class="align-btn" [class.align-btn--active]="customConfig.descriptionAlign === 'center'" (click)="customConfig.descriptionAlign = 'center'" title="Center">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm2-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+                Center
+              </button>
+              <button type="button" class="align-btn" [class.align-btn--active]="customConfig.descriptionAlign === 'right'" (click)="customConfig.descriptionAlign = 'right'" title="Right">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M6 12.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm4-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-4-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11A.5.5 0 012 3.5z"/></svg>
+                Right
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Editor area preview with background -->
-        <div class="editor-preview-wrapper"
+      <!-- ⑥ Live preview -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Live Preview</h4>
+        <div class="custom-preview-box"
              [style.backgroundColor]="customConfig.backgroundColor || '#f8fafc'"
              [style.backgroundImage]="customConfig.backgroundImage ? 'url(' + customConfig.backgroundImage + ')' : ''"
              [style.backgroundSize]="'cover'"
-             [style.backgroundPosition]="'center'">
-          <div class="editor-content"
-               contenteditable="true"
-               [style.color]="customConfig.textColor || '#1e293b'"
-               [innerHTML]="editorContent"
-               (input)="onEditorInput($event)"
-               (blur)="onEditorInput($event)">
+             [style.backgroundPosition]="'center'"
+             [style.minHeight]="customConfig.minHeight || '120px'"
+             [style.padding]="customConfig.padding || '2rem 1.5rem'">
+          <div class="custom-preview-overlay" *ngIf="customConfig.backgroundImage"></div>
+          <div class="custom-preview-inner">
+            <p class="custom-preview-empty" *ngIf="!customConfig.title && !customConfig.description">Title &amp; description will appear here</p>
+            <div *ngIf="customConfig.title"
+                 class="custom-preview-title"
+                 [style.color]="customConfig.titleColor"
+                 [style.textAlign]="customConfig.titleAlign || 'left'">
+              {{ customConfig.title }}
+            </div>
+            <div *ngIf="customConfig.description"
+                 class="custom-preview-desc"
+                 [style.color]="customConfig.descriptionColor"
+                 [style.textAlign]="customConfig.descriptionAlign || 'left'">
+              {{ customConfig.description }}
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Active Toggle -->
+      <!-- ⑦ Active toggle -->
       <div class="admin-form__group">
         <label class="admin-checkbox">
           <input type="checkbox" [(ngModel)]="customIsActive">
-          <span>Active - Show on homepage</span>
+          <span>Active — Show on homepage</span>
         </label>
       </div>
 

@@ -31,10 +31,23 @@ export interface GallerySliderImage {
 }
 
 export interface CustomContentConfig {
+  // Background & layout
   backgroundImage?: string;
   backgroundColor?: string;
-  content?: string;
   template?: 'minimal' | 'dark' | 'image-overlay' | 'split';
+  minHeight?: string;
+  padding?: string;
+  verticalAlign?: 'top' | 'center' | 'bottom';
+  // Title
+  title?: string;
+  titleColor?: string;
+  titleAlign?: 'left' | 'center' | 'right';
+  // Description
+  description?: string;
+  descriptionColor?: string;
+  descriptionAlign?: 'left' | 'center' | 'right';
+  // Legacy rich-text fallback (kept for backward compatibility)
+  content?: string;
   textColor?: string;
   textAlign?: string;
 }
