@@ -8,6 +8,7 @@ import { LanguageService, Language } from '../../services/language.service';
 })
 export class LanguageSwitcherComponent implements OnInit {
   isOpen = false;
+  isScrolled = false;
   searchQuery = '';
   languages: Language[] = [];
   current: Language = { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧' };
@@ -43,6 +44,11 @@ export class LanguageSwitcherComponent implements OnInit {
     this.langService.setLanguage(code);
     this.isOpen = false;
     this.searchQuery = '';
+  }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    this.isScrolled = window.scrollY > 50;
   }
 
   @HostListener('document:click', ['$event'])
