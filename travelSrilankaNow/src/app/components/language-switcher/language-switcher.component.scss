@@ -27,16 +27,22 @@
     }
   }
 
-  // Scrolled navbar — dark text variant
-  .navbar.scrolled & &__trigger {
-    color: #1e3a5f;
-    background: rgba(30, 58, 95, 0.08);
-    border-color: rgba(30, 58, 95, 0.2);
+  // Scrolled state — matches nav-link scrolled color (#6B6762 warm-gray)
+  &__trigger.scrolled {
+    color: #6B6762;
+    background: rgba(107, 103, 98, 0.08);
+    border-color: rgba(107, 103, 98, 0.35);
     box-shadow: none;
+    text-shadow: none;
+
+    svg {
+      color: #6B6762;
+    }
 
     &:hover {
-      background: rgba(30, 58, 95, 0.14);
-      border-color: rgba(30, 58, 95, 0.35);
+      color: #0F2854;
+      background: rgba(30, 58, 95, 0.1);
+      border-color: rgba(30, 58, 95, 0.4);
     }
   }
 
