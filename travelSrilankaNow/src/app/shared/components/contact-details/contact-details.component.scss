@@ -1,0 +1,77 @@
+@import '../../../../styles/_variables';
+
+.contact-details {
+  margin-top: $spacing-xl;
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $primary-navy-dark;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 2px solid $primary-sky;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: $white;
+  background-color: var(--contact-color, #64748b);
+  border: none;
+  user-select: none;
+  min-height: 36px;
+
+  &:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &--wechat {
+    cursor: default;
+    background-color: var(--contact-color, #07c160);
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
+    }
+  }
+
+  &__label {
+    white-space: nowrap;
+  }
+}

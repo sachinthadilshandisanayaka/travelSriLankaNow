@@ -1,0 +1,100 @@
+<div class="contact-mgr">
+  <div class="contact-mgr__header">
+    <h4 class="contact-mgr__title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.05 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+      </svg>
+      Contact Details
+    </h4>
+    <button class="admin-btn admin-btn--primary admin-btn--sm" (click)="openAddForm()" *ngIf="!showAddForm">
+      + Add Contact
+    </button>
+  </div>
+
+  <div *ngIf="successMsg" class="contact-alert contact-alert--success">{{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="contact-alert contact-alert--error">{{ errorMsg }}</div>
+
+  <!-- Add form -->
+  <div *ngIf="showAddForm" class="contact-form">
+    <h5 class="contact-form__title">New Contact</h5>
+    <div class="contact-form__row">
+      <div class="contact-form__field">
+        <label>Type</label>
+        <select [(ngModel)]="newContact.contactType" class="admin-select">
+          <option *ngFor="let t of allTypes" [value]="t">{{ getTypeLabel(t) }}</option>
+        </select>
+      </div>
+      <div class="contact-form__field contact-form__field--grow">
+        <label>Value <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="newContact.value" class="admin-input"
+               [placeholder]="newContact.contactType === 'PHONE' || newContact.contactType === 'WHATSAPP' ? '+94771234567' :
+                              newContact.contactType === 'EMAIL' ? 'email@example.com' :
+                              newContact.contactType === 'WEBSITE' ? 'https://example.com' :
+                              newContact.contactType === 'TELEGRAM' ? 'username or +94...' : 'username / handle'">
+      </div>
+      <div class="contact-form__field">
+        <label>Label (optional)</label>
+        <input type="text" [(ngModel)]="newContact.label" class="admin-input" placeholder="e.g. Reservations">
+      </div>
+      <div class="contact-form__field contact-form__field--narrow">
+        <label>Order</label>
+        <input type="number" [(ngModel)]="newContact.displayOrder" class="admin-input" min="0">
+      </div>
+    </div>
+    <div class="contact-form__actions">
+      <button class="admin-btn admin-btn--primary admin-btn--sm" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+      <button class="admin-btn admin-btn--ghost admin-btn--sm" (click)="cancelAdd()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div *ngIf="loading" class="contact-loading">Loading…</div>
+
+  <div *ngIf="!loading && contacts.length === 0 && !showAddForm" class="contact-empty">
+    No contact details yet. Click "+ Add Contact" to add one.
+  </div>
+
+  <div *ngIf="!loading && contacts.length > 0" class="contact-list">
+    <div *ngFor="let contact of contacts" class="contact-item" [class.contact-item--inactive]="!contact.isActive">
+
+      <!-- View row -->
+      <ng-container *ngIf="editingId !== contact.id">
+        <div class="contact-item__type-badge" [style.background]="typeMeta[contact.contactType].color">
+          {{ typeMeta[contact.contactType].label }}
+        </div>
+        <div class="contact-item__value">
+          <span class="contact-item__val">{{ contact.value }}</span>
+          <span *ngIf="contact.label" class="contact-item__label-tag">{{ contact.label }}</span>
+        </div>
+        <div class="contact-item__status">
+          <button class="toggle-btn" [class.toggle-btn--on]="contact.isActive" (click)="toggleActive(contact)"
+                  [title]="contact.isActive ? 'Active – click to deactivate' : 'Inactive – click to activate'">
+            <span class="toggle-btn__dot"></span>
+          </button>
+        </div>
+        <div class="contact-item__actions">
+          <button class="admin-btn admin-btn--ghost admin-btn--xs" (click)="startEdit(contact)">Edit</button>
+          <button class="admin-btn admin-btn--danger admin-btn--xs" (click)="delete(contact.id!)">Delete</button>
+        </div>
+      </ng-container>
+
+      <!-- Edit row -->
+      <ng-container *ngIf="editingId === contact.id">
+        <div class="contact-edit-row">
+          <select [(ngModel)]="editContact.contactType" class="admin-select admin-select--sm">
+            <option *ngFor="let t of allTypes" [value]="t">{{ getTypeLabel(t) }}</option>
+          </select>
+          <input type="text" [(ngModel)]="editContact.value" class="admin-input admin-input--sm" placeholder="Value">
+          <input type="text" [(ngModel)]="editContact.label" class="admin-input admin-input--sm" placeholder="Label (opt.)">
+          <input type="number" [(ngModel)]="editContact.displayOrder" class="admin-input admin-input--sm admin-input--narrow" min="0">
+          <button class="admin-btn admin-btn--primary admin-btn--xs" (click)="saveEdit(contact)" [disabled]="saving">
+            {{ saving ? '…' : 'Save' }}
+          </button>
+          <button class="admin-btn admin-btn--ghost admin-btn--xs" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

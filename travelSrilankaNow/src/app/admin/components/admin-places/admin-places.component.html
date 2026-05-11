@@ -456,6 +456,13 @@
         </div>
       </div>
 
+      <div *ngIf="isEditMode && placeForm.get('id')?.value" class="admin-modal__section">
+        <app-admin-contact-details
+          [entityType]="'PLACE'"
+          [entityId]="placeForm.get('id')?.value">
+        </app-admin-contact-details>
+      </div>
+
       <div class="admin-modal__footer">
         <button type="button" class="admin-btn admin-btn--secondary" (click)="closeModal()">Cancel</button>
         <button type="submit" class="admin-btn admin-btn--primary" [disabled]="placeForm.invalid || isLoading">

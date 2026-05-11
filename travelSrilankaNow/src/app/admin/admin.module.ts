@@ -20,6 +20,8 @@ import { AdminHomepageSectionsComponent } from './components/admin-homepage-sect
 import { AdminLayoutComponent } from './components/admin-layout/admin-layout.component';
 import { AdminMoreSectionsComponent } from './components/admin-more-sections/admin-more-sections.component';
 import { AdminProfileComponent } from './components/admin-profile/admin-profile.component';
+import { AdminNavConfigComponent } from './components/admin-nav-config/admin-nav-config.component';
+import { AdminContactDetailsComponent } from './components/admin-contact-details/admin-contact-details.component';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -55,7 +57,9 @@ import { MediaService } from './services/media.service';
     // New Advanced Upload Components
     AdvancedImageUploadComponent,
     ImageEditorComponent,
-    EntityImageManagerComponent
+    EntityImageManagerComponent,
+    AdminNavConfigComponent,
+    AdminContactDetailsComponent
   ],
   imports: [
     CommonModule,

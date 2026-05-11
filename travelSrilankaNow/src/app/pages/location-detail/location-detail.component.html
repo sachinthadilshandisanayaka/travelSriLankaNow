@@ -43,6 +43,9 @@
             <p class="description">{{ location.description }}</p>
           </section>
 
+          <!-- Contact Details -->
+          <app-contact-details [entityType]="'LOCATION'" [entityId]="location.id"></app-contact-details>
+
           <!-- Highlights Section -->
           <section class="detail-section" *ngIf="location.highlights && location.highlights.length > 0">
             <h2>Highlights</h2>
