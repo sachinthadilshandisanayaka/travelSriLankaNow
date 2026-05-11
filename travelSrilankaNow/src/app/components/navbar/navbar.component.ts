@@ -1,7 +1,18 @@
 import { Component, OnInit, HostListener, Renderer2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { MoreSectionService } from '../../services/more-section.service';
+import { NavConfigService } from '../../services/nav-config.service';
 import { MoreSection } from '../../models/more-section.model';
+import { NavConfig } from '../../models/nav-config.model';
+
+// Fallback nav links used if API is unavailable
+const FALLBACK_NAV: NavConfig[] = [
+  { routePath: '/',          labelKey: 'nav.home',      displayOrder: 1, isVisible: true, isFixed: true  },
+  { routePath: '/locations', labelKey: 'nav.locations', displayOrder: 2, isVisible: true, isFixed: false },
+  { routePath: '/events',    labelKey: 'nav.events',    displayOrder: 3, isVisible: true, isFixed: false },
+  { routePath: '/gallery',   labelKey: 'nav.gallery',   displayOrder: 4, isVisible: true, isFixed: false },
+  { routePath: '/places',    labelKey: 'nav.places',    displayOrder: 5, isVisible: true, isFixed: false },
+];
 
 @Component({
   selector: 'app-navbar',
@@ -13,24 +24,26 @@ export class NavbarComponent implements OnInit {
   isScrolled = false;
   isMoreOpen = false;
 
-  navLinks = [
-    { path: '/', label: 'Home', key: 'nav.home' },
-    { path: '/locations', label: 'Locations', key: 'nav.locations' },
-    { path: '/events', label: 'Events', key: 'nav.events' },
-    { path: '/gallery', label: 'Gallery', key: 'nav.gallery' },
-    { path: '/places', label: 'Hotels & Restaurants', key: 'nav.places' }
-  ];
-
+  navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
 
   constructor(
     private moreSectionService: MoreSectionService,
+    private navConfigService: NavConfigService,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
+    this.loadNavConfig();
     this.loadMoreSections();
+  }
+
+  private loadNavConfig(): void {
+    this.navConfigService.getVisibleNavLinks().subscribe({
+      next: (links) => { if (links.length) this.navLinks = links; },
+      error: () => { /* keep fallback */ }
+    });
   }
 
   private loadMoreSections(): void {
@@ -38,6 +51,10 @@ export class NavbarComponent implements OnInit {
       next: (sections) => this.moreSections = sections,
       error: () => this.moreSections = []
     });
+  }
+
+  getNavLabel(link: NavConfig): string {
+    return link.labelOverride || '';
   }
 
   @HostListener('window:scroll', [])

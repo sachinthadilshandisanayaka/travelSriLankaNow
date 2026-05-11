@@ -25,6 +25,7 @@ import { TranslatePipe } from './pipes/translate.pipe';
 import { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
+import { ContactDetailsComponent } from './shared/components/contact-details/contact-details.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { LanguageSwitcherComponent } from './components/language-switcher/langua
     TranslatePipe,
     PageHeaderComponent,
     ImageLightboxComponent,
-    LanguageSwitcherComponent
+    LanguageSwitcherComponent,
+    ContactDetailsComponent
   ],
   imports: [
     BrowserModule,
