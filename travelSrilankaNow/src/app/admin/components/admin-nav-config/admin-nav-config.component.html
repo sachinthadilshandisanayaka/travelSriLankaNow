@@ -1,0 +1,93 @@
+<div class="admin-page">
+  <div class="admin-page__header">
+    <div>
+      <h2 class="admin-page__title">Navigation Bar</h2>
+      <p class="admin-page__subtitle">Control which links appear in the navbar and their display names.</p>
+    </div>
+  </div>
+
+  <div *ngIf="successMsg" class="admin-alert admin-alert--success">{{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="admin-alert admin-alert--error">{{ errorMsg }}</div>
+
+  <div *ngIf="loading" class="admin-loading">Loading…</div>
+
+  <div *ngIf="!loading" class="nav-table-card">
+    <table class="nav-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Route</th>
+          <th>Default Key</th>
+          <th>Display Name Override</th>
+          <th>Visible</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let link of navLinks; let i = index" [class.nav-row--hidden]="!link.isVisible">
+
+          <!-- Order controls -->
+          <td class="nav-cell--order">
+            <button class="order-btn" (click)="moveUp(i)" [disabled]="i === 0" title="Move up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+            </button>
+            <span class="order-num">{{ link.displayOrder }}</span>
+            <button class="order-btn" (click)="moveDown(i)" [disabled]="i === navLinks.length - 1" title="Move down">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </td>
+
+          <!-- Route -->
+          <td><code class="nav-route">{{ link.routePath }}</code></td>
+
+          <!-- Default translation key -->
+          <td><span class="nav-key">{{ link.labelKey }}</span></td>
+
+          <!-- Editable label override -->
+          <td>
+            <div *ngIf="editingId !== link.id" class="nav-label-display">
+              <span *ngIf="link.labelOverride" class="nav-override">{{ link.labelOverride }}</span>
+              <span *ngIf="!link.labelOverride" class="nav-default-hint">— using translation key —</span>
+              <button class="admin-btn admin-btn--xs admin-btn--ghost" (click)="startEdit(link)">Edit</button>
+            </div>
+            <div *ngIf="editingId === link.id" class="nav-label-edit">
+              <input type="text" class="admin-input admin-input--sm"
+                     [(ngModel)]="editLabel"
+                     placeholder="Custom label (leave blank to use key)"
+                     (keyup.enter)="saveLabel(link)"
+                     (keyup.escape)="cancelEdit()">
+              <button class="admin-btn admin-btn--primary admin-btn--xs" (click)="saveLabel(link)" [disabled]="saving">Save</button>
+              <button class="admin-btn admin-btn--ghost admin-btn--xs" (click)="cancelEdit()">Cancel</button>
+            </div>
+          </td>
+
+          <!-- Visibility toggle -->
+          <td>
+            <button class="toggle-btn"
+                    [class.toggle-btn--on]="link.isVisible"
+                    [disabled]="link.isFixed"
+                    (click)="toggleVisibility(link)"
+                    [title]="link.isFixed ? 'This item cannot be hidden' : (link.isVisible ? 'Click to hide' : 'Click to show')">
+              <span class="toggle-btn__dot"></span>
+            </button>
+            <span *ngIf="link.isFixed" class="nav-fixed-badge">fixed</span>
+          </td>
+
+          <!-- Status info -->
+          <td>
+            <span class="status-chip" [class.status-chip--active]="link.isVisible" [class.status-chip--inactive]="!link.isVisible">
+              {{ link.isVisible ? 'Visible' : 'Hidden' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="nav-help">
+      <strong>Display Name Override</strong>: if set, this text is shown in the navbar instead of the translation key value.
+      Leave blank to continue using the multi-language translation.
+      <br>
+      <strong>Fixed</strong> items (e.g. Home) cannot be hidden.
+    </p>
+  </div>
+</div>

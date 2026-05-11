@@ -44,6 +44,9 @@
             <p class="description">{{ event.description }}</p>
           </section>
 
+          <!-- Contact Details -->
+          <app-contact-details [entityType]="'EVENT'" [entityId]="event.id"></app-contact-details>
+
           <!-- What's Included Section -->
           <section class="detail-section" *ngIf="event.included && event.included.length > 0">
             <h2>What's Included</h2>

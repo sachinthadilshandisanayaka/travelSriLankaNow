@@ -43,6 +43,9 @@
             <p class="description">{{ place.description }}</p>
           </section>
 
+          <!-- Contact Details -->
+          <app-contact-details [entityType]="'PLACE'" [entityId]="place.id"></app-contact-details>
+
           <!-- Cuisine Section (for restaurants/cafes) -->
           <section class="detail-section" *ngIf="place.cuisine && place.cuisine.length > 0">
             <h2>Cuisine</h2>
