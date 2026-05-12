@@ -167,7 +167,7 @@ $navbar-height: 80px;
 .container {
   max-width: $container-max-width;
   margin: 0 auto;
-  padding: $spacing-4xl $spacing-2xl;
+  padding: $spacing-4xl $spacing-2xl 8rem;
 }
 
 .content-grid {
@@ -372,6 +372,7 @@ $navbar-height: 80px;
     box-shadow: $shadow-lg;
     position: sticky;
     top: $spacing-2xl;
+    bottom: $spacing-2xl;
 
     h3 {
       color: $primary-navy-dark;
