@@ -17,7 +17,13 @@ public class AdminEventController {
     private final EventService eventService;
 
     @GetMapping("/paginated")
-    public ResponseEntity<Page<Event>> getEventsPaginated(Pageable pageable) {
+    public ResponseEntity<Page<Event>> getEventsPaginated(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
+            Pageable pageable) {
+        if ((search != null && !search.isBlank()) || (category != null && !category.isBlank())) {
+            return ResponseEntity.ok(eventService.getEventsPaginatedWithFilter(search, category, pageable));
+        }
         return ResponseEntity.ok(eventService.getEventsPaginated(pageable));
     }
 

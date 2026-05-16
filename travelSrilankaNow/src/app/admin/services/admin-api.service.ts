@@ -30,13 +30,15 @@ export class AdminApiService {
   constructor(private http: HttpClient) {}
 
   // Locations
-  getLocations(page: number = 0, size: number = 10, sort: string = 'name,asc'): Observable<PageResponse<any>> {
+  getLocations(page: number = 0, size: number = 10, sort: string = 'name,asc',
+               search?: string, category?: string, region?: string): Observable<PageResponse<any>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
-    if (sort) {
-      params = params.set('sort', sort);
-    }
+    if (sort) params = params.set('sort', sort);
+    if (search) params = params.set('search', search);
+    if (category) params = params.set('category', category);
+    if (region) params = params.set('region', region);
     return this.http.get<PageResponse<any>>(`${this.apiUrl}/locations/paginated`, { params });
   }
 
@@ -57,13 +59,14 @@ export class AdminApiService {
   }
 
   // Events
-  getEvents(page: number = 0, size: number = 10, sort: string = 'title,asc'): Observable<PageResponse<any>> {
+  getEvents(page: number = 0, size: number = 10, sort: string = 'title,asc',
+            search?: string, category?: string): Observable<PageResponse<any>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
-    if (sort) {
-      params = params.set('sort', sort);
-    }
+    if (sort) params = params.set('sort', sort);
+    if (search) params = params.set('search', search);
+    if (category) params = params.set('category', category);
     return this.http.get<PageResponse<any>>(`${this.apiUrl}/events/paginated`, { params });
   }
 
@@ -84,13 +87,15 @@ export class AdminApiService {
   }
 
   // Places
-  getPlaces(page: number = 0, size: number = 10, sort: string = 'name,asc'): Observable<PageResponse<any>> {
+  getPlaces(page: number = 0, size: number = 10, sort: string = 'name,asc',
+            search?: string, type?: string, priceRange?: string): Observable<PageResponse<any>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
-    if (sort) {
-      params = params.set('sort', sort);
-    }
+    if (sort) params = params.set('sort', sort);
+    if (search) params = params.set('search', search);
+    if (type) params = params.set('type', type);
+    if (priceRange) params = params.set('priceRange', priceRange);
     return this.http.get<PageResponse<any>>(`${this.apiUrl}/places/paginated`, { params });
   }
 

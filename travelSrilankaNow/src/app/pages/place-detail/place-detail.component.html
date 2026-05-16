@@ -164,7 +164,7 @@
             </div>
 
             <div class="action-buttons">
-              <button class="btn-primary btn-block">
+              <button class="btn-primary btn-block" (click)="openReservationModal()">
                 <span>Make Reservation</span>
                 <span class="btn-shine"></span>
                 <span class="btn-corner btn-corner--tl"></span>
@@ -177,5 +177,231 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Reservation Modal -->
+<div class="reservation-overlay" *ngIf="showReservationModal" (click)="closeReservationModal()">
+  <div class="reservation-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="reservation-modal__header">
+      <div>
+        <h3>{{ reservationStep === 'success' ? 'Request Sent!' : reservationModalTitle }}</h3>
+        <p *ngIf="reservationStep === 'form'">{{ place?.name }}</p>
+        <p *ngIf="reservationStep === 'auth'" class="res-auth-subtitle">Sign in or create an account to make a reservation at <strong>{{ place?.name }}</strong></p>
+      </div>
+      <button class="reservation-modal__close" (click)="closeReservationModal()">✕</button>
+    </div>
+
+    <!-- ── AUTH STEP ────────────────────────────────────── -->
+    <div *ngIf="reservationStep === 'auth'" class="reservation-modal__body">
+
+      <!-- Tab switcher -->
+      <div class="res-auth-tabs">
+        <button class="res-auth-tab" [class.res-auth-tab--active]="authTab === 'login'" (click)="switchAuthTab('login')">Sign In</button>
+        <button class="res-auth-tab" [class.res-auth-tab--active]="authTab === 'register'" (click)="switchAuthTab('register')">Create Account</button>
+      </div>
+
+      <div class="reservation-error" *ngIf="authError">{{ authError }}</div>
+
+      <!-- Sign In Form -->
+      <ng-container *ngIf="authTab === 'login'">
+        <div class="res-form-group">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="authUsername" placeholder="Your username" autocomplete="username">
+        </div>
+        <div class="res-form-group">
+          <label>Password <span class="req">*</span></label>
+          <input type="password" [(ngModel)]="authPassword" placeholder="Your password" autocomplete="current-password"
+                 (keydown.enter)="loginInline()">
+        </div>
+        <p class="res-auth-switch">Don't have an account? <a (click)="switchAuthTab('register')">Create one</a></p>
+      </ng-container>
+
+      <!-- Register Form -->
+      <ng-container *ngIf="authTab === 'register'">
+        <div class="res-form-row">
+          <div class="res-form-group">
+            <label>First Name</label>
+            <input type="text" [(ngModel)]="authFirstName" placeholder="First name">
+          </div>
+          <div class="res-form-group">
+            <label>Last Name</label>
+            <input type="text" [(ngModel)]="authLastName" placeholder="Last name">
+          </div>
+        </div>
+        <div class="res-form-group">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="authUsername" placeholder="Choose a username" autocomplete="username">
+        </div>
+        <div class="res-form-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" [(ngModel)]="authEmail" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="res-form-group">
+          <label>Phone Number</label>
+          <input type="tel" [(ngModel)]="authPhone" placeholder="+94 77 000 0000">
+        </div>
+        <div class="res-form-row">
+          <div class="res-form-group">
+            <label>Password <span class="req">*</span></label>
+            <input type="password" [(ngModel)]="authPassword" placeholder="Min 6 characters" autocomplete="new-password">
+          </div>
+          <div class="res-form-group">
+            <label>Confirm Password <span class="req">*</span></label>
+            <input type="password" [(ngModel)]="authConfirmPassword" placeholder="Repeat password" autocomplete="new-password">
+          </div>
+        </div>
+        <p class="res-auth-switch">Already have an account? <a (click)="switchAuthTab('login')">Sign in</a></p>
+      </ng-container>
+
+      <!-- Direct contact strip -->
+      <div class="res-contact-strip" *ngIf="place?.contact?.phone || place?.contact?.website">
+        <span class="res-contact-strip__label">Or contact directly:</span>
+        <a *ngIf="place?.contact?.phone" [href]="'tel:' + place!.contact.phone" class="res-contact-btn">
+          📞 {{ place!.contact.phone }}
+        </a>
+        <a *ngIf="place?.contact?.website" [href]="place!.contact.website" target="_blank" class="res-contact-btn">
+          🌐 Visit Website
+        </a>
+      </div>
+    </div>
+
+    <!-- Auth Footer -->
+    <div class="reservation-modal__footer" *ngIf="reservationStep === 'auth'">
+      <button class="res-cancel-btn" (click)="closeReservationModal()" [disabled]="authLoading">Cancel</button>
+      <button class="btn-primary" (click)="authTab === 'login' ? loginInline() : registerInline()" [disabled]="authLoading">
+        <span *ngIf="!authLoading">{{ authTab === 'login' ? 'Sign In' : 'Create Account' }}</span>
+        <span *ngIf="authLoading" class="res-spinner"></span>
+      </button>
+    </div>
+
+    <!-- ── SUCCESS STEP ──────────────────────────────────── -->
+    <div *ngIf="reservationStep === 'success'" class="reservation-success">
+      <div class="reservation-success__icon">✅</div>
+      <h4>We got your request!</h4>
+      <p>Thank you, <strong>{{ reservation.visitorName }}</strong>. We'll confirm your reservation at <strong>{{ place?.name }}</strong> and get back to you at <strong>{{ reservation.email }}</strong> shortly.</p>
+      <button class="btn-primary" (click)="closeReservationModal()">Done</button>
+    </div>
+
+    <!-- ── FORM STEP ─────────────────────────────────────── -->
+    <div *ngIf="reservationStep === 'form'" class="reservation-modal__body">
+
+      <div class="reservation-error" *ngIf="reservationError">{{ reservationError }}</div>
+
+      <!-- Contact Info -->
+      <div class="res-section-label">Your Details</div>
+      <div class="res-form-row">
+        <div class="res-form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="reservation.visitorName" placeholder="Your full name">
+        </div>
+        <div class="res-form-group">
+          <label>Phone</label>
+          <input type="tel" [(ngModel)]="reservation.phone" placeholder="+94 77 000 0000">
+        </div>
+      </div>
+      <div class="res-form-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" [(ngModel)]="reservation.email" placeholder="your@email.com">
+      </div>
+
+      <!-- Accommodation fields -->
+      <ng-container *ngIf="isAccommodation">
+        <div class="res-section-label">Stay Details</div>
+        <div class="res-form-group">
+          <label>Check-in & Check-out Dates <span class="req">*</span></label>
+          <app-date-range-picker
+            mode="range"
+            [minDate]="todayDate"
+            [startDate]="reservation.checkInDate"
+            [endDate]="reservation.checkOutDate"
+            placeholder="Select check-in & check-out dates"
+            (apply)="onStayDatesApply($event)">
+          </app-date-range-picker>
+        </div>
+        <div class="res-form-group res-form-group--sm">
+          <label>Number of Guests</label>
+          <input type="number" [(ngModel)]="reservation.partySize" min="1" max="20">
+        </div>
+      </ng-container>
+
+      <!-- Dining fields -->
+      <ng-container *ngIf="isDining">
+        <div class="res-section-label">Booking Details</div>
+        <div class="res-form-row">
+          <div class="res-form-group">
+            <label>Date of Visit <span class="req">*</span></label>
+            <app-date-range-picker
+              mode="single"
+              [minDate]="todayDate"
+              [startDate]="reservation.visitDate"
+              placeholder="Select visit date"
+              (apply)="onVisitDateApply($event)">
+            </app-date-range-picker>
+          </div>
+          <div class="res-form-group">
+            <label>Preferred Time</label>
+            <select [(ngModel)]="reservation.preferredTime" class="res-select">
+              <option value="">Select time</option>
+              <option *ngFor="let t of TIME_SLOTS" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="res-form-group res-form-group--sm">
+          <label>Party Size</label>
+          <input type="number" [(ngModel)]="reservation.partySize" min="1" max="50">
+        </div>
+      </ng-container>
+
+      <!-- Generic date (other place types) -->
+      <ng-container *ngIf="!isAccommodation && !isDining">
+        <div class="res-section-label">Visit Details</div>
+        <div class="res-form-row">
+          <div class="res-form-group">
+            <label>Preferred Date</label>
+            <app-date-range-picker
+              mode="single"
+              [minDate]="todayDate"
+              [startDate]="reservation.visitDate"
+              placeholder="Select preferred date"
+              (apply)="onVisitDateApply($event)">
+            </app-date-range-picker>
+          </div>
+          <div class="res-form-group res-form-group--sm">
+            <label>Party Size</label>
+            <input type="number" [(ngModel)]="reservation.partySize" min="1" max="50">
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="res-form-group">
+        <label>Special Requests</label>
+        <textarea [(ngModel)]="reservation.message" rows="3"
+                  placeholder="Dietary needs, room preferences, accessibility requirements..."></textarea>
+      </div>
+
+      <!-- Quick contact strip -->
+      <div class="res-contact-strip" *ngIf="place?.contact?.phone || place?.contact?.website">
+        <span class="res-contact-strip__label">Or contact directly:</span>
+        <a *ngIf="place?.contact?.phone" [href]="'tel:' + place!.contact.phone" class="res-contact-btn">
+          📞 {{ place!.contact.phone }}
+        </a>
+        <a *ngIf="place?.contact?.website" [href]="place!.contact.website" target="_blank" class="res-contact-btn">
+          🌐 Visit Website
+        </a>
+      </div>
+    </div>
+
+    <!-- Form Footer -->
+    <div class="reservation-modal__footer" *ngIf="reservationStep === 'form'">
+      <button class="res-cancel-btn" (click)="closeReservationModal()" [disabled]="reservationLoading">Cancel</button>
+      <button class="btn-primary" (click)="submitReservation()" [disabled]="reservationLoading">
+        <span *ngIf="!reservationLoading">Send Request</span>
+        <span *ngIf="reservationLoading" class="res-spinner"></span>
+      </button>
+    </div>
+
   </div>
 </div>

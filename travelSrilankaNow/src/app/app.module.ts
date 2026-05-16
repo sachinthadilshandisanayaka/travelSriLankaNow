@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './admin/interceptors/auth.interceptor';
+import { CustomerAuthInterceptor } from './interceptors/customer-auth.interceptor';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -26,6 +27,10 @@ import { PageHeaderComponent } from './shared/components/page-header/page-header
 import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
 import { ContactDetailsComponent } from './shared/components/contact-details/contact-details.component';
+import { AuthLoginComponent } from './pages/auth/auth-login.component';
+import { AuthRegisterComponent } from './pages/auth/auth-register.component';
+import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -49,21 +54,22 @@ import { ContactDetailsComponent } from './shared/components/contact-details/con
     PageHeaderComponent,
     ImageLightboxComponent,
     LanguageSwitcherComponent,
-    ContactDetailsComponent
+    ContactDetailsComponent,
+    AuthLoginComponent,
+    AuthRegisterComponent,
+    MyBookingsComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    SharedModule
   ],
   providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: CustomerAuthInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

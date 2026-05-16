@@ -21,11 +21,21 @@ public class AdminAuthController {
     public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody AuthenticationRequest request) {
         AuthenticationResponse response = authenticationService.authenticate(request);
 
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else {
+        if (!response.isSuccess()) {
             return ResponseEntity.status(401).body(response);
         }
+
+        // Only ADMIN users may access the admin panel
+        if (!"ADMIN".equals(response.getRole())) {
+            return ResponseEntity.status(403).body(
+                AuthenticationResponse.builder()
+                    .success(false)
+                    .message("Access denied. Admin credentials required.")
+                    .build()
+            );
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refresh")

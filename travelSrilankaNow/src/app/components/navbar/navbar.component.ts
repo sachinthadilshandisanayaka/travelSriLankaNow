@@ -1,7 +1,10 @@
-import { Component, OnInit, HostListener, Renderer2, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, Renderer2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { MoreSectionService } from '../../services/more-section.service';
 import { NavConfigService } from '../../services/nav-config.service';
+import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.service';
 import { MoreSection } from '../../models/more-section.model';
 import { NavConfig } from '../../models/nav-config.model';
 
@@ -19,24 +22,37 @@ const FALLBACK_NAV: NavConfig[] = [
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
   isScrolled = false;
   isMoreOpen = false;
+  isUserMenuOpen = false;
+  currentUser: CustomerUser | null = null;
 
   navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
 
+  private userSub?: Subscription;
+
   constructor(
     private moreSectionService: MoreSectionService,
     private navConfigService: NavConfigService,
+    private customerAuthService: CustomerAuthService,
     private renderer: Renderer2,
+    private router: Router,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
     this.loadNavConfig();
     this.loadMoreSections();
+    this.userSub = this.customerAuthService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.userSub?.unsubscribe();
   }
 
   private loadNavConfig(): void {
@@ -65,9 +81,8 @@ export class NavbarComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.more-dropdown')) {
-      this.isMoreOpen = false;
-    }
+    if (!target.closest('.more-dropdown')) this.isMoreOpen = false;
+    if (!target.closest('.nav-user-menu')) this.isUserMenuOpen = false;
   }
 
   toggleMenu() {
@@ -78,7 +93,25 @@ export class NavbarComponent implements OnInit {
   closeMenu() {
     this.isMenuOpen = false;
     this.isMoreOpen = false;
+    this.isUserMenuOpen = false;
     this.updateBodyScroll();
+  }
+
+  toggleMore(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isMoreOpen = !this.isMoreOpen;
+  }
+
+  toggleUserMenu(event: Event) {
+    event.stopPropagation();
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  logout() {
+    this.customerAuthService.logout();
+    this.isUserMenuOpen = false;
+    this.router.navigate(['/']);
   }
 
   private updateBodyScroll(): void {
@@ -87,11 +120,5 @@ export class NavbarComponent implements OnInit {
     } else {
       this.renderer.removeClass(this.document.body, 'menu-open');
     }
-  }
-
-  toggleMore(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isMoreOpen = !this.isMoreOpen;
   }
 }

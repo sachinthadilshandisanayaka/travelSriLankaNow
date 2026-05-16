@@ -1,0 +1,941 @@
+@import '../../styles/admin-shared';
+
+// ===== Page layout =====
+.admin-bookings {
+  padding: 1.5rem;
+  max-width: 1400px;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $admin-navy-dark;
+    margin: 0 0 0.25rem;
+  }
+
+  p { color: $admin-gray-500; margin: 0; font-size: 0.875rem; }
+}
+
+// ===== View toggle =====
+.view-toggle {
+  display: flex;
+  border: 1.5px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  overflow: hidden;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: $admin-white;
+    border: none;
+    cursor: pointer;
+    color: $admin-gray-500;
+    transition: background 0.15s, color 0.15s;
+
+    &--active { background: $admin-navy; color: $admin-white; }
+    &:hover:not(&--active) { background: $admin-gray-100; }
+  }
+}
+
+// ===== Alerts =====
+.admin-alert {
+  padding: 0.75rem 1rem;
+  border-radius: $admin-radius;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &--success { background: $admin-success-light; color: darken($admin-success, 15%); }
+  &--error   { background: $admin-error-light;   color: darken($admin-error, 15%); }
+}
+
+// ===== Search Panel =====
+.search-panel {
+  background: $admin-white;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius-lg;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: $admin-shadow-sm;
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+
+  &__input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    max-width: 380px;
+
+    &--sm { min-width: 180px; max-width: 240px; flex: unset; }
+  }
+
+  &__icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px; height: 15px;
+    color: $admin-gray-400;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 2.1rem;
+    border: 1.5px solid $admin-gray-200;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    color: $admin-gray-700;
+    background: $admin-white;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+    &::placeholder { color: $admin-gray-400; }
+    &:focus { outline: none; border-color: $admin-navy; }
+  }
+
+  &__date {
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid $admin-gray-200;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    color: $admin-gray-700;
+    background: $admin-white;
+    &:focus { outline: none; border-color: $admin-navy; }
+  }
+
+  &__select {
+    padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+    border: 1.5px solid $admin-gray-200;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    color: $admin-gray-700;
+    background-color: $admin-white;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 1.1rem;
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: light;
+    cursor: pointer;
+
+    option {
+      background-color: #ffffff;
+      color: #374151;
+    }
+
+    &:focus { outline: none; border-color: $admin-navy; }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.2rem;
+    cursor: pointer;
+    color: $admin-gray-400;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    &:hover { color: $admin-gray-700; background: $admin-gray-100; }
+  }
+
+  &__adv-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.47rem 0.85rem;
+    border: 1.5px solid $admin-gray-200;
+    border-radius: $admin-radius;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: $admin-white;
+    color: $admin-gray-600;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+
+    &:hover { border-color: $admin-navy; color: $admin-navy; }
+    &--active { background: $admin-navy-light; border-color: $admin-navy; color: $admin-navy; }
+  }
+
+  &__adv-dot {
+    width: 7px; height: 7px;
+    background: $admin-navy;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 2px;
+  }
+
+  &__clear-all {
+    padding: 0.47rem 0.75rem;
+    border: none;
+    background: none;
+    font-size: 0.8rem;
+    color: $admin-gray-400;
+    cursor: pointer;
+    border-radius: $admin-radius;
+    &:hover { color: darken($admin-error, 10%); background: $admin-error-light; }
+  }
+
+  &__count {
+    font-size: 0.8rem;
+    color: $admin-gray-400;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  &__advanced {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-top: 0.875rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid $admin-gray-100;
+    flex-wrap: wrap;
+  }
+}
+
+.adv-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  &--wide {
+    flex: 1;
+    min-width: 260px;
+  }
+
+  &--hint {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: $admin-gray-400;
+    margin-bottom: 0.25rem;
+    align-self: flex-end;
+  }
+}
+
+.adv-filter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: $admin-gray-500;
+}
+
+// ===== Loading =====
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: $admin-gray-400;
+  font-size: 0.875rem;
+}
+
+.admin-spinner {
+  width: 24px; height: 24px;
+  border: 3px solid $admin-gray-200;
+  border-top-color: $admin-navy;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ===== Table =====
+.admin-table-wrap {
+  overflow-x: auto;
+  border-radius: $admin-radius-lg;
+  border: 1px solid $admin-gray-200;
+  box-shadow: $admin-shadow-sm;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $admin-white;
+  font-size: 0.875rem;
+
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $admin-gray-500;
+    background: $admin-gray-50;
+    border-bottom: 1px solid $admin-gray-200;
+  }
+
+  td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid $admin-gray-100;
+    color: $admin-gray-700;
+    vertical-align: middle;
+  }
+
+  &__row {
+    cursor: pointer;
+    transition: background 0.1s;
+    &:hover { background: $admin-gray-50; }
+    &:last-child td { border-bottom: none; }
+  }
+}
+
+.event-cell {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: $admin-navy-dark;
+}
+
+.participant-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  small { font-size: 0.75rem; color: $admin-gray-400; }
+}
+
+.price-cell { font-weight: 600; color: $admin-navy-dark; }
+
+.date-cell { font-size: 0.8rem; color: $admin-gray-500; white-space: nowrap; }
+
+.center { text-align: center; }
+
+.actions-cell {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+}
+
+.empty-row {
+  text-align: center;
+  color: $admin-gray-400;
+  padding: 2.5rem !important;
+}
+
+// ===== Pagination =====
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+}
+
+// ===== Booking reference chip =====
+.booking-ref {
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  background: $admin-navy-dark-light;
+  color: $admin-navy-dark;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+
+  &--lg { font-size: 0.9rem; padding: 4px 10px; display: block; margin-top: 4px; }
+}
+
+// ===== Status badges =====
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &--pending   { background: $admin-warning-light; color: darken($admin-warning, 20%); }
+  &--confirmed { background: $admin-sky-light; color: $admin-navy; }
+  &--completed { background: $admin-success-light; color: darken($admin-success, 15%); }
+  &--cancelled { background: $admin-error-light; color: darken($admin-error, 15%); }
+}
+
+// ===== Buttons =====
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: $admin-radius;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: $admin-gray-100;
+  color: $admin-gray-700;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover:not(:disabled) { background: $admin-gray-200; }
+
+  &--sm  { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+  &--xs  { padding: 0.25rem 0.6rem; font-size: 0.75rem; border-radius: 6px; }
+
+  &--active { background: $admin-navy; color: $admin-white; }
+
+  &--confirm  { background: $admin-navy; color: $admin-white;
+                &:hover:not(:disabled) { background: darken($admin-navy, 8%); } }
+  &--complete { background: $admin-success; color: $admin-white;
+                &:hover:not(:disabled) { background: darken($admin-success, 8%); } }
+  &--cancel   { background: $admin-error-light; color: darken($admin-error, 10%); border: 1px solid rgba($admin-error, 0.3);
+                &:hover:not(:disabled) { background: rgba($admin-error, 0.2); } }
+}
+
+// ===== Calendar view =====
+.calendar-view {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 380px;
+    align-items: start;
+  }
+}
+
+.calendar-panel {
+  background: $admin-white;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius-lg;
+  overflow: hidden;
+  box-shadow: $admin-shadow-sm;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: $admin-navy-dark;
+  color: $admin-white;
+
+  h3 { font-size: 1rem; font-weight: 600; margin: 0; }
+  button { color: $admin-white; background: rgba($admin-white, 0.15); border-color: transparent;
+           &:hover:not(:disabled) { background: rgba($admin-white, 0.25); color: $admin-white; } }
+}
+
+.cal-legend {
+  display: flex;
+  gap: 1rem;
+  padding: 0.6rem 1.25rem;
+  background: $admin-gray-50;
+  border-bottom: 1px solid $admin-gray-200;
+  flex-wrap: wrap;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: $admin-gray-500;
+
+    &::before {
+      content: '';
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    &--pending::before    { background: rgba($admin-warning, 0.25); border: 1.5px solid $admin-warning; }
+    &--confirmed::before  { background: rgba($admin-navy, 0.15); border: 1.5px solid $admin-navy; }
+    &--today::before      { background: $admin-navy; }
+  }
+}
+
+.cal-grid-wrap { padding: 1rem; color: $admin-gray-700; }
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.4rem;
+
+  span {
+    text-align: center;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: $admin-gray-500;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0;
+  }
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  color: $admin-gray-700;
+}
+
+.cal-cell {
+  min-height: 70px;
+  border-radius: $admin-radius;
+  padding: 0.35rem;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.1s;
+  background: $admin-gray-50;
+  border: 1.5px solid transparent;
+  position: relative;
+  color: $admin-gray-700;
+
+  &--empty { background: transparent; cursor: default; pointer-events: none; }
+  &--no-bookings { background: $admin-gray-50; &:hover { background: $admin-gray-100; } }
+  &--has-pending  { background: rgba($admin-warning, 0.1); border-color: rgba($admin-warning, 0.3);
+                    &:hover { box-shadow: 0 0 0 2px rgba($admin-warning, 0.4); } }
+  &--all-confirmed { background: rgba($admin-navy, 0.07); border-color: rgba($admin-navy, 0.2);
+                     &:hover { box-shadow: 0 0 0 2px rgba($admin-navy, 0.3); } }
+  &--today { border-color: $admin-navy !important; box-shadow: 0 0 0 2px rgba($admin-navy, 0.2); }
+  &--selected { border-color: $admin-navy !important; box-shadow: 0 0 0 3px rgba($admin-navy, 0.35); transform: scale(1.03); z-index: 1; }
+
+  &__day {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $admin-gray-700;
+    display: block;
+    line-height: 1;
+  }
+
+  &--today &__day { color: $admin-navy; }
+
+  &__counts { margin-top: 0.3rem; }
+  &__total  { font-size: 1.1rem; font-weight: 700; color: $admin-navy-dark; line-height: 1; display: block; }
+  &__pills  { display: flex; gap: 2px; margin-top: 3px; flex-wrap: wrap; }
+}
+
+.pill {
+  font-size: 0.62rem;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+
+  &--pending   { background: $admin-warning-light; color: darken($admin-warning, 25%); }
+  &--confirmed { background: $admin-navy-light; color: $admin-navy; }
+  &--completed { background: $admin-success-light; color: darken($admin-success, 15%); }
+}
+
+// ===== Day detail panel =====
+.cal-detail {
+  background: $admin-white;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius-lg;
+  overflow: hidden;
+  box-shadow: $admin-shadow-sm;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: $admin-gray-50;
+    border-bottom: 1px solid $admin-gray-200;
+
+    h4 { font-size: 0.9rem; font-weight: 600; color: $admin-navy-dark; margin: 0; }
+  }
+
+  &__count {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $admin-navy;
+    background: $admin-navy-light;
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+
+  &__empty {
+    padding: 2rem;
+    text-align: center;
+    color: $admin-gray-400;
+    font-size: 0.875rem;
+  }
+
+  &__list { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+}
+
+.cal-booking-item {
+  background: $admin-gray-50;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  padding: 0.75rem;
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-navy-dark;
+    margin-bottom: 0.35rem;
+  }
+
+  &__meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.78rem;
+    color: $admin-gray-500;
+    margin-bottom: 0.5rem;
+  }
+
+  &__actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+}
+
+// ===== Booking Detail Modal =====
+.bk-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.15s ease;
+}
+
+.bk-modal {
+  background: $admin-white;
+  border-radius: $admin-radius-xl;
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.2s ease;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid $admin-gray-100;
+    background: $admin-gray-50;
+    flex-shrink: 0;
+
+    &--pending   { background: #fffbeb; border-bottom-color: #fde68a; }
+    &--confirmed { background: #eff6ff; border-bottom-color: #bfdbfe; }
+    &--completed { background: #f0fdf4; border-bottom-color: #bbf7d0; }
+    &--cancelled { background: #fff1f2; border-bottom-color: #fecdd3; }
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__status-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $admin-navy-dark;
+    margin: 0 0 2px;
+  }
+
+  &__ref {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.07);
+    color: $admin-gray-600;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  &__close {
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $admin-gray-500;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+
+    &:hover { background: rgba(0, 0, 0, 0.12); color: $admin-gray-800; }
+  }
+
+  &__status-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    background: $admin-white;
+    border-bottom: 1px solid $admin-gray-100;
+    flex-shrink: 0;
+  }
+
+  &__payment-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: $admin-gray-100;
+    color: $admin-gray-500;
+
+    &--paid { background: #d1fae5; color: #065f46; }
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid $admin-gray-100;
+    background: $admin-gray-50;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  &__footer-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $admin-gray-500;
+    white-space: nowrap;
+  }
+
+  &__footer-btns {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  &__no-actions {
+    font-size: 0.8rem;
+    color: $admin-gray-400;
+    font-style: italic;
+  }
+}
+
+// Booking detail sections
+.bk-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+
+  &-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+
+    @media (max-width: 400px) { grid-template-columns: 1fr; }
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $admin-gray-400;
+
+    svg { flex-shrink: 0; }
+  }
+
+  &__value {
+    font-size: 0.875rem;
+    color: $admin-gray-800;
+
+    &--strong { font-weight: 600; color: $admin-navy-dark; }
+    &--price  { font-size: 1.1rem; font-weight: 700; color: $admin-navy-dark; }
+    &--note   {
+      background: $admin-gray-50;
+      border: 1px solid $admin-gray-200;
+      border-radius: $admin-radius;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      color: $admin-gray-600;
+      line-height: 1.5;
+    }
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+// ===== Confirmation Dialog =====
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+.confirm-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem 1.75rem 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: slideUp 0.2s ease;
+
+  &__icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 1.6rem;
+
+    &--success { background: #dcfce7; }
+    &--complete { background: #dbeafe; }
+    &--danger   { background: #fee2e2; }
+  }
+
+  &__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.5rem;
+  }
+
+  &__message {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 1.25rem;
+    line-height: 1.6;
+  }
+
+  &__meta {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+
+    .admin-btn {
+      flex: 1;
+      justify-content: center;
+      padding-top: 0.6rem;
+      padding-bottom: 0.6rem;
+    }
+
+    // Override ghost so it looks like a neutral secondary button in this context
+    .admin-btn--ghost {
+      border: 1.5px solid #e5e7eb !important;
+      border-radius: 8px !important;
+      color: #374151 !important;
+      background: #fff !important;
+      padding: 0.6rem 1rem !important;
+
+      &:hover { background: #f9fafb !important; border-color: #d1d5db !important; }
+    }
+  }
+}
+
+.confirm-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.confirm-meta-label {
+  font-weight: 600;
+  color: #374151;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.confirm-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

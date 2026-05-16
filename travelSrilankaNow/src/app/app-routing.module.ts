@@ -11,10 +11,16 @@ import { PlaceDetailComponent } from './pages/place-detail/place-detail.componen
 import { LandingSimpleComponent } from './pages/landing/landing-simple.component';
 import { MoreSectionDetailComponent } from './pages/more-section-detail/more-section-detail.component';
 import { MoreSectionItemDetailComponent } from './pages/more-section-item-detail/more-section-item-detail.component';
+import { AuthLoginComponent } from './pages/auth/auth-login.component';
+import { AuthRegisterComponent } from './pages/auth/auth-register.component';
+import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
 
 const routes: Routes = [
   { path: '', component: LandingComponent, data: { animation: 'HomePage' } },
   { path: 'test-simple', component: LandingSimpleComponent, data: { animation: 'TestPage' } },
+  { path: 'login', component: AuthLoginComponent },
+  { path: 'register', component: AuthRegisterComponent },
+  { path: 'my-bookings', component: MyBookingsComponent },
   { path: 'locations', component: LocationsComponent, data: { animation: 'LocationsPage' } },
   { path: 'locations/:id', component: LocationDetailComponent, data: { animation: 'LocationDetailPage' } },
   { path: 'gallery', component: GalleryComponent, data: { animation: 'GalleryPage' } },

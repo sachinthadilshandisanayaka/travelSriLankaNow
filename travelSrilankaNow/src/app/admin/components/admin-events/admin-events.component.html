@@ -45,6 +45,31 @@
       </svg>
     </div>
 
+    <!-- Search & Filter Bar -->
+    <div class="admin-search-bar">
+      <div class="admin-search-bar__input-wrap">
+        <svg class="admin-search-bar__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input
+          class="admin-search-bar__input"
+          type="text"
+          placeholder="Search by title, location..."
+          [value]="searchTerm"
+          (input)="onSearchChange($any($event.target).value)">
+        <button *ngIf="searchTerm" class="admin-search-bar__clear" (click)="clearSearch()" title="Clear">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <select class="admin-search-bar__select" [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat.code">{{ cat.displayName }}</option>
+      </select>
+      <span class="admin-search-bar__count">{{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}</span>
+    </div>
+
     <!-- Events Table -->
     <div *ngIf="!isLoading" class="admin-table">
       <div class="admin-table__wrapper">
@@ -275,6 +300,92 @@
           </div>
         </div>
 
+        <!-- Event Locations -->
+        <div class="admin-modal__section">
+          <div class="admin-section-header">
+            <div>
+              <h4 class="admin-section-header__title">📍 Event Locations</h4>
+              <p class="admin-section-header__hint">Add one location or multiple stops for journey-style events.</p>
+            </div>
+            <button type="button" class="admin-btn admin-btn--outline admin-btn--sm" (click)="addLocation()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Add Stop
+            </button>
+          </div>
+
+          <div class="location-list">
+            <div *ngIf="eventLocations.length === 0" class="location-list__empty">
+              No locations added — the "Location" field above will be used.
+            </div>
+
+            <div *ngFor="let loc of eventLocations; let i = index" class="location-row">
+              <div class="location-row__order">
+                <button type="button" class="admin-btn admin-btn--ghost admin-btn--xs" (click)="moveLocationUp(i)" [disabled]="i === 0" title="Move up">▲</button>
+                <span class="location-row__num">{{ i + 1 }}</span>
+                <button type="button" class="admin-btn admin-btn--ghost admin-btn--xs" (click)="moveLocationDown(i)" [disabled]="i === eventLocations.length - 1" title="Move down">▼</button>
+              </div>
+              <div class="location-row__fields">
+                <input type="text" class="admin-input" placeholder="Location name *" [(ngModel)]="loc.name" [ngModelOptions]="{standalone: true}">
+                <input type="text" class="admin-input" placeholder="Short description (optional)" [(ngModel)]="loc.description" [ngModelOptions]="{standalone: true}">
+                <input type="text" class="admin-input admin-input--sm" placeholder="Stay duration (e.g., 2 hours)" [(ngModel)]="loc.durationHere" [ngModelOptions]="{standalone: true}">
+              </div>
+              <button type="button" class="admin-btn admin-btn--ghost-danger admin-btn--xs" (click)="removeLocation(i)" title="Remove">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing Options -->
+        <div class="admin-modal__section">
+          <div class="admin-section-header">
+            <div>
+              <h4 class="admin-section-header__title">💰 Pricing Options</h4>
+              <p class="admin-section-header__hint">Define multi-currency, multi-type pricing. The primary price is highlighted to users.</p>
+            </div>
+            <button type="button" class="admin-btn admin-btn--outline admin-btn--sm" (click)="addPricing()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Add Pricing
+            </button>
+          </div>
+
+          <div class="pricing-list">
+            <div *ngIf="pricings.length === 0" class="pricing-list__empty">
+              No pricing options — the "Price (USD)" field above will be used.
+            </div>
+
+            <div *ngFor="let p of pricings; let i = index" class="pricing-row" [class.pricing-row--primary]="p.isPrimary">
+              <div class="pricing-row__fields">
+                <select class="admin-select admin-select--sm" [(ngModel)]="p.currencyCode" [ngModelOptions]="{standalone: true}">
+                  <option *ngFor="let c of currencies" [value]="c.code">{{ c.icon }} {{ c.code }} – {{ c.displayName }}</option>
+                  <option value="USD">$ USD</option>
+                </select>
+
+                <select class="admin-select admin-select--sm" [(ngModel)]="p.pricingType" [ngModelOptions]="{standalone: true}">
+                  <option *ngFor="let pt of pricingTypes" [value]="pt.value">{{ pt.label }}</option>
+                </select>
+
+                <input type="number" class="admin-input admin-input--sm" placeholder="Amount" min="0" step="0.01"
+                       [value]="p.amount" (input)="p.amount = +$any($event.target).value">
+
+                <input *ngIf="p.pricingType === 'GROUP'" type="number" class="admin-input admin-input--sm" placeholder="Min group size"
+                       min="2" [value]="p.groupSize" (input)="p.groupSize = +$any($event.target).value">
+
+                <input type="text" class="admin-input admin-input--sm" placeholder="Label (optional)" [(ngModel)]="p.label" [ngModelOptions]="{standalone: true}">
+              </div>
+              <div class="pricing-row__actions">
+                <label class="admin-checkbox admin-checkbox--sm" title="Set as primary price">
+                  <input type="radio" name="primaryPricing" [checked]="p.isPrimary" (change)="setPrimaryPricing(i)">
+                  <span>Primary</span>
+                </label>
+                <button type="button" class="admin-btn admin-btn--ghost-danger admin-btn--xs" (click)="removePricing(i)" title="Remove">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Dynamic Additional Details -->
         <div *ngIf="fieldDefinitions.length > 0" class="dynamic-fields">
           <div class="dynamic-fields__header">
@@ -295,19 +406,21 @@
                      (input)="additionalDetails[field.key] = +$any($event.target).value">
 
               <!-- date -->
-              <input *ngIf="field.type === 'date'" type="date" class="admin-input"
-                     [value]="additionalDetails[field.key] || ''"
-                     (input)="additionalDetails[field.key] = $any($event.target).value">
+              <app-date-range-picker *ngIf="field.type === 'date'"
+                mode="single"
+                [startDate]="additionalDetails[field.key] || ''"
+                (apply)="additionalDetails[field.key] = $event.start">
+              </app-date-range-picker>
 
               <!-- date_range -->
-              <div *ngIf="field.type === 'date_range'" class="range-inputs">
-                <input type="date" class="admin-input"
-                       [value]="additionalDetails[field.key]?.from || ''"
-                       (input)="additionalDetails[field.key] = {from: $any($event.target).value, to: additionalDetails[field.key]?.to || ''}">
-                <span class="range-separator">to</span>
-                <input type="date" class="admin-input"
-                       [value]="additionalDetails[field.key]?.to || ''"
-                       (input)="additionalDetails[field.key] = {from: additionalDetails[field.key]?.from || '', to: $any($event.target).value}">
+              <div *ngIf="field.type === 'date_range'">
+                <app-date-range-picker
+                  mode="range"
+                  [startDate]="additionalDetails[field.key]?.from || ''"
+                  [endDate]="additionalDetails[field.key]?.to || ''"
+                  placeholder="Select date range"
+                  (apply)="additionalDetails[field.key] = {from: $event.start, to: $event.end}">
+                </app-date-range-picker>
               </div>
 
               <!-- number_range -->

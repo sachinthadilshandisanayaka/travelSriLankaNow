@@ -108,3 +108,14 @@ img {
 img.ql-selected {
   outline: 2px solid #4f7ac7;
 }
+
+// ── Global native select fix ──────────────────────────────────────────────────
+// Component-scoped SCSS gets Angular view-encapsulation attributes, so it can
+// never reach the OS-level dropdown popup. These rules MUST live here.
+select {
+  color-scheme: light !important;
+}
+select option {
+  background-color: #ffffff !important;
+  color: #374151 !important;
+}

@@ -18,7 +18,7 @@ public class EventBookingDTO {
     @NotNull(message = "Event ID is required")
     private Long eventId;
 
-    @NotNull(message = "Event date ID is required")
+    // Optional – null when event has no specific dates
     private Long eventDateId;
 
     @NotBlank(message = "Participant name is required")

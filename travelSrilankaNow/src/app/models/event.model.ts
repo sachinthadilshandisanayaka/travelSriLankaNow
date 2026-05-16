@@ -1,3 +1,25 @@
+export type PricingType = 'PER_PERSON' | 'GROUP' | 'FULL_EVENT';
+
+export interface EventLocation {
+  id?: number;
+  locationRefId?: number;
+  name: string;
+  description?: string;
+  visitOrder: number;
+  durationHere?: string;
+}
+
+export interface EventPricing {
+  id?: number;
+  currencyCode: string;
+  amount: number;
+  pricingType: PricingType;
+  groupSize?: number;
+  label?: string;
+  isPrimary: boolean;
+  displayOrder: number;
+}
+
 export interface Event {
   id: number;
   title: string;
@@ -7,6 +29,8 @@ export interface Event {
   images: string[];
   category: 'cultural' | 'adventure' | 'food' | 'festival' | 'tour';
   location: string;
+  eventLocations: EventLocation[];
+  pricings: EventPricing[];
   dates: EventDate[];
   price: number;
   duration: string;

@@ -1,0 +1,456 @@
+<div class="admin-bookings">
+
+  <!-- Page Header -->
+  <div class="admin-page-header">
+    <div>
+      <h1>Bookings</h1>
+      <p>Manage and review all event bookings</p>
+    </div>
+    <div class="admin-page-header__actions">
+      <div class="view-toggle">
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="activeView === 'table'" (click)="switchView('table')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <rect x="3" y="3" width="18" height="5" rx="1"/><rect x="3" y="10" width="18" height="5" rx="1"/><rect x="3" y="17" width="18" height="5" rx="1"/>
+          </svg>
+          List
+        </button>
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="activeView === 'calendar'" (click)="switchView('calendar')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          Calendar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success / Error messages -->
+  <div class="admin-alert admin-alert--success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="admin-alert admin-alert--error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- ===== TABLE VIEW ===== -->
+  <div *ngIf="activeView === 'table'">
+    <!-- Search Panel -->
+    <div class="search-panel">
+      <!-- Quick search row -->
+      <div class="search-panel__top">
+        <div class="search-panel__input-wrap">
+          <svg class="search-panel__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+          <input class="search-panel__input" type="text" placeholder="Search by name, email or phone..."
+                 [value]="searchTerm"
+                 (input)="searchTerm = $any($event.target).value; onSearchInput()">
+          <button *ngIf="searchTerm" class="search-panel__clear" (click)="searchTerm = ''; onFilterChange()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <select class="search-panel__select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+          <option value="">All Statuses</option>
+          <option *ngFor="let s of STATUS_OPTIONS" [value]="s">{{ s | titlecase }}</option>
+        </select>
+        <button class="search-panel__adv-toggle"
+                [class.search-panel__adv-toggle--active]="showAdvancedFilters"
+                (click)="showAdvancedFilters = !showAdvancedFilters">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 4h18M7 8h10M11 12h2M11 16h2"/>
+          </svg>
+          Filters
+          <span *ngIf="hasActiveFilters" class="search-panel__adv-dot"></span>
+        </button>
+        <button *ngIf="hasActiveFilters" class="search-panel__clear-all" (click)="clearAllFilters()">
+          Clear all
+        </button>
+        <span class="search-panel__count">{{ totalElements }} booking{{ totalElements !== 1 ? 's' : '' }}</span>
+      </div>
+
+      <!-- Advanced filters row -->
+      <div class="search-panel__advanced" *ngIf="showAdvancedFilters">
+        <div class="adv-filter-group">
+          <label class="adv-filter-label">Booking Reference</label>
+          <div class="search-panel__input-wrap search-panel__input-wrap--sm">
+            <svg class="search-panel__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+            </svg>
+            <input class="search-panel__input" type="text" placeholder="TSL-202505-0001"
+                   [value]="searchReference"
+                   (input)="searchReference = $any($event.target).value; onSearchInput()">
+            <button *ngIf="searchReference" class="search-panel__clear" (click)="searchReference = ''; onFilterChange()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="adv-filter-group adv-filter-group--wide">
+          <label class="adv-filter-label">Booking Date Range</label>
+          <app-date-range-picker
+            mode="range"
+            [startDate]="dateFrom"
+            [endDate]="dateTo"
+            placeholder="Select date range"
+            (apply)="onDateRangeApply($event)"
+            (cancel)="onDateRangeCancel()">
+          </app-date-range-picker>
+        </div>
+        <div class="adv-filter-group adv-filter-group--hint">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <path stroke-linecap="round" stroke-width="2" d="M12 8v4M12 16h.01"/>
+          </svg>
+          Filters by booking creation date
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="admin-loading" *ngIf="isLoading">
+      <div class="admin-spinner"></div>
+      <span>Loading bookings...</span>
+    </div>
+
+    <!-- Table -->
+    <div class="admin-table-wrap" *ngIf="!isLoading">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Event</th>
+            <th>Participant</th>
+            <th>People</th>
+            <th>Total</th>
+            <th>Booked</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bookings" (click)="openDetail(b)" class="admin-table__row">
+            <td><code class="booking-ref">{{ b.bookingReference }}</code></td>
+            <td class="event-cell">{{ b.eventTitle }}</td>
+            <td>
+              <div class="participant-cell">
+                <span>{{ b.participantName }}</span>
+                <small>{{ b.email }}</small>
+              </div>
+            </td>
+            <td class="center">{{ b.numberOfPeople }}</td>
+            <td class="price-cell">${{ b.totalPrice | number:'1.0-2' }}</td>
+            <td class="date-cell">{{ formatDate(b.bookingDate) }}</td>
+            <td><span [class]="getStatusClass(b.status)">{{ b.status | titlecase }}</span></td>
+            <td class="actions-cell" (click)="$event.stopPropagation()">
+              <button class="admin-btn admin-btn--xs admin-btn--confirm"
+                      *ngIf="b.status === 'pending'"
+                      (click)="requestConfirm(b, 'confirmed')">Approve</button>
+              <button class="admin-btn admin-btn--xs admin-btn--complete"
+                      *ngIf="b.status === 'confirmed'"
+                      (click)="requestConfirm(b, 'completed')">Complete</button>
+              <button class="admin-btn admin-btn--xs admin-btn--cancel"
+                      *ngIf="b.status !== 'cancelled' && b.status !== 'completed'"
+                      (click)="requestConfirm(b, 'cancelled')">Cancel</button>
+            </td>
+          </tr>
+          <tr *ngIf="bookings.length === 0">
+            <td colspan="8" class="empty-row">No bookings found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="admin-pagination" *ngIf="totalPages > 1">
+      <button class="admin-btn admin-btn--sm" [disabled]="currentPage === 0" (click)="goToPage(0)">«</button>
+      <button class="admin-btn admin-btn--sm" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)">‹</button>
+      <button *ngFor="let p of pages"
+              class="admin-btn admin-btn--sm"
+              [class.admin-btn--active]="p === currentPage"
+              (click)="goToPage(p)">{{ p + 1 }}</button>
+      <button class="admin-btn admin-btn--sm" [disabled]="currentPage >= totalPages - 1" (click)="goToPage(currentPage + 1)">›</button>
+      <button class="admin-btn admin-btn--sm" [disabled]="currentPage >= totalPages - 1" (click)="goToPage(totalPages - 1)">»</button>
+    </div>
+  </div>
+
+  <!-- ===== CALENDAR VIEW ===== -->
+  <div *ngIf="activeView === 'calendar'" class="calendar-view">
+    <div class="calendar-panel">
+      <!-- Month navigation -->
+      <div class="cal-header">
+        <button class="admin-btn admin-btn--sm" (click)="calendarPrev()">&#8249;</button>
+        <h3>{{ calendarMonthLabel }}</h3>
+        <button class="admin-btn admin-btn--sm" (click)="calendarNext()">&#8250;</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="cal-legend">
+        <span class="cal-legend__item cal-legend__item--pending">Has Pending</span>
+        <span class="cal-legend__item cal-legend__item--confirmed">All Confirmed</span>
+        <span class="cal-legend__item cal-legend__item--today">Today</span>
+      </div>
+
+      <!-- Loading -->
+      <div class="admin-loading" *ngIf="calendarLoading">
+        <div class="admin-spinner"></div>
+      </div>
+
+      <!-- Calendar grid -->
+      <div class="cal-grid-wrap" *ngIf="!calendarLoading">
+        <!-- Weekday headers -->
+        <div class="cal-weekdays">
+          <span *ngFor="let d of WEEKDAYS">{{ d }}</span>
+        </div>
+        <!-- Day cells -->
+        <div class="cal-grid">
+          <div *ngFor="let day of calendarGrid"
+               [class]="getCalendarCellClass(day)"
+               (click)="selectCalendarDay(day)">
+            <ng-container *ngIf="day">
+              <span class="cal-cell__day">{{ +day.date.substring(8) }}</span>
+              <div class="cal-cell__counts" *ngIf="day.totalBookings > 0">
+                <span class="cal-cell__total">{{ day.totalBookings }}</span>
+                <div class="cal-cell__pills">
+                  <span class="pill pill--pending" *ngIf="day.pendingCount">{{ day.pendingCount }}p</span>
+                  <span class="pill pill--confirmed" *ngIf="day.confirmedCount">{{ day.confirmedCount }}c</span>
+                  <span class="pill pill--completed" *ngIf="day.completedCount">{{ day.completedCount }}✓</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day detail panel -->
+    <div class="cal-detail" *ngIf="calendarSelectedDay">
+      <div class="cal-detail__header">
+        <h4>{{ formatCalendarDate(calendarSelectedDay.date) }}</h4>
+        <span class="cal-detail__count">{{ calendarSelectedDay.totalBookings }} booking{{ calendarSelectedDay.totalBookings !== 1 ? 's' : '' }}</span>
+      </div>
+      <div class="cal-detail__empty" *ngIf="calendarSelectedDay.totalBookings === 0">
+        No bookings on this day.
+      </div>
+      <div class="cal-detail__list" *ngIf="calendarSelectedDay.totalBookings > 0">
+        <div *ngFor="let b of calendarSelectedDay.bookings" class="cal-booking-item">
+          <div class="cal-booking-item__top">
+            <code class="booking-ref">{{ b.bookingReference }}</code>
+            <span [class]="getStatusClass(b.status)">{{ b.status | titlecase }}</span>
+          </div>
+          <div class="cal-booking-item__title">{{ b.eventTitle }}</div>
+          <div class="cal-booking-item__meta">
+            <span>{{ b.participantName }}</span>
+            <span>{{ b.numberOfPeople }} pax</span>
+            <span>${{ b.totalPrice | number:'1.0-2' }}</span>
+          </div>
+          <div class="cal-booking-item__actions">
+            <button class="admin-btn admin-btn--xs admin-btn--confirm"
+                    *ngIf="b.status === 'pending'"
+                    [disabled]="statusUpdating"
+                    (click)="requestConfirm(b, 'confirmed')">Approve</button>
+            <button class="admin-btn admin-btn--xs admin-btn--complete"
+                    *ngIf="b.status === 'confirmed'"
+                    [disabled]="statusUpdating"
+                    (click)="requestConfirm(b, 'completed')">Complete</button>
+            <button class="admin-btn admin-btn--xs admin-btn--cancel"
+                    *ngIf="b.status !== 'cancelled' && b.status !== 'completed'"
+                    [disabled]="statusUpdating"
+                    (click)="requestConfirm(b, 'cancelled')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIRMATION DIALOG ===== -->
+<div class="confirm-overlay" *ngIf="showConfirmDialog" (click)="dismissConfirm()">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+
+    <div class="confirm-dialog__icon-wrap" [class.confirm-dialog__icon-wrap--danger]="confirmNewStatus === 'cancelled'"
+         [class.confirm-dialog__icon-wrap--success]="confirmNewStatus === 'confirmed'"
+         [class.confirm-dialog__icon-wrap--complete]="confirmNewStatus === 'completed'">
+      <span class="confirm-dialog__icon">{{ confirmIcon }}</span>
+    </div>
+
+    <h3 class="confirm-dialog__title">{{ confirmTitle }}</h3>
+    <p class="confirm-dialog__message">{{ confirmMessage }}</p>
+
+    <div class="confirm-dialog__meta" *ngIf="confirmBooking">
+      <div class="confirm-meta-row">
+        <span class="confirm-meta-label">Reference</span>
+        <code class="booking-ref">{{ confirmBooking.bookingReference }}</code>
+      </div>
+      <div class="confirm-meta-row">
+        <span class="confirm-meta-label">Participant</span>
+        <span>{{ confirmBooking.participantName }}</span>
+      </div>
+      <div class="confirm-meta-row">
+        <span class="confirm-meta-label">Event</span>
+        <span>{{ confirmBooking.eventTitle }}</span>
+      </div>
+    </div>
+
+    <div class="confirm-dialog__actions">
+      <button class="admin-btn admin-btn--ghost" (click)="dismissConfirm()" [disabled]="statusUpdating">
+        No, Go Back
+      </button>
+      <button [class]="confirmActionClass" (click)="executeConfirm()" [disabled]="statusUpdating">
+        <span *ngIf="!statusUpdating">Yes, {{ confirmTitle }}</span>
+        <span *ngIf="statusUpdating" class="confirm-spinner"></span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== BOOKING DETAIL MODAL ===== -->
+<div class="bk-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="bk-modal" (click)="$event.stopPropagation()" *ngIf="selectedBooking">
+
+    <!-- Header band coloured by status -->
+    <div class="bk-modal__header" [ngClass]="'bk-modal__header--' + selectedBooking.status">
+      <div class="bk-modal__header-left">
+        <div class="bk-modal__status-icon">
+          <span *ngIf="selectedBooking.status === 'pending'">⏳</span>
+          <span *ngIf="selectedBooking.status === 'confirmed'">✓</span>
+          <span *ngIf="selectedBooking.status === 'completed'">✅</span>
+          <span *ngIf="selectedBooking.status === 'cancelled'">✕</span>
+        </div>
+        <div>
+          <h3 class="bk-modal__title">Booking Details</h3>
+          <code class="bk-modal__ref">{{ selectedBooking.bookingReference }}</code>
+        </div>
+      </div>
+      <button class="bk-modal__close" (click)="closeDetail()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Status bar -->
+    <div class="bk-modal__status-bar">
+      <span [class]="getStatusClass(selectedBooking.status)">{{ selectedBooking.status | titlecase }}</span>
+      <span class="bk-modal__payment-tag" [class.bk-modal__payment-tag--paid]="selectedBooking.paymentStatus === 'PAID'">
+        {{ selectedBooking.paymentStatus | titlecase }}
+      </span>
+    </div>
+
+    <!-- Body -->
+    <div class="bk-modal__body">
+
+      <!-- Event section -->
+      <div class="bk-section">
+        <div class="bk-section__title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          Event
+        </div>
+        <div class="bk-section__value bk-section__value--strong">{{ selectedBooking.eventTitle }}</div>
+      </div>
+
+      <!-- Participant section -->
+      <div class="bk-section-group">
+        <div class="bk-section">
+          <div class="bk-section__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Participant
+          </div>
+          <div class="bk-section__value bk-section__value--strong">{{ selectedBooking.participantName }}</div>
+        </div>
+        <div class="bk-section">
+          <div class="bk-section__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+            People
+          </div>
+          <div class="bk-section__value">{{ selectedBooking.numberOfPeople }} person{{ selectedBooking.numberOfPeople !== 1 ? 's' : '' }}</div>
+        </div>
+      </div>
+
+      <!-- Contact section -->
+      <div class="bk-section-group">
+        <div class="bk-section">
+          <div class="bk-section__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Email
+          </div>
+          <div class="bk-section__value">{{ selectedBooking.email }}</div>
+        </div>
+        <div class="bk-section">
+          <div class="bk-section__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 .18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.09-1.26a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/>
+            </svg>
+            Phone
+          </div>
+          <div class="bk-section__value">{{ selectedBooking.phone }}</div>
+        </div>
+      </div>
+
+      <!-- Price and date -->
+      <div class="bk-section-group">
+        <div class="bk-section">
+          <div class="bk-section__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+            </svg>
+            Total Price
+          </div>
+          <div class="bk-section__value bk-section__value--price">${{ selectedBooking.totalPrice | number:'1.0-2' }}</div>
+        </div>
+        <div class="bk-section">
+          <div class="bk-section__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Booked On
+          </div>
+          <div class="bk-section__value">{{ formatDate(selectedBooking.bookingDate) }}</div>
+        </div>
+      </div>
+
+      <!-- Special requests -->
+      <div class="bk-section" *ngIf="selectedBooking.specialRequests">
+        <div class="bk-section__title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+          Special Requests
+        </div>
+        <div class="bk-section__value bk-section__value--note">{{ selectedBooking.specialRequests }}</div>
+      </div>
+
+    </div>
+
+    <!-- Footer actions -->
+    <div class="bk-modal__footer">
+      <span class="bk-modal__footer-label">Actions:</span>
+      <div class="bk-modal__footer-btns">
+        <button *ngIf="selectedBooking.status === 'pending'"
+                class="admin-btn admin-btn--confirm"
+                [disabled]="statusUpdating"
+                (click)="requestConfirm(selectedBooking, 'confirmed')">✓ Approve</button>
+        <button *ngIf="selectedBooking.status === 'confirmed'"
+                class="admin-btn admin-btn--complete"
+                [disabled]="statusUpdating"
+                (click)="requestConfirm(selectedBooking, 'completed')">✅ Mark Complete</button>
+        <button *ngIf="selectedBooking.status !== 'cancelled' && selectedBooking.status !== 'completed'"
+                class="admin-btn admin-btn--cancel"
+                [disabled]="statusUpdating"
+                (click)="requestConfirm(selectedBooking, 'cancelled')">✕ Cancel Booking</button>
+        <span *ngIf="selectedBooking.status === 'cancelled' || selectedBooking.status === 'completed'"
+              class="bk-modal__no-actions">No further actions available</span>
+      </div>
+    </div>
+
+  </div>
+</div>

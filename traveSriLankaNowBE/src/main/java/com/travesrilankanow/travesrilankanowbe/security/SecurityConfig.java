@@ -38,10 +38,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints - no authentication required
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/nav-config/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/contact-details/**").permitAll()
                         .requestMatchers("/api/admin/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/places/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/places/*/inquiry").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/gallery/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/master-data/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/site-settings/**").permitAll()
@@ -52,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/more-sections/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/entity-field-configs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bookings/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/events/book").permitAll()
 
                         // Admin endpoints - require ADMIN role
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
