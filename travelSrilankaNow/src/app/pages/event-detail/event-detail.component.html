@@ -332,18 +332,41 @@
         <div class="booking-form__group booking-calendar-group">
           <label>{{ hasEventDates ? 'Select a Date' : 'Preferred Date (Optional)' }}</label>
           <div class="booking-calendar">
-            <!-- Month Nav -->
+            <!-- Header — prev/next switch between month-nav and year-nav depending on picker state -->
             <div class="booking-calendar__header">
-              <button type="button" class="booking-calendar__nav" (click)="calendarPrevMonth()">&#8249;</button>
-              <span class="booking-calendar__month">{{ calendarMonthLabel }}</span>
-              <button type="button" class="booking-calendar__nav" (click)="calendarNextMonth()">&#8250;</button>
+              <button type="button" class="booking-calendar__nav"
+                      (click)="showMonthPicker ? pickerPrevYear() : calendarPrevMonth()">&#8249;</button>
+
+              <button type="button" class="booking-calendar__month-toggle" (click)="toggleMonthPicker()">
+                <span>{{ showMonthPicker ? pickerYear : calendarMonthLabel }}</span>
+                <svg class="booking-calendar__chevron" [class.booking-calendar__chevron--up]="showMonthPicker"
+                     width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+
+              <button type="button" class="booking-calendar__nav"
+                      (click)="showMonthPicker ? pickerNextYear() : calendarNextMonth()">&#8250;</button>
             </div>
+
+            <!-- Month Picker Panel -->
+            <div class="booking-calendar__month-picker" *ngIf="showMonthPicker">
+              <button *ngFor="let m of MONTHS; let i = index"
+                      type="button"
+                      class="booking-calendar__mp-item"
+                      [class.booking-calendar__mp-item--selected]="isPickerMonthSelected(i)"
+                      [class.booking-calendar__mp-item--past]="isPickerMonthPast(i)"
+                      (click)="selectPickerMonth(i)">
+                {{ m }}
+              </button>
+            </div>
+
             <!-- Day Labels -->
-            <div class="booking-calendar__weekdays">
+            <div class="booking-calendar__weekdays" *ngIf="!showMonthPicker">
               <span *ngFor="let w of WEEKDAYS">{{ w }}</span>
             </div>
             <!-- Day Cells -->
-            <div class="booking-calendar__grid">
+            <div class="booking-calendar__grid" *ngIf="!showMonthPicker">
               <div *ngFor="let cell of calendarDays"
                    class="booking-calendar__cell"
                    [class.booking-calendar__cell--empty]="!cell.date"

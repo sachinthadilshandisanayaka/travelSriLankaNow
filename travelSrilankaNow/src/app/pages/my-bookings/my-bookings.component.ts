@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.service';
 
 export interface MyBooking {
   id: number;
   bookingReference: string;
+  bookingType: 'EVENT' | 'PLACE';
   eventId: number;
   eventTitle: string;
+  placeId: number;
+  placeName: string;
   participantName: string;
   email: string;
   phone: string;
@@ -23,13 +27,14 @@ export interface MyBooking {
   templateUrl: './my-bookings.component.html',
   styleUrls: ['./my-bookings.component.scss']
 })
-export class MyBookingsComponent implements OnInit {
+export class MyBookingsComponent implements OnInit, OnDestroy {
   bookings: MyBooking[] = [];
   filteredBookings: MyBooking[] = [];
   loading = true;
   error = '';
   activeFilter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' = 'all';
   currentUser: CustomerUser | null = null;
+  private userSub!: Subscription;
 
   constructor(
     private customerAuthService: CustomerAuthService,
@@ -41,8 +46,14 @@ export class MyBookingsComponent implements OnInit {
       this.router.navigate(['/login'], { queryParams: { returnUrl: '/my-bookings' } });
       return;
     }
-    this.currentUser = this.customerAuthService.getCurrentUser();
+    this.userSub = this.customerAuthService.currentUser$.subscribe(u => {
+      if (u) this.currentUser = u;
+    });
     this.loadBookings();
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSub) this.userSub.unsubscribe();
   }
 
   loadBookings(): void {
@@ -111,6 +122,23 @@ export class MyBookingsComponent implements OnInit {
 
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount || 0);
+  }
+
+  bookingTitle(booking: MyBooking): string {
+    if (booking.bookingType === 'PLACE') return booking.placeName || 'Place Reservation';
+    return booking.eventTitle || 'Event Booking';
+  }
+
+  bookingTypeLabel(booking: MyBooking): string {
+    return booking.bookingType === 'PLACE' ? 'Place' : 'Event';
+  }
+
+  viewBookingSource(booking: MyBooking): void {
+    if (booking.bookingType === 'PLACE' && booking.placeId) {
+      this.router.navigate(['/places', booking.placeId]);
+    } else if (booking.eventId) {
+      this.router.navigate(['/events', booking.eventId]);
+    }
   }
 
   viewEvent(eventId: number): void {

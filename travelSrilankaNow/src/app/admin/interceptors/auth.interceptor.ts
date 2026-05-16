@@ -23,8 +23,13 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip adding token for auth endpoints and external APIs
+    // Skip auth endpoints and external APIs
     if (this.isAuthEndpoint(request.url) || this.isExternalUrl(request.url)) {
+      return next.handle(request);
+    }
+
+    // Only attach admin token to admin API routes — never to customer/public routes
+    if (!this.isAdminRoute(request.url)) {
       return next.handle(request);
     }
 
@@ -54,6 +59,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private isAuthEndpoint(url: string): boolean {
     return url.includes('/admin/auth/login') || url.includes('/admin/auth/refresh');
+  }
+
+  private isAdminRoute(url: string): boolean {
+    return url.includes('/api/admin/');
   }
 
   private isExternalUrl(url: string): boolean {

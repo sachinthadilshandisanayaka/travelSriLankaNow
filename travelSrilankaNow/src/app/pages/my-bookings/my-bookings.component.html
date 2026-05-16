@@ -75,9 +75,10 @@
           </div>
         </div>
 
-        <!-- Event Name -->
-        <div class="mb-card__event" (click)="viewEvent(b.eventId)">
-          <h3>{{ b.eventTitle }}</h3>
+        <!-- Booking Title -->
+        <div class="mb-card__event" (click)="viewBookingSource(b)">
+          <h3>{{ bookingTitle(b) }}</h3>
+          <span class="mb-card__type-badge mb-card__type-badge--{{(b.bookingType || 'EVENT') | lowercase}}">{{ bookingTypeLabel(b) }}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
@@ -111,7 +112,7 @@
 
         <!-- Footer Actions -->
         <div class="mb-card__footer">
-          <button class="mb-btn-view" (click)="viewEvent(b.eventId)">View Event</button>
+          <button class="mb-btn-view" (click)="viewBookingSource(b)">View {{ bookingTypeLabel(b) }}</button>
         </div>
 
       </div>

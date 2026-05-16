@@ -1,10 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminApiService } from '../../services/admin-api.service';
+import { BookingCountService } from '../../services/booking-count.service';
 import { forkJoin, Subscription } from 'rxjs';
-import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-layout',
@@ -18,8 +17,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   pendingCount = 0;
   showPendingBanner = true;
   private displayNameSub!: Subscription;
-  private readonly adminApi = `${environment.apiUrl}/admin`;
-
+  private pendingSub!: Subscription;
   stats = {
     locations: { total: 0 },
     events: { total: 0 },
@@ -30,22 +28,22 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AdminAuthService,
     private apiService: AdminApiService,
-    private router: Router,
-    private http: HttpClient
+    private bookingCount: BookingCountService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.displayNameSub = this.authService.displayName$.subscribe(name => {
       this.displayName = name;
     });
+    this.pendingSub = this.bookingCount.pending$.subscribe(n => this.pendingCount = n);
     this.loadStats();
-    this.loadPendingCount();
+    this.bookingCount.refresh();
   }
 
   ngOnDestroy(): void {
-    if (this.displayNameSub) {
-      this.displayNameSub.unsubscribe();
-    }
+    if (this.displayNameSub) this.displayNameSub.unsubscribe();
+    if (this.pendingSub) this.pendingSub.unsubscribe();
   }
 
   private loadStats(): void {
@@ -61,14 +59,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         this.stats.places.total = data.places.totalElements;
         this.stats.gallery.total = data.gallery.totalElements;
       },
-      error: () => {}
-    });
-  }
-
-  private loadPendingCount(): void {
-    const params = new HttpParams().set('page', '0').set('size', '1').set('status', 'pending');
-    this.http.get<{ totalElements: number }>(`${this.adminApi}/bookings`, { params }).subscribe({
-      next: (res) => { this.pendingCount = res.totalElements; },
       error: () => {}
     });
   }

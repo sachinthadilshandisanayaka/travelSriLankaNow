@@ -10,8 +10,11 @@ public class BookingAdminResponse {
 
     private Long id;
     private String bookingReference;
+    private EventBooking.BookingType bookingType;
     private Long eventId;
     private String eventTitle;
+    private Long placeId;
+    private String placeName;
     private Long customerId;
     private String participantName;
     private String email;
@@ -23,12 +26,20 @@ public class BookingAdminResponse {
     private EventBooking.BookingStatus status;
     private EventBooking.PaymentStatus paymentStatus;
 
-    public static BookingAdminResponse from(EventBooking b, String eventTitle) {
+    public static BookingAdminResponse from(EventBooking b, String displayTitle) {
         BookingAdminResponse r = new BookingAdminResponse();
         r.setId(b.getId());
         r.setBookingReference(b.getBookingReference());
+        r.setBookingType(b.getBookingType() != null ? b.getBookingType() : EventBooking.BookingType.EVENT);
         r.setEventId(b.getEventId());
-        r.setEventTitle(eventTitle);
+        r.setPlaceId(b.getPlaceId());
+        if (r.getBookingType() == EventBooking.BookingType.PLACE) {
+            r.setPlaceName(displayTitle);
+            r.setEventTitle(null);
+        } else {
+            r.setEventTitle(displayTitle);
+            r.setPlaceName(null);
+        }
         r.setCustomerId(b.getCustomerId());
         r.setParticipantName(b.getParticipantName());
         r.setEmail(b.getEmail());

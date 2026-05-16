@@ -37,6 +37,9 @@ public class EventBookingDTO {
 
     private String specialRequests;
 
+    // Free-form preferred date when event has no specific dates defined
+    private String preferredDate;
+
     @NotNull(message = "Total price is required")
     @Min(value = 0, message = "Price cannot be negative")
     private Double totalPrice;
