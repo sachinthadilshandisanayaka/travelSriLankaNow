@@ -21,7 +21,7 @@ public class EventBooking {
     @Column(nullable = false)
     private Long eventId;
 
-    @Column(nullable = false)
+    @Column
     private Long eventDateId;
 
     @Column(nullable = false)
@@ -50,6 +50,20 @@ public class EventBooking {
     private BookingStatus status;
 
     public enum BookingStatus {
-        pending, confirmed, cancelled
+        pending, confirmed, completed, cancelled
+    }
+
+    @Column(name = "customer_id")
+    private Long customerId;
+
+    @Column(name = "booking_reference", unique = true, length = 30)
+    private String bookingReference;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
+    public enum PaymentStatus {
+        UNPAID, PARTIALLY_PAID, PAID, REFUNDED
     }
 }

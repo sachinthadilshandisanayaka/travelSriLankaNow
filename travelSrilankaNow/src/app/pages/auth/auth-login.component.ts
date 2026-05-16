@@ -1,0 +1,47 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { CustomerAuthService } from '../../services/customer-auth.service';
+
+@Component({
+  selector: 'app-auth-login',
+  templateUrl: './auth-login.component.html',
+  styleUrls: ['./auth-login.component.scss']
+})
+export class AuthLoginComponent implements OnInit {
+  username = '';
+  password = '';
+  loading = false;
+  error = '';
+  private returnUrl = '/';
+
+  constructor(
+    private authService: CustomerAuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+  }
+
+  login(): void {
+    if (!this.username || !this.password) { this.error = 'Please enter username and password.'; return; }
+    this.loading = true;
+    this.error = '';
+    this.authService.login(this.username, this.password).subscribe({
+      next: (res) => {
+        this.loading = false;
+        if (res.success) {
+          this.router.navigateByUrl(this.returnUrl);
+        } else {
+          this.error = res.message || 'Login failed.';
+        }
+      },
+      error: () => { this.loading = false; this.error = 'Invalid username or password.'; }
+    });
+  }
+
+  loginWithGoogle(): void {
+    this.error = 'Google login coming soon. Please use username & password for now.';
+  }
+}

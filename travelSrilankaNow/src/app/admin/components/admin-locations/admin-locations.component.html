@@ -45,6 +45,35 @@
       </svg>
     </div>
 
+    <!-- Search & Filter Bar -->
+    <div class="admin-search-bar">
+      <div class="admin-search-bar__input-wrap">
+        <svg class="admin-search-bar__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input
+          class="admin-search-bar__input"
+          type="text"
+          placeholder="Search by name, description..."
+          [value]="searchTerm"
+          (input)="onSearchChange($any($event.target).value)">
+        <button *ngIf="searchTerm" class="admin-search-bar__clear" (click)="clearSearch()" title="Clear">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <select class="admin-search-bar__select" [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat.code">{{ cat.displayName }}</option>
+      </select>
+      <select class="admin-search-bar__select" [(ngModel)]="filterRegion" (ngModelChange)="onFilterChange()">
+        <option value="">All Regions</option>
+        <option *ngFor="let region of regions" [value]="region.code">{{ region.displayName }}</option>
+      </select>
+      <span class="admin-search-bar__count">{{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}</span>
+    </div>
+
     <!-- Locations Table -->
     <div *ngIf="!isLoading" class="admin-table">
       <div class="admin-table__wrapper">
@@ -256,11 +285,19 @@
               <label>{{ field.label }}<span *ngIf="field.required" class="required">*</span></label>
               <input *ngIf="field.type === 'text'" type="text" class="admin-input" [value]="additionalDetails[field.key] || ''" (input)="additionalDetails[field.key] = $any($event.target).value">
               <input *ngIf="field.type === 'number'" type="number" class="admin-input" [value]="additionalDetails[field.key]" (input)="additionalDetails[field.key] = +$any($event.target).value">
-              <input *ngIf="field.type === 'date'" type="date" class="admin-input" [value]="additionalDetails[field.key] || ''" (input)="additionalDetails[field.key] = $any($event.target).value">
-              <div *ngIf="field.type === 'date_range'" class="range-inputs">
-                <input type="date" class="admin-input" [value]="additionalDetails[field.key]?.from || ''" (input)="additionalDetails[field.key] = {from: $any($event.target).value, to: additionalDetails[field.key]?.to || ''}">
-                <span class="range-separator">to</span>
-                <input type="date" class="admin-input" [value]="additionalDetails[field.key]?.to || ''" (input)="additionalDetails[field.key] = {from: additionalDetails[field.key]?.from || '', to: $any($event.target).value}">
+              <app-date-range-picker *ngIf="field.type === 'date'"
+                mode="single"
+                [startDate]="additionalDetails[field.key] || ''"
+                (apply)="additionalDetails[field.key] = $event.start">
+              </app-date-range-picker>
+              <div *ngIf="field.type === 'date_range'">
+                <app-date-range-picker
+                  mode="range"
+                  [startDate]="additionalDetails[field.key]?.from || ''"
+                  [endDate]="additionalDetails[field.key]?.to || ''"
+                  placeholder="Select date range"
+                  (apply)="additionalDetails[field.key] = {from: $event.start, to: $event.end}">
+                </app-date-range-picker>
               </div>
               <div *ngIf="field.type === 'number_range'" class="range-inputs">
                 <input type="number" class="admin-input" placeholder="Min" [value]="additionalDetails[field.key]?.min" (input)="additionalDetails[field.key] = {min: +$any($event.target).value, max: additionalDetails[field.key]?.max}">

@@ -16,8 +16,10 @@
 
     <!-- Navigation -->
     <nav class="sidebar__nav">
+
+      <!-- Overview -->
       <div class="nav-section">
-        <span class="nav-section__title">Main Menu</span>
+        <span class="nav-section__title">Overview</span>
 
         <a routerLink="/admin/dashboard" routerLinkActive="nav-item--active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -28,6 +30,26 @@
           </svg>
           <span>Dashboard</span>
         </a>
+      </div>
+
+      <!-- Operations -->
+      <div class="nav-section">
+        <span class="nav-section__title">Operations</span>
+
+        <a routerLink="/admin/bookings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <path d="M9 12h6M9 16h4"/>
+          </svg>
+          <span>Bookings</span>
+          <span class="nav-item__pending-badge" *ngIf="pendingCount > 0">{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
+        </a>
+      </div>
+
+      <!-- Content -->
+      <div class="nav-section">
+        <span class="nav-section__title">Content</span>
 
         <a routerLink="/admin/events" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -198,12 +220,40 @@
         </div>
       </div>
       <div class="header__right">
+        <!-- Pending bookings notification bell -->
+        <a class="notif-bell" routerLink="/admin/bookings" [class.notif-bell--active]="pendingCount > 0"
+           [title]="pendingCount > 0 ? pendingCount + ' pending booking' + (pendingCount !== 1 ? 's' : '') + ' need attention' : 'No pending bookings'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <span class="notif-bell__badge" *ngIf="pendingCount > 0">{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
+        </a>
         <div class="status-badge">
           <span class="status-badge__dot"></span>
           <span>System Online</span>
         </div>
       </div>
     </header>
+
+    <!-- Pending bookings attention banner -->
+    <div class="pending-banner" *ngIf="pendingCount > 0 && showPendingBanner">
+      <div class="pending-banner__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+      </div>
+      <span class="pending-banner__text">
+        You have <strong>{{ pendingCount }}</strong> pending booking{{ pendingCount !== 1 ? 's' : '' }} waiting for your review.
+      </span>
+      <a class="pending-banner__link" routerLink="/admin/bookings">Review now →</a>
+      <button class="pending-banner__dismiss" (click)="dismissPendingBanner()" title="Dismiss">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
 
     <!-- Page Content (Router Outlet) -->
     <div class="content">

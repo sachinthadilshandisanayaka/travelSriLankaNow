@@ -100,6 +100,16 @@ $admin-transition-slow: 300ms ease;
 // SHARED COMPONENTS
 // ============================================
 
+// Global select option fix: ensure dropdown options are always visible
+// regardless of browser dark mode or inherited colors
+select {
+  color-scheme: light;
+  option {
+    background-color: #ffffff;
+    color: #374151;
+  }
+}
+
 // Page Container
 .admin-page {
   min-height: 100vh;
@@ -1311,13 +1321,21 @@ $admin-transition-slow: 300ms ease;
 }
 
 .admin-select {
+  -webkit-appearance: none;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+  background-color: #ffffff;
   background-position: right 0.75rem center;
   background-repeat: no-repeat;
   background-size: 1.25rem;
   padding-right: 2.5rem;
   cursor: pointer;
+  color-scheme: light;
+
+  option {
+    background-color: #ffffff;
+    color: #374151;
+  }
 
   &:focus {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%230065F8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
@@ -1630,5 +1648,96 @@ $admin-transition-slow: 300ms ease;
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+
+// ===== Search & Filter Bar =====
+.admin-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+
+  &__input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+  }
+
+  &__icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: $admin-gray-400;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.5rem 2.25rem 0.5rem 2.25rem;
+    border: 1.5px solid $admin-gray-200;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    color: $admin-gray-700;
+    background: $admin-white;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+
+    &::placeholder { color: $admin-gray-400; }
+    &:focus { outline: none; border-color: $admin-navy; }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.2rem;
+    cursor: pointer;
+    color: $admin-gray-400;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+
+    svg { width: 14px; height: 14px; }
+    &:hover { color: $admin-gray-700; background: $admin-gray-100; }
+  }
+
+  &__select {
+    padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+    border: 1.5px solid $admin-gray-200;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    color: $admin-gray-700;
+    background-color: $admin-white;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 1.1rem;
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: light;
+    cursor: pointer;
+
+    option {
+      background-color: $admin-white;
+      color: $admin-gray-800;
+    }
+
+    &:focus { outline: none; border-color: $admin-navy; }
+  }
+
+  &__count {
+    font-size: 0.8rem;
+    color: $admin-gray-400;
+    white-space: nowrap;
+    margin-left: auto;
   }
 }

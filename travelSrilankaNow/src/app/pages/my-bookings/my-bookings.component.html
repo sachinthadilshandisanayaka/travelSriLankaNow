@@ -1,0 +1,121 @@
+<div class="mb-page">
+
+  <!-- Hero Header -->
+  <div class="mb-hero">
+    <div class="mb-hero__content">
+      <div class="mb-hero__avatar">
+        {{ currentUser?.firstName?.charAt(0) || currentUser?.username?.charAt(0) || '?' }}
+      </div>
+      <div>
+        <h1>My Bookings</h1>
+        <p>Welcome back, <strong>{{ currentUser?.firstName || currentUser?.username }}</strong> &mdash; here are all your event reservations.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-body">
+
+    <!-- Filter Tabs -->
+    <div class="mb-tabs">
+      <button class="mb-tab" [class.mb-tab--active]="activeFilter === 'all'" (click)="setFilter('all')">
+        All <span class="mb-tab__badge">{{ counts.all }}</span>
+      </button>
+      <button class="mb-tab" [class.mb-tab--active]="activeFilter === 'confirmed'" (click)="setFilter('confirmed')">
+        Confirmed <span class="mb-tab__badge mb-tab__badge--confirmed">{{ counts.confirmed }}</span>
+      </button>
+      <button class="mb-tab" [class.mb-tab--active]="activeFilter === 'pending'" (click)="setFilter('pending')">
+        Pending <span class="mb-tab__badge mb-tab__badge--pending">{{ counts.pending }}</span>
+      </button>
+      <button class="mb-tab" [class.mb-tab--active]="activeFilter === 'completed'" (click)="setFilter('completed')">
+        Completed <span class="mb-tab__badge mb-tab__badge--completed">{{ counts.completed }}</span>
+      </button>
+      <button class="mb-tab" [class.mb-tab--active]="activeFilter === 'cancelled'" (click)="setFilter('cancelled')">
+        Cancelled <span class="mb-tab__badge mb-tab__badge--cancelled">{{ counts.cancelled }}</span>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="mb-loading" *ngIf="loading">
+      <div class="mb-spinner"></div>
+      <p>Loading your bookings...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="mb-error" *ngIf="error && !loading">
+      <span>⚠️</span> {{ error }}
+      <button (click)="loadBookings()">Try again</button>
+    </div>
+
+    <!-- Empty State -->
+    <div class="mb-empty" *ngIf="!loading && !error && filteredBookings.length === 0">
+      <div class="mb-empty__icon">🎪</div>
+      <h3>{{ activeFilter === 'all' ? 'No bookings yet' : 'No ' + activeFilter + ' bookings' }}</h3>
+      <p *ngIf="activeFilter === 'all'">Discover exciting events in Sri Lanka and make your first booking!</p>
+      <p *ngIf="activeFilter !== 'all'">Try switching to a different filter above.</p>
+      <a routerLink="/events" class="mb-cta-btn" *ngIf="activeFilter === 'all'">Browse Events</a>
+    </div>
+
+    <!-- Booking Cards -->
+    <div class="mb-list" *ngIf="!loading && !error && filteredBookings.length > 0">
+      <div class="mb-card" *ngFor="let b of filteredBookings">
+
+        <!-- Card Header -->
+        <div class="mb-card__header">
+          <div class="mb-card__ref">
+            <span class="mb-card__ref-icon">🎫</span>
+            <span class="mb-card__ref-text">{{ b.bookingReference }}</span>
+          </div>
+          <div class="mb-card__badges">
+            <span class="mb-status-badge" [class]="'mb-status-badge--' + b.status">
+              {{ statusIcon(b.status) }} {{ statusLabel(b.status) }}
+            </span>
+            <span class="mb-pay-badge" [class]="'mb-pay-badge--' + b.paymentStatus">
+              {{ paymentLabel(b.paymentStatus) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Event Name -->
+        <div class="mb-card__event" (click)="viewEvent(b.eventId)">
+          <h3>{{ b.eventTitle }}</h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="mb-card__info">
+          <div class="mb-info-item">
+            <span class="mb-info-item__label">Booked on</span>
+            <span class="mb-info-item__value">{{ formatDate(b.bookingDate) }}</span>
+          </div>
+          <div class="mb-info-item">
+            <span class="mb-info-item__label">Participants</span>
+            <span class="mb-info-item__value">👥 {{ b.numberOfPeople }} {{ b.numberOfPeople === 1 ? 'person' : 'people' }}</span>
+          </div>
+          <div class="mb-info-item">
+            <span class="mb-info-item__label">Total Paid</span>
+            <span class="mb-info-item__value mb-info-item__value--price">{{ formatCurrency(b.totalPrice) }}</span>
+          </div>
+          <div class="mb-info-item">
+            <span class="mb-info-item__label">Contact</span>
+            <span class="mb-info-item__value">{{ b.email }}</span>
+          </div>
+        </div>
+
+        <!-- Special Requests -->
+        <div class="mb-card__requests" *ngIf="b.specialRequests">
+          <span class="mb-card__requests-label">💬 Special requests:</span>
+          <span class="mb-card__requests-text">{{ b.specialRequests }}</span>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="mb-card__footer">
+          <button class="mb-btn-view" (click)="viewEvent(b.eventId)">View Event</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

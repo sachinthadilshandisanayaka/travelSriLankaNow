@@ -25,7 +25,8 @@ export enum MasterDataType {
   REGION = 'REGION',
   PRICE_RANGE = 'PRICE_RANGE',
   GALLERY_CATEGORY = 'GALLERY_CATEGORY',
-  GALLERY_TYPE = 'GALLERY_TYPE'
+  GALLERY_TYPE = 'GALLERY_TYPE',
+  CURRENCY = 'CURRENCY'
 }
 
 @Injectable({
@@ -90,5 +91,9 @@ export class MasterDataService {
 
   getGalleryTypes(): Observable<MasterData[]> {
     return this.getByType(MasterDataType.GALLERY_TYPE);
+  }
+
+  getCurrencies(): Observable<MasterData[]> {
+    return this.getByType(MasterDataType.CURRENCY);
   }
 }

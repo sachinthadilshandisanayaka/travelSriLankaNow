@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { forkJoin, Subscription } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-layout',
@@ -13,7 +15,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   displayName = '';
   isSidebarOpen = false;
   showLogoutConfirm = false;
+  pendingCount = 0;
+  showPendingBanner = true;
   private displayNameSub!: Subscription;
+  private readonly adminApi = `${environment.apiUrl}/admin`;
 
   stats = {
     locations: { total: 0 },
@@ -25,7 +30,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AdminAuthService,
     private apiService: AdminApiService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -33,6 +39,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       this.displayName = name;
     });
     this.loadStats();
+    this.loadPendingCount();
   }
 
   ngOnDestroy(): void {
@@ -56,6 +63,18 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       },
       error: () => {}
     });
+  }
+
+  private loadPendingCount(): void {
+    const params = new HttpParams().set('page', '0').set('size', '1').set('status', 'pending');
+    this.http.get<{ totalElements: number }>(`${this.adminApi}/bookings`, { params }).subscribe({
+      next: (res) => { this.pendingCount = res.totalElements; },
+      error: () => {}
+    });
+  }
+
+  dismissPendingBanner(): void {
+    this.showPendingBanner = false;
   }
 
   toggleSidebar(): void {

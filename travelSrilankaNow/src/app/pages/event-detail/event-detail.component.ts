@@ -1,30 +1,63 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { EventService } from '../../services/event.service';
-import { Event } from '../../models/event.model';
+import { Event, EventPricing, EventLocation } from '../../models/event.model';
 import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
 import { DataService } from '../../services/data.service';
 import { FieldDefinition } from '../../models/more-section.model';
+import { MasterDataService, MasterData } from '../../services/master-data.service';
+import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-event-detail',
   templateUrl: './event-detail.component.html',
   styleUrls: ['./event-detail.component.scss']
 })
-export class EventDetailComponent implements OnInit {
+export class EventDetailComponent implements OnInit, OnDestroy {
   event: Event | null = null;
-  loading: boolean = true;
+  loading = true;
   error: string | null = null;
-  selectedImageIndex: number = 0;
+  selectedImageIndex = 0;
   fieldDefinitions: FieldDefinition[] = [];
+
+  // Pricing state
+  currencies: MasterData[] = [];
+  selectedCurrency = 'USD';
+  selectedPricing: EventPricing | null = null;
+
+  // Booking modal state
+  showBookingModal = false;
+  bookingStep: 'form' | 'success' = 'form';
+  bookingLoading = false;
+  bookingError = '';
+  bookingReference = '';
+  currentUser: CustomerUser | null = null;
+  booking = {
+    participantName: '',
+    email: '',
+    phone: '',
+    numberOfPeople: 1,
+    specialRequests: '',
+    selectedDateId: null as number | null
+  };
+
+  // Calendar state
+  calendarMonth: Date = new Date();
+  readonly WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   @ViewChild('lightbox') lightbox!: ImageLightboxComponent;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private http: HttpClient,
     private eventService: EventService,
-    private dataService: DataService
-  ) { }
+    private dataService: DataService,
+    private masterDataService: MasterDataService,
+    private customerAuthService: CustomerAuthService
+  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -38,24 +71,96 @@ export class EventDetailComponent implements OnInit {
       next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
       error: () => {}
     });
+    this.masterDataService.getCurrencies().subscribe({
+      next: (data) => { this.currencies = data; },
+      error: () => {}
+    });
+    this.customerAuthService.currentUser$.subscribe(u => {
+      this.currentUser = u;
+      if (u) {
+        this.booking.participantName = `${u.firstName} ${u.lastName}`.trim();
+        this.booking.email = u.email;
+        this.booking.phone = u.phoneNumber || '';
+      }
+    });
   }
 
   loadEventDetails(id: number): void {
     this.loading = true;
     this.error = null;
-
     this.eventService.getEventById(id).subscribe({
       next: (event) => {
         this.event = event;
         this.loading = false;
-        console.log('Loaded event:', event);
+        this.initPricingState();
       },
-      error: (error) => {
-        console.error('Error loading event:', error);
+      error: () => {
         this.error = 'Failed to load event details. Please try again later.';
         this.loading = false;
       }
     });
+  }
+
+  private initPricingState(): void {
+    if (!this.event?.pricings?.length) return;
+    const primary = this.event.pricings.find(p => p.isPrimary) || this.event.pricings[0];
+    this.selectedCurrency = primary.currencyCode;
+    this.selectedPricing = primary;
+  }
+
+  /** Unique currencies from the event pricings */
+  get availableCurrencies(): string[] {
+    if (!this.event?.pricings?.length) return [];
+    return [...new Set(this.event.pricings.map(p => p.currencyCode))];
+  }
+
+  /** Pricings filtered to selected currency */
+  get filteredPricings(): EventPricing[] {
+    if (!this.event?.pricings?.length) return [];
+    return this.event.pricings.filter(p => p.currencyCode === this.selectedCurrency);
+  }
+
+  selectCurrency(code: string): void {
+    this.selectedCurrency = code;
+    const pricings = this.filteredPricings;
+    this.selectedPricing = pricings.find(p => p.isPrimary) || pricings[0] || null;
+  }
+
+  selectPricing(pricing: EventPricing): void {
+    this.selectedPricing = pricing;
+  }
+
+  getCurrencySymbol(code: string): string {
+    const c = this.currencies.find(m => m.code === code);
+    return c?.icon || code;
+  }
+
+  getPricingTypeLabel(type: string): string {
+    switch (type) {
+      case 'PER_PERSON': return 'Per Person';
+      case 'GROUP': return 'Group Price';
+      case 'FULL_EVENT': return 'Full Package';
+      default: return type;
+    }
+  }
+
+  getPricingTypeIcon(type: string): string {
+    switch (type) {
+      case 'PER_PERSON': return '👤';
+      case 'GROUP': return '👥';
+      case 'FULL_EVENT': return '🎯';
+      default: return '💰';
+    }
+  }
+
+  /** Whether the event has multi-location journey */
+  get hasJourney(): boolean {
+    return !!this.event?.eventLocations?.length && this.event.eventLocations.length > 1;
+  }
+
+  get sortedLocations(): EventLocation[] {
+    if (!this.event?.eventLocations) return [];
+    return [...this.event.eventLocations].sort((a, b) => a.visitOrder - b.visitOrder);
   }
 
   selectImage(index: number): void {
@@ -63,9 +168,137 @@ export class EventDetailComponent implements OnInit {
   }
 
   openLightbox(index: number): void {
-    if (this.lightbox) {
-      this.lightbox.open(index);
+    if (this.lightbox) this.lightbox.open(index);
+  }
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
+  // ===== Booking =====
+  openBookingModal(): void {
+    if (!this.currentUser) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
     }
+    this.bookingStep = 'form';
+    this.bookingError = '';
+    // Set calendar to first future month that has available dates, or today
+    const today = new Date();
+    const firstFuture = this.event?.dates?.find(d => new Date(d.date) >= today && d.availableSpots > 0);
+    this.calendarMonth = firstFuture ? new Date(firstFuture.date) : new Date();
+    this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), 1);
+    this.showBookingModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeBookingModal(): void {
+    this.showBookingModal = false;
+    this.bookingStep = 'form';
+    this.bookingError = '';
+    document.body.style.overflow = '';
+  }
+
+  // ===== Calendar =====
+  get calendarMonthLabel(): string {
+    return this.calendarMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+  }
+
+  calendarPrevMonth(): void {
+    const d = new Date(this.calendarMonth);
+    d.setMonth(d.getMonth() - 1);
+    this.calendarMonth = d;
+  }
+
+  calendarNextMonth(): void {
+    const d = new Date(this.calendarMonth);
+    d.setMonth(d.getMonth() + 1);
+    this.calendarMonth = d;
+  }
+
+  get calendarDays(): Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean }> {
+    const year = this.calendarMonth.getFullYear();
+    const month = this.calendarMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cells: Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean }> = [];
+
+    for (let i = 0; i < firstDay; i++) cells.push({ date: null, eventDate: null, isPast: false, isToday: false });
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const isPast = date < today;
+      const isToday = date.getTime() === today.getTime();
+      const eventDate = this.event?.dates?.find(ed => {
+        const ed2 = new Date(ed.date);
+        return ed2.getFullYear() === year && ed2.getMonth() === month && ed2.getDate() === d;
+      }) || null;
+      cells.push({ date, eventDate, isPast, isToday });
+    }
+    return cells;
+  }
+
+  selectCalendarDate(cell: { date: Date | null; eventDate: any | null; isPast: boolean }): void {
+    if (!cell.date || cell.isPast) return;
+    if (cell.eventDate) {
+      if (cell.eventDate.availableSpots === 0) return;
+      this.booking.selectedDateId = cell.eventDate.id;
+    } else {
+      this.booking.selectedDateId = null;
+    }
+  }
+
+  isCalendarDaySelected(cell: { date: Date | null; eventDate: any | null }): boolean {
+    if (!cell.date) return false;
+    if (cell.eventDate) return this.booking.selectedDateId === cell.eventDate.id;
+    return false;
+  }
+
+  get hasEventDates(): boolean {
+    return !!(this.event?.dates?.length);
+  }
+
+  get bookingTotalPrice(): number {
+    if (!this.selectedPricing) return this.event?.price || 0;
+    if (this.selectedPricing.pricingType === 'PER_PERSON') {
+      return this.selectedPricing.amount * this.booking.numberOfPeople;
+    }
+    return this.selectedPricing.amount;
+  }
+
+  submitBooking(): void {
+    if (!this.booking.participantName || !this.booking.email || !this.booking.phone) {
+      this.bookingError = 'Please fill in all required fields.';
+      return;
+    }
+    if (!this.event) return;
+    this.bookingLoading = true;
+    this.bookingError = '';
+
+    const payload: any = {
+      eventId: this.event.id,
+      participantName: this.booking.participantName,
+      email: this.booking.email,
+      phone: this.booking.phone,
+      numberOfPeople: this.booking.numberOfPeople,
+      specialRequests: this.booking.specialRequests,
+      totalPrice: this.bookingTotalPrice
+    };
+    if (this.booking.selectedDateId) payload.eventDateId = this.booking.selectedDateId;
+
+    this.http.post<any>(`${environment.apiUrl}/events/book`, payload).subscribe({
+      next: (res) => {
+        this.bookingLoading = false;
+        this.bookingReference = res.bookingReference || '';
+        this.bookingStep = 'success';
+      },
+      error: (err) => {
+        this.bookingLoading = false;
+        this.bookingError = err?.error?.message || 'Booking failed. Please try again.';
+      }
+    });
   }
 
   goBack(): void {
@@ -74,11 +307,7 @@ export class EventDetailComponent implements OnInit {
 
   getCategoryIcon(category: string): string {
     const icons: { [key: string]: string } = {
-      'cultural': '🏛️',
-      'adventure': '⛰️',
-      'food': '🍽️',
-      'festival': '🎉',
-      'tour': '🗺️'
+      'cultural': '🏛️', 'adventure': '⛰️', 'food': '🍽️', 'festival': '🎉', 'tour': '🗺️'
     };
     return icons[category] || '🎯';
   }
@@ -91,9 +320,7 @@ export class EventDetailComponent implements OnInit {
   isNonEmpty(value: any): boolean {
     if (value === null || value === undefined || value === '') return false;
     if (Array.isArray(value)) return value.length > 0;
-    if (typeof value === 'object') {
-      return Object.values(value).some(v => v !== null && v !== undefined && v !== '');
-    }
+    if (typeof value === 'object') return Object.values(value).some(v => v !== null && v !== undefined && v !== '');
     return true;
   }
 
@@ -102,7 +329,7 @@ export class EventDetailComponent implements OnInit {
     if (Array.isArray(value)) return value.join(', ');
     if (typeof value === 'object') {
       if (value.from !== undefined && value.to !== undefined) return `${value.from || '?'} - ${value.to || '?'}`;
-      if (value.min !== undefined && value.max !== undefined) return `${value.min !== null ? value.min : '?'} - ${value.max !== null ? value.max : '?'}`;
+      if (value.min !== undefined && value.max !== undefined) return `${value.min ?? '?'} - ${value.max ?? '?'}`;
     }
     return String(value);
   }
@@ -113,8 +340,7 @@ export class EventDetailComponent implements OnInit {
   }
 
   isLinkField(key: string): boolean {
-    const def = this.fieldDefinitions.find(d => d.key === key);
-    return def?.type === 'link';
+    return this.fieldDefinitions.find(d => d.key === key)?.type === 'link';
   }
 
   getLinkHref(value: any): string {
@@ -130,23 +356,17 @@ export class EventDetailComponent implements OnInit {
 
   getAvailabilityStatus(): string {
     if (!this.event) return '';
-
-    const available = this.event.availableSpots;
-    const max = this.event.maxParticipants;
-    const percentage = (available / max) * 100;
-
-    if (percentage > 50) return 'available';
-    if (percentage > 20) return 'limited';
+    const pct = (this.event.availableSpots / this.event.maxParticipants) * 100;
+    if (pct > 50) return 'available';
+    if (pct > 20) return 'limited';
     return 'filling-fast';
   }
 
   getAvailabilityText(): string {
     if (!this.event) return '';
-
-    const available = this.event.availableSpots;
-
-    if (available === 0) return 'Sold Out';
-    if (available <= 5) return `Only ${available} spots left!`;
-    return `${available} spots available`;
+    const a = this.event.availableSpots;
+    if (a === 0) return 'Sold Out';
+    if (a <= 5) return `Only ${a} spots left!`;
+    return `${a} spots available`;
   }
 }

@@ -47,6 +47,35 @@
       </svg>
     </div>
 
+    <!-- Search & Filter Bar -->
+    <div class="admin-search-bar">
+      <div class="admin-search-bar__input-wrap">
+        <svg class="admin-search-bar__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input
+          class="admin-search-bar__input"
+          type="text"
+          placeholder="Search by name, location..."
+          [value]="searchTerm"
+          (input)="onSearchChange($any($event.target).value)">
+        <button *ngIf="searchTerm" class="admin-search-bar__clear" (click)="clearSearch()" title="Clear">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <select class="admin-search-bar__select" [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+        <option value="">All Types</option>
+        <option *ngFor="let pt of placeTypes" [value]="pt.code">{{ pt.name }}</option>
+      </select>
+      <select class="admin-search-bar__select" [(ngModel)]="filterPriceRange" (ngModelChange)="onFilterChange()">
+        <option value="">All Prices</option>
+        <option *ngFor="let pr of priceRanges" [value]="pr.code">{{ pr.name }}</option>
+      </select>
+      <span class="admin-search-bar__count">{{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}</span>
+    </div>
+
     <!-- Places Table -->
     <div *ngIf="!isLoading" class="admin-table">
       <div class="admin-table__wrapper">
@@ -378,25 +407,23 @@
               <!-- Date -->
               <div class="admin-form__group" *ngIf="field.type === 'date'">
                 <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
-                <input class="admin-input" type="date"
-                       [value]="additionalDetails[field.key] || ''"
-                       (input)="additionalDetails[field.key] = $any($event.target).value">
+                <app-date-range-picker
+                  mode="single"
+                  [startDate]="additionalDetails[field.key] || ''"
+                  (apply)="additionalDetails[field.key] = $event.start">
+                </app-date-range-picker>
               </div>
 
               <!-- Date Range -->
               <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'date_range'">
                 <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
-                <div class="range-inputs">
-                  <input class="admin-input" type="date"
-                         [value]="additionalDetails[field.key]?.from || ''"
-                         (input)="additionalDetails[field.key].from = $any($event.target).value"
-                         placeholder="From">
-                  <span class="range-inputs__separator">to</span>
-                  <input class="admin-input" type="date"
-                         [value]="additionalDetails[field.key]?.to || ''"
-                         (input)="additionalDetails[field.key].to = $any($event.target).value"
-                         placeholder="To">
-                </div>
+                <app-date-range-picker
+                  mode="range"
+                  [startDate]="additionalDetails[field.key]?.from || ''"
+                  [endDate]="additionalDetails[field.key]?.to || ''"
+                  placeholder="Select date range"
+                  (apply)="additionalDetails[field.key] = {from: $event.start, to: $event.end}">
+                </app-date-range-picker>
               </div>
 
               <!-- Number Range -->

@@ -17,7 +17,14 @@ public class AdminPlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/paginated")
-    public ResponseEntity<Page<Place>> getPlacesPaginated(Pageable pageable) {
+    public ResponseEntity<Page<Place>> getPlacesPaginated(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String priceRange,
+            Pageable pageable) {
+        if ((search != null && !search.isBlank()) || (type != null && !type.isBlank()) || (priceRange != null && !priceRange.isBlank())) {
+            return ResponseEntity.ok(placeService.getPlacesPaginatedWithFilter(search, type, priceRange, pageable));
+        }
         return ResponseEntity.ok(placeService.getPlacesPaginated(pageable));
     }
 

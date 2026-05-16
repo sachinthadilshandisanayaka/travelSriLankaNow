@@ -1,10 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { PlaceService } from '../../services/place.service';
 import { Place } from '../../models/place.model';
 import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
 import { DataService } from '../../services/data.service';
 import { FieldDefinition } from '../../models/more-section.model';
+import { environment } from '../../../environments/environment';
+import { CustomerAuthService, RegisterRequest } from '../../services/customer-auth.service';
 
 @Component({
   selector: 'app-place-detail',
@@ -19,11 +22,50 @@ export class PlaceDetailComponent implements OnInit {
   fieldDefinitions: FieldDefinition[] = [];
   @ViewChild('lightbox') lightbox!: ImageLightboxComponent;
 
+  // Reservation modal
+  showReservationModal = false;
+  reservationStep: 'auth' | 'form' | 'success' = 'form';
+  reservationLoading = false;
+  reservationError = '';
+
+  reservation = {
+    visitorName: '',
+    email: '',
+    phone: '',
+    checkInDate: '',
+    checkOutDate: '',
+    visitDate: '',
+    preferredTime: '',
+    partySize: 1,
+    message: ''
+  };
+
+  // Inline auth state
+  authTab: 'login' | 'register' = 'login';
+  authUsername = '';
+  authPassword = '';
+  authEmail = '';
+  authFirstName = '';
+  authLastName = '';
+  authPhone = '';
+  authConfirmPassword = '';
+  authLoading = false;
+  authError = '';
+
+  readonly TIME_SLOTS = [
+    '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
+    '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM',
+    '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM',
+    '07:00 PM', '08:00 PM', '09:00 PM'
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private http: HttpClient,
     private placeService: PlaceService,
-    private dataService: DataService
+    private dataService: DataService,
+    private customerAuthService: CustomerAuthService
   ) { }
 
   ngOnInit(): void {
@@ -48,7 +90,6 @@ export class PlaceDetailComponent implements OnInit {
       next: (place) => {
         this.place = place;
         this.loading = false;
-        console.log('Loaded place:', place);
       },
       error: (error) => {
         console.error('Error loading place:', error);
@@ -147,5 +188,196 @@ export class PlaceDetailComponent implements OnInit {
       '$$$$': 'Luxury'
     };
     return ranges[priceRange] || priceRange;
+  }
+
+  get isAccommodation(): boolean {
+    return ['hotel', 'guesthouse', 'resort'].includes(this.place?.type || '');
+  }
+
+  get isDining(): boolean {
+    return ['restaurant', 'cafe'].includes(this.place?.type || '');
+  }
+
+  get reservationModalTitle(): string {
+    if (this.reservationStep === 'auth') return 'Sign in to Continue';
+    if (this.isAccommodation) return 'Book a Stay';
+    if (this.isDining) return 'Reserve a Table';
+    return 'Make a Reservation';
+  }
+
+  get todayDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // ── Date range picker callbacks ───────────────────────────────────────────
+
+  onStayDatesApply(range: { start: string; end: string }): void {
+    this.reservation.checkInDate = range.start;
+    this.reservation.checkOutDate = range.end;
+  }
+
+  onVisitDateApply(range: { start: string; end: string }): void {
+    this.reservation.visitDate = range.start;
+  }
+
+  // ── Modal lifecycle ───────────────────────────────────────────────────────
+
+  openReservationModal(): void {
+    this.reservationError = '';
+    this.reservation = {
+      visitorName: '', email: '', phone: '',
+      checkInDate: '', checkOutDate: '',
+      visitDate: '', preferredTime: '',
+      partySize: 1, message: ''
+    };
+
+    if (!this.customerAuthService.isLoggedIn()) {
+      this.reservationStep = 'auth';
+      this.authTab = 'login';
+      this.resetAuthFields();
+    } else {
+      this.reservationStep = 'form';
+      // Pre-fill name/email from logged-in user
+      const user = this.customerAuthService.getCurrentUser();
+      if (user) {
+        this.reservation.visitorName = `${user.firstName} ${user.lastName}`.trim();
+        this.reservation.email = user.email || '';
+        this.reservation.phone = user.phoneNumber || '';
+      }
+    }
+
+    this.showReservationModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeReservationModal(): void {
+    this.showReservationModal = false;
+    document.body.style.overflow = '';
+  }
+
+  // ── Inline auth ───────────────────────────────────────────────────────────
+
+  switchAuthTab(tab: 'login' | 'register'): void {
+    this.authTab = tab;
+    this.authError = '';
+    this.resetAuthFields();
+  }
+
+  loginInline(): void {
+    if (!this.authUsername.trim() || !this.authPassword) {
+      this.authError = 'Please enter username and password.';
+      return;
+    }
+    this.authLoading = true;
+    this.authError = '';
+    this.customerAuthService.login(this.authUsername.trim(), this.authPassword).subscribe({
+      next: (res) => {
+        this.authLoading = false;
+        if (res.success) {
+          this.reservationStep = 'form';
+          const user = this.customerAuthService.getCurrentUser();
+          if (user) {
+            this.reservation.visitorName = `${user.firstName} ${user.lastName}`.trim();
+            this.reservation.email = user.email || '';
+            this.reservation.phone = user.phoneNumber || '';
+          }
+        } else {
+          this.authError = res.message || 'Login failed. Please try again.';
+        }
+      },
+      error: () => {
+        this.authLoading = false;
+        this.authError = 'Invalid username or password.';
+      }
+    });
+  }
+
+  registerInline(): void {
+    if (!this.authUsername.trim() || !this.authEmail.trim() || !this.authPassword) {
+      this.authError = 'Please fill in all required fields.';
+      return;
+    }
+    if (this.authPassword !== this.authConfirmPassword) {
+      this.authError = 'Passwords do not match.';
+      return;
+    }
+    if (this.authPassword.length < 6) {
+      this.authError = 'Password must be at least 6 characters.';
+      return;
+    }
+    this.authLoading = true;
+    this.authError = '';
+    const req: RegisterRequest = {
+      username: this.authUsername.trim(),
+      email: this.authEmail.trim(),
+      password: this.authPassword,
+      firstName: this.authFirstName.trim(),
+      lastName: this.authLastName.trim(),
+      phoneNumber: this.authPhone.trim()
+    };
+    this.customerAuthService.register(req).subscribe({
+      next: (res) => {
+        this.authLoading = false;
+        if (res.success) {
+          this.reservationStep = 'form';
+          const user = this.customerAuthService.getCurrentUser();
+          if (user) {
+            this.reservation.visitorName = `${user.firstName} ${user.lastName}`.trim();
+            this.reservation.email = user.email || '';
+            this.reservation.phone = user.phoneNumber || '';
+          }
+        } else {
+          this.authError = res.message || 'Registration failed.';
+        }
+      },
+      error: (err) => {
+        this.authLoading = false;
+        this.authError = err?.error?.message || 'Registration failed. Username or email may already be taken.';
+      }
+    });
+  }
+
+  private resetAuthFields(): void {
+    this.authUsername = '';
+    this.authPassword = '';
+    this.authEmail = '';
+    this.authFirstName = '';
+    this.authLastName = '';
+    this.authPhone = '';
+    this.authConfirmPassword = '';
+    this.authLoading = false;
+    this.authError = '';
+  }
+
+  // ── Reservation submit ────────────────────────────────────────────────────
+
+  submitReservation(): void {
+    if (!this.reservation.visitorName.trim() || !this.reservation.email.trim()) {
+      this.reservationError = 'Please fill in your name and email.';
+      return;
+    }
+    if (this.isAccommodation && !this.reservation.checkInDate) {
+      this.reservationError = 'Please select a check-in date.';
+      return;
+    }
+    if (this.isDining && !this.reservation.visitDate) {
+      this.reservationError = 'Please select a visit date.';
+      return;
+    }
+
+    this.reservationLoading = true;
+    this.reservationError = '';
+
+    this.http.post(`${environment.apiUrl}/places/${this.place!.id}/inquiry`, this.reservation)
+      .subscribe({
+        next: () => {
+          this.reservationLoading = false;
+          this.reservationStep = 'success';
+        },
+        error: () => {
+          this.reservationLoading = false;
+          this.reservationError = 'Something went wrong. Please try again or contact us directly.';
+        }
+      });
   }
 }

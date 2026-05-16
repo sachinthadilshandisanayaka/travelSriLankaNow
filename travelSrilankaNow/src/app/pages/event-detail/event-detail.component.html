@@ -25,7 +25,6 @@
           </span>
           <h1>{{ event.title }}</h1>
           <div class="hero-meta">
-            <span class="price">${{ event.price }}</span>
             <span class="duration">⏱️ {{ event.duration }}</span>
             <span class="rating">⭐ {{ event.rating }}</span>
           </div>
@@ -38,6 +37,7 @@
       <div class="content-grid">
         <!-- Left Column - Main Info -->
         <div class="main-content">
+
           <!-- Overview Section -->
           <section class="detail-section">
             <h2>Event Overview</h2>
@@ -46,6 +46,38 @@
 
           <!-- Contact Details -->
           <app-contact-details [entityType]="'EVENT'" [entityId]="event.id"></app-contact-details>
+
+          <!-- Journey Timeline (multi-location) -->
+          <section class="detail-section journey-section" *ngIf="event.eventLocations && event.eventLocations.length > 0">
+            <h2>
+              <span class="section-icon">🗺️</span>
+              {{ hasJourney ? 'Journey Itinerary' : 'Event Location' }}
+            </h2>
+            <div class="journey-timeline">
+              <div *ngFor="let stop of sortedLocations; let i = index; let last = last"
+                   class="journey-stop" [class.journey-stop--last]="last">
+                <div class="journey-stop__connector" *ngIf="!last">
+                  <div class="journey-stop__line"></div>
+                  <div class="journey-stop__travel" *ngIf="stop.durationHere">
+                    <span class="journey-stop__travel-time">⏱ {{ stop.durationHere }}</span>
+                  </div>
+                </div>
+                <div class="journey-stop__marker">
+                  <div class="journey-stop__number" [class.journey-stop__number--last]="last">
+                    <span *ngIf="!last">{{ i + 1 }}</span>
+                    <span *ngIf="last">🏁</span>
+                  </div>
+                </div>
+                <div class="journey-stop__content">
+                  <h3 class="journey-stop__name">{{ stop.name }}</h3>
+                  <p class="journey-stop__desc" *ngIf="stop.description">{{ stop.description }}</p>
+                  <span class="journey-stop__duration" *ngIf="stop.durationHere && !last">
+                    Stay: {{ stop.durationHere }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <!-- What's Included Section -->
           <section class="detail-section" *ngIf="event.included && event.included.length > 0">
@@ -97,11 +129,7 @@
                 </div>
               </div>
             </div>
-            <app-image-lightbox
-              #lightbox
-              [images]="event.images"
-              [entityName]="event.title">
-            </app-image-lightbox>
+            <app-image-lightbox #lightbox [images]="event.images" [entityName]="event.title"></app-image-lightbox>
           </section>
 
           <!-- Event Dates Section -->
@@ -119,45 +147,99 @@
               </div>
             </div>
           </section>
+
         </div>
 
         <!-- Right Column - Booking Info -->
         <div class="sidebar">
-          <!-- Booking Card -->
           <div class="booking-card">
-            <div class="price-section">
-              <span class="price-label">Price per person</span>
-              <span class="price-value">${{ event.price }}</span>
-            </div>
 
+            <!-- Pricing Section: multi-currency + type -->
+            <ng-container *ngIf="event.pricings && event.pricings.length > 0; else legacyPrice">
+
+              <!-- Currency Tabs -->
+              <div class="pricing-currency-tabs" *ngIf="availableCurrencies.length > 1">
+                <button *ngFor="let code of availableCurrencies"
+                        class="currency-tab"
+                        [class.active]="selectedCurrency === code"
+                        (click)="selectCurrency(code)">
+                  {{ getCurrencySymbol(code) }} {{ code }}
+                </button>
+              </div>
+
+              <!-- Pricing Options -->
+              <div class="pricing-options">
+                <div *ngFor="let pricing of filteredPricings"
+                     class="pricing-option"
+                     [class.pricing-option--selected]="selectedPricing === pricing"
+                     [class.pricing-option--primary]="pricing.isPrimary"
+                     (click)="selectPricing(pricing)">
+                  <div class="pricing-option__left">
+                    <span class="pricing-option__type-icon">{{ getPricingTypeIcon(pricing.pricingType) }}</span>
+                    <div>
+                      <div class="pricing-option__label">
+                        {{ pricing.label || getPricingTypeLabel(pricing.pricingType) }}
+                      </div>
+                      <div class="pricing-option__sublabel" *ngIf="pricing.pricingType === 'GROUP' && pricing.groupSize">
+                        Min {{ pricing.groupSize }} people
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pricing-option__price">
+                    <span class="pricing-option__symbol">{{ getCurrencySymbol(pricing.currencyCode) }}</span>
+                    <span class="pricing-option__amount">{{ pricing.amount | number:'1.0-2' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected price highlight -->
+              <div class="pricing-selected-summary" *ngIf="selectedPricing">
+                <span class="pricing-selected-summary__label">
+                  {{ getPricingTypeLabel(selectedPricing.pricingType) }}
+                </span>
+                <span class="pricing-selected-summary__price">
+                  {{ getCurrencySymbol(selectedPricing.currencyCode) }}{{ selectedPricing.amount | number:'1.0-2' }}
+                </span>
+              </div>
+
+            </ng-container>
+
+            <!-- Fallback: legacy single price -->
+            <ng-template #legacyPrice>
+              <div class="price-section">
+                <span class="price-label">Price per person</span>
+                <span class="price-value">${{ event.price }}</span>
+              </div>
+            </ng-template>
+
+            <!-- Availability -->
             <div class="availability-section" [ngClass]="getAvailabilityStatus()">
               <span class="availability-icon">🎟️</span>
               <span class="availability-text">{{ getAvailabilityText() }}</span>
             </div>
 
+            <!-- Event Info -->
             <div class="event-info">
               <div class="info-item">
                 <span class="info-label">Category</span>
-                <span class="info-value">
-                  {{ getCategoryIcon(event.category) }} {{ event.category | titlecase }}
-                </span>
+                <span class="info-value">{{ getCategoryIcon(event.category) }} {{ event.category | titlecase }}</span>
               </div>
-
               <div class="info-item">
                 <span class="info-label">Duration</span>
                 <span class="info-value">⏱️ {{ event.duration }}</span>
               </div>
-
-              <div class="info-item">
+              <div class="info-item" *ngIf="event.location && (!event.eventLocations || event.eventLocations.length === 0)">
                 <span class="info-label">Location</span>
                 <span class="info-value">📍 {{ event.location }}</span>
               </div>
-
+              <div class="info-item" *ngIf="event.eventLocations && event.eventLocations.length > 0">
+                <span class="info-label">{{ hasJourney ? 'Stops' : 'Location' }}</span>
+                <span class="info-value">📍 {{ hasJourney ? (event.eventLocations.length + ' destinations') : event.eventLocations[0].name }}</span>
+              </div>
               <div class="info-item">
                 <span class="info-label">Max Participants</span>
                 <span class="info-value">👥 {{ event.maxParticipants }} people</span>
               </div>
-
               <div class="info-item">
                 <span class="info-label">Rating</span>
                 <span class="info-value">⭐ {{ event.rating }} / 5</span>
@@ -165,7 +247,9 @@
             </div>
 
             <div class="action-buttons">
-              <button class="btn-primary btn-block" [disabled]="event.availableSpots === 0">
+              <button class="btn-primary btn-block"
+                      [disabled]="event.availableSpots === 0"
+                      (click)="openBookingModal()">
                 <span>{{ event.availableSpots === 0 ? 'Sold Out' : 'Book Now' }}</span>
                 <span class="btn-shine"></span>
                 <span class="btn-corner btn-corner--tl"></span>
@@ -173,10 +257,136 @@
                 <span class="btn-corner btn-corner--bl"></span>
                 <span class="btn-corner btn-corner--br"></span>
               </button>
+              <p class="booking-hint" *ngIf="!currentUser">
+                <a routerLink="/login" [queryParams]="{returnUrl: '/events/' + event.id}">Sign in</a> to book this event
+              </p>
             </div>
+
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="booking-modal-overlay" *ngIf="showBookingModal" (click)="closeBookingModal()">
+  <div class="booking-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="booking-modal__header">
+      <div>
+        <h3>{{ bookingStep === 'success' ? 'Booking Confirmed!' : 'Book This Event' }}</h3>
+        <p *ngIf="bookingStep === 'form'">{{ event?.title }}</p>
+      </div>
+      <button class="booking-modal__close" (click)="closeBookingModal()">✕</button>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="bookingStep === 'success'" class="booking-success">
+      <div class="booking-success__icon">🎉</div>
+      <h4>You're booked!</h4>
+      <p>Your booking reference is:</p>
+      <div class="booking-success__ref">{{ bookingReference }}</div>
+      <p class="booking-success__note">A confirmation will be sent to <strong>{{ booking.email }}</strong></p>
+      <button class="btn-primary" (click)="closeBookingModal()">Done</button>
+    </div>
+
+    <!-- Booking Form -->
+    <div *ngIf="bookingStep === 'form'" class="booking-modal__body">
+
+      <!-- Price Summary -->
+      <div class="booking-price-summary" *ngIf="selectedPricing || event?.price">
+        <span>{{ selectedPricing ? getPricingTypeLabel(selectedPricing.pricingType) : 'Price per person' }}</span>
+        <span class="booking-price-summary__total">
+          {{ getCurrencySymbol(selectedPricing?.currencyCode || 'USD') }}{{ bookingTotalPrice | number:'1.0-2' }}
+          <small *ngIf="selectedPricing?.pricingType === 'PER_PERSON'"> ({{ booking.numberOfPeople }} &times; {{ getCurrencySymbol(selectedPricing!.currencyCode) }}{{ selectedPricing!.amount | number:'1.0-2' }})</small>
+        </span>
+      </div>
+
+      <div class="booking-error" *ngIf="bookingError">{{ bookingError }}</div>
+
+      <div class="booking-form">
+        <div class="booking-form__row">
+          <div class="booking-form__group">
+            <label>Full Name *</label>
+            <input type="text" [(ngModel)]="booking.participantName" placeholder="Your full name">
+          </div>
+          <div class="booking-form__group">
+            <label>Phone *</label>
+            <input type="tel" [(ngModel)]="booking.phone" placeholder="+94 77 000 0000">
+          </div>
+        </div>
+        <div class="booking-form__group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="booking.email" placeholder="your@email.com">
+        </div>
+        <div class="booking-form__row">
+          <div class="booking-form__group">
+            <label>Number of People *</label>
+            <input type="number" [(ngModel)]="booking.numberOfPeople" min="1" [max]="event?.availableSpots">
+          </div>
+        </div>
+
+        <!-- Inline Date Calendar -->
+        <div class="booking-form__group booking-calendar-group">
+          <label>{{ hasEventDates ? 'Select a Date' : 'Preferred Date (Optional)' }}</label>
+          <div class="booking-calendar">
+            <!-- Month Nav -->
+            <div class="booking-calendar__header">
+              <button type="button" class="booking-calendar__nav" (click)="calendarPrevMonth()">&#8249;</button>
+              <span class="booking-calendar__month">{{ calendarMonthLabel }}</span>
+              <button type="button" class="booking-calendar__nav" (click)="calendarNextMonth()">&#8250;</button>
+            </div>
+            <!-- Day Labels -->
+            <div class="booking-calendar__weekdays">
+              <span *ngFor="let w of WEEKDAYS">{{ w }}</span>
+            </div>
+            <!-- Day Cells -->
+            <div class="booking-calendar__grid">
+              <div *ngFor="let cell of calendarDays"
+                   class="booking-calendar__cell"
+                   [class.booking-calendar__cell--empty]="!cell.date"
+                   [class.booking-calendar__cell--past]="cell.isPast"
+                   [class.booking-calendar__cell--today]="cell.isToday"
+                   [class.booking-calendar__cell--available]="cell.eventDate && !cell.isPast && cell.eventDate.availableSpots > 0"
+                   [class.booking-calendar__cell--full]="cell.eventDate && cell.eventDate.availableSpots === 0"
+                   [class.booking-calendar__cell--selected]="isCalendarDaySelected(cell)"
+                   (click)="selectCalendarDate(cell)">
+                <span class="booking-calendar__day-num" *ngIf="cell.date">{{ cell.date.getDate() }}</span>
+                <span class="booking-calendar__dot" *ngIf="cell.eventDate && !cell.isPast && cell.eventDate.availableSpots > 0"></span>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="booking-calendar__legend" *ngIf="hasEventDates">
+              <span class="legend-item legend-item--available">Available</span>
+              <span class="legend-item legend-item--full">Fully Booked</span>
+              <span class="legend-item legend-item--selected">Selected</span>
+            </div>
+            <!-- Selected date info -->
+            <div class="booking-calendar__selected-info" *ngIf="booking.selectedDateId">
+              <ng-container *ngFor="let d of event!.dates">
+                <span *ngIf="d.id === booking.selectedDateId">
+                  ✅ {{ d.date | date:'EEEE, MMM dd, yyyy' }} · {{ d.startTime }}–{{ d.endTime }} · {{ d.availableSpots }} spots left
+                </span>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+        <div class="booking-form__group">
+          <label>Special Requests</label>
+          <textarea [(ngModel)]="booking.specialRequests" rows="3" placeholder="Dietary requirements, accessibility needs, etc."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-modal__footer" *ngIf="bookingStep === 'form'">
+      <button class="booking-cancel-btn" (click)="closeBookingModal()" [disabled]="bookingLoading">Cancel</button>
+      <button class="btn-primary" (click)="submitBooking()" [disabled]="bookingLoading">
+        <span *ngIf="!bookingLoading">Confirm Booking</span>
+        <span *ngIf="bookingLoading" class="booking-spinner"></span>
+      </button>
+    </div>
+
   </div>
 </div>
