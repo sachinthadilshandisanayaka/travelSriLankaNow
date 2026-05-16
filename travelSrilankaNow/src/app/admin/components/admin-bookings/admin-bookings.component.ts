@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { BookingCountService } from '../../services/booking-count.service';
 import { environment } from '../../../../environments/environment';
 
 export interface BookingAdminResponse {
@@ -87,14 +88,20 @@ export class AdminBookingsComponent implements OnInit, OnDestroy {
   calendarLoading = false;
   calendarSelectedDay: BookingCalendarDay | null = null;
   readonly MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  readonly SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   readonly WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  // Month picker state
+  showMonthPicker = false;
+  pickerYear: number;
 
   readonly STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private bookingCount: BookingCountService) {
     const now = new Date();
     this.calendarYear = now.getFullYear();
     this.calendarMonth = now.getMonth() + 1;
+    this.pickerYear = this.calendarYear;
   }
 
   ngOnInit(): void {
@@ -252,11 +259,11 @@ export class AdminBookingsComponent implements OnInit, OnDestroy {
         if (this.selectedBooking?.id === updated.id) this.selectedBooking = updated;
         const idx = this.bookings.findIndex(b => b.id === updated.id);
         if (idx >= 0) this.bookings[idx] = updated;
-        // Also refresh calendar cell if in calendar view
         if (this.calendarSelectedDay) {
           const ci = this.calendarSelectedDay.bookings.findIndex(b => b.id === updated.id);
           if (ci >= 0) this.calendarSelectedDay.bookings[ci] = updated;
         }
+        this.bookingCount.refresh();
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: () => { this.statusUpdating = false; this.errorMessage = 'Failed to update status.'; }
@@ -302,6 +309,25 @@ export class AdminBookingsComponent implements OnInit, OnDestroy {
     if (this.calendarMonth === 12) { this.calendarMonth = 1; this.calendarYear++; }
     else this.calendarMonth++;
     this.loadCalendar();
+  }
+
+  toggleMonthPicker(): void {
+    this.showMonthPicker = !this.showMonthPicker;
+    if (this.showMonthPicker) this.pickerYear = this.calendarYear;
+  }
+
+  pickerPrevYear(): void { this.pickerYear--; }
+  pickerNextYear(): void { this.pickerYear++; }
+
+  selectPickerMonth(monthIndex: number): void {
+    this.calendarMonth = monthIndex + 1;
+    this.calendarYear = this.pickerYear;
+    this.showMonthPicker = false;
+    this.loadCalendar();
+  }
+
+  isPickerMonthSelected(monthIndex: number): boolean {
+    return this.calendarYear === this.pickerYear && this.calendarMonth === monthIndex + 1;
   }
 
   get calendarGrid(): Array<BookingCalendarDay | null> {

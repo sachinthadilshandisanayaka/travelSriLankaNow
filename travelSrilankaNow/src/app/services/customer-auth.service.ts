@@ -96,14 +96,10 @@ export class CustomerAuthService {
 
   private handleAuthSuccess(res: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, res.access_token);
-    // Set partial user immediately for responsive UI, then fetch full profile
-    const partial: CustomerUser = {
-      id: 0, username: res.username, firstName: res.first_name,
-      lastName: '', email: '', phoneNumber: '', profileImageUrl: '', role: res.role
-    };
-    localStorage.setItem(this.USER_KEY, JSON.stringify(partial));
-    this.currentUserSubject.next(partial);
-    // Fetch full profile in background to get email, lastName, id, etc.
+    // Clear any stale user data from a previous session before fetching fresh profile
+    localStorage.removeItem(this.USER_KEY);
+    this.currentUserSubject.next(null);
+    // Fetch the real profile — callers should subscribe to currentUser$ to react
     this.getProfile().subscribe({ error: () => {} });
   }
 

@@ -1,8 +1,11 @@
 package com.travesrilankanow.travesrilankanowbe.controller;
 
+import com.travesrilankanow.travesrilankanowbe.dto.PlaceBookingRequest;
+import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import com.travesrilankanow.travesrilankanowbe.entity.Place;
 import com.travesrilankanow.travesrilankanowbe.entity.PlaceInquiry;
 import com.travesrilankanow.travesrilankanowbe.repository.PlaceInquiryRepository;
+import com.travesrilankanow.travesrilankanowbe.service.EventBookingService;
 import com.travesrilankanow.travesrilankanowbe.service.PlaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +27,7 @@ public class PlaceController {
 
     private final PlaceService placeService;
     private final PlaceInquiryRepository inquiryRepository;
+    private final EventBookingService bookingService;
 
     @GetMapping
     public ResponseEntity<Page<Place>> getAllPlaces(
@@ -59,6 +64,16 @@ public class PlaceController {
     @GetMapping("/search")
     public ResponseEntity<List<Place>> searchPlaces(@RequestParam String q) {
         return ResponseEntity.ok(placeService.searchPlaces(q));
+    }
+
+    @PostMapping("/{id}/book")
+    public ResponseEntity<EventBooking> bookPlace(
+            @PathVariable Long id,
+            @RequestBody PlaceBookingRequest request,
+            Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        EventBooking booking = bookingService.bookPlace(id, request, username);
+        return ResponseEntity.status(HttpStatus.CREATED).body(booking);
     }
 
     @PostMapping("/{id}/inquiry")

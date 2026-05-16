@@ -18,8 +18,17 @@ public class EventBooking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private Long eventId;
+
+    @Column
+    private Long placeId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "booking_type", nullable = false)
+    private BookingType bookingType = BookingType.EVENT;
+
+    public enum BookingType { EVENT, PLACE }
 
     @Column
     private Long eventDateId;
