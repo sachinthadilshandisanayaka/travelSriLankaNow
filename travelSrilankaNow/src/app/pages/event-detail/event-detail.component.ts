@@ -40,12 +40,16 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     phone: '',
     numberOfPeople: 1,
     specialRequests: '',
-    selectedDateId: null as number | null
+    selectedDateId: null as number | null,
+    preferredDate: null as string | null
   };
 
   // Calendar state
   calendarMonth: Date = new Date();
+  showMonthPicker = false;
+  pickerYear = new Date().getFullYear();
   readonly WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  readonly MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   @ViewChild('lightbox') lightbox!: ImageLightboxComponent;
 
@@ -196,6 +200,9 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.showBookingModal = false;
     this.bookingStep = 'form';
     this.bookingError = '';
+    this.booking.selectedDateId = null;
+    this.booking.preferredDate = null;
+    this.showMonthPicker = false;
     document.body.style.overflow = '';
   }
 
@@ -214,6 +221,34 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     const d = new Date(this.calendarMonth);
     d.setMonth(d.getMonth() + 1);
     this.calendarMonth = d;
+  }
+
+  toggleMonthPicker(): void {
+    this.showMonthPicker = !this.showMonthPicker;
+    if (this.showMonthPicker) {
+      this.pickerYear = this.calendarMonth.getFullYear();
+    }
+  }
+
+  pickerPrevYear(): void { this.pickerYear--; }
+  pickerNextYear(): void { this.pickerYear++; }
+
+  selectPickerMonth(monthIndex: number): void {
+    this.calendarMonth = new Date(this.pickerYear, monthIndex, 1);
+    this.showMonthPicker = false;
+  }
+
+  isPickerMonthSelected(monthIndex: number): boolean {
+    return this.calendarMonth.getFullYear() === this.pickerYear &&
+           this.calendarMonth.getMonth() === monthIndex;
+  }
+
+  isPickerMonthPast(monthIndex: number): boolean {
+    const today = new Date();
+    // Last day of the given month in pickerYear
+    const lastDay = new Date(this.pickerYear, monthIndex + 1, 0);
+    lastDay.setHours(23, 59, 59, 0);
+    return lastDay < today;
   }
 
   get calendarDays(): Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean }> {
@@ -245,14 +280,20 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     if (cell.eventDate) {
       if (cell.eventDate.availableSpots === 0) return;
       this.booking.selectedDateId = cell.eventDate.id;
+      this.booking.preferredDate = null;
     } else {
+      // Free-form preferred date (for events without pre-defined dates)
       this.booking.selectedDateId = null;
+      this.booking.preferredDate = cell.date.toISOString().split('T')[0];
     }
   }
 
   isCalendarDaySelected(cell: { date: Date | null; eventDate: any | null }): boolean {
     if (!cell.date) return false;
     if (cell.eventDate) return this.booking.selectedDateId === cell.eventDate.id;
+    if (this.booking.preferredDate) {
+      return cell.date.toISOString().split('T')[0] === this.booking.preferredDate;
+    }
     return false;
   }
 
@@ -287,6 +328,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       totalPrice: this.bookingTotalPrice
     };
     if (this.booking.selectedDateId) payload.eventDateId = this.booking.selectedDateId;
+    if (this.booking.preferredDate) payload.preferredDate = this.booking.preferredDate;
 
     this.http.post<any>(`${environment.apiUrl}/events/book`, payload).subscribe({
       next: (res) => {

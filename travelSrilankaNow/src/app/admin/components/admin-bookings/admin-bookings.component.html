@@ -179,9 +179,27 @@
     <div class="calendar-panel">
       <!-- Month navigation -->
       <div class="cal-header">
-        <button class="admin-btn admin-btn--sm" (click)="calendarPrev()">&#8249;</button>
-        <h3>{{ calendarMonthLabel }}</h3>
-        <button class="admin-btn admin-btn--sm" (click)="calendarNext()">&#8250;</button>
+        <button class="admin-btn admin-btn--sm" (click)="showMonthPicker ? pickerPrevYear() : calendarPrev()">&#8249;</button>
+        <button class="cal-header__month-toggle" (click)="toggleMonthPicker()">
+          {{ showMonthPicker ? pickerYear : calendarMonthLabel }}
+          <svg class="cal-header__chevron" [class.cal-header__chevron--open]="showMonthPicker"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <button class="admin-btn admin-btn--sm" (click)="showMonthPicker ? pickerNextYear() : calendarNext()">&#8250;</button>
+      </div>
+
+      <!-- Month picker grid -->
+      <div class="cal-month-picker" *ngIf="showMonthPicker">
+        <div class="cal-mp-grid">
+          <button *ngFor="let m of SHORT_MONTHS; let i = index"
+                  class="cal-mp-item"
+                  [class.cal-mp-item--selected]="isPickerMonthSelected(i)"
+                  (click)="selectPickerMonth(i)">
+            {{ m }}
+          </button>
+        </div>
       </div>
 
       <!-- Legend -->

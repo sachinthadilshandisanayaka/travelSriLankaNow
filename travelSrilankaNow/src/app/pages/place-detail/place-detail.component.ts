@@ -1,25 +1,29 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import { PlaceService } from '../../services/place.service';
 import { Place } from '../../models/place.model';
 import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
 import { DataService } from '../../services/data.service';
 import { FieldDefinition } from '../../models/more-section.model';
 import { environment } from '../../../environments/environment';
-import { CustomerAuthService, RegisterRequest } from '../../services/customer-auth.service';
+import { CustomerAuthService, CustomerUser, RegisterRequest } from '../../services/customer-auth.service';
 
 @Component({
   selector: 'app-place-detail',
   templateUrl: './place-detail.component.html',
   styleUrls: ['./place-detail.component.scss']
 })
-export class PlaceDetailComponent implements OnInit {
+export class PlaceDetailComponent implements OnInit, OnDestroy {
   place: Place | null = null;
   loading: boolean = true;
   error: string | null = null;
   selectedImageIndex: number = 0;
   fieldDefinitions: FieldDefinition[] = [];
+  currentUser: CustomerUser | null = null;
+  private userSub!: Subscription;
   @ViewChild('lightbox') lightbox!: ImageLightboxComponent;
 
   // Reservation modal
@@ -27,6 +31,7 @@ export class PlaceDetailComponent implements OnInit {
   reservationStep: 'auth' | 'form' | 'success' = 'form';
   reservationLoading = false;
   reservationError = '';
+  reservationReference = '';
 
   reservation = {
     visitorName: '',
@@ -80,6 +85,14 @@ export class PlaceDetailComponent implements OnInit {
       next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
       error: () => {}
     });
+    this.userSub = this.customerAuthService.currentUser$.subscribe(u => {
+      this.currentUser = u;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSub) this.userSub.unsubscribe();
+    document.body.style.overflow = '';
   }
 
   loadPlaceDetails(id: number): void {
@@ -237,12 +250,11 @@ export class PlaceDetailComponent implements OnInit {
       this.resetAuthFields();
     } else {
       this.reservationStep = 'form';
-      // Pre-fill name/email from logged-in user
-      const user = this.customerAuthService.getCurrentUser();
-      if (user) {
-        this.reservation.visitorName = `${user.firstName} ${user.lastName}`.trim();
-        this.reservation.email = user.email || '';
-        this.reservation.phone = user.phoneNumber || '';
+      // Pre-fill from the reactively-tracked current user (already correct after login)
+      if (this.currentUser) {
+        this.reservation.visitorName = `${this.currentUser.firstName} ${this.currentUser.lastName}`.trim();
+        this.reservation.email = this.currentUser.email || '';
+        this.reservation.phone = this.currentUser.phoneNumber || '';
       }
     }
 
@@ -272,16 +284,20 @@ export class PlaceDetailComponent implements OnInit {
     this.authError = '';
     this.customerAuthService.login(this.authUsername.trim(), this.authPassword).subscribe({
       next: (res) => {
-        this.authLoading = false;
         if (res.success) {
-          this.reservationStep = 'form';
-          const user = this.customerAuthService.getCurrentUser();
-          if (user) {
-            this.reservation.visitorName = `${user.firstName} ${user.lastName}`.trim();
-            this.reservation.email = user.email || '';
-            this.reservation.phone = user.phoneNumber || '';
-          }
+          // Wait for the full profile to arrive (id !== 0) before pre-filling
+          this.customerAuthService.currentUser$.pipe(
+            filter(u => !!u && u.id !== 0),
+            take(1)
+          ).subscribe(user => {
+            this.authLoading = false;
+            this.reservationStep = 'form';
+            this.reservation.visitorName = `${user!.firstName} ${user!.lastName}`.trim();
+            this.reservation.email = user!.email || '';
+            this.reservation.phone = user!.phoneNumber || '';
+          });
         } else {
+          this.authLoading = false;
           this.authError = res.message || 'Login failed. Please try again.';
         }
       },
@@ -317,16 +333,19 @@ export class PlaceDetailComponent implements OnInit {
     };
     this.customerAuthService.register(req).subscribe({
       next: (res) => {
-        this.authLoading = false;
         if (res.success) {
-          this.reservationStep = 'form';
-          const user = this.customerAuthService.getCurrentUser();
-          if (user) {
-            this.reservation.visitorName = `${user.firstName} ${user.lastName}`.trim();
-            this.reservation.email = user.email || '';
-            this.reservation.phone = user.phoneNumber || '';
-          }
+          this.customerAuthService.currentUser$.pipe(
+            filter(u => !!u && u.id !== 0),
+            take(1)
+          ).subscribe(user => {
+            this.authLoading = false;
+            this.reservationStep = 'form';
+            this.reservation.visitorName = `${user!.firstName} ${user!.lastName}`.trim();
+            this.reservation.email = user!.email || '';
+            this.reservation.phone = user!.phoneNumber || '';
+          });
         } else {
+          this.authLoading = false;
           this.authError = res.message || 'Registration failed.';
         }
       },
@@ -368,10 +387,11 @@ export class PlaceDetailComponent implements OnInit {
     this.reservationLoading = true;
     this.reservationError = '';
 
-    this.http.post(`${environment.apiUrl}/places/${this.place!.id}/inquiry`, this.reservation)
+    this.http.post<any>(`${environment.apiUrl}/places/${this.place!.id}/book`, this.reservation)
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.reservationLoading = false;
+          this.reservationReference = res.bookingReference || '';
           this.reservationStep = 'success';
         },
         error: () => {
@@ -379,5 +399,10 @@ export class PlaceDetailComponent implements OnInit {
           this.reservationError = 'Something went wrong. Please try again or contact us directly.';
         }
       });
+  }
+
+  goToMyBookings(): void {
+    this.closeReservationModal();
+    this.router.navigate(['/my-bookings']);
   }
 }

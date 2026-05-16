@@ -3,9 +3,11 @@ package com.travesrilankanow.travesrilankanowbe.controller;
 import com.travesrilankanow.travesrilankanowbe.dto.BookingAdminResponse;
 import com.travesrilankanow.travesrilankanowbe.entity.Event;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
+import com.travesrilankanow.travesrilankanowbe.entity.Place;
 import com.travesrilankanow.travesrilankanowbe.entity.User;
 import com.travesrilankanow.travesrilankanowbe.repository.EventBookingRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.EventRepository;
+import com.travesrilankanow.travesrilankanowbe.repository.PlaceRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ public class CustomerController {
     private final UserRepository userRepository;
     private final EventBookingRepository bookingRepository;
     private final EventRepository eventRepository;
+    private final PlaceRepository placeRepository;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -62,9 +65,15 @@ public class CustomerController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         List<EventBooking> bookings = bookingRepository.findByCustomerIdOrderByBookingDateDesc(user.getId());
         List<BookingAdminResponse> result = bookings.stream().map(b -> {
-            String eventTitle = eventRepository.findById(b.getEventId())
-                    .map(Event::getTitle).orElse("Unknown Event");
-            return BookingAdminResponse.from(b, eventTitle);
+            String title;
+            if (b.getBookingType() == EventBooking.BookingType.PLACE && b.getPlaceId() != null) {
+                title = placeRepository.findById(b.getPlaceId()).map(Place::getName).orElse("Unknown Place");
+            } else if (b.getEventId() != null) {
+                title = eventRepository.findById(b.getEventId()).map(Event::getTitle).orElse("Unknown Event");
+            } else {
+                title = "Unknown";
+            }
+            return BookingAdminResponse.from(b, title);
         }).collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }

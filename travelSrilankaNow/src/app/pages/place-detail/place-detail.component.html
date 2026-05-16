@@ -280,9 +280,14 @@
     <!-- ── SUCCESS STEP ──────────────────────────────────── -->
     <div *ngIf="reservationStep === 'success'" class="reservation-success">
       <div class="reservation-success__icon">✅</div>
-      <h4>We got your request!</h4>
-      <p>Thank you, <strong>{{ reservation.visitorName }}</strong>. We'll confirm your reservation at <strong>{{ place?.name }}</strong> and get back to you at <strong>{{ reservation.email }}</strong> shortly.</p>
-      <button class="btn-primary" (click)="closeReservationModal()">Done</button>
+      <h4>Reservation Confirmed!</h4>
+      <p>Thank you, <strong>{{ reservation.visitorName }}</strong>. Your reservation at <strong>{{ place?.name }}</strong> has been submitted.</p>
+      <p *ngIf="reservationReference" class="reservation-success__ref">Booking reference: <strong>{{ reservationReference }}</strong></p>
+      <p class="reservation-success__note">We'll confirm and get back to you at <strong>{{ reservation.email }}</strong> shortly.</p>
+      <div class="reservation-success__actions">
+        <button class="btn-primary" (click)="goToMyBookings()">View My Bookings</button>
+        <button class="btn-secondary" (click)="closeReservationModal()">Close</button>
+      </div>
     </div>
 
     <!-- ── FORM STEP ─────────────────────────────────────── -->
