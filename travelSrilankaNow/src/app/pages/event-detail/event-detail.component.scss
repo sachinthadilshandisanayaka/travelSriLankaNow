@@ -1302,7 +1302,7 @@ $navbar-height: 80px;
 
     @media (max-width: $breakpoint-md) {
       flex-direction: column-reverse;
-      padding: $spacing-md $spacing-lg calc($spacing-lg + env(safe-area-inset-bottom, 0px));
+      padding: $spacing-md $spacing-lg calc(#{$spacing-lg} + env(safe-area-inset-bottom, 0px));
 
       button { width: 100%; justify-content: center; }
     }
