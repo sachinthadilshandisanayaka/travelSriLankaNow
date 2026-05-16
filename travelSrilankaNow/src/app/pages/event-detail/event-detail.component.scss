@@ -1237,7 +1237,7 @@ $navbar-height: 80px;
 
     // Pull-bar indicator on mobile sheet
     @media (max-width: $breakpoint-md) {
-      padding-top: calc($spacing-xl + 8px);
+      padding-top: calc(#{$spacing-xl} + 8px);
 
       &::before {
         content: '';
