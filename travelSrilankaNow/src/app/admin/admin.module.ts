@@ -22,6 +22,7 @@ import { AdminMoreSectionsComponent } from './components/admin-more-sections/adm
 import { AdminProfileComponent } from './components/admin-profile/admin-profile.component';
 import { AdminNavConfigComponent } from './components/admin-nav-config/admin-nav-config.component';
 import { AdminContactDetailsComponent } from './components/admin-contact-details/admin-contact-details.component';
+import { AdminBookingsComponent } from './components/admin-bookings/admin-bookings.component';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -33,6 +34,7 @@ import { QuillModule } from 'ngx-quill';
 
 // Services
 import { MediaService } from './services/media.service';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
@@ -59,14 +61,16 @@ import { MediaService } from './services/media.service';
     ImageEditorComponent,
     EntityImageManagerComponent,
     AdminNavConfigComponent,
-    AdminContactDetailsComponent
+    AdminContactDetailsComponent,
+    AdminBookingsComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     AdminRoutingModule,
-    QuillModule.forRoot()
+    QuillModule.forRoot(),
+    SharedModule
   ],
   providers: [
     MediaService

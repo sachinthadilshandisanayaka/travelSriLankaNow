@@ -17,7 +17,14 @@ public class AdminLocationController {
     private final LocationService locationService;
 
     @GetMapping("/paginated")
-    public ResponseEntity<Page<Location>> getLocationsPaginated(Pageable pageable) {
+    public ResponseEntity<Page<Location>> getLocationsPaginated(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String region,
+            Pageable pageable) {
+        if ((search != null && !search.isBlank()) || (category != null && !category.isBlank()) || (region != null && !region.isBlank())) {
+            return ResponseEntity.ok(locationService.getLocationsPaginatedWithFilter(search, category, region, pageable));
+        }
         return ResponseEntity.ok(locationService.getLocationsPaginated(pageable));
     }
 

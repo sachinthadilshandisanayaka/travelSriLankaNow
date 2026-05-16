@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
@@ -9,7 +11,7 @@ import { FieldDefinition } from '../../../models/more-section.model';
   templateUrl: './admin-places.component.html',
   styleUrls: ['./admin-places.component.scss']
 })
-export class AdminPlacesComponent implements OnInit {
+export class AdminPlacesComponent implements OnInit, OnDestroy {
   Math = Math; // Expose Math to template
 
   places: any[] = [];
@@ -26,6 +28,13 @@ export class AdminPlacesComponent implements OnInit {
   placeForm: FormGroup;
   successMessage = '';
   errorMessage = '';
+
+  // Search & filter
+  searchTerm = '';
+  filterType = '';
+  filterPriceRange = '';
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   placeTypes: MasterData[] = [];
   regions: MasterData[] = [];
@@ -83,6 +92,32 @@ export class AdminPlacesComponent implements OnInit {
     this.loadMasterData();
     this.loadPlaces();
     this.loadFieldConfig();
+
+    this.searchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => { this.currentPage = 0; this.loadPlaces(); });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    this.searchSubject.next(term);
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 0;
+    this.loadPlaces();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filterType = '';
+    this.filterPriceRange = '';
+    this.currentPage = 0;
+    this.loadPlaces();
   }
 
   loadFieldConfig(): void {
@@ -204,7 +239,12 @@ export class AdminPlacesComponent implements OnInit {
 
   loadPlaces(): void {
     this.isLoading = true;
-    this.apiService.getPlaces(this.currentPage, this.pageSize).subscribe({
+    this.apiService.getPlaces(
+      this.currentPage, this.pageSize, 'name,asc',
+      this.searchTerm || undefined,
+      this.filterType || undefined,
+      this.filterPriceRange || undefined
+    ).subscribe({
       next: (response: PageResponse<any>) => {
         this.places = response.content;
         this.totalPages = response.totalPages;

@@ -1,15 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
 import { FieldDefinition } from '../../../models/more-section.model';
+
+interface EventLocationItem {
+  id?: number;
+  name: string;
+  description: string;
+  visitOrder: number;
+  durationHere: string;
+}
+
+interface PricingItem {
+  id?: number;
+  currencyCode: string;
+  amount: number | null;
+  pricingType: 'PER_PERSON' | 'GROUP' | 'FULL_EVENT';
+  groupSize: number | null;
+  label: string;
+  isPrimary: boolean;
+  displayOrder: number;
+}
 
 @Component({
   selector: 'app-admin-events',
   templateUrl: './admin-events.component.html',
   styleUrls: ['./admin-events.component.scss']
 })
-export class AdminEventsComponent implements OnInit {
+export class AdminEventsComponent implements OnInit, OnDestroy {
   Math = Math; // Expose Math to template
 
   events: any[] = [];
@@ -27,8 +48,25 @@ export class AdminEventsComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
+  // Search & filter
+  searchTerm = '';
+  filterCategory = '';
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
   categories: MasterData[] = [];
+  currencies: MasterData[] = [];
   galleryImages: string[] = [];
+
+  // Multi-location & pricing
+  eventLocations: EventLocationItem[] = [];
+  pricings: PricingItem[] = [];
+
+  readonly pricingTypes = [
+    { value: 'PER_PERSON', label: 'Per Person' },
+    { value: 'GROUP', label: 'Group Price' },
+    { value: 'FULL_EVENT', label: 'Full Event Package' }
+  ];
 
   // Dynamic field config
   fieldDefinitions: FieldDefinition[] = [];
@@ -73,8 +111,26 @@ export class AdminEventsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadCurrencies();
     this.loadEvents();
     this.loadFieldConfig();
+    this.searchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => { this.currentPage = 0; this.loadEvents(); });
+  }
+
+  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
+  onSearchChange(term: string): void { this.searchTerm = term; this.searchSubject.next(term); }
+
+  onFilterChange(): void { this.currentPage = 0; this.loadEvents(); }
+
+  clearSearch(): void { this.searchTerm = ''; this.filterCategory = ''; this.currentPage = 0; this.loadEvents(); }
+
+  loadCurrencies(): void {
+    this.masterDataService.getCurrencies().subscribe({
+      next: (data) => { this.currencies = data; },
+      error: () => {}
+    });
   }
 
   loadFieldConfig(): void {
@@ -100,7 +156,8 @@ export class AdminEventsComponent implements OnInit {
 
   loadEvents(): void {
     this.isLoading = true;
-    this.apiService.getEvents(this.currentPage, this.pageSize).subscribe({
+    this.apiService.getEvents(this.currentPage, this.pageSize, 'title,asc',
+      this.searchTerm || undefined, this.filterCategory || undefined).subscribe({
       next: (response: PageResponse<any>) => {
         this.events = response.content;
         this.totalPages = response.totalPages;
@@ -127,6 +184,8 @@ export class AdminEventsComponent implements OnInit {
       orderNumber: 0
     });
     this.galleryImages = [];
+    this.eventLocations = [];
+    this.pricings = [];
     this.additionalDetails = this.initAdditionalDetails();
     this.showModal = true;
   }
@@ -139,8 +198,28 @@ export class AdminEventsComponent implements OnInit {
       requirements: event.requirements ? event.requirements.join(', ') : ''
     });
     this.galleryImages = event.images || [];
+    this.eventLocations = event.eventLocations
+      ? event.eventLocations.map((l: any) => ({
+          id: l.id,
+          name: l.name || '',
+          description: l.description || '',
+          visitOrder: l.visitOrder ?? 0,
+          durationHere: l.durationHere || ''
+        }))
+      : [];
+    this.pricings = event.pricings
+      ? event.pricings.map((p: any) => ({
+          id: p.id,
+          currencyCode: p.currencyCode || 'USD',
+          amount: p.amount ?? null,
+          pricingType: p.pricingType || 'PER_PERSON',
+          groupSize: p.groupSize ?? null,
+          label: p.label || '',
+          isPrimary: !!p.isPrimary,
+          displayOrder: p.displayOrder ?? 0
+        }))
+      : [];
     this.additionalDetails = event.additionalDetails ? { ...event.additionalDetails } : this.initAdditionalDetails();
-    // Ensure all field definitions have entries
     for (const field of this.fieldDefinitions) {
       if (this.additionalDetails[field.key] === undefined) {
         if (field.type === 'date_range') this.additionalDetails[field.key] = { from: '', to: '' };
@@ -171,7 +250,9 @@ export class AdminEventsComponent implements OnInit {
       included: formValue.included ? formValue.included.split(',').map((i: string) => i.trim()).filter((i: string) => i) : [],
       requirements: formValue.requirements ? formValue.requirements.split(',').map((r: string) => r.trim()).filter((r: string) => r) : [],
       images: this.galleryImages,
-      additionalDetails: this.additionalDetails
+      additionalDetails: this.additionalDetails,
+      eventLocations: this.eventLocations.map((l, idx) => ({ ...l, visitOrder: idx })),
+      pricings: this.pricings.map((p, idx) => ({ ...p, displayOrder: idx }))
     };
 
     this.isLoading = true;
@@ -282,6 +363,55 @@ export class AdminEventsComponent implements OnInit {
       else details[field.key] = null;
     }
     return details;
+  }
+
+  // ===== Event Location methods =====
+  addLocation(): void {
+    this.eventLocations.push({ name: '', description: '', visitOrder: this.eventLocations.length, durationHere: '' });
+  }
+
+  removeLocation(index: number): void {
+    this.eventLocations.splice(index, 1);
+  }
+
+  moveLocationUp(index: number): void {
+    if (index === 0) return;
+    [this.eventLocations[index - 1], this.eventLocations[index]] = [this.eventLocations[index], this.eventLocations[index - 1]];
+  }
+
+  moveLocationDown(index: number): void {
+    if (index === this.eventLocations.length - 1) return;
+    [this.eventLocations[index], this.eventLocations[index + 1]] = [this.eventLocations[index + 1], this.eventLocations[index]];
+  }
+
+  // ===== Pricing methods =====
+  addPricing(): void {
+    const defaultCurrency = this.currencies.length > 0 ? this.currencies[0].code : 'USD';
+    this.pricings.push({
+      currencyCode: defaultCurrency,
+      amount: null,
+      pricingType: 'PER_PERSON',
+      groupSize: null,
+      label: '',
+      isPrimary: this.pricings.length === 0,
+      displayOrder: this.pricings.length
+    });
+  }
+
+  removePricing(index: number): void {
+    this.pricings.splice(index, 1);
+    if (this.pricings.length > 0 && !this.pricings.some(p => p.isPrimary)) {
+      this.pricings[0].isPrimary = true;
+    }
+  }
+
+  setPrimaryPricing(index: number): void {
+    this.pricings.forEach((p, i) => { p.isPrimary = i === index; });
+  }
+
+  getCurrencySymbol(code: string): string {
+    const c = this.currencies.find(m => m.code === code);
+    return c?.icon || code;
   }
 
   openFieldConfigModal(): void {

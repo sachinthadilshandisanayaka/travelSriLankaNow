@@ -1,6 +1,8 @@
 package com.travesrilankanow.travesrilankanowbe.service;
 
 import com.travesrilankanow.travesrilankanowbe.entity.Event;
+import com.travesrilankanow.travesrilankanowbe.entity.EventLocation;
+import com.travesrilankanow.travesrilankanowbe.entity.EventPricing;
 import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
 import com.travesrilankanow.travesrilankanowbe.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,17 @@ public class EventService {
 
     @Transactional
     public Event createEvent(Event event) {
+        // Wire bidirectional references before cascade-saving
+        if (event.getEventLocations() != null) {
+            for (EventLocation loc : event.getEventLocations()) {
+                loc.setEvent(event);
+            }
+        }
+        if (event.getPricings() != null) {
+            for (EventPricing pricing : event.getPricings()) {
+                pricing.setEvent(event);
+            }
+        }
         return eventRepository.save(event);
     }
 
@@ -117,6 +130,24 @@ public class EventService {
         }
         if (event.getAdditionalDetails() != null) {
             existing.setAdditionalDetails(event.getAdditionalDetails());
+        }
+
+        // Replace event locations (orphanRemoval handles deletes)
+        if (event.getEventLocations() != null) {
+            existing.getEventLocations().clear();
+            for (EventLocation loc : event.getEventLocations()) {
+                loc.setEvent(existing);
+                existing.getEventLocations().add(loc);
+            }
+        }
+
+        // Replace pricing options (orphanRemoval handles deletes)
+        if (event.getPricings() != null) {
+            existing.getPricings().clear();
+            for (EventPricing pricing : event.getPricings()) {
+                pricing.setEvent(existing);
+                existing.getPricings().add(pricing);
+            }
         }
 
         return eventRepository.save(existing);

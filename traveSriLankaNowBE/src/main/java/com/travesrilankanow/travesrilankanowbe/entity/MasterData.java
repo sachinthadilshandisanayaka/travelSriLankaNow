@@ -72,6 +72,7 @@ public class MasterData {
         REGION,
         PRICE_RANGE,
         GALLERY_CATEGORY,
-        GALLERY_TYPE
+        GALLERY_TYPE,
+        CURRENCY
     }
 }

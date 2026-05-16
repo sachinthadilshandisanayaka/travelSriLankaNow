@@ -571,17 +571,23 @@
             <!-- Date -->
             <div class="admin-form__group" *ngIf="field.type === 'date'">
               <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
-              <input class="admin-input" type="date" [(ngModel)]="itemForm.additionalDetails[field.key]">
+              <app-date-range-picker
+                mode="single"
+                [startDate]="itemForm.additionalDetails[field.key] || ''"
+                (apply)="itemForm.additionalDetails[field.key] = $event.start">
+              </app-date-range-picker>
             </div>
 
             <!-- Date Range -->
             <div class="admin-form__group admin-form__group--full" *ngIf="field.type === 'date_range'">
               <label class="admin-form__label">{{ field.label }}{{ field.required ? ' *' : '' }}</label>
-              <div class="range-inputs">
-                <input class="admin-input" type="date" [(ngModel)]="itemForm.additionalDetails[field.key].from" placeholder="From">
-                <span class="range-inputs__separator">to</span>
-                <input class="admin-input" type="date" [(ngModel)]="itemForm.additionalDetails[field.key].to" placeholder="To">
-              </div>
+              <app-date-range-picker
+                mode="range"
+                [startDate]="itemForm.additionalDetails[field.key]?.from || ''"
+                [endDate]="itemForm.additionalDetails[field.key]?.to || ''"
+                placeholder="Select date range"
+                (apply)="itemForm.additionalDetails[field.key] = {from: $event.start, to: $event.end}">
+              </app-date-range-picker>
             </div>
 
             <!-- Number Range -->

@@ -66,6 +66,24 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
+    @Column(name = "google_id", length = 200)
+    private String googleId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    public enum AuthProvider {
+        LOCAL, GOOGLE
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
