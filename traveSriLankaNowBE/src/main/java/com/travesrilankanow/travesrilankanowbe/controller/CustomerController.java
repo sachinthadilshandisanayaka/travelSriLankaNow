@@ -1,16 +1,24 @@
 package com.travesrilankanow.travesrilankanowbe.controller;
 
 import com.travesrilankanow.travesrilankanowbe.dto.BookingAdminResponse;
+import com.travesrilankanow.travesrilankanowbe.dto.BookingCancelRequest;
+import com.travesrilankanow.travesrilankanowbe.dto.BookingConditionCheckResponse;
+import com.travesrilankanow.travesrilankanowbe.dto.BookingEditRequest;
 import com.travesrilankanow.travesrilankanowbe.entity.Event;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import com.travesrilankanow.travesrilankanowbe.entity.Place;
 import com.travesrilankanow.travesrilankanowbe.entity.User;
+import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
 import com.travesrilankanow.travesrilankanowbe.repository.EventBookingRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.EventRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.PlaceRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.UserRepository;
+import com.travesrilankanow.travesrilankanowbe.service.EventBookingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +36,7 @@ public class CustomerController {
     private final EventBookingRepository bookingRepository;
     private final EventRepository eventRepository;
     private final PlaceRepository placeRepository;
+    private final EventBookingService bookingService;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
@@ -60,21 +69,92 @@ public class CustomerController {
     }
 
     @GetMapping("/bookings")
-    public ResponseEntity<List<BookingAdminResponse>> getMyBookings(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<List<BookingAdminResponse>> getMyBookings(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = resolveUser(userDetails);
         List<EventBooking> bookings = bookingRepository.findByCustomerIdOrderByBookingDateDesc(user.getId());
-        List<BookingAdminResponse> result = bookings.stream().map(b -> {
-            String title;
-            if (b.getBookingType() == EventBooking.BookingType.PLACE && b.getPlaceId() != null) {
-                title = placeRepository.findById(b.getPlaceId()).map(Place::getName).orElse("Unknown Place");
-            } else if (b.getEventId() != null) {
-                title = eventRepository.findById(b.getEventId()).map(Event::getTitle).orElse("Unknown Event");
-            } else {
-                title = "Unknown";
-            }
-            return BookingAdminResponse.from(b, title);
-        }).collect(Collectors.toList());
+        List<BookingAdminResponse> result = bookings.stream()
+                .map(b -> BookingAdminResponse.from(b, resolveTitle(b)))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/bookings/{id}")
+    public ResponseEntity<BookingAdminResponse> getMyBooking(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = resolveUser(userDetails);
+        EventBooking booking = bookingService.getBookingById(id);
+        assertOwnership(booking, user);
+        return ResponseEntity.ok(BookingAdminResponse.from(booking, resolveTitle(booking)));
+    }
+
+    @GetMapping("/bookings/{id}/conditions")
+    public ResponseEntity<BookingConditionCheckResponse> checkConditions(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = resolveUser(userDetails);
+        EventBooking booking = bookingService.getBookingById(id);
+        assertOwnership(booking, user);
+        return ResponseEntity.ok(bookingService.checkConditions(id));
+    }
+
+    @PostMapping("/bookings/{id}/cancel")
+    public ResponseEntity<BookingAdminResponse> cancelBooking(
+            @PathVariable Long id,
+            @RequestBody(required = false) BookingCancelRequest req,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = resolveUser(userDetails);
+        EventBooking booking = bookingService.getBookingById(id);
+        assertOwnership(booking, user);
+        String reason = req != null ? req.getReason() : null;
+        bookingService.cancelBooking(id, reason, user.getUsername());
+        return ResponseEntity.ok(bookingService.getAdminBooking(id));
+    }
+
+    @PutMapping("/bookings/{id}")
+    public ResponseEntity<BookingAdminResponse> editBooking(
+            @PathVariable Long id,
+            @Valid @RequestBody BookingEditRequest req,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = resolveUser(userDetails);
+        EventBooking booking = bookingService.getBookingById(id);
+        assertOwnership(booking, user);
+        bookingService.editBooking(id, req, user.getUsername());
+        return ResponseEntity.ok(bookingService.getAdminBooking(id));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleConditionViolation(IllegalStateException ex) {
+        return ResponseEntity.status(422).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "You do not have permission to access this booking"));
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private User resolveUser(UserDetails userDetails) {
+        return userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    private void assertOwnership(EventBooking booking, User user) {
+        if (!user.getId().equals(booking.getCustomerId())) {
+            throw new AccessDeniedException("Booking does not belong to this user");
+        }
+    }
+
+    private String resolveTitle(EventBooking b) {
+        if (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()) && b.getPlaceId() != null) {
+            return placeRepository.findById(b.getPlaceId()).map(Place::getName).orElse("Unknown Place");
+        }
+        if (b.getEventId() != null) {
+            return eventRepository.findById(b.getEventId()).map(Event::getTitle).orElse("Unknown Event");
+        }
+        return "Unknown";
     }
 }

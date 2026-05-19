@@ -3,6 +3,7 @@ package com.travesrilankanow.travesrilankanowbe.dto;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -10,7 +11,7 @@ public class BookingAdminResponse {
 
     private Long id;
     private String bookingReference;
-    private EventBooking.BookingType bookingType;
+    private String bookingType;
     private Long eventId;
     private String eventTitle;
     private Long placeId;
@@ -23,17 +24,24 @@ public class BookingAdminResponse {
     private String specialRequests;
     private Double totalPrice;
     private LocalDateTime bookingDate;
+    private LocalDate requestedDate;
     private EventBooking.BookingStatus status;
     private EventBooking.PaymentStatus paymentStatus;
+    private boolean termsAccepted;
+    private String cancellationReason;
+    private LocalDateTime cancelledAt;
+    private LocalDateTime editedAt;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 
     public static BookingAdminResponse from(EventBooking b, String displayTitle) {
         BookingAdminResponse r = new BookingAdminResponse();
         r.setId(b.getId());
         r.setBookingReference(b.getBookingReference());
-        r.setBookingType(b.getBookingType() != null ? b.getBookingType() : EventBooking.BookingType.EVENT);
+        r.setBookingType(b.getBookingType() != null ? b.getBookingType() : EventBooking.BookingTypes.EVENT);
         r.setEventId(b.getEventId());
         r.setPlaceId(b.getPlaceId());
-        if (r.getBookingType() == EventBooking.BookingType.PLACE) {
+        if (EventBooking.BookingTypes.PLACE.equals(r.getBookingType())) {
             r.setPlaceName(displayTitle);
             r.setEventTitle(null);
         } else {
@@ -48,8 +56,15 @@ public class BookingAdminResponse {
         r.setSpecialRequests(b.getSpecialRequests());
         r.setTotalPrice(b.getTotalPrice());
         r.setBookingDate(b.getBookingDate());
+        r.setRequestedDate(b.getRequestedDate());
         r.setStatus(b.getStatus());
         r.setPaymentStatus(b.getPaymentStatus());
+        r.setTermsAccepted(b.isTermsAccepted());
+        r.setCancellationReason(b.getCancellationReason());
+        r.setCancelledAt(b.getCancelledAt());
+        r.setEditedAt(b.getEditedAt());
+        r.setCreatedDate(b.getCreatedDate());
+        r.setUpdatedDate(b.getUpdatedDate());
         return r;
     }
 }

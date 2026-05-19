@@ -1622,6 +1622,19 @@ $navbar-height: 80px;
       color: rgba($warm-gray, 0.5);
     }
 
+    &--blocked {
+      background: rgba(#ef4444, 0.1);
+      cursor: not-allowed;
+      pointer-events: none;
+
+      .booking-calendar__day-num {
+        color: #ef4444 !important;
+        text-decoration: line-through;
+        text-decoration-color: #ef4444;
+        opacity: 0.7;
+      }
+    }
+
     &--selected {
       background: $primary-navy !important;
       color: $white !important;
@@ -1682,6 +1695,7 @@ $navbar-height: 80px;
 
   &--available::before { background: rgba(#22c55e, 0.5); border: 1px solid #22c55e; }
   &--full::before      { background: rgba(#ef4444, 0.5); border: 1px solid #ef4444; }
+  &--blocked::before   { background: rgba(#ef4444, 0.15); border: 1px solid #ef4444; }
   &--selected::before  { background: $primary-navy; }
 }
 

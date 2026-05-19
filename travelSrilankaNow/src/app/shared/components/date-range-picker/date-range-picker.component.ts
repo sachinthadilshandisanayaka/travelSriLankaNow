@@ -10,6 +10,7 @@ export interface CalendarDay {
   inRange: boolean;
   isDisabled: boolean;
   isHover: boolean;
+  isBlocked: boolean;
 }
 
 @Component({
@@ -23,8 +24,10 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
   @Input() endDate: string = '';
   @Input() minDate: string = '';
   @Input() placeholder: string = 'Select date';
+  @Input() blockedDates: string[] = [];
   @Output() apply = new EventEmitter<{ start: string; end: string }>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() monthChange = new EventEmitter<{ year: number; month: number }>();
 
   isOpen = false;
   leftYear = 0;
@@ -34,8 +37,11 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
   hoverDate: string = '';
   leftDays: CalendarDay[] = [];
   rightDays: CalendarDay[] = [];
-  /** Tracks whether we're waiting for the end-date click in range mode */
   selectingEnd = false;
+
+  // Month/year picker
+  viewMode: 'days' | 'months' = 'days';
+  pickerYear = 0;
 
   readonly WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   readonly MONTHS = [
@@ -49,6 +55,7 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
     this.leftMonth = now.getMonth();
     this.tempStart = this.startDate || '';
     this.tempEnd = this.endDate || '';
+    this.pickerYear = this.leftYear;
     this.buildCalendars();
   }
 
@@ -83,11 +90,7 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
 
   toggleOpen(event: Event): void {
     event.stopPropagation();
-    if (this.isOpen) {
-      this.closePanel();
-    } else {
-      this.openPanel();
-    }
+    if (this.isOpen) { this.closePanel(); } else { this.openPanel(); }
   }
 
   private openPanel(): void {
@@ -95,6 +98,7 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
     this.tempEnd = this.endDate || '';
     this.hoverDate = '';
     this.selectingEnd = false;
+    this.viewMode = 'days';
     const now = new Date();
     this.leftYear = now.getFullYear();
     this.leftMonth = now.getMonth();
@@ -103,6 +107,7 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
       this.leftYear = d.getFullYear();
       this.leftMonth = d.getMonth();
     }
+    this.pickerYear = this.leftYear;
     this.buildCalendars();
     this.isOpen = true;
   }
@@ -111,25 +116,59 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
     this.isOpen = false;
     this.selectingEnd = false;
     this.hoverDate = '';
+    this.viewMode = 'days';
   }
 
   prevMonth(event: Event): void {
     event.stopPropagation();
     if (this.leftMonth === 0) { this.leftMonth = 11; this.leftYear--; }
     else { this.leftMonth--; }
+    this.pickerYear = this.leftYear;
     this.buildCalendars();
+    this.monthChange.emit({ year: this.leftYear, month: this.leftMonth });
   }
 
   nextMonth(event: Event): void {
     event.stopPropagation();
     if (this.leftMonth === 11) { this.leftMonth = 0; this.leftYear++; }
     else { this.leftMonth++; }
+    this.pickerYear = this.leftYear;
     this.buildCalendars();
+    this.monthChange.emit({ year: this.leftYear, month: this.leftMonth });
   }
+
+  // ── Month/Year picker ────────────────────────────────────────────────────
+
+  openMonthYearPicker(event: Event): void {
+    event.stopPropagation();
+    this.pickerYear = this.leftYear;
+    this.viewMode = 'months';
+  }
+
+  prevPickerYear(event: Event): void {
+    event.stopPropagation();
+    this.pickerYear--;
+  }
+
+  nextPickerYear(event: Event): void {
+    event.stopPropagation();
+    this.pickerYear++;
+  }
+
+  selectMonthYear(year: number, month: number): void {
+    this.leftYear = year;
+    this.leftMonth = month;
+    this.pickerYear = year;
+    this.viewMode = 'days';
+    this.buildCalendars();
+    this.monthChange.emit({ year: this.leftYear, month: this.leftMonth });
+  }
+
+  // ── Day selection ────────────────────────────────────────────────────────
 
   onDayClick(event: Event, day: CalendarDay): void {
     event.stopPropagation();
-    if (day.isDisabled || !day.currentMonth) return;
+    if (day.isDisabled || day.isBlocked || !day.currentMonth) return;
 
     if (this.mode === 'single') {
       this.tempStart = day.date;
@@ -139,23 +178,16 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
       return;
     }
 
-    // Range mode: explicit two-phase selection
     if (!this.selectingEnd) {
-      // Phase 1 — pick start date
       this.tempStart = day.date;
       this.tempEnd = '';
       this.hoverDate = '';
       this.selectingEnd = true;
     } else {
-      // Phase 2 — pick end date
       this.selectingEnd = false;
       if (day.date < this.tempStart) {
-        // Clicked before start → swap
         this.tempEnd = this.tempStart;
         this.tempStart = day.date;
-      } else if (day.date === this.tempStart) {
-        // Same day → single-day range
-        this.tempEnd = day.date;
       } else {
         this.tempEnd = day.date;
       }
@@ -225,18 +257,15 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
       const py = month === 0 ? year - 1 : year;
       days.push(this.makeDay(this.toDateStr(py, pm, d), d, false, today));
     }
-
     for (let d = 1; d <= daysInMonth; d++) {
       days.push(this.makeDay(this.toDateStr(year, month, d), d, true, today));
     }
-
     const remainder = 42 - days.length;
     const nm = month === 11 ? 0 : month + 1;
     const ny = month === 11 ? year + 1 : year;
     for (let d = 1; d <= remainder; d++) {
       days.push(this.makeDay(this.toDateStr(ny, nm, d), d, false, today));
     }
-
     return days;
   }
 
@@ -247,6 +276,9 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
     const re = this.tempStart && effectiveEnd
       ? (this.tempStart <= effectiveEnd ? effectiveEnd : this.tempStart) : '';
 
+    const isBlocked = currentMonth && this.blockedDates.includes(dateStr);
+    const isPast = !!(this.minDate && dateStr < this.minDate);
+
     return {
       date: dateStr,
       day,
@@ -255,8 +287,9 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
       isStart: !!(rs && dateStr === rs),
       isEnd: !!(re && dateStr === re) || (this.mode === 'single' && dateStr === this.tempStart),
       inRange: !!(rs && re && dateStr > rs && dateStr < re),
-      isDisabled: !!(this.minDate && dateStr < this.minDate),
-      isHover: dateStr === this.hoverDate
+      isDisabled: isPast || isBlocked,
+      isHover: dateStr === this.hoverDate,
+      isBlocked
     };
   }
 

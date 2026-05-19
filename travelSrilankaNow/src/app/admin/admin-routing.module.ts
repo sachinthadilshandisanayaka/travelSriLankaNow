@@ -20,6 +20,7 @@ import { AdminMoreSectionsComponent } from './components/admin-more-sections/adm
 import { AdminProfileComponent } from './components/admin-profile/admin-profile.component';
 import { AdminNavConfigComponent } from './components/admin-nav-config/admin-nav-config.component';
 import { AdminBookingsComponent } from './components/admin-bookings/admin-bookings.component';
+import { AdminBookingSettingsComponent } from './components/admin-booking-settings/admin-booking-settings.component';
 
 const routes: Routes = [
   {
@@ -47,6 +48,7 @@ const routes: Routes = [
       { path: 'order/:type', component: AdminItemOrderComponent },
       { path: 'nav-config', component: AdminNavConfigComponent },
       { path: 'bookings', component: AdminBookingsComponent },
+      { path: 'booking-settings', component: AdminBookingSettingsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

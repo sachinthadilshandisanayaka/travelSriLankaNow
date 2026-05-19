@@ -620,6 +620,23 @@
   margin-bottom: 0;
 }
 
+// ── Mobile overflow fix ───────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .navbar-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  // Hide "Sign In" text label, keep only the icon so the hamburger isn't pushed off-screen
+  .nav-auth-btn span {
+    display: none;
+  }
+
+  .nav-auth-btn {
+    padding: 0.4rem 0.5rem;
+  }
+}
+
 // Customer auth button — matches language switcher size exactly
 .nav-auth-btn {
   display: inline-flex;
