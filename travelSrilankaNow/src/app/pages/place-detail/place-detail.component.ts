@@ -32,6 +32,7 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
   reservationLoading = false;
   reservationError = '';
   reservationReference = '';
+  blockedDates: string[] = [];
 
   reservation = {
     visitorName: '',
@@ -222,6 +223,30 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
     return new Date().toISOString().split('T')[0];
   }
 
+  // ── Blocked dates ─────────────────────────────────────────────────────────
+
+  fetchBlockedDates(year: number, month: number): void {
+    if (!this.place) return;
+    const params = `bookingType=PLACE&entityId=${this.place.id}&year=${year}&month=${month + 1}`;
+    this.http.get<string[]>(`${environment.apiUrl}/availability/blocked-dates?${params}`).subscribe({
+      next: (dates) => {
+        // Merge with existing blocked dates (cover current + next month on desktop)
+        const combined = new Set([...this.blockedDates, ...dates]);
+        this.blockedDates = Array.from(combined);
+      },
+      error: () => {}
+    });
+  }
+
+  onMonthChange(event: { year: number; month: number }): void {
+    this.fetchBlockedDates(event.year, event.month);
+    // Also fetch the next month (right calendar on desktop)
+    const next = event.month === 11
+      ? { year: event.year + 1, month: 0 }
+      : { year: event.year, month: event.month + 1 };
+    this.fetchBlockedDates(next.year, next.month);
+  }
+
   // ── Date range picker callbacks ───────────────────────────────────────────
 
   onStayDatesApply(range: { start: string; end: string }): void {
@@ -260,6 +285,15 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
 
     this.showReservationModal = true;
     document.body.style.overflow = 'hidden';
+
+    // Pre-load blocked dates for current + next month
+    this.blockedDates = [];
+    const now = new Date();
+    this.fetchBlockedDates(now.getFullYear(), now.getMonth());
+    const nextMonth = now.getMonth() === 11
+      ? { year: now.getFullYear() + 1, month: 0 }
+      : { year: now.getFullYear(), month: now.getMonth() + 1 };
+    this.fetchBlockedDates(nextMonth.year, nextMonth.month);
   }
 
   closeReservationModal(): void {
@@ -394,9 +428,9 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
           this.reservationReference = res.bookingReference || '';
           this.reservationStep = 'success';
         },
-        error: () => {
+        error: (err) => {
           this.reservationLoading = false;
-          this.reservationError = 'Something went wrong. Please try again or contact us directly.';
+          this.reservationError = err?.error?.message || 'Something went wrong. Please try again or contact us directly.';
         }
       });
   }

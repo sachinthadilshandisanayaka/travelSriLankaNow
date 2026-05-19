@@ -322,8 +322,10 @@
             [minDate]="todayDate"
             [startDate]="reservation.checkInDate"
             [endDate]="reservation.checkOutDate"
+            [blockedDates]="blockedDates"
             placeholder="Select check-in & check-out dates"
-            (apply)="onStayDatesApply($event)">
+            (apply)="onStayDatesApply($event)"
+            (monthChange)="onMonthChange($event)">
           </app-date-range-picker>
         </div>
         <div class="res-form-group res-form-group--sm">
@@ -342,8 +344,10 @@
               mode="single"
               [minDate]="todayDate"
               [startDate]="reservation.visitDate"
+              [blockedDates]="blockedDates"
               placeholder="Select visit date"
-              (apply)="onVisitDateApply($event)">
+              (apply)="onVisitDateApply($event)"
+              (monthChange)="onMonthChange($event)">
             </app-date-range-picker>
           </div>
           <div class="res-form-group">
@@ -370,8 +374,10 @@
               mode="single"
               [minDate]="todayDate"
               [startDate]="reservation.visitDate"
+              [blockedDates]="blockedDates"
               placeholder="Select preferred date"
-              (apply)="onVisitDateApply($event)">
+              (apply)="onVisitDateApply($event)"
+              (monthChange)="onMonthChange($event)">
             </app-date-range-picker>
           </div>
           <div class="res-form-group res-form-group--sm">

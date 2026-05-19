@@ -48,6 +48,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   calendarMonth: Date = new Date();
   showMonthPicker = false;
   pickerYear = new Date().getFullYear();
+  blockedDates: string[] = [];
   readonly WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   readonly MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -194,6 +195,20 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), 1);
     this.showBookingModal = true;
     document.body.style.overflow = 'hidden';
+    this.blockedDates = [];
+    this.fetchBlockedDates(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth());
+  }
+
+  fetchBlockedDates(year: number, month: number): void {
+    if (!this.event) return;
+    const params = `bookingType=EVENT&entityId=${this.event.id}&year=${year}&month=${month + 1}`;
+    this.http.get<string[]>(`${environment.apiUrl}/availability/blocked-dates?${params}`).subscribe({
+      next: (dates) => {
+        const combined = new Set([...this.blockedDates, ...dates]);
+        this.blockedDates = Array.from(combined);
+      },
+      error: () => {}
+    });
   }
 
   closeBookingModal(): void {
@@ -215,12 +230,14 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     const d = new Date(this.calendarMonth);
     d.setMonth(d.getMonth() - 1);
     this.calendarMonth = d;
+    this.fetchBlockedDates(d.getFullYear(), d.getMonth());
   }
 
   calendarNextMonth(): void {
     const d = new Date(this.calendarMonth);
     d.setMonth(d.getMonth() + 1);
     this.calendarMonth = d;
+    this.fetchBlockedDates(d.getFullYear(), d.getMonth());
   }
 
   toggleMonthPicker(): void {
@@ -236,6 +253,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   selectPickerMonth(monthIndex: number): void {
     this.calendarMonth = new Date(this.pickerYear, monthIndex, 1);
     this.showMonthPicker = false;
+    this.fetchBlockedDates(this.pickerYear, monthIndex);
   }
 
   isPickerMonthSelected(monthIndex: number): boolean {
@@ -251,40 +269,43 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     return lastDay < today;
   }
 
-  get calendarDays(): Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean }> {
+  get calendarDays(): Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean; isBlocked: boolean }> {
     const year = this.calendarMonth.getFullYear();
     const month = this.calendarMonth.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const cells: Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean }> = [];
+    const cells: Array<{ date: Date | null; eventDate: any | null; isPast: boolean; isToday: boolean; isBlocked: boolean }> = [];
 
-    for (let i = 0; i < firstDay; i++) cells.push({ date: null, eventDate: null, isPast: false, isToday: false });
+    for (let i = 0; i < firstDay; i++) cells.push({ date: null, eventDate: null, isPast: false, isToday: false, isBlocked: false });
 
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
       const isPast = date < today;
       const isToday = date.getTime() === today.getTime();
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isBlocked = !isPast && this.blockedDates.includes(dateStr);
       const eventDate = this.event?.dates?.find(ed => {
         const ed2 = new Date(ed.date);
         return ed2.getFullYear() === year && ed2.getMonth() === month && ed2.getDate() === d;
       }) || null;
-      cells.push({ date, eventDate, isPast, isToday });
+      cells.push({ date, eventDate, isPast, isToday, isBlocked });
     }
     return cells;
   }
 
-  selectCalendarDate(cell: { date: Date | null; eventDate: any | null; isPast: boolean }): void {
-    if (!cell.date || cell.isPast) return;
+  selectCalendarDate(cell: { date: Date | null; eventDate: any | null; isPast: boolean; isBlocked: boolean }): void {
+    if (!cell.date || cell.isPast || cell.isBlocked) return;
     if (cell.eventDate) {
       if (cell.eventDate.availableSpots === 0) return;
       this.booking.selectedDateId = cell.eventDate.id;
       this.booking.preferredDate = null;
     } else {
-      // Free-form preferred date (for events without pre-defined dates)
+      // Free-form preferred date — use local date parts to avoid UTC timezone shift
       this.booking.selectedDateId = null;
-      this.booking.preferredDate = cell.date.toISOString().split('T')[0];
+      const d = cell.date;
+      this.booking.preferredDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
   }
 
@@ -292,7 +313,9 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     if (!cell.date) return false;
     if (cell.eventDate) return this.booking.selectedDateId === cell.eventDate.id;
     if (this.booking.preferredDate) {
-      return cell.date.toISOString().split('T')[0] === this.booking.preferredDate;
+      const d = cell.date;
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return dateStr === this.booking.preferredDate;
     }
     return false;
   }

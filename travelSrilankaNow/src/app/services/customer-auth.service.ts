@@ -94,6 +94,14 @@ export class CustomerAuthService {
     return this.http.get<any[]>(`${this.apiBase}/customer/bookings`);
   }
 
+  checkBookingConditions(bookingId: number): Observable<{ canCancel: boolean; cancelReason: string; canEdit: boolean; editReason: string }> {
+    return this.http.get<any>(`${this.apiBase}/customer/bookings/${bookingId}/conditions`);
+  }
+
+  cancelBooking(bookingId: number, reason?: string): Observable<any> {
+    return this.http.post(`${this.apiBase}/customer/bookings/${bookingId}/cancel`, { reason: reason || null });
+  }
+
   private handleAuthSuccess(res: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, res.access_token);
     // Clear any stale user data from a previous session before fetching fresh profile

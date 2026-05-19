@@ -18,8 +18,12 @@ export interface MyBooking {
   specialRequests: string;
   totalPrice: number;
   bookingDate: string;
+  requestedDate: string | null;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
+  cancellationReason: string | null;
+  cancelledAt: string | null;
+  termsAccepted: boolean;
 }
 
 @Component({
@@ -35,6 +39,13 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
   activeFilter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' = 'all';
   currentUser: CustomerUser | null = null;
   private userSub!: Subscription;
+
+  // Cancel dialog state
+  cancelDialogOpen = false;
+  cancelTargetBooking: MyBooking | null = null;
+  cancelReason = '';
+  cancelLoading = false;
+  cancelError = '';
 
   constructor(
     private customerAuthService: CustomerAuthService,
@@ -93,6 +104,60 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
     };
   }
 
+  // ── Cancel flow ───────────────────────────────────────────────────────────
+
+  initCancel(booking: MyBooking): void {
+    this.cancelError = '';
+    this.cancelLoading = true;
+    this.customerAuthService.checkBookingConditions(booking.id).subscribe({
+      next: (check) => {
+        this.cancelLoading = false;
+        if (!check.canCancel) {
+          this.cancelError = check.cancelReason || 'Cancellation is not allowed at this time.';
+          return;
+        }
+        this.cancelTargetBooking = booking;
+        this.cancelReason = '';
+        this.cancelDialogOpen = true;
+      },
+      error: () => {
+        this.cancelLoading = false;
+        this.cancelError = 'Could not verify cancellation eligibility. Please try again.';
+      }
+    });
+  }
+
+  confirmCancel(): void {
+    if (!this.cancelTargetBooking) return;
+    this.cancelLoading = true;
+    this.customerAuthService.cancelBooking(this.cancelTargetBooking.id, this.cancelReason).subscribe({
+      next: () => {
+        this.cancelLoading = false;
+        this.cancelDialogOpen = false;
+        this.cancelTargetBooking = null;
+        this.loadBookings();
+      },
+      error: (err) => {
+        this.cancelLoading = false;
+        const msg = err?.error?.error;
+        this.cancelError = msg || 'Failed to cancel booking. Please try again.';
+      }
+    });
+  }
+
+  closeCancel(): void {
+    this.cancelDialogOpen = false;
+    this.cancelTargetBooking = null;
+    this.cancelReason = '';
+    this.cancelError = '';
+  }
+
+  canCancel(booking: MyBooking): boolean {
+    return booking.status === 'pending' || booking.status === 'confirmed';
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
   statusLabel(status: string): string {
     const map: Record<string, string> = {
       pending: 'Pending', confirmed: 'Confirmed',
@@ -139,13 +204,5 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
     } else if (booking.eventId) {
       this.router.navigate(['/events', booking.eventId]);
     }
-  }
-
-  viewEvent(eventId: number): void {
-    this.router.navigate(['/events', eventId]);
-  }
-
-  canCancel(booking: MyBooking): boolean {
-    return booking.status === 'pending';
   }
 }

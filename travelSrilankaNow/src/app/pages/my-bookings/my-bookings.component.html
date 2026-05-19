@@ -34,6 +34,12 @@
       </button>
     </div>
 
+    <!-- Inline cancel error (condition check failed) -->
+    <div class="mb-error" *ngIf="cancelError && !cancelDialogOpen">
+      <span>⚠️</span> {{ cancelError }}
+      <button (click)="cancelError = ''">Dismiss</button>
+    </div>
+
     <!-- Loading -->
     <div class="mb-loading" *ngIf="loading">
       <div class="mb-spinner"></div>
@@ -91,32 +97,71 @@
             <span class="mb-info-item__value">{{ formatDate(b.bookingDate) }}</span>
           </div>
           <div class="mb-info-item">
+            <span class="mb-info-item__label">Visit / Event Date</span>
+            <span class="mb-info-item__value">{{ b.requestedDate ? formatDate(b.requestedDate) : '—' }}</span>
+          </div>
+          <div class="mb-info-item">
             <span class="mb-info-item__label">Participants</span>
             <span class="mb-info-item__value">👥 {{ b.numberOfPeople }} {{ b.numberOfPeople === 1 ? 'person' : 'people' }}</span>
           </div>
           <div class="mb-info-item">
-            <span class="mb-info-item__label">Total Paid</span>
+            <span class="mb-info-item__label">Total</span>
             <span class="mb-info-item__value mb-info-item__value--price">{{ formatCurrency(b.totalPrice) }}</span>
-          </div>
-          <div class="mb-info-item">
-            <span class="mb-info-item__label">Contact</span>
-            <span class="mb-info-item__value">{{ b.email }}</span>
           </div>
         </div>
 
         <!-- Special Requests -->
         <div class="mb-card__requests" *ngIf="b.specialRequests">
-          <span class="mb-card__requests-label">💬 Special requests:</span>
+          <span class="mb-card__requests-label">💬 Notes:</span>
           <span class="mb-card__requests-text">{{ b.specialRequests }}</span>
+        </div>
+
+        <!-- Cancellation Reason (shown when cancelled) -->
+        <div class="mb-card__cancelled" *ngIf="b.status === 'cancelled' && b.cancellationReason">
+          <span class="mb-card__cancelled-label">❌ Reason:</span>
+          <span class="mb-card__cancelled-text">{{ b.cancellationReason }}</span>
         </div>
 
         <!-- Footer Actions -->
         <div class="mb-card__footer">
           <button class="mb-btn-view" (click)="viewBookingSource(b)">View {{ bookingTypeLabel(b) }}</button>
+          <button class="mb-btn-cancel"
+                  *ngIf="canCancel(b)"
+                  [disabled]="cancelLoading"
+                  (click)="initCancel(b)">
+            <span *ngIf="cancelLoading && cancelTargetBooking?.id === b.id">...</span>
+            <span *ngIf="!(cancelLoading && cancelTargetBooking?.id === b.id)">Cancel</span>
+          </button>
         </div>
 
       </div>
     </div>
 
   </div>
+
+  <!-- Cancel Confirmation Dialog -->
+  <div class="mb-overlay" *ngIf="cancelDialogOpen" (click)="closeCancel()"></div>
+  <div class="mb-dialog" *ngIf="cancelDialogOpen">
+    <div class="mb-dialog__header">
+      <h3>Cancel Booking</h3>
+      <button class="mb-dialog__close" (click)="closeCancel()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="mb-dialog__body">
+      <p>You are about to cancel booking <strong>{{ cancelTargetBooking?.bookingReference }}</strong>.</p>
+      <p class="mb-dialog__subtitle">This action cannot be undone.</p>
+      <label class="mb-dialog__label">Reason (optional)</label>
+      <textarea class="mb-dialog__textarea"
+                [(ngModel)]="cancelReason"
+                placeholder="Let us know why you're cancelling..."
+                rows="3"></textarea>
+      <div class="mb-dialog__error" *ngIf="cancelError">{{ cancelError }}</div>
+    </div>
+    <div class="mb-dialog__footer">
+      <button class="mb-dialog__btn-secondary" (click)="closeCancel()" [disabled]="cancelLoading">Keep Booking</button>
+      <button class="mb-dialog__btn-danger" (click)="confirmCancel()" [disabled]="cancelLoading">
+        {{ cancelLoading ? 'Cancelling...' : 'Yes, Cancel' }}
+      </button>
+    </div>
+  </div>
+
 </div>

@@ -21,7 +21,7 @@
   <!-- Panel -->
   <div class="drp-panel" *ngIf="isOpen" (click)="$event.stopPropagation()">
 
-    <!-- Selection phase indicator -->
+    <!-- Phase hint -->
     <div class="drp-phase-hint" *ngIf="mode === 'range'">
       <span class="drp-phase-dot" [class.drp-phase-dot--active]="!selectingEnd"></span>
       <span [class.drp-phase-label--active]="!selectingEnd">Check-in</span>
@@ -30,87 +30,150 @@
       <span [class.drp-phase-label--active]="selectingEnd">Check-out</span>
     </div>
 
-    <div class="drp-calendars">
-
-      <!-- Left Calendar -->
-      <div class="drp-calendar">
-        <div class="drp-cal-nav">
-          <button type="button" class="drp-cal-nav__btn" (click)="prevMonth($event)" title="Previous month">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-          <span class="drp-cal-nav__title">{{ MONTHS[leftMonth] }} {{ leftYear }}</span>
-          <div class="drp-cal-nav__spacer"></div>
-        </div>
-
-        <div class="drp-cal-grid" (mouseleave)="clearHover()">
-          <div class="drp-cal-weekday" *ngFor="let wd of WEEKDAYS">{{ wd }}</div>
-          <div *ngFor="let day of leftDays; trackBy: trackByDate"
-               class="drp-cal-day"
-               [class.drp-cal-day--other]="!day.currentMonth"
-               [class.drp-cal-day--today]="day.isToday && day.currentMonth"
-               [class.drp-cal-day--start]="day.isStart && day.currentMonth"
-               [class.drp-cal-day--end]="day.isEnd && day.currentMonth"
-               [class.drp-cal-day--range]="day.inRange && day.currentMonth"
-               [class.drp-cal-day--disabled]="day.isDisabled"
-               [class.drp-cal-day--hover]="day.isHover && day.currentMonth"
-               (click)="onDayClick($event, day)"
-               (mouseenter)="onDayHover(day.date)">
-            <span *ngIf="day.currentMonth">{{ day.day }}</span>
-          </div>
-        </div>
+    <!-- Month/Year picker overlay -->
+    <div class="drp-month-picker" *ngIf="viewMode === 'months'" (click)="$event.stopPropagation()">
+      <div class="drp-month-picker__header">
+        <button type="button" class="drp-cal-nav__btn" (click)="prevPickerYear($event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <span class="drp-month-picker__year">{{ pickerYear }}</span>
+        <button type="button" class="drp-cal-nav__btn" (click)="nextPickerYear($event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
-
-      <div class="drp-divider"></div>
-
-      <!-- Right Calendar -->
-      <div class="drp-calendar">
-        <div class="drp-cal-nav">
-          <div class="drp-cal-nav__spacer"></div>
-          <span class="drp-cal-nav__title">{{ MONTHS[rightMonth] }} {{ rightYear }}</span>
-          <button type="button" class="drp-cal-nav__btn" (click)="nextMonth($event)" title="Next month">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
-        </div>
-
-        <div class="drp-cal-grid" (mouseleave)="clearHover()">
-          <div class="drp-cal-weekday" *ngFor="let wd of WEEKDAYS">{{ wd }}</div>
-          <div *ngFor="let day of rightDays; trackBy: trackByDate"
-               class="drp-cal-day"
-               [class.drp-cal-day--other]="!day.currentMonth"
-               [class.drp-cal-day--today]="day.isToday && day.currentMonth"
-               [class.drp-cal-day--start]="day.isStart && day.currentMonth"
-               [class.drp-cal-day--end]="day.isEnd && day.currentMonth"
-               [class.drp-cal-day--range]="day.inRange && day.currentMonth"
-               [class.drp-cal-day--disabled]="day.isDisabled"
-               [class.drp-cal-day--hover]="day.isHover && day.currentMonth"
-               (click)="onDayClick($event, day)"
-               (mouseenter)="onDayHover(day.date)">
-            <span *ngIf="day.currentMonth">{{ day.day }}</span>
-          </div>
-        </div>
+      <div class="drp-month-picker__grid">
+        <button *ngFor="let m of MONTHS; let i = index"
+                type="button"
+                class="drp-month-picker__month"
+                [class.drp-month-picker__month--active]="i === leftMonth && pickerYear === leftYear"
+                (click)="selectMonthYear(pickerYear, i)">
+          {{ m.slice(0, 3) }}
+        </button>
       </div>
-
-    </div>
-
-    <!-- Footer -->
-    <div class="drp-footer">
-      <div class="drp-footer__hint">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-        <span>{{ selectionHint }}</span>
-      </div>
-      <div class="drp-footer__actions">
-        <button type="button" class="drp-btn-cancel" (click)="onCancel($event)">Cancel</button>
-        <button type="button" class="drp-btn-apply" (click)="onApply($event)"
-                [disabled]="!tempStart || (mode === 'range' && !tempEnd)">Apply</button>
+      <div class="drp-month-picker__footer">
+        <button type="button" class="drp-btn-cancel" (click)="viewMode = 'days'">Back</button>
       </div>
     </div>
+
+    <!-- Calendars (hidden when month picker is open) -->
+    <ng-container *ngIf="viewMode === 'days'">
+
+      <!-- Mobile-only unified navigation row -->
+      <div class="drp-mobile-nav">
+        <button type="button" class="drp-cal-nav__btn" (click)="prevMonth($event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="drp-mobile-nav__title" (click)="openMonthYearPicker($event)">
+          {{ MONTHS[leftMonth] }} {{ leftYear }}
+        </button>
+        <button type="button" class="drp-cal-nav__btn" (click)="nextMonth($event)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <div class="drp-calendars">
+
+        <!-- Left Calendar -->
+        <div class="drp-calendar">
+          <div class="drp-cal-nav drp-cal-nav--desktop">
+            <button type="button" class="drp-cal-nav__btn" (click)="prevMonth($event)" title="Previous month">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button type="button" class="drp-cal-nav__title-btn" (click)="openMonthYearPicker($event)" title="Jump to month">
+              {{ MONTHS[leftMonth] }} {{ leftYear }}
+            </button>
+            <div class="drp-cal-nav__spacer"></div>
+          </div>
+
+          <div class="drp-cal-grid" (mouseleave)="clearHover()">
+            <div class="drp-cal-weekday" *ngFor="let wd of WEEKDAYS">{{ wd }}</div>
+            <div *ngFor="let day of leftDays; trackBy: trackByDate"
+                 class="drp-cal-day"
+                 [class.drp-cal-day--other]="!day.currentMonth"
+                 [class.drp-cal-day--today]="day.isToday && day.currentMonth"
+                 [class.drp-cal-day--start]="day.isStart && day.currentMonth"
+                 [class.drp-cal-day--end]="day.isEnd && day.currentMonth"
+                 [class.drp-cal-day--range]="day.inRange && day.currentMonth"
+                 [class.drp-cal-day--disabled]="day.isDisabled"
+                 [class.drp-cal-day--blocked]="day.isBlocked"
+                 [class.drp-cal-day--hover]="day.isHover && day.currentMonth"
+                 (click)="onDayClick($event, day)"
+                 (mouseenter)="onDayHover(day.date)">
+              <span *ngIf="day.currentMonth">{{ day.day }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="drp-divider drp-divider--desktop"></div>
+
+        <!-- Right Calendar (desktop only) -->
+        <div class="drp-calendar drp-calendar--right">
+          <div class="drp-cal-nav drp-cal-nav--desktop">
+            <div class="drp-cal-nav__spacer"></div>
+            <button type="button" class="drp-cal-nav__title-btn" (click)="openMonthYearPicker($event)" title="Jump to month">
+              {{ MONTHS[rightMonth] }} {{ rightYear }}
+            </button>
+            <button type="button" class="drp-cal-nav__btn" (click)="nextMonth($event)" title="Next month">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div class="drp-cal-grid" (mouseleave)="clearHover()">
+            <div class="drp-cal-weekday" *ngFor="let wd of WEEKDAYS">{{ wd }}</div>
+            <div *ngFor="let day of rightDays; trackBy: trackByDate"
+                 class="drp-cal-day"
+                 [class.drp-cal-day--other]="!day.currentMonth"
+                 [class.drp-cal-day--today]="day.isToday && day.currentMonth"
+                 [class.drp-cal-day--start]="day.isStart && day.currentMonth"
+                 [class.drp-cal-day--end]="day.isEnd && day.currentMonth"
+                 [class.drp-cal-day--range]="day.inRange && day.currentMonth"
+                 [class.drp-cal-day--disabled]="day.isDisabled"
+                 [class.drp-cal-day--blocked]="day.isBlocked"
+                 [class.drp-cal-day--hover]="day.isHover && day.currentMonth"
+                 (click)="onDayClick($event, day)"
+                 (mouseenter)="onDayHover(day.date)">
+              <span *ngIf="day.currentMonth">{{ day.day }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Blocked dates legend (show only when there are blocked dates visible) -->
+      <div class="drp-legend" *ngIf="blockedDates.length > 0">
+        <span class="drp-legend__dot drp-legend__dot--blocked"></span>
+        <span class="drp-legend__label">Fully booked — date unavailable</span>
+      </div>
+
+      <!-- Footer -->
+      <div class="drp-footer">
+        <div class="drp-footer__hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>{{ selectionHint }}</span>
+        </div>
+        <div class="drp-footer__actions">
+          <button type="button" class="drp-btn-cancel" (click)="onCancel($event)">Cancel</button>
+          <button type="button" class="drp-btn-apply" (click)="onApply($event)"
+                  [disabled]="!tempStart || (mode === 'range' && !tempEnd)">Apply</button>
+        </div>
+      </div>
+
+    </ng-container>
 
   </div>
 </div>

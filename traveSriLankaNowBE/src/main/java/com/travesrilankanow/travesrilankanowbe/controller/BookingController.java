@@ -3,7 +3,9 @@ package com.travesrilankanow.travesrilankanowbe.controller;
 import com.travesrilankanow.travesrilankanowbe.dto.BookingAdminResponse;
 import com.travesrilankanow.travesrilankanowbe.dto.BookingCalendarDay;
 import com.travesrilankanow.travesrilankanowbe.dto.EventBookingDTO;
+import com.travesrilankanow.travesrilankanowbe.entity.BkAuditLog;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
+import com.travesrilankanow.travesrilankanowbe.service.BookingAuditService;
 import com.travesrilankanow.travesrilankanowbe.service.EventBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-
 import java.util.List;
 
 @RestController
@@ -26,19 +27,32 @@ import java.util.List;
 public class BookingController {
 
     private final EventBookingService bookingService;
+    private final BookingAuditService auditService;
 
-    // ---- Customer-facing ----
+    // ── Customer-facing ───────────────────────────────────────────────────────
+    // Cancel / edit / condition-check live in CustomerController (/api/customer/bookings/...)
+    // which requires authentication and verifies booking ownership.
 
     @PostMapping("/events/book")
     public ResponseEntity<EventBooking> bookEvent(
             @Valid @RequestBody EventBookingDTO bookingDTO,
             Authentication authentication) {
         String username = authentication != null ? authentication.getName() : null;
-        EventBooking booking = bookingService.bookEvent(bookingDTO, username);
-        return ResponseEntity.status(HttpStatus.CREATED).body(booking);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(bookingService.bookEvent(bookingDTO, username));
     }
 
-    // ---- Admin-protected ----
+    /** Public endpoint — returns fully-booked dates for a given month so the FE calendar can block them. */
+    @GetMapping("/availability/blocked-dates")
+    public ResponseEntity<List<String>> getBlockedDates(
+            @RequestParam String bookingType,
+            @RequestParam(required = false) Long entityId,
+            @RequestParam int year,
+            @RequestParam int month) {
+        return ResponseEntity.ok(bookingService.getBlockedDates(bookingType, entityId, year, month));
+    }
+
+    // ── Admin-protected ───────────────────────────────────────────────────────
 
     @GetMapping("/admin/bookings")
     public ResponseEntity<Page<BookingAdminResponse>> getAdminBookings(
@@ -52,8 +66,7 @@ public class BookingController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(bookingService.getAdminBookings(
                 status, search, reference,
-                dateFrom != null ? dateFrom.atStartOfDay() : null,
-                dateTo != null ? dateTo.atTime(23, 59, 59) : null,
+                dateFrom, dateTo,
                 pageable));
     }
 
@@ -65,8 +78,10 @@ public class BookingController {
     @PatchMapping("/admin/bookings/{id}/status")
     public ResponseEntity<BookingAdminResponse> updateBookingStatus(
             @PathVariable Long id,
-            @RequestParam EventBooking.BookingStatus status) {
-        bookingService.updateBookingStatus(id, status);
+            @RequestParam EventBooking.BookingStatus status,
+            Authentication authentication) {
+        String changedBy = authentication != null ? authentication.getName() : "admin";
+        bookingService.updateBookingStatus(id, status, changedBy);
         return ResponseEntity.ok(bookingService.getAdminBooking(id));
     }
 
@@ -75,5 +90,10 @@ public class BookingController {
             @RequestParam int year,
             @RequestParam int month) {
         return ResponseEntity.ok(bookingService.getBookingCalendar(year, month));
+    }
+
+    @GetMapping("/admin/bookings/{id}/audit")
+    public ResponseEntity<List<BkAuditLog>> getAuditHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(auditService.getHistory(id));
     }
 }

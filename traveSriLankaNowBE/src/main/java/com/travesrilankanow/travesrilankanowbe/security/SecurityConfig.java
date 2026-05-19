@@ -1,5 +1,6 @@
 package com.travesrilankanow.travesrilankanowbe.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/entity-field-configs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bookings/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/events/book").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
 
                         // Admin endpoints - require ADMIN role
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -66,6 +68,13 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\":\"Token expired or missing. Please log in again.\",\"status\":401}");
+                        })
                 )
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
