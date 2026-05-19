@@ -8,8 +8,10 @@ import { environment } from '../../../../environments/environment';
 export interface BookingAdminResponse {
   id: number;
   bookingReference: string;
-  eventId: number;
+  bookingType: 'EVENT' | 'PLACE';
+  eventId: number | null;
   eventTitle: string;
+  placeId: number | null;
   customerId: number | null;
   participantName: string;
   email: string;
@@ -18,8 +20,15 @@ export interface BookingAdminResponse {
   specialRequests: string;
   totalPrice: number;
   bookingDate: string;
+  requestedDate: string | null;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
+  termsAccepted: boolean;
+  cancellationReason: string | null;
+  cancelledAt: string | null;
+  editedAt: string | null;
+  createdDate: string | null;
+  updatedDate: string | null;
 }
 
 export interface BookingCalendarDay {

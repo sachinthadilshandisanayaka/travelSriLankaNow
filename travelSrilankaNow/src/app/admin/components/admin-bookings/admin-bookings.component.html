@@ -119,11 +119,11 @@
         <thead>
           <tr>
             <th>Reference</th>
-            <th>Event</th>
+            <th>Event / Place</th>
             <th>Participant</th>
             <th>People</th>
             <th>Total</th>
-            <th>Booked</th>
+            <th>Visit Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -140,7 +140,7 @@
             </td>
             <td class="center">{{ b.numberOfPeople }}</td>
             <td class="price-cell">${{ b.totalPrice | number:'1.0-2' }}</td>
-            <td class="date-cell">{{ formatDate(b.bookingDate) }}</td>
+            <td class="date-cell">{{ b.requestedDate || (formatDate(b.bookingDate) | slice:0:11) }}</td>
             <td><span [class]="getStatusClass(b.status)">{{ b.status | titlecase }}</span></td>
             <td class="actions-cell" (click)="$event.stopPropagation()">
               <button class="admin-btn admin-btn--xs admin-btn--confirm"
@@ -434,6 +434,23 @@
           </div>
           <div class="bk-section__value">{{ formatDate(selectedBooking.bookingDate) }}</div>
         </div>
+      </div>
+
+      <!-- Requested / visit date -->
+      <div class="bk-section" *ngIf="selectedBooking.requestedDate">
+        <div class="bk-section__title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          Visit / Event Date
+        </div>
+        <div class="bk-section__value bk-section__value--strong">{{ selectedBooking.requestedDate }}</div>
+      </div>
+
+      <!-- Cancellation info -->
+      <div class="bk-section bk-section--danger" *ngIf="selectedBooking.status === 'cancelled' && selectedBooking.cancellationReason">
+        <div class="bk-section__title">Cancellation Reason</div>
+        <div class="bk-section__value bk-section__value--note">{{ selectedBooking.cancellationReason }}</div>
       </div>
 
       <!-- Special requests -->

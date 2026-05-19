@@ -372,18 +372,20 @@
                    [class.booking-calendar__cell--empty]="!cell.date"
                    [class.booking-calendar__cell--past]="cell.isPast"
                    [class.booking-calendar__cell--today]="cell.isToday"
-                   [class.booking-calendar__cell--available]="cell.eventDate && !cell.isPast && cell.eventDate.availableSpots > 0"
+                   [class.booking-calendar__cell--blocked]="cell.isBlocked"
+                   [class.booking-calendar__cell--available]="cell.eventDate && !cell.isPast && !cell.isBlocked && cell.eventDate.availableSpots > 0"
                    [class.booking-calendar__cell--full]="cell.eventDate && cell.eventDate.availableSpots === 0"
                    [class.booking-calendar__cell--selected]="isCalendarDaySelected(cell)"
                    (click)="selectCalendarDate(cell)">
                 <span class="booking-calendar__day-num" *ngIf="cell.date">{{ cell.date.getDate() }}</span>
-                <span class="booking-calendar__dot" *ngIf="cell.eventDate && !cell.isPast && cell.eventDate.availableSpots > 0"></span>
+                <span class="booking-calendar__dot" *ngIf="cell.eventDate && !cell.isPast && !cell.isBlocked && cell.eventDate.availableSpots > 0"></span>
               </div>
             </div>
             <!-- Legend -->
-            <div class="booking-calendar__legend" *ngIf="hasEventDates">
-              <span class="legend-item legend-item--available">Available</span>
-              <span class="legend-item legend-item--full">Fully Booked</span>
+            <div class="booking-calendar__legend" *ngIf="hasEventDates || blockedDates.length > 0">
+              <span class="legend-item legend-item--available" *ngIf="hasEventDates">Available</span>
+              <span class="legend-item legend-item--full" *ngIf="hasEventDates">Fully Booked</span>
+              <span class="legend-item legend-item--blocked" *ngIf="blockedDates.length > 0">Unavailable</span>
               <span class="legend-item legend-item--selected">Selected</span>
             </div>
             <!-- Selected date info -->

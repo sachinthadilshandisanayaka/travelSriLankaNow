@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -37,8 +38,13 @@ public class EventBookingDTO {
 
     private String specialRequests;
 
-    // Free-form preferred date when event has no specific dates defined
+    /** Customer's chosen visit/event date. Stored as requestedDate on the booking record. */
+    private LocalDate requestedDate;
+
+    /** Legacy free-text field kept for backward compatibility */
     private String preferredDate;
+
+    private Boolean termsAccepted;
 
     @NotNull(message = "Total price is required")
     @Min(value = 0, message = "Price cannot be negative")

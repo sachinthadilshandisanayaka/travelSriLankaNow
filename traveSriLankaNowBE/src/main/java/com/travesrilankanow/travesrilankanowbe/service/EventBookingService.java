@@ -1,20 +1,13 @@
 package com.travesrilankanow.travesrilankanowbe.service;
 
-import com.travesrilankanow.travesrilankanowbe.dto.BookingAdminResponse;
-import com.travesrilankanow.travesrilankanowbe.dto.BookingCalendarDay;
-import com.travesrilankanow.travesrilankanowbe.dto.EventBookingDTO;
-import com.travesrilankanow.travesrilankanowbe.dto.PlaceBookingRequest;
+import com.travesrilankanow.travesrilankanowbe.dto.*;
+import com.travesrilankanow.travesrilankanowbe.entity.BkAvailabilityConfig;
 import com.travesrilankanow.travesrilankanowbe.entity.Event;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import com.travesrilankanow.travesrilankanowbe.entity.EventDate;
 import com.travesrilankanow.travesrilankanowbe.entity.Place;
 import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
-import com.travesrilankanow.travesrilankanowbe.repository.BookingSpecification;
-import com.travesrilankanow.travesrilankanowbe.repository.EventBookingRepository;
-import com.travesrilankanow.travesrilankanowbe.repository.EventDateRepository;
-import com.travesrilankanow.travesrilankanowbe.repository.EventRepository;
-import com.travesrilankanow.travesrilankanowbe.repository.PlaceRepository;
-import com.travesrilankanow.travesrilankanowbe.repository.UserRepository;
+import com.travesrilankanow.travesrilankanowbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,53 +35,65 @@ public class EventBookingService {
     private final EventDateRepository eventDateRepository;
     private final UserRepository userRepository;
     private final PlaceRepository placeRepository;
+    private final BookingConditionEngine conditionEngine;
+    private final BookingAuditService auditService;
+    private final BkAvailabilityConfigRepository availabilityRepo;
 
     @Transactional
-    public EventBooking bookEvent(EventBookingDTO bookingDTO, String currentUsername) {
-        // Validate event exists
-        eventRepository.findById(bookingDTO.getEventId())
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found: " + bookingDTO.getEventId()));
+    public EventBooking bookEvent(EventBookingDTO dto, String currentUsername) {
+        eventRepository.findById(dto.getEventId())
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found: " + dto.getEventId()));
 
-        // Handle optional event date
-        if (bookingDTO.getEventDateId() != null) {
-            EventDate eventDate = eventDateRepository.findById(bookingDTO.getEventDateId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Event date not found: " + bookingDTO.getEventDateId()));
-            if (eventDate.getAvailableSpots() < bookingDTO.getNumberOfPeople()) {
+        // Resolve requestedDate before availability check
+        LocalDate requestedDate = dto.getRequestedDate();
+        if (requestedDate == null && dto.getPreferredDate() != null && !dto.getPreferredDate().isBlank()) {
+            try { requestedDate = LocalDate.parse(dto.getPreferredDate()); } catch (Exception ignored) {}
+        }
+
+        checkAvailability(EventBooking.BookingTypes.EVENT, dto.getEventId(), requestedDate);
+
+        if (dto.getEventDateId() != null) {
+            EventDate eventDate = eventDateRepository.findById(dto.getEventDateId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Event date not found: " + dto.getEventDateId()));
+            if (eventDate.getAvailableSpots() < dto.getNumberOfPeople()) {
                 throw new IllegalStateException("Not enough spots available for this date");
             }
-            eventDate.setAvailableSpots(eventDate.getAvailableSpots() - bookingDTO.getNumberOfPeople());
+            eventDate.setAvailableSpots(eventDate.getAvailableSpots() - dto.getNumberOfPeople());
             eventDateRepository.save(eventDate);
         }
 
         EventBooking booking = new EventBooking();
-        booking.setEventId(bookingDTO.getEventId());
-        booking.setEventDateId(bookingDTO.getEventDateId());
-        booking.setParticipantName(bookingDTO.getParticipantName());
-        booking.setEmail(bookingDTO.getEmail());
-        booking.setPhone(bookingDTO.getPhone());
-        booking.setNumberOfPeople(bookingDTO.getNumberOfPeople());
-        String notes = bookingDTO.getSpecialRequests() != null ? bookingDTO.getSpecialRequests() : "";
-        if (bookingDTO.getPreferredDate() != null && !bookingDTO.getPreferredDate().isBlank()) {
-            notes = (notes.isBlank() ? "" : notes + "\n") + "Preferred date: " + bookingDTO.getPreferredDate();
-        }
-        booking.setSpecialRequests(notes.isBlank() ? null : notes);
-        booking.setTotalPrice(bookingDTO.getTotalPrice());
+        booking.setBookingType(EventBooking.BookingTypes.EVENT);
+        booking.setEventId(dto.getEventId());
+        booking.setEventDateId(dto.getEventDateId());
+        booking.setParticipantName(dto.getParticipantName());
+        booking.setEmail(dto.getEmail());
+        booking.setPhone(dto.getPhone());
+        booking.setNumberOfPeople(dto.getNumberOfPeople());
+        booking.setTotalPrice(dto.getTotalPrice());
         booking.setBookingDate(LocalDateTime.now());
         booking.setStatus(EventBooking.BookingStatus.pending);
         booking.setPaymentStatus(EventBooking.PaymentStatus.UNPAID);
+        booking.setTermsAccepted(Boolean.TRUE.equals(dto.getTermsAccepted()));
+        booking.setRequestedDate(requestedDate);
 
-        // Link authenticated customer if logged in
+        // Append any free-text notes to specialRequests
+        String notes = dto.getSpecialRequests() != null ? dto.getSpecialRequests() : "";
+        booking.setSpecialRequests(notes.isBlank() ? null : notes);
+
         if (currentUsername != null) {
             userRepository.findByUsername(currentUsername)
-                    .ifPresent(user -> booking.setCustomerId(user.getId()));
+                    .ifPresent(user -> {
+                        booking.setCustomerId(user.getId());
+                        booking.setCreatedBy(user.getUsername());
+                    });
         }
 
-        // Save first to get the generated ID, then set reference
         EventBooking saved = bookingRepository.save(booking);
-        String ref = "TSL-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"))
-                + "-" + String.format("%04d", saved.getId());
-        saved.setBookingReference(ref);
-        return bookingRepository.save(saved);
+        saved.setBookingReference(buildRef(saved.getId()));
+        saved = bookingRepository.save(saved);
+        auditService.logCreated(saved, currentUsername);
+        return saved;
     }
 
     @Transactional
@@ -106,8 +112,19 @@ public class EventBookingService {
         if (req.getPreferredTime() != null && !req.getPreferredTime().isBlank())
             notes.append("\nPreferred time: ").append(req.getPreferredTime());
 
+        // Resolve requestedDate from the visit/check-in date fields
+        LocalDate requestedDate = null;
+        if (req.getVisitDate() != null && !req.getVisitDate().isBlank()) {
+            try { requestedDate = LocalDate.parse(req.getVisitDate()); } catch (Exception ignored) {}
+        }
+        if (requestedDate == null && req.getCheckInDate() != null && !req.getCheckInDate().isBlank()) {
+            try { requestedDate = LocalDate.parse(req.getCheckInDate()); } catch (Exception ignored) {}
+        }
+
+        checkAvailability(EventBooking.BookingTypes.PLACE, placeId, requestedDate);
+
         EventBooking booking = new EventBooking();
-        booking.setBookingType(EventBooking.BookingType.PLACE);
+        booking.setBookingType(EventBooking.BookingTypes.PLACE);
         booking.setPlaceId(placeId);
         booking.setParticipantName(req.getVisitorName());
         booking.setEmail(req.getEmail());
@@ -116,19 +133,23 @@ public class EventBookingService {
         booking.setSpecialRequests(notes.toString());
         booking.setTotalPrice(0.0);
         booking.setBookingDate(LocalDateTime.now());
+        booking.setRequestedDate(requestedDate);
         booking.setStatus(EventBooking.BookingStatus.pending);
         booking.setPaymentStatus(EventBooking.PaymentStatus.UNPAID);
 
         if (currentUsername != null) {
             userRepository.findByUsername(currentUsername)
-                    .ifPresent(user -> booking.setCustomerId(user.getId()));
+                    .ifPresent(user -> {
+                        booking.setCustomerId(user.getId());
+                        booking.setCreatedBy(user.getUsername());
+                    });
         }
 
         EventBooking saved = bookingRepository.save(booking);
-        String ref = "TSL-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"))
-                + "-" + String.format("%04d", saved.getId());
-        saved.setBookingReference(ref);
-        return bookingRepository.save(saved);
+        saved.setBookingReference(buildRef(saved.getId()));
+        saved = bookingRepository.save(saved);
+        auditService.logCreated(saved, currentUsername);
+        return saved;
     }
 
     public List<EventBooking> getAllBookings() {
@@ -149,10 +170,73 @@ public class EventBookingService {
     }
 
     @Transactional
-    public EventBooking updateBookingStatus(Long id, EventBooking.BookingStatus status) {
+    public EventBooking updateBookingStatus(Long id, EventBooking.BookingStatus newStatus, String changedBy) {
         EventBooking booking = getBookingById(id);
-        booking.setStatus(status);
-        return bookingRepository.save(booking);
+        String oldStatus = booking.getStatus().name();
+        booking.setStatus(newStatus);
+        if (changedBy != null) booking.setUpdatedBy(changedBy);
+        EventBooking saved = bookingRepository.save(booking);
+        auditService.logStatusChange(saved.getId(), oldStatus, newStatus.name(), changedBy, null);
+        return saved;
+    }
+
+    /** Customer-facing: cancel with condition validation */
+    @Transactional
+    public EventBooking cancelBooking(Long id, String reason, String username) {
+        EventBooking booking = getBookingById(id);
+
+        if (!conditionEngine.canCancel(booking)) {
+            String msg = conditionEngine.getCancelViolationReason(booking);
+            throw new IllegalStateException(msg != null ? msg : "Cancellation not allowed at this time");
+        }
+
+        String oldStatus = booking.getStatus().name();
+        booking.setStatus(EventBooking.BookingStatus.cancelled);
+        booking.setCancellationReason(reason);
+        booking.setCancelledAt(LocalDateTime.now());
+        booking.setUpdatedBy(username);
+        EventBooking saved = bookingRepository.save(booking);
+        auditService.logCancelled(saved.getId(), oldStatus, username, reason);
+        return saved;
+    }
+
+    /** Customer-facing: edit booking details with condition validation */
+    @Transactional
+    public EventBooking editBooking(Long id, BookingEditRequest req, String username) {
+        EventBooking booking = getBookingById(id);
+
+        if (!conditionEngine.canEdit(booking)) {
+            String msg = conditionEngine.getEditViolationReason(booking);
+            throw new IllegalStateException(msg != null ? msg : "Editing not allowed at this time");
+        }
+
+        if (req.getParticipantName() != null && !req.getParticipantName().isBlank())
+            booking.setParticipantName(req.getParticipantName());
+        if (req.getPhone() != null && !req.getPhone().isBlank())
+            booking.setPhone(req.getPhone());
+        if (req.getNumberOfPeople() != null)
+            booking.setNumberOfPeople(req.getNumberOfPeople());
+        if (req.getSpecialRequests() != null)
+            booking.setSpecialRequests(req.getSpecialRequests());
+        if (req.getRequestedDate() != null)
+            booking.setRequestedDate(req.getRequestedDate());
+        if (Boolean.TRUE.equals(req.getTermsAccepted()))
+            booking.setTermsAccepted(true);
+
+        booking.setEditedAt(LocalDateTime.now());
+        booking.setUpdatedBy(username);
+        EventBooking saved = bookingRepository.save(booking);
+        auditService.logEdited(saved.getId(), username);
+        return saved;
+    }
+
+    public BookingConditionCheckResponse checkConditions(Long id) {
+        EventBooking booking = getBookingById(id);
+        boolean canCancel = conditionEngine.canCancel(booking);
+        boolean canEdit = conditionEngine.canEdit(booking);
+        return new BookingConditionCheckResponse(
+                canCancel, conditionEngine.getCancelViolationReason(booking),
+                canEdit,   conditionEngine.getEditViolationReason(booking));
     }
 
     // ===== Admin methods =====
@@ -161,8 +245,8 @@ public class EventBookingService {
             EventBooking.BookingStatus status,
             String search,
             String reference,
-            LocalDateTime dateFrom,
-            LocalDateTime dateTo,
+            LocalDate dateFrom,
+            LocalDate dateTo,
             Pageable pageable) {
         boolean hasFilters = status != null
                 || (search != null && !search.isBlank())
@@ -183,18 +267,7 @@ public class EventBookingService {
 
     public BookingAdminResponse getAdminBooking(Long id) {
         EventBooking b = getBookingById(id);
-        String title = resolveBookingTitle(b);
-        return BookingAdminResponse.from(b, title);
-    }
-
-    private String resolveBookingTitle(EventBooking b) {
-        if (b.getBookingType() == EventBooking.BookingType.PLACE && b.getPlaceId() != null) {
-            return placeRepository.findById(b.getPlaceId()).map(Place::getName).orElse("Unknown Place");
-        }
-        if (b.getEventId() != null) {
-            return eventRepository.findById(b.getEventId()).map(Event::getTitle).orElse("Unknown Event");
-        }
-        return "Unknown";
+        return BookingAdminResponse.from(b, resolveBookingTitle(b));
     }
 
     public List<BookingCalendarDay> getBookingCalendar(int year, int month) {
@@ -202,11 +275,16 @@ public class EventBookingService {
         LocalDateTime from = ym.atDay(1).atStartOfDay();
         LocalDateTime to = ym.atEndOfMonth().atTime(23, 59, 59);
 
-        List<EventBooking> bookings = bookingRepository.findByBookingDateBetween(from, to);
-        Map<String, List<EventBooking>> byDate = bookings.stream()
-                .collect(Collectors.groupingBy(b -> b.getBookingDate().toLocalDate().toString()));
+        List<EventBooking> bookings = bookingRepository.findByBookingDateBetweenOrRequestedDateBetween(
+                from, to, ym.atDay(1), ym.atEndOfMonth());
 
-        // Pre-load event and place titles
+        // Group by requestedDate when available; fall back to bookingDate
+        Map<String, List<EventBooking>> byDate = bookings.stream()
+                .collect(Collectors.groupingBy(b -> {
+                    if (b.getRequestedDate() != null) return b.getRequestedDate().toString();
+                    return b.getBookingDate().toLocalDate().toString();
+                }));
+
         Map<Long, String> eventTitles = bookings.stream()
                 .filter(b -> b.getEventId() != null)
                 .map(EventBooking::getEventId).distinct()
@@ -227,7 +305,7 @@ public class EventBookingService {
             long completed = dayBookings.stream().filter(b -> b.getStatus() == EventBooking.BookingStatus.completed).count();
             List<BookingAdminResponse> enriched = dayBookings.stream()
                     .map(b -> {
-                        String title = (b.getBookingType() == EventBooking.BookingType.PLACE)
+                        String title = (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()))
                                 ? placeTitles.getOrDefault(b.getPlaceId(), "Unknown Place")
                                 : eventTitles.getOrDefault(b.getEventId(), "Unknown Event");
                         return BookingAdminResponse.from(b, title);
@@ -236,6 +314,16 @@ public class EventBookingService {
             result.add(new BookingCalendarDay(date, dayBookings.size(), pending, confirmed, completed, enriched));
         }
         return result;
+    }
+
+    private String resolveBookingTitle(EventBooking b) {
+        if (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()) && b.getPlaceId() != null) {
+            return placeRepository.findById(b.getPlaceId()).map(Place::getName).orElse("Unknown Place");
+        }
+        if (b.getEventId() != null) {
+            return eventRepository.findById(b.getEventId()).map(Event::getTitle).orElse("Unknown Event");
+        }
+        return "Unknown";
     }
 
     private List<BookingAdminResponse> enrichBookings(List<EventBooking> bookings) {
@@ -251,11 +339,98 @@ public class EventBookingService {
                         id -> placeRepository.findById(id).map(Place::getName).orElse("Unknown Place")));
         return bookings.stream()
                 .map(b -> {
-                    String title = (b.getBookingType() == EventBooking.BookingType.PLACE)
+                    String title = (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()))
                             ? placeTitles.getOrDefault(b.getPlaceId(), "Unknown Place")
                             : eventTitles.getOrDefault(b.getEventId(), "Unknown Event");
                     return BookingAdminResponse.from(b, title);
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns ISO date strings (yyyy-MM-dd) that are fully booked for a given month.
+     * Used by the frontend calendar to visually block unavailable dates.
+     */
+    public List<String> getBlockedDates(String bookingType, Long entityId, int year, int month) {
+        Optional<BkAvailabilityConfig> cfgOpt = entityId != null
+                ? availabilityRepo.findByBookingTypeCodeAndEntityIdAndActiveTrue(bookingType, entityId)
+                : Optional.empty();
+        if (cfgOpt.isEmpty()) {
+            cfgOpt = availabilityRepo.findByBookingTypeCodeAndEntityIdIsNullAndActiveTrue(bookingType);
+        }
+        if (cfgOpt.isEmpty()) return List.of();
+
+        BkAvailabilityConfig cfg = cfgOpt.get();
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate from = ym.atDay(1);
+        LocalDate to = ym.atEndOfMonth();
+
+        List<Object[]> rows;
+        if (entityId != null) {
+            rows = EventBooking.BookingTypes.EVENT.equals(bookingType)
+                    ? bookingRepository.countByTypeAndEventAndDateRange(bookingType, entityId, from, to, EventBooking.BookingStatus.cancelled)
+                    : bookingRepository.countByTypeAndPlaceAndDateRange(bookingType, entityId, from, to, EventBooking.BookingStatus.cancelled);
+        } else {
+            rows = bookingRepository.countByTypeAndDateRange(bookingType, from, to, EventBooking.BookingStatus.cancelled);
+        }
+
+        return rows.stream()
+                .filter(row -> {
+                    long count = ((Number) row[1]).longValue();
+                    if (cfg.getMaxBookingsPerDate() != null) {
+                        return count >= cfg.getMaxBookingsPerDate();
+                    }
+                    return !cfg.isAllowMultiplePerDate() && count > 0;
+                })
+                .map(row -> row[0].toString())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Enforces BkAvailabilityConfig rules for the given booking type + entity + date.
+     * Entity-specific config takes priority over global (entityId = null) config.
+     * Throws IllegalStateException when a limit would be exceeded.
+     */
+    private void checkAvailability(String bookingType, Long entityId, LocalDate requestedDate) {
+        if (requestedDate == null) return;
+
+        // Entity-specific config first, then fall back to global
+        java.util.Optional<BkAvailabilityConfig> configOpt = entityId != null
+                ? availabilityRepo.findByBookingTypeCodeAndEntityIdAndActiveTrue(bookingType, entityId)
+                : java.util.Optional.empty();
+        if (configOpt.isEmpty()) {
+            configOpt = availabilityRepo.findByBookingTypeCodeAndEntityIdIsNullAndActiveTrue(bookingType);
+        }
+        if (configOpt.isEmpty()) return; // no rule configured → allow
+
+        BkAvailabilityConfig cfg = configOpt.get();
+
+        long existing;
+        if (entityId != null) {
+            existing = EventBooking.BookingTypes.EVENT.equals(bookingType)
+                    ? bookingRepository.countActiveByTypeAndEventAndDate(bookingType, entityId, requestedDate, EventBooking.BookingStatus.cancelled)
+                    : bookingRepository.countActiveByTypeAndPlaceAndDate(bookingType, entityId, requestedDate, EventBooking.BookingStatus.cancelled);
+        } else {
+            existing = bookingRepository.countActiveByTypeAndDate(bookingType, requestedDate, EventBooking.BookingStatus.cancelled);
+        }
+
+        // maxBookingsPerDate takes priority: if it is set, use it as the sole limit.
+        // allowMultiplePerDate=false is only enforced when no explicit max is configured.
+        if (cfg.getMaxBookingsPerDate() != null) {
+            if (existing >= cfg.getMaxBookingsPerDate()) {
+                throw new IllegalStateException(
+                        "Maximum bookings (" + cfg.getMaxBookingsPerDate() + ") already reached for " + requestedDate);
+            }
+        } else if (!cfg.isAllowMultiplePerDate()) {
+            if (existing > 0) {
+                throw new IllegalStateException(
+                        "No additional bookings are allowed on " + requestedDate + " — only one booking per date is permitted for this " + bookingType.toLowerCase());
+            }
+        }
+    }
+
+    private String buildRef(Long id) {
+        return "TSL-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"))
+                + "-" + String.format("%04d", id);
     }
 }
