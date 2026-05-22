@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AdminAuthGuard } from './guards/admin-auth.guard';
+import { PermissionGuard } from './guards/permission.guard';
 
 import { AdminLoginComponent } from './components/admin-login/admin-login.component';
 import { AdminLayoutComponent } from './components/admin-layout/admin-layout.component';
@@ -21,6 +22,8 @@ import { AdminProfileComponent } from './components/admin-profile/admin-profile.
 import { AdminNavConfigComponent } from './components/admin-nav-config/admin-nav-config.component';
 import { AdminBookingsComponent } from './components/admin-bookings/admin-bookings.component';
 import { AdminBookingSettingsComponent } from './components/admin-booking-settings/admin-booking-settings.component';
+import { AdminUsersComponent } from './components/admin-users/admin-users.component';
+import { AdminRolesComponent } from './components/admin-roles/admin-roles.component';
 
 const routes: Routes = [
   {
@@ -32,23 +35,125 @@ const routes: Routes = [
     component: AdminLayoutComponent,
     canActivate: [AdminAuthGuard],
     children: [
+      // Dashboard — always accessible to any authenticated admin
       { path: 'dashboard', component: AdminDashboardComponent },
-      { path: 'locations', component: AdminLocationsComponent },
-      { path: 'events', component: AdminEventsComponent },
-      { path: 'places', component: AdminPlacesComponent },
-      { path: 'gallery', component: AdminGalleryComponent },
-      { path: 'hero-slides', component: AdminHeroSlidesComponent },
-      { path: 'page-header-backgrounds', component: PageHeaderBackgroundsComponent },
-      { path: 'master-data', component: AdminMasterDataComponent },
-      { path: 'site-settings', component: AdminSiteSettingsComponent },
-      { path: 'social-media', component: AdminSocialMediaComponent },
-      { path: 'homepage-sections', component: AdminHomepageSectionsComponent },
-      { path: 'more-sections', component: AdminMoreSectionsComponent },
+
+      // Profile — no section permission needed, any authenticated user
       { path: 'profile', component: AdminProfileComponent },
-      { path: 'order/:type', component: AdminItemOrderComponent },
-      { path: 'nav-config', component: AdminNavConfigComponent },
-      { path: 'bookings', component: AdminBookingsComponent },
-      { path: 'booking-settings', component: AdminBookingSettingsComponent },
+
+      // Operations
+      {
+        path: 'bookings',
+        component: AdminBookingsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'BOOKINGS:VIEW' }
+      },
+      {
+        path: 'booking-settings',
+        component: AdminBookingSettingsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'BOOKING_SETTINGS:VIEW' }
+      },
+
+      // Content
+      {
+        path: 'locations',
+        component: AdminLocationsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'LOCATIONS:VIEW' }
+      },
+      {
+        path: 'events',
+        component: AdminEventsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'EVENTS:VIEW' }
+      },
+      {
+        path: 'places',
+        component: AdminPlacesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'PLACES:VIEW' }
+      },
+      {
+        path: 'gallery',
+        component: AdminGalleryComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'GALLERY:VIEW' }
+      },
+
+      // UI Components
+      {
+        path: 'hero-slides',
+        component: AdminHeroSlidesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'HERO_SLIDES:VIEW' }
+      },
+      {
+        path: 'page-header-backgrounds',
+        component: PageHeaderBackgroundsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'PAGE_HEADERS:VIEW' }
+      },
+      {
+        path: 'social-media',
+        component: AdminSocialMediaComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'SOCIAL_MEDIA:VIEW' }
+      },
+      {
+        path: 'more-sections',
+        component: AdminMoreSectionsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'MORE_SECTIONS:VIEW' }
+      },
+      {
+        path: 'nav-config',
+        component: AdminNavConfigComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'NAV_CONFIG:VIEW' }
+      },
+
+      // Settings
+      {
+        path: 'homepage-sections',
+        component: AdminHomepageSectionsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'HOMEPAGE_SECTIONS:VIEW' }
+      },
+      {
+        // Display Order manages ordering of locations, places, events
+        path: 'order/:type',
+        component: AdminItemOrderComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: ['LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW'] }
+      },
+      {
+        path: 'master-data',
+        component: AdminMasterDataComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'MASTER_DATA:VIEW' }
+      },
+      {
+        path: 'site-settings',
+        component: AdminSiteSettingsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'SITE_SETTINGS:VIEW' }
+      },
+
+      // Administration
+      {
+        path: 'users',
+        component: AdminUsersComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'USER_MANAGEMENT:VIEW' }
+      },
+      {
+        path: 'roles',
+        component: AdminRolesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'ROLE_MANAGEMENT:VIEW' }
+      },
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

@@ -1,6 +1,7 @@
 package com.travesrilankanow.travesrilankanowbe.controller;
 
 import com.travesrilankanow.travesrilankanowbe.entity.MoreSection;
+import com.travesrilankanow.travesrilankanowbe.entity.MoreSectionItem;
 import com.travesrilankanow.travesrilankanowbe.service.MoreSectionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,10 @@ public class MoreSectionController {
     @GetMapping("/{slug}")
     public ResponseEntity<MoreSection> getSectionBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(moreSectionService.getSectionBySlug(slug));
+    }
+
+    @GetMapping("/items/{itemSlug}")
+    public ResponseEntity<MoreSectionItem> getItemBySlug(@PathVariable String itemSlug) {
+        return ResponseEntity.ok(moreSectionService.getItemBySlug(itemSlug));
     }
 }

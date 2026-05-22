@@ -17,7 +17,7 @@
     <!-- Navigation -->
     <nav class="sidebar__nav">
 
-      <!-- Overview -->
+      <!-- ── Overview (always visible to authenticated admins) ── -->
       <div class="nav-section">
         <span class="nav-section__title">Overview</span>
 
@@ -32,11 +32,12 @@
         </a>
       </div>
 
-      <!-- Operations -->
-      <div class="nav-section">
+      <!-- ── Operations ── -->
+      <div class="nav-section" *ngIf="hasAny('BOOKINGS:VIEW', 'BOOKING_SETTINGS:VIEW')">
         <span class="nav-section__title">Operations</span>
 
-        <a routerLink="/admin/bookings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('BOOKINGS:VIEW')"
+           routerLink="/admin/bookings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
             <rect x="9" y="3" width="6" height="4" rx="1"/>
@@ -45,7 +46,9 @@
           <span>Bookings</span>
           <span class="nav-item__pending-badge" *ngIf="pendingCount > 0">{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
         </a>
-        <a routerLink="/admin/booking-settings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+
+        <a *ngIf="hasPermission('BOOKING_SETTINGS:VIEW')"
+           routerLink="/admin/booking-settings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
@@ -54,11 +57,12 @@
         </a>
       </div>
 
-      <!-- Content -->
-      <div class="nav-section">
+      <!-- ── Content ── -->
+      <div class="nav-section" *ngIf="hasAny('EVENTS:VIEW', 'LOCATIONS:VIEW', 'PLACES:VIEW', 'GALLERY:VIEW')">
         <span class="nav-section__title">Content</span>
 
-        <a routerLink="/admin/events" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('EVENTS:VIEW')"
+           routerLink="/admin/events" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="4" width="18" height="18" rx="2"/>
             <path d="M16 2v4M8 2v4M3 10h18"/>
@@ -67,7 +71,8 @@
           <span class="nav-item__badge">{{ stats.events.total }}</span>
         </a>
 
-        <a routerLink="/admin/locations" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('LOCATIONS:VIEW')"
+           routerLink="/admin/locations" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
             <circle cx="12" cy="10" r="3"/>
@@ -76,7 +81,8 @@
           <span class="nav-item__badge">{{ stats.locations.total }}</span>
         </a>
 
-        <a routerLink="/admin/places" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('PLACES:VIEW')"
+           routerLink="/admin/places" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/>
           </svg>
@@ -84,7 +90,8 @@
           <span class="nav-item__badge">{{ stats.places.total }}</span>
         </a>
 
-        <a routerLink="/admin/gallery" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('GALLERY:VIEW')"
+           routerLink="/admin/gallery" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -95,10 +102,12 @@
         </a>
       </div>
 
-      <div class="nav-section">
+      <!-- ── UI Components ── -->
+      <div class="nav-section" *ngIf="hasAny('HERO_SLIDES:VIEW', 'PAGE_HEADERS:VIEW', 'SOCIAL_MEDIA:VIEW', 'MORE_SECTIONS:VIEW', 'NAV_CONFIG:VIEW')">
         <span class="nav-section__title">UI Components</span>
 
-        <a routerLink="/admin/hero-slides" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('HERO_SLIDES:VIEW')"
+           routerLink="/admin/hero-slides" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="6" width="20" height="12" rx="2"/>
             <path d="M2 10h20"/>
@@ -108,23 +117,25 @@
           <span>Hero Slides</span>
         </a>
 
-        <a routerLink="/admin/page-header-backgrounds" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('PAGE_HEADERS:VIEW')"
+           routerLink="/admin/page-header-backgrounds" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path d="M3 9h18"/>
-            <path d="M9 21V9"/>
+            <path d="M3 9h18M9 21V9"/>
           </svg>
           <span>Page Headers</span>
         </a>
 
-        <a routerLink="/admin/social-media" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('SOCIAL_MEDIA:VIEW')"
+           routerLink="/admin/social-media" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
           </svg>
           <span>Social Media</span>
         </a>
 
-        <a routerLink="/admin/more-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('MORE_SECTIONS:VIEW')"
+           routerLink="/admin/more-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="5" r="1"/>
             <circle cx="12" cy="12" r="1"/>
@@ -133,7 +144,8 @@
           <span>More Sections</span>
         </a>
 
-        <a routerLink="/admin/nav-config" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('NAV_CONFIG:VIEW')"
+           routerLink="/admin/nav-config" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <line x1="3" y1="12" x2="21" y2="12"/>
@@ -143,17 +155,20 @@
         </a>
       </div>
 
-      <div class="nav-section">
+      <!-- ── Settings ── -->
+      <div class="nav-section" *ngIf="hasAny('HOMEPAGE_SECTIONS:VIEW', 'LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW', 'MASTER_DATA:VIEW', 'SITE_SETTINGS:VIEW')">
         <span class="nav-section__title">Settings</span>
 
-        <a routerLink="/admin/homepage-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('HOMEPAGE_SECTIONS:VIEW')"
+           routerLink="/admin/homepage-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
           </svg>
           <span>Homepage Sections</span>
         </a>
 
-        <a routerLink="/admin/order/locations" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasAny('LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW')"
+           routerLink="/admin/order/locations" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M3 12h18M3 18h18"/>
             <path d="M9 6v12M15 6v12"/>
@@ -161,14 +176,16 @@
           <span>Display Order</span>
         </a>
 
-        <a routerLink="/admin/master-data" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('MASTER_DATA:VIEW')"
+           routerLink="/admin/master-data" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
           </svg>
           <span>Master Data</span>
         </a>
 
-        <a routerLink="/admin/site-settings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+        <a *ngIf="hasPermission('SITE_SETTINGS:VIEW')"
+           routerLink="/admin/site-settings" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -177,6 +194,31 @@
         </a>
       </div>
 
+      <!-- ── Administration ── -->
+      <div class="nav-section" *ngIf="hasAny('USER_MANAGEMENT:VIEW', 'ROLE_MANAGEMENT:VIEW')">
+        <span class="nav-section__title">Administration</span>
+
+        <a *ngIf="hasPermission('USER_MANAGEMENT:VIEW')"
+           routerLink="/admin/users" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          <span>Admin Users</span>
+        </a>
+
+        <a *ngIf="hasPermission('ROLE_MANAGEMENT:VIEW')"
+           routerLink="/admin/roles" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <span>Roles & Permissions</span>
+        </a>
+      </div>
+
+      <!-- ── Quick Links (always visible) ── -->
       <div class="nav-section">
         <span class="nav-section__title">Quick Links</span>
 
@@ -227,8 +269,9 @@
         </div>
       </div>
       <div class="header__right">
-        <!-- Pending bookings notification bell -->
-        <a class="notif-bell" routerLink="/admin/bookings" [class.notif-bell--active]="pendingCount > 0"
+        <!-- Pending bookings bell — only visible if user can see bookings -->
+        <a *ngIf="hasPermission('BOOKINGS:VIEW')"
+           class="notif-bell" routerLink="/admin/bookings" [class.notif-bell--active]="pendingCount > 0"
            [title]="pendingCount > 0 ? pendingCount + ' pending booking' + (pendingCount !== 1 ? 's' : '') + ' need attention' : 'No pending bookings'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
             <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -243,8 +286,8 @@
       </div>
     </header>
 
-    <!-- Pending bookings attention banner -->
-    <div class="pending-banner" *ngIf="pendingCount > 0 && showPendingBanner">
+    <!-- Pending bookings attention banner — only if user has bookings access -->
+    <div class="pending-banner" *ngIf="hasPermission('BOOKINGS:VIEW') && pendingCount > 0 && showPendingBanner">
       <div class="pending-banner__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +18,7 @@ public class AdminEventController {
     private final EventService eventService;
 
     @GetMapping("/paginated")
+    @PreAuthorize("hasAuthority('EVENTS:VIEW')")
     public ResponseEntity<Page<Event>> getEventsPaginated(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
@@ -28,19 +30,20 @@ public class AdminEventController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('EVENTS:CREATE')")
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        Event created = eventService.createEvent(event);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('EVENTS:UPDATE')")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event event) {
         event.setId(id);
-        Event updated = eventService.updateEvent(event);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(eventService.updateEvent(event));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('EVENTS:DELETE')")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();

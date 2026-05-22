@@ -140,7 +140,9 @@ export class MoreSectionDetailComponent implements OnInit, OnDestroy {
   }
 
   navigateToItem(item: any, event: MouseEvent): void {
-    this.router.navigate(['/more', this.section!.slug, item.id]);
+    // Use slug for SEO-friendly URL; fall back to numeric ID for items without a slug
+    const itemParam = item.slug ?? item.id;
+    this.router.navigate(['/more', this.section!.slug, itemParam]);
   }
 
   getArticleExcerpt(item: any): string {

@@ -13,6 +13,9 @@ export interface AuthResponse {
   username?: string;
   first_name?: string;
   role?: string;
+  admin_role_code?: string;
+  admin_role_name?: string;
+  permissions?: string[];
 }
 
 @Injectable({
@@ -31,6 +34,9 @@ export class AdminAuthService implements OnDestroy {
   private readonly USER_KEY = 'adminUser';
   private readonly FIRST_NAME_KEY = 'adminFirstName';
   private readonly ROLE_KEY = 'adminRole';
+  private readonly ADMIN_ROLE_CODE_KEY = 'adminRoleCode';
+  private readonly ADMIN_ROLE_NAME_KEY = 'adminRoleName';
+  private readonly PERMISSIONS_KEY = 'adminPermissions';
 
   private tokenExpirySubscription: Subscription | null = null;
   private readonly TOKEN_CHECK_INTERVAL = 30000; // Check every 30 seconds
@@ -95,6 +101,15 @@ export class AdminAuthService implements OnDestroy {
     if (response.role) {
       localStorage.setItem(this.ROLE_KEY, response.role);
     }
+    if (response.admin_role_code) {
+      localStorage.setItem(this.ADMIN_ROLE_CODE_KEY, response.admin_role_code);
+    }
+    if (response.admin_role_name) {
+      localStorage.setItem(this.ADMIN_ROLE_NAME_KEY, response.admin_role_name);
+    }
+    if (response.permissions) {
+      localStorage.setItem(this.PERMISSIONS_KEY, JSON.stringify(response.permissions));
+    }
     this.displayNameSubject.next(this.getFirstName() || this.getUsername() || '');
   }
 
@@ -104,6 +119,9 @@ export class AdminAuthService implements OnDestroy {
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem(this.FIRST_NAME_KEY);
     localStorage.removeItem(this.ROLE_KEY);
+    localStorage.removeItem(this.ADMIN_ROLE_CODE_KEY);
+    localStorage.removeItem(this.ADMIN_ROLE_NAME_KEY);
+    localStorage.removeItem(this.PERMISSIONS_KEY);
     // Also remove legacy token key if exists
     localStorage.removeItem('adminToken');
     this.isAuthenticatedSubject.next(false);
@@ -145,6 +163,28 @@ export class AdminAuthService implements OnDestroy {
 
   isAdmin(): boolean {
     return this.getRole() === 'ADMIN';
+  }
+
+  getAdminRoleCode(): string | null {
+    return localStorage.getItem(this.ADMIN_ROLE_CODE_KEY);
+  }
+
+  getAdminRoleName(): string | null {
+    return localStorage.getItem(this.ADMIN_ROLE_NAME_KEY);
+  }
+
+  getPermissions(): string[] {
+    const raw = localStorage.getItem(this.PERMISSIONS_KEY);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as string[];
+    } catch {
+      return [];
+    }
+  }
+
+  hasPermission(permission: string): boolean {
+    return this.getPermissions().includes(permission);
   }
 
   updateStoredProfile(firstName: string, username: string): void {

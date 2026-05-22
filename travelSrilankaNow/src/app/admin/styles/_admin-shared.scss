@@ -229,336 +229,185 @@ select {
   }
 }
 
-// Primary Button - Premium Thin Border Design
-// Navy Blue theme with elegant thin borders
+// Admin Buttons — clean, flat, professional
 .admin-btn {
   all: unset;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  padding: 0.625em 1.5em;
-  border: 1px solid $admin-navy;
+  padding: 0.5rem 1.125rem;
+  border: 1px solid transparent;
   border-radius: $admin-radius;
-  color: $admin-navy;
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   cursor: pointer;
-  overflow: hidden;
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
   box-sizing: border-box;
-
-  // Text and icon z-index to stay above circles
-  span, svg {
-    position: relative;
-    z-index: 1;
-  }
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 
   svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-right: 0.5rem;
-    transition: transform $admin-transition;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.375rem;
+    flex-shrink: 0;
   }
 
-  // Circle pseudo-elements for hover effect
-  &::after,
-  &::before {
-    content: "";
-    position: absolute;
-    width: 14em;
-    aspect-ratio: 1;
-    background: $admin-sky;
-    opacity: 0.6;
-    border-radius: 50%;
-    transition: transform 500ms ease, background 300ms ease, opacity 300ms ease;
-  }
-
-  &::before {
-    left: 0;
-    transform: translateX(-12em);
-  }
-
-  &::after {
-    right: 0;
-    transform: translateX(12em);
-  }
-
-  &:hover {
-    color: $admin-navy-dark;
-    border-color: $admin-blue;
-
-    &::before {
-      transform: translateX(-1em);
-      opacity: 0.8;
-    }
-
-    &::after {
-      transform: translateX(1em);
-      opacity: 0.8;
-    }
-  }
-
-  &:active {
-    border-color: $admin-navy-dark;
-
-    &::before,
-    &::after {
-      background: $admin-blue;
-      opacity: 0.7;
-    }
-  }
-
-  // Primary variant - filled background with light circle effect
+  // Primary — solid navy, white text
   &--primary {
-    background: linear-gradient(135deg, $admin-navy-dark 0%, darken($admin-navy-dark, 5%) 100%);
-    border-color: transparent;
+    background: $admin-navy-dark;
+    border-color: $admin-navy-dark;
     color: $admin-white;
-    box-shadow: 0 2px 8px rgba($admin-navy-dark, 0.25);
-
-    &::before,
-    &::after {
-      background: $admin-sky;
-      opacity: 0.4;
-    }
 
     &:hover {
-      color: $admin-white;
-      border-color: $admin-navy;
       background: $admin-navy;
-      box-shadow: $admin-shadow-lg, 0 4px 20px rgba($admin-navy-dark, 0.4);
-
-      &::before,
-      &::after {
-        opacity: 0.5;
-      }
+      border-color: $admin-navy;
     }
 
     &:active {
-      background: $admin-navy-dark;
-      border-color: $admin-navy-dark;
-      box-shadow: $admin-shadow-sm;
-
-      &::before,
-      &::after {
-        background: $admin-blue;
-        opacity: 0.6;
-      }
+      background: darken($admin-navy-dark, 6%);
+      border-color: darken($admin-navy-dark, 6%);
     }
 
     &:focus-visible {
       outline: none;
-      box-shadow: $admin-shadow-lg, 0 0 0 3px rgba($admin-navy, 0.4);
+      box-shadow: 0 0 0 3px rgba($admin-navy, 0.35);
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
-
-      &::before,
-      &::after {
-        display: none;  // Hide circles when disabled
-      }
-
-      &:hover {
-        background: $admin-navy-dark;
-        border-color: $admin-navy-dark;
-        box-shadow: $admin-shadow-md;
-      }
+      pointer-events: none;
     }
   }
 
-  // Secondary variant - outlined with navy
+  // Secondary — white with gray border
   &--secondary {
     background: $admin-white;
-    border: 1px solid $admin-gray-200;
-    color: $admin-gray-600;
-
-    &::before,
-    &::after {
-      background: $admin-gray-200;
-      opacity: 0.5;
-    }
+    border-color: $admin-gray-300;
+    color: $admin-gray-700;
 
     &:hover {
-      color: $admin-navy;
-      border-color: $admin-navy;
-
-      &::before,
-      &::after {
-        background: $admin-sky-light;
-        opacity: 0.7;
-      }
+      background: $admin-gray-50;
+      border-color: $admin-gray-400;
+      color: $admin-gray-900;
     }
 
     &:active {
-      border-color: $admin-navy-dark;
+      background: $admin-gray-100;
+    }
 
-      &::before,
-      &::after {
-        background: $admin-blue-light;
-      }
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($admin-gray-400, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
 
-  // Danger variant - red theme
+  // Danger — solid red, white text
   &--danger {
-    background: linear-gradient(135deg, $admin-error 0%, darken($admin-error, 8%) 100%);
-    border-color: transparent;
+    background: $admin-error;
+    border-color: $admin-error;
     color: $admin-white;
-    box-shadow: 0 2px 6px rgba($admin-error, 0.2);
-
-    &::before,
-    &::after {
-      background: lighten($admin-error, 30%);
-      opacity: 0.4;
-    }
 
     &:hover {
-      color: $admin-white;
-      border-color: darken($admin-error, 8%);
-      background: darken($admin-error, 5%);
-      box-shadow: $admin-shadow-md, 0 4px 15px rgba($admin-error, 0.35);
-
-      &::before,
-      &::after {
-        opacity: 0.5;
-      }
+      background: darken($admin-error, 7%);
+      border-color: darken($admin-error, 7%);
     }
 
     &:active {
-      background: darken($admin-error, 10%);
-      border-color: darken($admin-error, 15%);
+      background: darken($admin-error, 12%);
+    }
 
-      &::before,
-      &::after {
-        background: darken($admin-error, 5%);
-        opacity: 0.6;
-      }
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($admin-error, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
 
-  // Ghost variant - transparent with navy accent
+  // Ghost — icon-only or text, no background
   &--ghost {
     background: transparent;
     border-color: transparent;
-    color: $admin-navy;
-    padding: 0.5rem;
-
-    &::before,
-    &::after {
-      width: 3em;
-      background: $admin-sky;
-      opacity: 0;
-    }
-
-    &:hover {
-      color: $admin-navy-dark;
-      border-color: transparent;
-      background: $admin-sky-light;
-
-      &::before,
-      &::after {
-        opacity: 0.5;
-        transform: translateX(0);
-      }
-    }
-
-    &:active {
-      background: $admin-blue-light;
-    }
+    color: $admin-gray-500;
+    padding: 0.375rem;
 
     svg {
       margin-right: 0;
     }
+
+    &:hover {
+      background: $admin-gray-100;
+      color: $admin-gray-700;
+    }
+
+    &:active {
+      background: $admin-gray-200;
+    }
   }
 
-  // Ghost Danger variant
+  // Ghost Danger — red icon/text, no background
   &--ghost-danger {
     background: transparent;
     border-color: transparent;
     color: $admin-error;
-    padding: 0.5rem;
-
-    &::before,
-    &::after {
-      width: 3em;
-      background: $admin-error-light;
-      opacity: 0;
-    }
-
-    &:hover {
-      color: darken($admin-error, 10%);
-      border-color: transparent;
-      background: $admin-error-light;
-
-      &::before,
-      &::after {
-        opacity: 0.6;
-        transform: translateX(0);
-      }
-    }
-
-    &:active {
-      background: darken($admin-error-light, 5%);
-    }
+    padding: 0.375rem;
 
     svg {
       margin-right: 0;
     }
+
+    &:hover {
+      background: $admin-error-light;
+      color: darken($admin-error, 8%);
+    }
+
+    &:active {
+      background: darken($admin-error-light, 4%);
+    }
   }
 
-  // Outline variant - thin elegant border
+  // Outline — transparent with navy border
   &--outline {
     background: transparent;
-    border: 1px solid $admin-navy;
+    border-color: $admin-navy;
     color: $admin-navy;
 
-    &::before,
-    &::after {
-      background: $admin-sky;
-      opacity: 0.5;
-    }
-
     &:hover {
-      color: $admin-navy-dark;
-      border-color: $admin-blue;
-      background: rgba($admin-sky, 0.2);
+      background: $admin-navy-dark;
+      color: $admin-white;
     }
 
     &:active {
-      border-color: $admin-navy-dark;
-      background: rgba($admin-sky, 0.3);
+      background: darken($admin-navy-dark, 5%);
+      color: $admin-white;
     }
   }
 
-  // Sky variant - light button with sky colors
+  // Sky — light blue tinted button
   &--sky {
-    background: linear-gradient(135deg, $admin-sky 0%, lighten($admin-sky, 5%) 100%);
-    border: 1px solid rgba($admin-blue, 0.2);
+    background: $admin-sky-light;
+    border-color: rgba($admin-blue, 0.25);
     color: $admin-navy-dark;
 
-    &::before,
-    &::after {
-      background: $admin-white;
-      opacity: 0.5;
-    }
-
     &:hover {
+      background: $admin-blue-light;
       border-color: $admin-blue;
-      background: lighten($admin-sky, 3%);
-
-      &::before,
-      &::after {
-        opacity: 0.7;
-      }
     }
 
     &:active {
-      background: darken($admin-sky, 5%);
-      border-color: $admin-navy;
+      background: darken($admin-sky-light, 5%);
     }
   }
 }
@@ -1486,30 +1335,6 @@ select {
   to {
     opacity: 0;
     transform: translateY(1rem) scale(0.95);
-  }
-}
-
-// Button Animations
-@keyframes buttonPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba($admin-blue, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba($admin-blue, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba($admin-blue, 0);
-  }
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
   }
 }
 

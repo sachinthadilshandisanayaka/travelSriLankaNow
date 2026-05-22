@@ -39,6 +39,9 @@ public class MoreSectionItem {
 
     private String link;
 
+    @Column(nullable = false, unique = true)
+    private String slug;
+
     @Column(nullable = false, columnDefinition = "varchar(20) default 'simple'")
     private String contentType = "simple";
 

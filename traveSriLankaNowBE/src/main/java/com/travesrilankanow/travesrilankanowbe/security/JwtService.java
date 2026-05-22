@@ -1,5 +1,6 @@
 package com.travesrilankanow.travesrilankanowbe.security;
 
+import com.travesrilankanow.travesrilankanowbe.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -36,7 +39,16 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof User user && user.getAdminRole() != null) {
+            claims.put("adminRole", user.getAdminRole().getCode());
+            List<String> perms = user.getAdminRole().getPermissions().stream()
+                    .map(p -> p.getFunctionCode() + ":" + p.getAction())
+                    .sorted()
+                    .collect(Collectors.toList());
+            claims.put("permissions", perms);
+        }
+        return generateToken(claims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

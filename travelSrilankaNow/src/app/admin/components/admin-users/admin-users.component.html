@@ -1,0 +1,196 @@
+<div class="admin-page">
+  <div class="admin-page__header">
+    <div class="admin-page__header-left">
+      <h1 class="admin-page__title">Admin Users</h1>
+      <p class="admin-page__subtitle">Manage admin panel users and their role assignments</p>
+    </div>
+    <div class="admin-page__header-right">
+      <button *appHasPermission="'USER_MANAGEMENT:CREATE'" class="admin-btn admin-btn--primary" (click)="openCreate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Add User
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="admin-alert admin-alert--success">{{ success }}</div>
+  <div *ngIf="error" class="admin-alert admin-alert--error">{{ error }}</div>
+
+  <div class="users-card">
+    <div *ngIf="loading" class="admin-loading">Loading users...</div>
+
+    <table *ngIf="!loading" class="users-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>
+            <div class="user-name">{{ user.firstName }} {{ user.lastName }}</div>
+          </td>
+          <td><code class="user-username">{{ user.username }}</code></td>
+          <td class="user-email">{{ user.email }}</td>
+          <td>
+            <span *ngIf="user.adminRoleName" class="role-badge">{{ user.adminRoleName }}</span>
+            <span *ngIf="!user.adminRoleName" class="role-badge role-badge--none">No Role</span>
+          </td>
+          <td>
+            <span class="status-badge" [class.status-badge--active]="user.enabled" [class.status-badge--inactive]="!user.enabled">
+              {{ user.enabled ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>
+            <div class="action-cell">
+              <button *appHasPermission="'USER_MANAGEMENT:UPDATE'" class="admin-btn admin-btn--sm admin-btn--secondary" (click)="openEdit(user)">Edit</button>
+              <button *appHasPermission="'USER_MANAGEMENT:DELETE'" class="admin-btn admin-btn--sm admin-btn--danger" (click)="openDelete(user)">Deactivate</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="users.length === 0">
+          <td colspan="6" class="empty-state">No admin users found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Create Modal ──────────────────────────────────────────────────────── -->
+<div *ngIf="showCreateModal" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="margin-right:0.5rem;vertical-align:middle">
+          <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6"/>
+        </svg>
+        Create Admin User
+      </h2>
+      <button class="admin-modal__close" type="button" (click)="showCreateModal = false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <form (ngSubmit)="submitCreate()">
+      <div class="admin-modal__body">
+        <div *ngIf="formError" class="admin-alert admin-alert--error" style="margin-bottom:1rem">{{ formError }}</div>
+        <div class="user-form-grid">
+          <div class="user-form__group">
+            <label class="user-form__label">First Name</label>
+            <input type="text" [(ngModel)]="createForm.firstName" name="firstName" class="admin-input" placeholder="John" required>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Last Name</label>
+            <input type="text" [(ngModel)]="createForm.lastName" name="lastName" class="admin-input" placeholder="Doe">
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Username</label>
+            <input type="text" [(ngModel)]="createForm.username" name="username" class="admin-input" placeholder="johndoe" required>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Email Address</label>
+            <input type="email" [(ngModel)]="createForm.email" name="email" class="admin-input" placeholder="john@example.com" required>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Password</label>
+            <input type="password" [(ngModel)]="createForm.password" name="password" class="admin-input" placeholder="••••••••" required>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Role</label>
+            <select [(ngModel)]="createForm.adminRoleCode" name="adminRoleCode" class="admin-select">
+              <option [ngValue]="null">— No Role —</option>
+              <option *ngFor="let role of roles" [ngValue]="role.code">{{ role.name }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="showCreateModal = false">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Edit Modal ────────────────────────────────────────────────────────── -->
+<div *ngIf="showEditModal" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="margin-right:0.5rem;vertical-align:middle">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Edit User — <span style="color:var(--admin-navy,#1C4D8D)">{{ selectedUser?.username }}</span>
+      </h2>
+      <button class="admin-modal__close" type="button" (click)="showEditModal = false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <form (ngSubmit)="submitEdit()">
+      <div class="admin-modal__body">
+        <div *ngIf="formError" class="admin-alert admin-alert--error" style="margin-bottom:1rem">{{ formError }}</div>
+        <div class="user-form-grid">
+          <div class="user-form__group">
+            <label class="user-form__label">First Name</label>
+            <input type="text" [(ngModel)]="editForm.firstName" name="firstName" class="admin-input" required>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Last Name</label>
+            <input type="text" [(ngModel)]="editForm.lastName" name="lastName" class="admin-input">
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Email Address</label>
+            <input type="email" [(ngModel)]="editForm.email" name="email" class="admin-input" required>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Role</label>
+            <select [(ngModel)]="editForm.adminRoleCode" name="adminRoleCode" class="admin-select">
+              <option [ngValue]="null">— No Role —</option>
+              <option *ngFor="let role of roles" [ngValue]="role.code">{{ role.name }}</option>
+            </select>
+          </div>
+          <div class="user-form__group">
+            <label class="user-form__label">Account Status</label>
+            <select [(ngModel)]="editForm.enabled" name="enabled" class="admin-select">
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="showEditModal = false">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Deactivate Confirm ─────────────────────────────────────────────────── -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Deactivate User</h3>
+      <p class="admin-confirm__text">Deactivate <strong>{{ selectedUser?.username }}</strong>? They will no longer be able to log in.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="showDeleteConfirm = false">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="confirmDelete()">Deactivate</button>
+      </div>
+    </div>
+  </div>
+</div>

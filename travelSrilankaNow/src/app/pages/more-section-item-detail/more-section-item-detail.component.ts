@@ -39,9 +39,9 @@ export class MoreSectionItemDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.slug = params['slug'];
-      const itemId = +params['id'];
-      if (this.slug && itemId) {
-        this.loadItem(this.slug, itemId);
+      const itemParam = params['itemSlug'];
+      if (this.slug && itemParam) {
+        this.loadItem(this.slug, itemParam);
       }
     });
 
@@ -54,13 +54,18 @@ export class MoreSectionItemDetailComponent implements OnInit, OnDestroy {
     this.langSub?.unsubscribe();
   }
 
-  private loadItem(slug: string, itemId: number): void {
+  private loadItem(slug: string, itemParam: string): void {
     this.isLoading = true;
     this.error = false;
     this.moreSectionService.getSectionBySlug(slug).subscribe({
       next: (section) => {
         this.section = section;
-        this.item = section.items?.find(i => i.id === itemId) || null;
+        const numericId = parseInt(itemParam, 10);
+        const isNumeric = !isNaN(numericId) && String(numericId) === itemParam;
+        // Support both old numeric-ID URLs and new slug-based URLs
+        this.item = isNumeric
+          ? section.items?.find(i => i.id === numericId) || null
+          : section.items?.find(i => i.slug === itemParam) || null;
         if (!this.item) {
           this.error = true;
         } else {
