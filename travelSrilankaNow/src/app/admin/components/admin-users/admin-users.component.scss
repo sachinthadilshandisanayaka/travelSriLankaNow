@@ -1,0 +1,189 @@
+@import '../../styles/admin-shared';
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+.admin-page {
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0 0 0.25rem;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: $admin-gray-500;
+    margin: 0;
+  }
+}
+
+// ── Alerts ────────────────────────────────────────────────────────────────────
+
+.admin-alert {
+  padding: 0.75rem 1rem;
+  border-radius: $admin-radius;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+
+  &--success { background: $admin-success-light; color: darken($admin-success, 10%); border: 1px solid $admin-success; }
+  &--error   { background: $admin-error-light;   color: darken($admin-error, 10%);   border: 1px solid $admin-error;   }
+}
+
+// ── Loading ────────────────────────────────────────────────────────────────────
+
+.admin-loading {
+  padding: 2rem;
+  text-align: center;
+  color: $admin-gray-500;
+  font-size: 0.9rem;
+}
+
+// ── Users Card / Table ────────────────────────────────────────────────────────
+
+.users-card {
+  @include admin-card;
+  overflow: hidden;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+  }
+
+  th {
+    background: $admin-gray-50;
+    color: $admin-gray-600;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid $admin-gray-200;
+    white-space: nowrap;
+  }
+
+  td {
+    border-bottom: 1px solid $admin-gray-100;
+    color: $admin-gray-700;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tbody tr {
+    transition: background $admin-transition-fast;
+
+    &:hover { background: $admin-blue-light; }
+  }
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-gray-900;
+}
+
+.user-username {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  background: $admin-gray-100;
+  padding: 0.15rem 0.45rem;
+  border-radius: $admin-radius-sm;
+  color: $admin-navy-dark;
+}
+
+.user-email {
+  font-size: 0.8125rem;
+  color: $admin-gray-500;
+}
+
+.action-cell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.empty-state {
+  text-align: center;
+  color: $admin-gray-400;
+  padding: 2.5rem;
+  font-size: 0.9rem;
+}
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: $admin-radius-full;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: $admin-blue-light;
+  color: $admin-navy;
+
+  &--none {
+    background: $admin-gray-100;
+    color: $admin-gray-400;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: $admin-radius-full;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &--active   { background: $admin-success-light; color: darken($admin-success, 8%); }
+  &--inactive { background: $admin-error-light;   color: darken($admin-error, 8%);   }
+}
+
+// ── Small Buttons ─────────────────────────────────────────────────────────────
+
+.admin-btn--sm {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.8rem !important;
+}
+
+// ── User Form (inside modals) ─────────────────────────────────────────────────
+
+.user-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.user-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.user-form__label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-gray-700;
+}

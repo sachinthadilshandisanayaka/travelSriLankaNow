@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,7 @@ public class AdminMediaController {
      * POST /api/admin/media/upload
      */
     @PostMapping("/upload")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> uploadImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "mediaType", defaultValue = "GENERAL") String mediaTypeStr,
@@ -69,6 +71,7 @@ public class AdminMediaController {
      * POST /api/admin/media/upload/multiple
      */
     @PostMapping("/upload/multiple")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> uploadMultipleImages(
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam(value = "mediaType", defaultValue = "GENERAL") String mediaTypeStr
@@ -99,6 +102,7 @@ public class AdminMediaController {
      * POST /api/admin/media/upload/transform
      */
     @PostMapping("/upload/transform")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> uploadWithTransformation(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "mediaType", defaultValue = "GENERAL") String mediaTypeStr,
@@ -136,6 +140,7 @@ public class AdminMediaController {
      * PUT /api/admin/media/{id}/replace
      */
     @PutMapping("/{id}/replace")
+    @PreAuthorize("hasAuthority('MEDIA:UPDATE')")
     public ResponseEntity<Map<String, Object>> replaceImage(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file
@@ -164,6 +169,7 @@ public class AdminMediaController {
      * PUT /api/admin/media/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('MEDIA:UPDATE')")
     public ResponseEntity<Map<String, Object>> updateMetadata(
             @PathVariable Long id,
             @RequestBody Map<String, Object> updates
@@ -197,6 +203,7 @@ public class AdminMediaController {
      * POST /api/admin/media/{id}/link
      */
     @PostMapping("/{id}/link")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> linkToEntity(
             @PathVariable Long id,
             @RequestBody Map<String, Object> linkData
@@ -227,6 +234,7 @@ public class AdminMediaController {
      * GET /api/admin/media/{id}
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
 
@@ -248,6 +256,7 @@ public class AdminMediaController {
      * GET /api/admin/media
      */
     @GetMapping
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
@@ -270,6 +279,7 @@ public class AdminMediaController {
      * GET /api/admin/media/type/{type}
      */
     @GetMapping("/type/{type}")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getByType(
             @PathVariable String type,
             @RequestParam(defaultValue = "0") int page,
@@ -301,6 +311,7 @@ public class AdminMediaController {
      * GET /api/admin/media/search
      */
     @GetMapping("/search")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> search(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
@@ -324,6 +335,7 @@ public class AdminMediaController {
      * GET /api/admin/media/recent
      */
     @GetMapping("/recent")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getRecentUploads() {
         Map<String, Object> response = new HashMap<>();
 
@@ -340,6 +352,7 @@ public class AdminMediaController {
      * GET /api/admin/media/entity/{entityType}/{entityId}
      */
     @GetMapping("/entity/{entityType}/{entityId}")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getForEntity(
             @PathVariable String entityType,
             @PathVariable Long entityId
@@ -359,6 +372,7 @@ public class AdminMediaController {
      * GET /api/admin/media/stats
      */
     @GetMapping("/stats")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> response = new HashMap<>();
 
@@ -375,6 +389,7 @@ public class AdminMediaController {
      * GET /api/admin/media/{id}/transform
      */
     @GetMapping("/{id}/transform")
+    @PreAuthorize("hasAuthority('MEDIA:VIEW')")
     public ResponseEntity<Map<String, Object>> getTransformedUrl(
             @PathVariable Long id,
             @RequestParam(required = false) Integer width,
@@ -405,6 +420,7 @@ public class AdminMediaController {
      * DELETE /api/admin/media/{id}
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MEDIA:DELETE')")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
 
@@ -429,6 +445,7 @@ public class AdminMediaController {
      * DELETE /api/admin/media/{id}/soft
      */
     @DeleteMapping("/{id}/soft")
+    @PreAuthorize("hasAuthority('MEDIA:DELETE')")
     public ResponseEntity<Map<String, Object>> softDelete(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
 
@@ -453,6 +470,7 @@ public class AdminMediaController {
      * POST /api/admin/media/cleanup
      */
     @PostMapping("/cleanup")
+    @PreAuthorize("hasAuthority('MEDIA:DELETE')")
     public ResponseEntity<Map<String, Object>> cleanupUnused(
             @RequestParam(defaultValue = "30") int daysOld
     ) {

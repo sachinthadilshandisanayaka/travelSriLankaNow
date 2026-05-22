@@ -17,6 +17,24 @@ class DividerBlot extends BlockEmbed {
 }
 Quill.register(DividerBlot);
 
+// Register pixel-value font-size style attributor
+const SizeStyle = Quill.import('attributors/style/size');
+SizeStyle.whitelist = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px'];
+Quill.register(SizeStyle, true);
+
+// Register font-family style attributor
+const FontAttributor = Quill.import('attributors/style/font');
+FontAttributor.whitelist = ['Arial', 'Georgia', 'Tahoma', 'Verdana', 'Courier New'];
+Quill.register(FontAttributor, true);
+
+// Register custom line-height block attributor
+const Parchment = Quill.import('parchment');
+const LineHeightStyle = new Parchment.Attributor.Style('lineHeight', 'line-height', {
+  scope: Parchment.Scope.BLOCK,
+  whitelist: ['1', '1.2', '1.5', '1.8', '2', '2.5', '3']
+});
+Quill.register(LineHeightStyle, true);
+
 @Component({
   selector: 'app-admin-more-sections',
   templateUrl: './admin-more-sections.component.html',
@@ -54,7 +72,9 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   showItemModal = false;
   isEditingItem = false;
   editingItemId: number | null = null;
-  itemForm: any = { title: '', shortDescription: '', description: '', imageUrl: '', link: '', contentType: 'simple', articleContent: '', displayOrder: 0, active: true, additionalDetails: {} };
+  itemForm: any = { title: '', slug: '', shortDescription: '', description: '', imageUrl: '', link: '', contentType: 'simple', articleContent: '', displayOrder: 0, active: true, additionalDetails: {} };
+  itemSlugManuallyEdited = false;
+  itemFormError = '';
 
   // Fullscreen & editor state
   isFullscreen = false;
@@ -83,10 +103,16 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   private linkLeaveHandler: any = null;
   private linkTooltipTimer: any = null;
 
+  readonly FONT_SIZES = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px'];
+  readonly LINE_HEIGHTS = ['1', '1.2', '1.5', '1.8', '2', '2.5', '3'];
+
   // Quill editor config — enhanced Medium-like toolbar
   quillModules = {
     toolbar: {
       container: [
+        [{ size: ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px'] }],
+        [{ font: ['', 'Arial', 'Georgia', 'Tahoma', 'Verdana', 'Courier New'] }],
+        [{ lineHeight: ['1', '1.2', '1.5', '1.8', '2', '2.5', '3'] }],
         [{ header: [1, 2, 3, false] }],
         ['bold', 'italic', 'underline', 'strike'],
         [{ script: 'sub' }, { script: 'super' }],
@@ -365,6 +391,13 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
     return formats[format];
   }
 
+  floatingSelectFormat(format: string, event: Event): void {
+    if (!this.quillInstance) return;
+    const value = (event.target as HTMLSelectElement).value;
+    this.quillInstance.format(format, value || false, 'user');
+    (event.target as HTMLSelectElement).value = value;
+  }
+
   // --- Side insert menu helpers ---
 
   private updateSideMenu(editor: any, range: any): void {
@@ -545,6 +578,18 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
     }
   }
 
+  onItemTitleChange(newTitle: string): void {
+    if (!this.itemSlugManuallyEdited) {
+      this.itemForm.slug = this.generateSlug(newTitle);
+    }
+  }
+
+  onItemSlugInput(value: string): void {
+    this.itemSlugManuallyEdited = true;
+    // Sanitize: lowercase, keep only alphanumeric and hyphens, collapse multiple hyphens
+    this.itemForm.slug = (value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').replace(/-{2,}/g, '-');
+  }
+
   openAddSection(): void {
     this.sectionForm = { name: '', slug: '', description: '', imageUrl: '', displayOrder: 0, active: true, additionalFieldDefinitions: [] };
     this.isEditingSection = false;
@@ -618,7 +663,9 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   }
 
   openAddItem(): void {
-    this.itemForm = { title: '', shortDescription: '', description: '', imageUrl: '', link: '', contentType: 'simple', articleContent: '', displayOrder: 0, active: true, additionalDetails: {} };
+    this.itemForm = { title: '', slug: '', shortDescription: '', description: '', imageUrl: '', link: '', contentType: 'simple', articleContent: '', displayOrder: 0, active: true, additionalDetails: {} };
+    this.itemSlugManuallyEdited = false;
+    this.itemFormError = '';
     // Pre-populate additionalDetails keys from section field definitions
     if (this.selectedSection?.additionalFieldDefinitions) {
       for (const field of this.selectedSection.additionalFieldDefinitions) {
@@ -639,7 +686,13 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   }
 
   openEditItem(item: any): void {
-    this.itemForm = { ...item, additionalDetails: item.additionalDetails ? { ...item.additionalDetails } : {} };
+    this.itemForm = {
+      ...item,
+      slug: item.slug ?? '',            // undefined → '' so JSON.stringify includes it
+      additionalDetails: item.additionalDetails ? { ...item.additionalDetails } : {}
+    };
+    this.itemSlugManuallyEdited = true; // editing always locks slug to existing value
+    this.itemFormError = '';
     // Ensure all field definitions have corresponding entries
     if (this.selectedSection?.additionalFieldDefinitions) {
       for (const field of this.selectedSection.additionalFieldDefinitions) {
@@ -681,10 +734,14 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
 
   saveItem(): void {
     if (!this.itemForm.title) return;
+    this.itemFormError = '';
+
+    // Always include slug as a string so it is never dropped by JSON.stringify
+    const payload = { ...this.itemForm, slug: this.itemForm.slug ?? '' };
 
     const obs = this.isEditingItem
-      ? this.adminApi.updateMoreSectionItem(this.editingItemId!, this.itemForm)
-      : this.adminApi.createMoreSectionItem(this.selectedSection.id, this.itemForm);
+      ? this.adminApi.updateMoreSectionItem(this.editingItemId!, payload)
+      : this.adminApi.createMoreSectionItem(this.selectedSection.id, payload);
 
     obs.subscribe({
       next: () => {
@@ -693,9 +750,8 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
         this.closeItemModal();
         this.loadItems();
       },
-      error: () => {
-        this.errorMessage = 'Failed to save item';
-        this.hideMessageAfterDelay();
+      error: (err: any) => {
+        this.itemFormError = err?.error?.message || 'Failed to save item.';
       }
     });
   }

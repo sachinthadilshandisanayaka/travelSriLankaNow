@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -80,6 +81,10 @@ public class User implements UserDetails {
     @Builder.Default
     private AuthProvider authProvider = AuthProvider.LOCAL;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "admin_role_id")
+    private AdminRole adminRole;
+
     public enum AuthProvider {
         LOCAL, GOOGLE
     }
@@ -97,7 +102,14 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        if (adminRole != null) {
+            adminRole.getPermissions().forEach(p ->
+                authorities.add(new SimpleGrantedAuthority(p.getFunctionCode() + ":" + p.getAction()))
+            );
+        }
+        return authorities;
     }
 
     @Override

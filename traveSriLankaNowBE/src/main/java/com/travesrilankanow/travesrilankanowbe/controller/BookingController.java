@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +56,7 @@ public class BookingController {
     // ── Admin-protected ───────────────────────────────────────────────────────
 
     @GetMapping("/admin/bookings")
+    @PreAuthorize("hasAuthority('BOOKINGS:VIEW')")
     public ResponseEntity<Page<BookingAdminResponse>> getAdminBookings(
             @RequestParam(required = false) EventBooking.BookingStatus status,
             @RequestParam(required = false) String search,
@@ -71,11 +73,13 @@ public class BookingController {
     }
 
     @GetMapping("/admin/bookings/{id}")
+    @PreAuthorize("hasAuthority('BOOKINGS:VIEW')")
     public ResponseEntity<BookingAdminResponse> getAdminBooking(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.getAdminBooking(id));
     }
 
     @PatchMapping("/admin/bookings/{id}/status")
+    @PreAuthorize("hasAuthority('BOOKINGS:UPDATE')")
     public ResponseEntity<BookingAdminResponse> updateBookingStatus(
             @PathVariable Long id,
             @RequestParam EventBooking.BookingStatus status,
@@ -86,6 +90,7 @@ public class BookingController {
     }
 
     @GetMapping("/admin/bookings/calendar")
+    @PreAuthorize("hasAuthority('BOOKINGS:VIEW')")
     public ResponseEntity<List<BookingCalendarDay>> getBookingCalendar(
             @RequestParam int year,
             @RequestParam int month) {
@@ -93,6 +98,7 @@ public class BookingController {
     }
 
     @GetMapping("/admin/bookings/{id}/audit")
+    @PreAuthorize("hasAuthority('BOOKINGS:VIEW')")
     public ResponseEntity<List<BkAuditLog>> getAuditHistory(@PathVariable Long id) {
         return ResponseEntity.ok(auditService.getHistory(id));
     }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MoreSectionItemRepository extends JpaRepository<MoreSectionItem, Long> {
@@ -20,4 +21,10 @@ public interface MoreSectionItemRepository extends JpaRepository<MoreSectionItem
 
     @Query("SELECT COALESCE(MAX(i.displayOrder), 0) FROM MoreSectionItem i WHERE i.section.id = :sectionId")
     Integer findMaxDisplayOrderBySectionId(Long sectionId);
+
+    Optional<MoreSectionItem> findBySlug(String slug);
+
+    boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, Long id);
 }

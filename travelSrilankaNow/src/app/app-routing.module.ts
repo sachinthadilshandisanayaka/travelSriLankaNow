@@ -29,7 +29,7 @@ const routes: Routes = [
   { path: 'places', component: PlacesComponent, data: { animation: 'PlacesPage' } },
   { path: 'places/:id', component: PlaceDetailComponent, data: { animation: 'PlaceDetailPage' } },
   { path: 'more/:slug', component: MoreSectionDetailComponent, data: { animation: 'MoreSectionPage' } },
-  { path: 'more/:slug/:id', component: MoreSectionItemDetailComponent, data: { animation: 'MoreSectionItemPage' } },
+  { path: 'more/:slug/:itemSlug', component: MoreSectionItemDetailComponent, data: { animation: 'MoreSectionItemPage' } },
   {
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
