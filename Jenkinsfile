@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Pull Latest Code') {
             steps {
-                sh "cd ${PROJECT_DIR} && git stash && git pull origin release_v1_0"
+                sh "cd ${PROJECT_DIR} && git fetch origin release_v1_0 && git reset --hard origin/release_v1_0"
             }
         }
 
