@@ -1,0 +1,224 @@
+<div class="admin-page">
+  <div class="admin-page__header">
+    <div class="admin-page__header-left">
+      <h1 class="admin-page__title">Roles & Permissions</h1>
+      <p class="admin-page__subtitle">Define roles and control which features each role can access</p>
+    </div>
+    <div class="admin-page__header-right">
+      <button *appHasPermission="'ROLE_MANAGEMENT:CREATE'" class="admin-btn admin-btn--primary" (click)="openCreate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        New Role
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="admin-alert admin-alert--success">{{ success }}</div>
+  <div *ngIf="error" class="admin-alert admin-alert--error">{{ error }}</div>
+  <div *ngIf="loading" class="admin-loading">Loading roles...</div>
+
+  <div *ngFor="let role of roles" class="role-card">
+    <div class="role-card__header">
+      <div class="role-card__info">
+        <div class="role-card__title-row">
+          <h3 class="role-card__name">{{ role.name }}</h3>
+          <code class="role-card__code">{{ role.code }}</code>
+          <span *ngIf="role.systemRole" class="role-badge role-badge--system">System</span>
+        </div>
+        <p class="role-card__desc">{{ role.description || '—' }}</p>
+      </div>
+      <div class="role-card__right">
+        <div class="role-card__stats">
+          <span class="role-card__perm-count">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            {{ role.permissions.length }} permissions
+          </span>
+        </div>
+        <div class="role-card__actions">
+          <button class="admin-btn admin-btn--sm admin-btn--ghost" (click)="toggleViewRole(role)">
+            {{ viewRole?.id === role.id ? 'Hide' : 'View' }} Permissions
+          </button>
+          <button *appHasPermission="'ROLE_MANAGEMENT:UPDATE'" class="admin-btn admin-btn--sm admin-btn--secondary" (click)="openEdit(role)">Edit</button>
+          <ng-container *appHasPermission="'ROLE_MANAGEMENT:DELETE'">
+            <button *ngIf="!role.systemRole" class="admin-btn admin-btn--sm admin-btn--danger" (click)="openDelete(role)">Delete</button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="viewRole?.id === role.id" class="role-card__perm-panel">
+      <div class="perm-table">
+        <div class="perm-table__header-row">
+          <span class="perm-table__fn-cell">Function</span>
+          <span *ngFor="let action of ACTIONS" class="perm-table__action-cell">{{ action }}</span>
+        </div>
+        <div *ngFor="let group of permissionGroups" class="perm-table__row">
+          <span class="perm-table__fn-cell perm-table__fn-cell--data">{{ group.functionCode }}</span>
+          <span *ngFor="let action of ACTIONS" class="perm-table__action-cell">
+            <ng-container *ngIf="getPermByAction(group, action) as perm; else naCell">
+              <svg *ngIf="roleHasPerm(role, perm.id)" class="perm-icon perm-icon--granted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+              <span *ngIf="!roleHasPerm(role, perm.id)" class="perm-icon perm-icon--denied">—</span>
+            </ng-container>
+            <ng-template #naCell><span class="perm-icon perm-icon--na"></span></ng-template>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create Modal ──────────────────────────────────────────────────────── -->
+<div *ngIf="showCreateModal" class="admin-modal">
+  <div class="admin-modal__content admin-modal__content--xl">
+    <div class="admin-modal__header">
+      <h2>Create New Role</h2>
+      <button class="admin-modal__close" type="button" (click)="showCreateModal = false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <form (ngSubmit)="submitCreate()">
+      <div class="admin-modal__body">
+        <div *ngIf="formError" class="admin-alert admin-alert--error" style="margin-bottom:1rem">{{ formError }}</div>
+        <div class="role-form-grid">
+          <div class="role-form__group">
+            <label class="role-form__label">Role Code <small>uppercase, no spaces</small></label>
+            <input type="text" [(ngModel)]="formCode" name="code" class="admin-input" placeholder="e.g. CONTENT_MANAGER">
+          </div>
+          <div class="role-form__group">
+            <label class="role-form__label">Role Name</label>
+            <input type="text" [(ngModel)]="formName" name="name" class="admin-input">
+          </div>
+          <div class="role-form__group">
+            <label class="role-form__label">Description</label>
+            <input type="text" [(ngModel)]="formDescription" name="description" class="admin-input">
+          </div>
+        </div>
+
+        <div class="perm-matrix">
+          <div class="perm-matrix__title-bar">
+            <span>Assign Permissions</span>
+            <small>{{ selectedPermissionIds.size }} of {{ allPermissions.length }} selected</small>
+          </div>
+          <div class="perm-matrix__col-headers">
+            <span class="perm-matrix__fn-header">Function</span>
+            <span *ngFor="let action of ACTIONS" class="perm-matrix__action-header">{{ action }}</span>
+          </div>
+          <div *ngFor="let group of permissionGroups" class="perm-matrix__row">
+            <label class="perm-matrix__group-label">
+              <input type="checkbox"
+                     [checked]="isGroupAllSelected(group)"
+                     [indeterminate]="isGroupPartialSelected(group)"
+                     (change)="toggleGroup(group)">
+              <span>{{ group.functionCode }}</span>
+            </label>
+            <div *ngFor="let action of ACTIONS" class="perm-matrix__cell">
+              <ng-container *ngIf="getPermByAction(group, action) as perm">
+                <input type="checkbox"
+                       [checked]="selectedPermissionIds.has(perm.id)"
+                       (change)="togglePermission(perm.id)">
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="showCreateModal = false">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary">Create Role</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Edit Modal ────────────────────────────────────────────────────────── -->
+<div *ngIf="showEditModal" class="admin-modal">
+  <div class="admin-modal__content admin-modal__content--xl">
+    <div class="admin-modal__header">
+      <h2>Edit Role — {{ selectedRole?.name }}</h2>
+      <button class="admin-modal__close" type="button" (click)="showEditModal = false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <form (ngSubmit)="submitEdit()">
+      <div class="admin-modal__body">
+        <div *ngIf="formError" class="admin-alert admin-alert--error" style="margin-bottom:1rem">{{ formError }}</div>
+        <div *ngIf="selectedRole?.systemRole" class="admin-alert admin-alert--info">
+          System roles cannot have their code or name changed.
+        </div>
+        <div class="role-form-grid">
+          <div *ngIf="!selectedRole?.systemRole" class="role-form__group">
+            <label class="role-form__label">Role Code</label>
+            <input type="text" [(ngModel)]="formCode" name="code" class="admin-input">
+          </div>
+          <div *ngIf="!selectedRole?.systemRole" class="role-form__group">
+            <label class="role-form__label">Role Name</label>
+            <input type="text" [(ngModel)]="formName" name="name" class="admin-input">
+          </div>
+          <div class="role-form__group" [class.role-form__group--full]="selectedRole?.systemRole">
+            <label class="role-form__label">Description</label>
+            <input type="text" [(ngModel)]="formDescription" name="description" class="admin-input">
+          </div>
+        </div>
+
+        <div class="perm-matrix">
+          <div class="perm-matrix__title-bar">
+            <span>Assign Permissions</span>
+            <small>{{ selectedPermissionIds.size }} of {{ allPermissions.length }} selected</small>
+          </div>
+          <div class="perm-matrix__col-headers">
+            <span class="perm-matrix__fn-header">Function</span>
+            <span *ngFor="let action of ACTIONS" class="perm-matrix__action-header">{{ action }}</span>
+          </div>
+          <div *ngFor="let group of permissionGroups" class="perm-matrix__row">
+            <label class="perm-matrix__group-label">
+              <input type="checkbox"
+                     [checked]="isGroupAllSelected(group)"
+                     [indeterminate]="isGroupPartialSelected(group)"
+                     (change)="toggleGroup(group)">
+              <span>{{ group.functionCode }}</span>
+            </label>
+            <div *ngFor="let action of ACTIONS" class="perm-matrix__cell">
+              <ng-container *ngIf="getPermByAction(group, action) as perm">
+                <input type="checkbox"
+                       [checked]="selectedPermissionIds.has(perm.id)"
+                       (change)="togglePermission(perm.id)">
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="showEditModal = false">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Delete Confirm ────────────────────────────────────────────────────── -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete Role</h3>
+      <p class="admin-confirm__text">Delete <strong>{{ selectedRole?.name }}</strong>? Users with this role will lose their permissions.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="showDeleteConfirm = false">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

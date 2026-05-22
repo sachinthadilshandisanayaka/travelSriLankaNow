@@ -13,6 +13,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -43,15 +47,7 @@ public class AuthenticationService {
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return AuthenticationResponse.builder()
-                .success(true)
-                .message("Login successful")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .username(user.getUsername())
-                .firstName(user.getFirstName())
-                .role(user.getRole().name())
-                .build();
+        return buildResponse(user, accessToken, refreshToken, "Login successful");
     }
 
     public AuthenticationResponse refreshToken(String refreshToken) {
@@ -62,16 +58,7 @@ public class AuthenticationService {
 
             if (jwtService.isTokenValid(refreshToken, user)) {
                 String newAccessToken = jwtService.generateToken(user);
-
-                return AuthenticationResponse.builder()
-                        .success(true)
-                        .message("Token refreshed successfully")
-                        .accessToken(newAccessToken)
-                        .refreshToken(refreshToken)
-                        .username(user.getUsername())
-                        .firstName(user.getFirstName())
-                        .role(user.getRole().name())
-                        .build();
+                return buildResponse(user, newAccessToken, refreshToken, "Token refreshed successfully");
             }
         } catch (Exception e) {
             // Token is invalid
@@ -80,6 +67,28 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .success(false)
                 .message("Invalid or expired refresh token")
+                .build();
+    }
+
+    private AuthenticationResponse buildResponse(User user, String accessToken, String refreshToken, String message) {
+        List<String> permissions = user.getAdminRole() != null
+                ? user.getAdminRole().getPermissions().stream()
+                        .map(p -> p.getFunctionCode() + ":" + p.getAction())
+                        .sorted()
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
+
+        return AuthenticationResponse.builder()
+                .success(true)
+                .message(message)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .role(user.getRole().name())
+                .adminRoleCode(user.getAdminRole() != null ? user.getAdminRole().getCode() : null)
+                .adminRoleName(user.getAdminRole() != null ? user.getAdminRole().getName() : null)
+                .permissions(permissions)
                 .build();
     }
 

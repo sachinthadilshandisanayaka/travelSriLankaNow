@@ -24,6 +24,9 @@ import { AdminNavConfigComponent } from './components/admin-nav-config/admin-nav
 import { AdminContactDetailsComponent } from './components/admin-contact-details/admin-contact-details.component';
 import { AdminBookingsComponent } from './components/admin-bookings/admin-bookings.component';
 import { AdminBookingSettingsComponent } from './components/admin-booking-settings/admin-booking-settings.component';
+import { AdminUsersComponent } from './components/admin-users/admin-users.component';
+import { AdminRolesComponent } from './components/admin-roles/admin-roles.component';
+import { HasPermissionDirective } from './directives/has-permission.directive';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -64,7 +67,10 @@ import { SharedModule } from '../shared/shared.module';
     AdminNavConfigComponent,
     AdminContactDetailsComponent,
     AdminBookingsComponent,
-    AdminBookingSettingsComponent
+    AdminBookingSettingsComponent,
+    AdminUsersComponent,
+    AdminRolesComponent,
+    HasPermissionDirective
   ],
   imports: [
     CommonModule,
@@ -78,9 +84,9 @@ import { SharedModule } from '../shared/shared.module';
     MediaService
   ],
   exports: [
-    // Export for use in other modules if needed
     AdvancedImageUploadComponent,
-    ImageEditorComponent
+    ImageEditorComponent,
+    HasPermissionDirective
   ]
 })
 export class AdminModule { }

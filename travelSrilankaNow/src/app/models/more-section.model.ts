@@ -22,6 +22,7 @@ export interface MoreSection {
 
 export interface MoreSectionItem {
   id?: number;
+  slug?: string;
   title: string;
   shortDescription?: string;
   description?: string;

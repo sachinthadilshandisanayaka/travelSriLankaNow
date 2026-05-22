@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { BookingCountService } from '../../services/booking-count.service';
-import { forkJoin, Subscription } from 'rxjs';
+import { forkJoin, of, Subscription } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-layout',
@@ -36,9 +37,14 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.displayNameSub = this.authService.displayName$.subscribe(name => {
       this.displayName = name;
     });
-    this.pendingSub = this.bookingCount.pending$.subscribe(n => this.pendingCount = n);
+
+    // Only subscribe to pending bookings if the user has permission
+    if (this.hasPermission('BOOKINGS:VIEW')) {
+      this.pendingSub = this.bookingCount.pending$.subscribe(n => this.pendingCount = n);
+      this.bookingCount.refresh();
+    }
+
     this.loadStats();
-    this.bookingCount.refresh();
   }
 
   ngOnDestroy(): void {
@@ -47,11 +53,21 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   private loadStats(): void {
+    const empty = of({ totalElements: 0 });
+
     forkJoin({
-      locations: this.apiService.getLocations(0, 1),
-      events: this.apiService.getEvents(0, 1),
-      places: this.apiService.getPlaces(0, 1),
-      gallery: this.apiService.getGalleryItems(0, 1)
+      locations: this.hasPermission('LOCATIONS:VIEW')
+        ? this.apiService.getLocations(0, 1).pipe(catchError(() => empty))
+        : empty,
+      events: this.hasPermission('EVENTS:VIEW')
+        ? this.apiService.getEvents(0, 1).pipe(catchError(() => empty))
+        : empty,
+      places: this.hasPermission('PLACES:VIEW')
+        ? this.apiService.getPlaces(0, 1).pipe(catchError(() => empty))
+        : empty,
+      gallery: this.hasPermission('GALLERY:VIEW')
+        ? this.apiService.getGalleryItems(0, 1).pipe(catchError(() => empty))
+        : empty
     }).subscribe({
       next: (data) => {
         this.stats.locations.total = data.locations.totalElements;
@@ -62,6 +78,19 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       error: () => {}
     });
   }
+
+  // ── Permission helpers for template ────────────────────────────────────────
+
+  hasPermission(permission: string): boolean {
+    return this.authService.hasPermission(permission);
+  }
+
+  /** Returns true if the user has ANY of the supplied permissions. */
+  hasAny(...permissions: string[]): boolean {
+    return permissions.some(p => this.authService.hasPermission(p));
+  }
+
+  // ── Sidebar ────────────────────────────────────────────────────────────────
 
   dismissPendingBanner(): void {
     this.showPendingBanner = false;
@@ -74,6 +103,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   closeSidebar(): void {
     this.isSidebarOpen = false;
   }
+
+  // ── Logout ─────────────────────────────────────────────────────────────────
 
   openLogoutConfirm(): void {
     this.showLogoutConfirm = true;

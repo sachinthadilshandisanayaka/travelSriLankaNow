@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -27,4 +29,12 @@ public class AuthenticationResponse {
     private String firstName;
 
     private String role;
+
+    @JsonProperty("admin_role_code")
+    private String adminRoleCode;
+
+    @JsonProperty("admin_role_name")
+    private String adminRoleName;
+
+    private List<String> permissions;
 }

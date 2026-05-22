@@ -33,7 +33,7 @@ public class BookingConditionEngine {
     }
 
     private String getFirstCancelViolation(EventBooking booking) {
-        String typeCode = booking.getBookingType() != null ? booking.getBookingType().name() : "EVENT";
+        String typeCode = booking.getBookingType() != null ? booking.getBookingType() : "EVENT";
         List<BkCondition> conditions = conditionRepository.findByBookingTypeCodeAndActiveTrue(typeCode);
         for (BkCondition c : conditions) {
             if (!evaluateForCancel(c, booking)) {
@@ -44,7 +44,7 @@ public class BookingConditionEngine {
     }
 
     private String getFirstEditViolation(EventBooking booking) {
-        String typeCode = booking.getBookingType() != null ? booking.getBookingType().name() : "EVENT";
+        String typeCode = booking.getBookingType() != null ? booking.getBookingType() : "EVENT";
         List<BkCondition> conditions = conditionRepository.findByBookingTypeCodeAndActiveTrue(typeCode);
         for (BkCondition c : conditions) {
             if (!evaluateForEdit(c, booking)) {

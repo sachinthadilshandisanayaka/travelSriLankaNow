@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ public class FileUploadController {
     private final CloudinaryService cloudinaryService;
 
     @PostMapping("/image")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> uploadImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "folder", defaultValue = "travel-sri-lanka") String folder
@@ -48,6 +50,7 @@ public class FileUploadController {
     }
 
     @PostMapping("/images")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> uploadMultipleImages(
             @RequestParam("files") MultipartFile[] files,
             @RequestParam(value = "folder", defaultValue = "travel-sri-lanka") String folder
@@ -81,6 +84,7 @@ public class FileUploadController {
     }
 
     @DeleteMapping("/image")
+    @PreAuthorize("hasAuthority('MEDIA:DELETE')")
     public ResponseEntity<Map<String, Object>> deleteImage(@RequestParam("publicId") String publicId) {
         try {
             cloudinaryService.deleteImage(publicId);

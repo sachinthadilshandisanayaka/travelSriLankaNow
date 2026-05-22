@@ -1,0 +1,407 @@
+@import '../../styles/admin-shared';
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+.admin-page {
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0 0 0.25rem;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: $admin-gray-500;
+    margin: 0;
+  }
+}
+
+// ── Alerts ────────────────────────────────────────────────────────────────────
+
+.admin-alert {
+  padding: 0.75rem 1rem;
+  border-radius: $admin-radius;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+
+  &--success { background: $admin-success-light; color: darken($admin-success, 10%); border: 1px solid $admin-success; }
+  &--error   { background: $admin-error-light;   color: darken($admin-error, 10%);   border: 1px solid $admin-error;   }
+  &--info    { background: $admin-blue-light;    color: $admin-navy-dark;            border: 1px solid $admin-blue;    }
+}
+
+// ── Loading ────────────────────────────────────────────────────────────────────
+
+.admin-loading {
+  padding: 2rem;
+  text-align: center;
+  color: $admin-gray-500;
+  font-size: 0.9rem;
+}
+
+// ── Role Card ─────────────────────────────────────────────────────────────────
+
+.role-card {
+  @include admin-card;
+  margin-bottom: 1rem;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.1rem 1.25rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+  }
+
+  &__name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0;
+  }
+
+  &__code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    background: $admin-gray-100;
+    padding: 0.15rem 0.45rem;
+    border-radius: $admin-radius-sm;
+    color: $admin-navy-dark;
+  }
+
+  &__desc {
+    font-size: 0.8125rem;
+    color: $admin-gray-500;
+    margin: 0;
+  }
+
+  &__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  &__stats {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  &__perm-count {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    color: $admin-navy;
+    font-weight: 600;
+
+    svg { flex-shrink: 0; }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__perm-panel {
+    border-top: 1px solid $admin-gray-100;
+    background: $admin-gray-50;
+    overflow-x: auto;
+  }
+}
+
+// ── Role Badge ────────────────────────────────────────────────────────────────
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: $admin-radius-full;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: $admin-blue-light;
+  color: $admin-navy;
+
+  &--system {
+    background: $admin-warning-light;
+    color: darken($admin-warning, 12%);
+  }
+}
+
+// ── Small Buttons ─────────────────────────────────────────────────────────────
+
+.admin-btn--sm {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.8rem !important;
+}
+
+// ── Permission Table (expanded card view) ─────────────────────────────────────
+
+.perm-table {
+  min-width: 560px;
+
+  &__header-row,
+  &__row {
+    display: grid;
+    grid-template-columns: 200px repeat(4, 1fr);
+    align-items: center;
+  }
+
+  &__header-row {
+    background: $admin-navy-dark;
+
+    .perm-table__fn-cell,
+    .perm-table__action-cell {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .perm-table__action-cell {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+  }
+
+  &__row {
+    border-bottom: 1px solid $admin-gray-100;
+
+    &:last-child { border-bottom: none; }
+
+    &:nth-child(even) { background: rgba($admin-gray-50, 0.7); }
+
+    &:hover { background: $admin-blue-light; }
+  }
+
+  &__fn-cell {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    color: $admin-gray-500;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    &--data {
+      color: $admin-gray-700;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+
+  &__action-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0;
+  }
+}
+
+.perm-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+
+  &--granted { color: $admin-success; }
+
+  &--denied {
+    color: $admin-gray-300;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+}
+
+// ── Permission Matrix (Create/Edit modal) ─────────────────────────────────────
+
+.perm-matrix {
+  margin-top: 1.25rem;
+  border: 1px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  overflow: hidden;
+
+  &__title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 1rem;
+    background: $admin-gray-50;
+    border-bottom: 1px solid $admin-gray-200;
+
+    span {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: $admin-gray-700;
+    }
+
+    small {
+      font-size: 0.75rem;
+      color: $admin-gray-400;
+    }
+  }
+
+  &__col-headers {
+    display: grid;
+    grid-template-columns: 1fr repeat(4, 80px);
+    padding: 0.45rem 1rem;
+    background: $admin-navy-dark;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr repeat(4, 60px);
+    }
+  }
+
+  &__fn-header {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__action-header {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr repeat(4, 80px);
+    align-items: center;
+    min-height: 2.5rem;
+    border-bottom: 1px solid $admin-gray-100;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr repeat(4, 60px);
+    }
+
+    &:last-child { border-bottom: none; }
+
+    &:nth-child(even) { background: rgba($admin-gray-50, 0.5); }
+
+    &:hover { background: $admin-blue-light; }
+  }
+
+  &__group-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $admin-gray-700;
+    cursor: pointer;
+    overflow: hidden;
+
+    input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: $admin-navy;
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0;
+
+    input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: $admin-navy;
+      width: 15px;
+      height: 15px;
+    }
+  }
+}
+
+// ── Role Form (inside modal) ──────────────────────────────────────────────────
+
+.role-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.875rem;
+  margin-bottom: 0.25rem;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.role-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  &--full { grid-column: 1 / -1; }
+}
+
+.role-form__label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-gray-700;
+
+  small {
+    font-weight: 400;
+    color: $admin-gray-400;
+    margin-left: 0.25rem;
+    font-size: 0.73rem;
+  }
+}
+
+// ── Modal Size Override ────────────────────────────────────────────────────────
+
+.admin-modal__content--xl {
+  max-width: 940px;
+  width: 95vw;
+}

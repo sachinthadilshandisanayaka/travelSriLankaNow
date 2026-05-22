@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +18,7 @@ public class AdminPlaceController {
     private final PlaceService placeService;
 
     @GetMapping("/paginated")
+    @PreAuthorize("hasAuthority('PLACES:VIEW')")
     public ResponseEntity<Page<Place>> getPlacesPaginated(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String type,
@@ -29,19 +31,20 @@ public class AdminPlaceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PLACES:CREATE')")
     public ResponseEntity<Place> createPlace(@RequestBody Place place) {
-        Place created = placeService.createPlace(place);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(placeService.createPlace(place));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('PLACES:UPDATE')")
     public ResponseEntity<Place> updatePlace(@PathVariable Long id, @RequestBody Place place) {
         place.setId(id);
-        Place updated = placeService.updatePlace(place);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(placeService.updatePlace(place));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('PLACES:DELETE')")
     public ResponseEntity<Void> deletePlace(@PathVariable Long id) {
         placeService.deletePlace(id);
         return ResponseEntity.noContent().build();
