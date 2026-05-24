@@ -314,14 +314,19 @@
     <ng-container *ngIf="getCustomConfig(section.id) as customConf">
       <section class="custom-content-section custom-content-section--{{ customConf.template || 'minimal' }}"
                [ngStyle]="getCustomSectionStyle(customConf)">
+        <!-- Dynamic overlay -->
+        <div class="custom-content-section__overlay"
+             [ngStyle]="getCustomOverlayStyle(customConf)">
+        </div>
         <div class="custom-content-section__inner container">
 
-          <!-- New structured layout: title + description -->
-          <ng-container *ngIf="customConf.title || customConf.description">
+          <!-- New structured layout: title + description + CTA -->
+          <ng-container *ngIf="customConf.title || customConf.description || customConf.buttonText">
             <h2 *ngIf="customConf.title"
                 class="custom-content-section__title"
                 [style.color]="customConf.titleColor"
-                [style.textAlign]="customConf.titleAlign || 'left'">
+                [style.textAlign]="customConf.titleAlign || 'left'"
+                [style.fontSize]="customConf.titleSize || ''">
               {{ customConf.title }}
             </h2>
             <p *ngIf="customConf.description"
@@ -330,10 +335,27 @@
                [style.textAlign]="customConf.descriptionAlign || 'left'">
               {{ customConf.description }}
             </p>
+            <div *ngIf="customConf.buttonText" class="custom-content-section__cta"
+                 [style.textAlign]="customConf.titleAlign || 'left'">
+              <a *ngIf="customConf.buttonUrl; else noLinkBtn"
+                 [routerLink]="customConf.buttonUrl"
+                 class="custom-content-section__btn"
+                 [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                 [style.color]="customConf.buttonTextColor || '#ffffff'">
+                {{ customConf.buttonText }}
+              </a>
+              <ng-template #noLinkBtn>
+                <button type="button" class="custom-content-section__btn"
+                        [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                        [style.color]="customConf.buttonTextColor || '#ffffff'">
+                  {{ customConf.buttonText }}
+                </button>
+              </ng-template>
+            </div>
           </ng-container>
 
           <!-- Legacy fallback: sections created with the old rich-text editor -->
-          <div *ngIf="!customConf.title && !customConf.description && customConf.content"
+          <div *ngIf="!customConf.title && !customConf.description && !customConf.buttonText && customConf.content"
                class="custom-content-section__text"
                [ngStyle]="getCustomTextStyle(customConf)"
                [innerHTML]="customConf.content">

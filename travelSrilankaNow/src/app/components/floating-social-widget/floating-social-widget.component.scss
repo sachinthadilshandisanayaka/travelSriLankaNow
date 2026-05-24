@@ -1,0 +1,161 @@
+.fsw {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+// Social buttons (stacked above toggle)
+.fsw__buttons {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.fsw__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+  transform: scale(0) translateY(10px);
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s ease,
+              box-shadow 0.15s ease;
+  pointer-events: none;
+  position: relative;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.35);
+    transform: scale(1.08) !important;
+  }
+
+  @media (max-width: 480px) {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Label tooltip
+.fsw__label {
+  position: absolute;
+  right: 56px;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.fsw__btn:hover .fsw__label {
+  opacity: 1;
+}
+
+// Toggle button
+.fsw__toggle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #1C4D8D;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(28, 77, 141, 0.4);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  z-index: 1;
+
+  &:hover {
+    background: #0F2854;
+    box-shadow: 0 6px 20px rgba(28, 77, 141, 0.5);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 480px) {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+.fsw__toggle-icon {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+  position: absolute;
+  transition: opacity 0.2s, transform 0.3s;
+
+  &--share {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+
+  &--close {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+}
+
+// Open state
+.fsw--open {
+  .fsw__btn {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .fsw__buttons {
+    pointer-events: auto;
+  }
+
+  .fsw__toggle {
+    background: #0F2854;
+  }
+
+  .fsw__toggle-icon--share {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.6);
+  }
+
+  .fsw__toggle-icon--close {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}

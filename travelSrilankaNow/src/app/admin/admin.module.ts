@@ -27,6 +27,7 @@ import { AdminBookingSettingsComponent } from './components/admin-booking-settin
 import { AdminUsersComponent } from './components/admin-users/admin-users.component';
 import { AdminRolesComponent } from './components/admin-roles/admin-roles.component';
 import { HasPermissionDirective } from './directives/has-permission.directive';
+import { AdminFloatingSocialComponent } from './components/admin-floating-social/admin-floating-social.component';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -70,6 +71,7 @@ import { SharedModule } from '../shared/shared.module';
     AdminBookingSettingsComponent,
     AdminUsersComponent,
     AdminRolesComponent,
+    AdminFloatingSocialComponent,
     HasPermissionDirective
   ],
   imports: [
