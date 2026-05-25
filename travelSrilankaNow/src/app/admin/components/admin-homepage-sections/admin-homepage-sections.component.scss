@@ -701,3 +701,33 @@
   color: $admin-gray-400;
   margin-left: 0.25rem;
 }
+
+// Background image options container
+.bg-image-options {
+  border-top: 1px solid $admin-gray-100;
+  padding-top: 0.5rem;
+}
+
+// Overlay opacity range slider
+.overlay-range {
+  width: 100%;
+  accent-color: $admin-blue;
+  height: 6px;
+  cursor: pointer;
+}
+
+// CTA button preview inside the live preview box
+.custom-preview-btn-wrap {
+  margin-top: 1rem;
+}
+
+.custom-preview-btn {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: default;
+  background: #1C4D8D;
+  color: #ffffff;
+}

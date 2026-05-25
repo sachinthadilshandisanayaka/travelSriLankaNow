@@ -255,8 +255,25 @@ export class LandingComponent implements OnInit, OnDestroy {
     if (config.backgroundColor) style['background-color'] = config.backgroundColor;
     if (config.backgroundImage) {
       style['background-image'] = `url(${config.backgroundImage})`;
-      style['background-size'] = 'cover';
-      style['background-position'] = 'center';
+      const effect = config.backgroundEffect || 'cover';
+      if (effect === 'parallax') {
+        style['background-size'] = 'cover';
+        style['background-attachment'] = 'fixed';
+        style['background-position'] = 'center';
+        style['background-repeat'] = 'no-repeat';
+      } else if (effect === 'contain') {
+        style['background-size'] = 'contain';
+        style['background-repeat'] = 'no-repeat';
+        style['background-position'] = 'center';
+      } else if (effect === 'tile') {
+        style['background-size'] = 'auto';
+        style['background-repeat'] = 'repeat';
+        style['background-position'] = 'top left';
+      } else {
+        style['background-size'] = 'cover';
+        style['background-position'] = 'center';
+        style['background-repeat'] = 'no-repeat';
+      }
     }
     if (config.textColor) style['color'] = config.textColor;
     if (config.minHeight) style['min-height'] = config.minHeight;
@@ -268,6 +285,16 @@ export class LandingComponent implements OnInit, OnDestroy {
       style['justify-content'] = map[config.verticalAlign] ?? 'flex-start';
     }
     return style;
+  }
+
+  getCustomOverlayStyle(config: CustomContentConfig): { [key: string]: string } {
+    if (!config.backgroundImage || !(config.overlayOpacity ?? 0)) return { display: 'none' };
+    const color = config.overlayColor || '#000000';
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16) || 0;
+    const g = parseInt(hex.substring(2, 4), 16) || 0;
+    const b = parseInt(hex.substring(4, 6), 16) || 0;
+    return { background: `rgba(${r},${g},${b},${config.overlayOpacity ?? 0})` };
   }
 
   getCustomTextStyle(config: CustomContentConfig): { [key: string]: string } {

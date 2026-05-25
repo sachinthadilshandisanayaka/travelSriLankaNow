@@ -58,7 +58,7 @@
       </div>
 
       <!-- ── Content ── -->
-      <div class="nav-section" *ngIf="hasAny('EVENTS:VIEW', 'LOCATIONS:VIEW', 'PLACES:VIEW', 'GALLERY:VIEW')">
+      <div class="nav-section" *ngIf="hasAny('EVENTS:VIEW', 'LOCATIONS:VIEW', 'PLACES:VIEW', 'GALLERY:VIEW', 'MORE_SECTIONS:VIEW', 'SOCIAL_MEDIA:VIEW')">
         <span class="nav-section__title">Content</span>
 
         <a *ngIf="hasPermission('EVENTS:VIEW')"
@@ -100,11 +100,35 @@
           <span>Gallery</span>
           <span class="nav-item__badge">{{ stats.gallery.total }}</span>
         </a>
+
+        <a *ngIf="hasPermission('MORE_SECTIONS:VIEW')"
+           routerLink="/admin/more-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+          </svg>
+          <span>More Sections</span>
+        </a>
+
+        <a *ngIf="hasPermission('SOCIAL_MEDIA:VIEW')"
+           routerLink="/admin/social-media" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+          </svg>
+          <span>Social Media</span>
+        </a>
       </div>
 
-      <!-- ── UI Components ── -->
-      <div class="nav-section" *ngIf="hasAny('HERO_SLIDES:VIEW', 'PAGE_HEADERS:VIEW', 'SOCIAL_MEDIA:VIEW', 'MORE_SECTIONS:VIEW', 'NAV_CONFIG:VIEW')">
-        <span class="nav-section__title">UI Components</span>
+      <!-- ── Website Layout ── -->
+      <div class="nav-section" *ngIf="hasAny('HERO_SLIDES:VIEW', 'PAGE_HEADERS:VIEW', 'HOMEPAGE_SECTIONS:VIEW', 'NAV_CONFIG:VIEW')">
+        <span class="nav-section__title">Website Layout</span>
+
+        <a *ngIf="hasPermission('HOMEPAGE_SECTIONS:VIEW')"
+           routerLink="/admin/homepage-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+          </svg>
+          <span>Homepage Sections</span>
+        </a>
 
         <a *ngIf="hasPermission('HERO_SLIDES:VIEW')"
            routerLink="/admin/hero-slides" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
@@ -126,24 +150,6 @@
           <span>Page Headers</span>
         </a>
 
-        <a *ngIf="hasPermission('SOCIAL_MEDIA:VIEW')"
-           routerLink="/admin/social-media" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
-          </svg>
-          <span>Social Media</span>
-        </a>
-
-        <a *ngIf="hasPermission('MORE_SECTIONS:VIEW')"
-           routerLink="/admin/more-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="5" r="1"/>
-            <circle cx="12" cy="12" r="1"/>
-            <circle cx="12" cy="19" r="1"/>
-          </svg>
-          <span>More Sections</span>
-        </a>
-
         <a *ngIf="hasPermission('NAV_CONFIG:VIEW')"
            routerLink="/admin/nav-config" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -155,17 +161,9 @@
         </a>
       </div>
 
-      <!-- ── Settings ── -->
-      <div class="nav-section" *ngIf="hasAny('HOMEPAGE_SECTIONS:VIEW', 'LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW', 'MASTER_DATA:VIEW', 'SITE_SETTINGS:VIEW')">
-        <span class="nav-section__title">Settings</span>
-
-        <a *ngIf="hasPermission('HOMEPAGE_SECTIONS:VIEW')"
-           routerLink="/admin/homepage-sections" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-          </svg>
-          <span>Homepage Sections</span>
-        </a>
+      <!-- ── Configuration ── -->
+      <div class="nav-section" *ngIf="hasAny('LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW', 'MASTER_DATA:VIEW', 'SITE_SETTINGS:VIEW')">
+        <span class="nav-section__title">Configuration</span>
 
         <a *ngIf="hasAny('LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW')"
            routerLink="/admin/order/locations" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
@@ -191,6 +189,18 @@
             <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
           <span>Site Settings</span>
+        </a>
+
+        <a *ngIf="hasPermission('SITE_SETTINGS:VIEW')"
+           routerLink="/admin/floating-social" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span>Floating Buttons</span>
         </a>
       </div>
 

@@ -200,6 +200,10 @@ export class AdminApiService {
     return this.http.patch(`${this.apiUrl}/site-settings/${id}/toggle-status`, {});
   }
 
+  upsertSiteSetting(setting: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/site-settings/upsert`, setting);
+  }
+
   // Hero Slides
   getHeroSlides(page: number = 0, size: number = 10, sort: string = 'displayOrder,asc'): Observable<PageResponse<any>> {
     let params = new HttpParams()

@@ -24,6 +24,7 @@ import { AdminBookingsComponent } from './components/admin-bookings/admin-bookin
 import { AdminBookingSettingsComponent } from './components/admin-booking-settings/admin-booking-settings.component';
 import { AdminUsersComponent } from './components/admin-users/admin-users.component';
 import { AdminRolesComponent } from './components/admin-roles/admin-roles.component';
+import { AdminFloatingSocialComponent } from './components/admin-floating-social/admin-floating-social.component';
 
 const routes: Routes = [
   {
@@ -99,6 +100,12 @@ const routes: Routes = [
         component: AdminSocialMediaComponent,
         canActivate: [PermissionGuard],
         data: { permission: 'SOCIAL_MEDIA:VIEW' }
+      },
+      {
+        path: 'floating-social',
+        component: AdminFloatingSocialComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'SITE_SETTINGS:VIEW' }
       },
       {
         path: 'more-sections',

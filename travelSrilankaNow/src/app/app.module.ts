@@ -30,6 +30,7 @@ import { ContactDetailsComponent } from './shared/components/contact-details/con
 import { AuthLoginComponent } from './pages/auth/auth-login.component';
 import { AuthRegisterComponent } from './pages/auth/auth-register.component';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
+import { FloatingSocialWidgetComponent } from './components/floating-social-widget/floating-social-widget.component';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
@@ -57,7 +58,8 @@ import { SharedModule } from './shared/shared.module';
     ContactDetailsComponent,
     AuthLoginComponent,
     AuthRegisterComponent,
-    MyBookingsComponent
+    MyBookingsComponent,
+    FloatingSocialWidgetComponent
   ],
   imports: [
     BrowserModule,
