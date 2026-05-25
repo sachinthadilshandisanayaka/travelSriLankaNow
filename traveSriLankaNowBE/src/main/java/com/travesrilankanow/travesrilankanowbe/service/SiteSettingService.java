@@ -62,6 +62,32 @@ public class SiteSettingService {
     }
 
     @Transactional
+    public SiteSetting upsertSetting(SiteSetting setting) {
+        return siteSettingRepository.findByKey(setting.getKey())
+                .map(existing -> {
+                    existing.setCategory(setting.getCategory());
+                    existing.setLabel(setting.getLabel());
+                    existing.setValue(setting.getValue());
+                    existing.setIcon(setting.getIcon());
+                    existing.setSortOrder(setting.getSortOrder());
+                    if (setting.getIsActive() != null) existing.setIsActive(setting.getIsActive());
+                    return siteSettingRepository.save(existing);
+                })
+                .orElseGet(() -> {
+                    SiteSetting newSetting = SiteSetting.builder()
+                            .category(setting.getCategory())
+                            .key(setting.getKey())
+                            .label(setting.getLabel())
+                            .value(setting.getValue())
+                            .icon(setting.getIcon())
+                            .sortOrder(setting.getSortOrder())
+                            .isActive(setting.getIsActive() != null ? setting.getIsActive() : true)
+                            .build();
+                    return siteSettingRepository.save(newSetting);
+                });
+    }
+
+    @Transactional
     public SiteSetting updateSetting(SiteSetting setting) {
         SiteSetting existingSetting = siteSettingRepository.findById(setting.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Setting not found with id: " + setting.getId()));

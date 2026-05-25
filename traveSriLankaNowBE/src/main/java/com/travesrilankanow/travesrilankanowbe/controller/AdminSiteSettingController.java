@@ -53,4 +53,10 @@ public class AdminSiteSettingController {
     public ResponseEntity<SiteSetting> toggleStatus(@PathVariable Long id) {
         return ResponseEntity.ok(siteSettingService.toggleStatus(id));
     }
+
+    @PostMapping("/upsert")
+    @PreAuthorize("hasAuthority('SITE_SETTINGS:UPDATE')")
+    public ResponseEntity<SiteSetting> upsertSetting(@RequestBody SiteSetting setting) {
+        return ResponseEntity.ok(siteSettingService.upsertSetting(setting));
+    }
 }

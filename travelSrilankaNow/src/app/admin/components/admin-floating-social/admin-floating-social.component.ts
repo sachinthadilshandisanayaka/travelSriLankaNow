@@ -87,23 +87,18 @@ export class AdminFloatingSocialComponent implements OnInit {
 
   save(): void {
     this.isSaving = true;
-    const value = JSON.stringify(this.config);
     const settingPayload = {
       category: 'GENERAL',
       key: 'floating_social_buttons',
       label: 'Floating Social Buttons',
-      value,
+      value: JSON.stringify(this.config),
       isActive: true,
       sortOrder: 100
     };
 
-    const request$ = this.settingId
-      ? this.apiService.updateSiteSetting(this.settingId, { ...settingPayload, id: this.settingId })
-      : this.apiService.createSiteSetting(settingPayload);
-
-    request$.subscribe({
+    this.apiService.upsertSiteSetting(settingPayload).subscribe({
       next: (result: any) => {
-        if (!this.settingId) this.settingId = result.id;
+        this.settingId = result.id;
         this.successMessage = 'Floating social buttons saved!';
         this.isSaving = false;
         this.hideMessages();
