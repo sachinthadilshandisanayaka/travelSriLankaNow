@@ -293,19 +293,14 @@
             </select>
           </div>
 
-          <div class="admin-form__group admin-form__group--full">
-            <label class="admin-form__label">Background Image URL <span class="admin-form__hint">(optional)</span></label>
-            <input type="url" class="admin-input" [(ngModel)]="customConfig.backgroundImage" placeholder="https://…/image.jpg">
-          </div>
-
-          <div class="admin-form__group" *ngIf="customConfig.backgroundImage">
+          <div class="admin-form__group">
             <label class="admin-form__label">Section Height</label>
             <select class="admin-input" [(ngModel)]="customConfig.minHeight">
               <option *ngFor="let h of MIN_HEIGHT_OPTIONS" [value]="h.value">{{ h.label }}</option>
             </select>
           </div>
 
-          <div class="admin-form__group admin-form__group--full">
+          <div class="admin-form__group">
             <label class="admin-form__label">Vertical Content Alignment</label>
             <div class="align-btn-group">
               <button type="button" class="align-btn"
@@ -332,6 +327,45 @@
         </div>
       </div>
 
+      <!-- ③b Background Image -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Background Image <span class="admin-form__hint">(optional)</span></h4>
+        <app-image-upload
+          [currentImageUrl]="customConfig.backgroundImage || ''"
+          folder="custom-content"
+          label="Background Image"
+          (imageUploaded)="onBgImageUploaded($event)">
+        </app-image-upload>
+
+        <div *ngIf="customConfig.backgroundImage" class="bg-image-options">
+          <div class="admin-form__grid" style="margin-top:0.875rem">
+
+            <div class="admin-form__group">
+              <label class="admin-form__label">Image Effect</label>
+              <select class="admin-input" [(ngModel)]="customConfig.backgroundEffect">
+                <option *ngFor="let e of BACKGROUND_EFFECT_OPTIONS" [value]="e.value">{{ e.label }}</option>
+              </select>
+            </div>
+
+            <div class="admin-form__group">
+              <label class="admin-form__label">Overlay Color</label>
+              <div class="color-input-group">
+                <input type="color" class="color-picker" [(ngModel)]="customConfig.overlayColor">
+                <input type="text" class="admin-input" [(ngModel)]="customConfig.overlayColor" placeholder="#000000">
+              </div>
+            </div>
+
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">
+                Overlay Opacity — {{ getOverlayOpacityPct() }}%
+              </label>
+              <input type="range" class="overlay-range" min="0" max="1" step="0.05"
+                     [(ngModel)]="customConfig.overlayOpacity">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ④ Title field -->
       <div class="custom-form-block">
         <h4 class="custom-section-label">Title</h4>
@@ -346,6 +380,15 @@
               <input type="text" class="admin-input" [(ngModel)]="customConfig.titleColor" placeholder="#1e293b">
             </div>
           </div>
+          <div class="content-style-cell">
+            <label class="admin-form__label">Size</label>
+            <select class="admin-input" [(ngModel)]="customConfig.titleSize">
+              <option value="">Default (responsive)</option>
+              <option *ngFor="let s of TITLE_SIZE_OPTIONS" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="content-style-row" style="margin-top:0.5rem">
           <div class="content-style-cell">
             <label class="admin-form__label">Alignment</label>
             <div class="align-btn-group">
@@ -400,23 +443,50 @@
         </div>
       </div>
 
-      <!-- ⑥ Live preview -->
+      <!-- ⑥ CTA Button -->
+      <div class="custom-form-block">
+        <h4 class="custom-section-label">Call-to-Action Button <span class="admin-form__hint">(optional)</span></h4>
+        <div class="admin-form__grid">
+          <div class="admin-form__group">
+            <label class="admin-form__label">Button Text</label>
+            <input type="text" class="admin-input" [(ngModel)]="customConfig.buttonText" placeholder="e.g. Explore Now">
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Button URL</label>
+            <input type="text" class="admin-input" [(ngModel)]="customConfig.buttonUrl" placeholder="/destinations">
+          </div>
+          <div class="admin-form__group" *ngIf="customConfig.buttonText">
+            <label class="admin-form__label">Button Background</label>
+            <div class="color-input-group">
+              <input type="color" class="color-picker" [(ngModel)]="customConfig.buttonColor">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.buttonColor" placeholder="#1C4D8D">
+            </div>
+          </div>
+          <div class="admin-form__group" *ngIf="customConfig.buttonText">
+            <label class="admin-form__label">Button Text Color</label>
+            <div class="color-input-group">
+              <input type="color" class="color-picker" [(ngModel)]="customConfig.buttonTextColor">
+              <input type="text" class="admin-input" [(ngModel)]="customConfig.buttonTextColor" placeholder="#ffffff">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑦ Live preview -->
       <div class="custom-form-block">
         <h4 class="custom-section-label">Live Preview</h4>
-        <div class="custom-preview-box"
-             [style.backgroundColor]="customConfig.backgroundColor || '#f8fafc'"
-             [style.backgroundImage]="customConfig.backgroundImage ? 'url(' + customConfig.backgroundImage + ')' : ''"
-             [style.backgroundSize]="'cover'"
-             [style.backgroundPosition]="'center'"
-             [style.minHeight]="customConfig.minHeight || '120px'"
-             [style.padding]="customConfig.padding || '2rem 1.5rem'">
-          <div class="custom-preview-overlay" *ngIf="customConfig.backgroundImage"></div>
+        <div class="custom-preview-box" [ngStyle]="getPreviewBgStyle()">
+          <div class="custom-preview-overlay"
+               *ngIf="hasOverlay()"
+               [ngStyle]="getOverlayStyle()">
+          </div>
           <div class="custom-preview-inner">
-            <p class="custom-preview-empty" *ngIf="!customConfig.title && !customConfig.description">Title &amp; description will appear here</p>
+            <p class="custom-preview-empty" *ngIf="!customConfig.title && !customConfig.description && !customConfig.buttonText">Title &amp; description will appear here</p>
             <div *ngIf="customConfig.title"
                  class="custom-preview-title"
                  [style.color]="customConfig.titleColor"
-                 [style.textAlign]="customConfig.titleAlign || 'left'">
+                 [style.textAlign]="customConfig.titleAlign || 'left'"
+                 [style.fontSize]="customConfig.titleSize || ''">
               {{ customConfig.title }}
             </div>
             <div *ngIf="customConfig.description"
@@ -425,11 +495,19 @@
                  [style.textAlign]="customConfig.descriptionAlign || 'left'">
               {{ customConfig.description }}
             </div>
+            <div *ngIf="customConfig.buttonText" class="custom-preview-btn-wrap"
+                 [style.textAlign]="customConfig.titleAlign || 'left'">
+              <span class="custom-preview-btn"
+                    [style.backgroundColor]="customConfig.buttonColor || '#1C4D8D'"
+                    [style.color]="customConfig.buttonTextColor || '#ffffff'">
+                {{ customConfig.buttonText }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ⑦ Active toggle -->
+      <!-- ⑧ Active toggle -->
       <div class="admin-form__group">
         <label class="admin-checkbox">
           <input type="checkbox" [(ngModel)]="customIsActive">

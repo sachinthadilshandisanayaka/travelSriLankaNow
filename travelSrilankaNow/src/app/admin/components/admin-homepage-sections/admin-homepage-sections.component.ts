@@ -113,6 +113,21 @@ export class AdminHomepageSectionsComponent implements OnInit {
     { label: 'Extra (120 px)', value: '120px 20px' },
   ];
 
+  readonly BACKGROUND_EFFECT_OPTIONS = [
+    { label: 'Cover (fill & crop)', value: 'cover' },
+    { label: 'Parallax (fixed scroll)', value: 'parallax' },
+    { label: 'Contain (fit inside)', value: 'contain' },
+    { label: 'Tile (repeat)', value: 'tile' },
+  ];
+
+  readonly TITLE_SIZE_OPTIONS = [
+    { label: 'Small (1.25 rem)', value: '1.25rem' },
+    { label: 'Medium (1.75 rem)', value: '1.75rem' },
+    { label: 'Large (2.25 rem)', value: '2.25rem' },
+    { label: 'Extra Large (3 rem)', value: '3rem' },
+    { label: 'Huge (4 rem)', value: '4rem' },
+  ];
+
   sectionTypeLabels: Record<string, string> = {
     HERO_SLIDER: 'Hero Slider',
     FEATURED_LOCATIONS: 'Featured Locations',
@@ -415,7 +430,9 @@ export class AdminHomepageSectionsComponent implements OnInit {
       },
       'image-overlay': {
         titleColor: '#ffffff', titleAlign: 'center',
-        descriptionColor: 'rgba(255,255,255,0.85)', descriptionAlign: 'center'
+        descriptionColor: 'rgba(255,255,255,0.85)', descriptionAlign: 'center',
+        overlayColor: '#000000', overlayOpacity: 0.45,
+        backgroundEffect: 'cover'
       },
       split: {
         backgroundColor: '#ffffff',
@@ -424,6 +441,48 @@ export class AdminHomepageSectionsComponent implements OnInit {
       }
     };
     this.customConfig = { ...this.customConfig, template: templateId as any, ...defaults[templateId] };
+  }
+
+  onBgImageUploaded(url: string): void {
+    this.customConfig = { ...this.customConfig, backgroundImage: url };
+  }
+
+  clearBgImage(): void {
+    this.customConfig = { ...this.customConfig, backgroundImage: '' };
+  }
+
+  getOverlayStyle(): { [key: string]: string } {
+    if (!this.customConfig.backgroundImage) return {};
+    const color = this.customConfig.overlayColor || '#000000';
+    const opacity = this.customConfig.overlayOpacity ?? 0;
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return { background: `rgba(${r},${g},${b},${opacity})` };
+  }
+
+  getOverlayOpacityPct(): number {
+    return Math.round((this.customConfig.overlayOpacity || 0) * 100);
+  }
+
+  hasOverlay(): boolean {
+    return !!(this.customConfig.backgroundImage && (this.customConfig.overlayOpacity || 0) > 0);
+  }
+
+  getPreviewBgStyle(): { [key: string]: string } {
+    const style: { [key: string]: string } = {};
+    if (this.customConfig.backgroundColor) style['backgroundColor'] = this.customConfig.backgroundColor;
+    if (this.customConfig.backgroundImage) {
+      style['backgroundImage'] = `url(${this.customConfig.backgroundImage})`;
+      style['backgroundSize'] = this.customConfig.backgroundEffect === 'contain' ? 'contain' :
+                                 this.customConfig.backgroundEffect === 'tile' ? 'auto' : 'cover';
+      style['backgroundRepeat'] = this.customConfig.backgroundEffect === 'tile' ? 'repeat' : 'no-repeat';
+      style['backgroundPosition'] = 'center';
+    }
+    if (this.customConfig.minHeight) style['minHeight'] = this.customConfig.minHeight;
+    if (this.customConfig.padding) style['padding'] = this.customConfig.padding;
+    return style;
   }
 
   saveCustomSection(): void {

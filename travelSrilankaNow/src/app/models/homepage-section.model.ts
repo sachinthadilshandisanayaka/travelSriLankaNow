@@ -38,14 +38,23 @@ export interface CustomContentConfig {
   minHeight?: string;
   padding?: string;
   verticalAlign?: 'top' | 'center' | 'bottom';
+  backgroundEffect?: 'cover' | 'parallax' | 'contain' | 'tile';
+  overlayColor?: string;
+  overlayOpacity?: number;
   // Title
   title?: string;
   titleColor?: string;
   titleAlign?: 'left' | 'center' | 'right';
+  titleSize?: string;
   // Description
   description?: string;
   descriptionColor?: string;
   descriptionAlign?: 'left' | 'center' | 'right';
+  // CTA Button
+  buttonText?: string;
+  buttonUrl?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
   // Legacy rich-text fallback (kept for backward compatibility)
   content?: string;
   textColor?: string;

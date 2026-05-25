@@ -1314,10 +1314,19 @@
   padding: $spacing-3xl $spacing-md;
   position: relative;
 
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   &__inner {
     max-width: 900px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
+    z-index: 1;
   }
 
   &__title {
@@ -1332,6 +1341,29 @@
     line-height: 1.75;
     margin: 0;
     max-width: 72ch;
+  }
+
+  &__cta {
+    margin-top: 1.75rem;
+  }
+
+  &__btn {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    background: #1C4D8D;
+    color: #ffffff;
+
+    &:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
   }
 
   &__text {
@@ -1360,12 +1392,6 @@
     color: #ffffff;
     display: flex;
     align-items: center;
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-    }
     .custom-content-section__inner { position: relative; z-index: 1; width: 100%; }
   }
 
