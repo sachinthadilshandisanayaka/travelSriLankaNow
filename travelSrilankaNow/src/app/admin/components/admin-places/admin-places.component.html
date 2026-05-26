@@ -207,7 +207,22 @@
             <!-- Name -->
             <div class="admin-form__group admin-form__group--full">
               <label class="admin-form__label">Place Name *</label>
-              <input type="text" formControlName="name" class="admin-input" placeholder="e.g., The Hilltop Resort">
+              <input type="text" formControlName="name" class="admin-input" placeholder="e.g., The Hilltop Resort"
+                     (input)="onNameChange($event.target.value)">
+            </div>
+
+            <!-- URL Slug -->
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">
+                URL Slug
+                <span class="admin-form__hint" style="margin-left:0.4rem;font-weight:400">optional · auto-generated from name if left blank</span>
+              </label>
+              <div class="slug-field">
+                <span class="slug-field__prefix">/places/</span>
+                <input class="admin-input slug-field__input" formControlName="slug" placeholder="the-hilltop-resort"
+                       (input)="onSlugInput($event.target.value)">
+              </div>
+              <span class="admin-form__hint">Lowercase letters, numbers and hyphens only. Must be unique.</span>
             </div>
 
             <!-- Type -->

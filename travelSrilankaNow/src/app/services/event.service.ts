@@ -60,6 +60,10 @@ export class EventService {
     return this.http.get<Event>(`${this.apiUrl}/${id}`);
   }
 
+  getEventBySlug(slug: string): Observable<Event> {
+    return this.http.get<Event>(`${this.apiUrl}/slug/${slug}`);
+  }
+
   getFeaturedEvents(): Observable<Event[]> {
     return this.http.get<Event[]>(`${this.apiUrl}/featured`);
   }

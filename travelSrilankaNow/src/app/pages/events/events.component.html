@@ -134,7 +134,7 @@
          [class.grid-4]="gridColumns === 4">
       <a
         *ngFor="let event of events; let i = index"
-        [routerLink]="['/events', event.id]"
+        [routerLink]="['/events', event.slug || event.id]"
         class="event-card card-stagger"
       >
         <div class="event-image">

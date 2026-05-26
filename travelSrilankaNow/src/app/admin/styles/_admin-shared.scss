@@ -1566,3 +1566,42 @@ select {
     margin-left: auto;
   }
 }
+
+// ── Slug field (shared across content admin forms) ──────────────────────────
+.slug-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid $admin-gray-300;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+
+  &:focus-within {
+    border-color: $admin-navy;
+    box-shadow: 0 0 0 3px rgba(15, 40, 84, 0.1);
+  }
+
+  &__prefix {
+    padding: 0 0.625rem;
+    background: $admin-gray-50;
+    border-right: 1px solid $admin-gray-300;
+    color: $admin-gray-500;
+    font-size: 0.8125rem;
+    font-family: monospace;
+    white-space: nowrap;
+    line-height: 2.25rem;
+    height: 2.25rem;
+  }
+
+  &__input {
+    flex: 1;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    font-family: monospace;
+    font-size: 0.875rem;
+    min-width: 0;
+
+    &:focus { outline: none; }
+  }
+}

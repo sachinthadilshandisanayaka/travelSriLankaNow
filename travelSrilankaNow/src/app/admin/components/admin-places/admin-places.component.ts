@@ -23,6 +23,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
   isLoading = false;
   showModal = false;
   isEditMode = false;
+  slugManuallyEdited = false;
   showDeleteConfirm = false;
   deletePlaceId: number | null = null;
   placeForm: FormGroup;
@@ -65,6 +66,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
     this.placeForm = this.fb.group({
       id: [null],
       name: ['', Validators.required],
+      slug: [''],
       type: ['', Validators.required],
       description: ['', Validators.required],
       shortDescription: ['', Validators.required],
@@ -259,8 +261,24 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
     });
   }
 
+  generateSlug(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  onNameChange(value: string): void {
+    if (!this.slugManuallyEdited) {
+      this.placeForm.patchValue({ slug: this.generateSlug(value) }, { emitEvent: false });
+    }
+  }
+
+  onSlugInput(value: string): void {
+    this.slugManuallyEdited = true;
+    this.placeForm.patchValue({ slug: (value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').replace(/-{2,}/g, '-') }, { emitEvent: false });
+  }
+
   openAddModal(): void {
     this.isEditMode = false;
+    this.slugManuallyEdited = false;
     this.placeForm.reset({
       type: this.placeTypes.length > 0 ? this.placeTypes[0].code : '',
       region: this.regions.length > 0 ? this.regions[0].code : '',
@@ -276,6 +294,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
 
   openEditModal(place: any): void {
     this.isEditMode = true;
+    this.slugManuallyEdited = true;
     this.placeForm.patchValue({
       ...place,
       cuisine: place.cuisine ? place.cuisine.join(', ') : '',
@@ -348,8 +367,8 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
           this.loadPlaces();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to update place';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to update place';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }
@@ -362,8 +381,8 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
           this.loadPlaces();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to create place';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to create place';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }

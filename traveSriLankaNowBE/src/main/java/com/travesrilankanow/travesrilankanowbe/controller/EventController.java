@@ -35,6 +35,11 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
 
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<Event> getEventBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(eventService.getEventBySlug(slug));
+    }
+
     @GetMapping("/featured")
     public ResponseEntity<List<Event>> getFeaturedEvents() {
         return ResponseEntity.ok(eventService.getFeaturedEvents());

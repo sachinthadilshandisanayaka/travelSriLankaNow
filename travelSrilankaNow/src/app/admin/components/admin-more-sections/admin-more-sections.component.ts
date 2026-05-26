@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AdminApiService } from '../../services/admin-api.service';
 import { FieldDefinition } from '../../../models/more-section.model';
 
@@ -154,7 +155,9 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   errorMessage = '';
 
   constructor(
-    private adminApi: AdminApiService
+    private adminApi: AdminApiService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   // Image upload handlers
@@ -550,6 +553,17 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
     this.loadSections();
   }
 
+  private restoreSectionFromRoute(): void {
+    const sectionId = this.route.snapshot.queryParamMap.get('section');
+    if (sectionId) {
+      const section = this.sections.find(s => s.id === +sectionId);
+      if (section) {
+        this.selectedSection = section;
+        this.loadItems();
+      }
+    }
+  }
+
   onContentTypeChange(type: string): void {
     this.itemForm.contentType = type;
   }
@@ -560,6 +574,7 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.sections = response.content;
         this.isLoading = false;
+        this.restoreSectionFromRoute();
       },
       error: () => {
         this.errorMessage = 'Failed to load sections';
@@ -639,12 +654,14 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   // Items management
   selectSection(section: any): void {
     this.selectedSection = section;
+    this.router.navigate([], { relativeTo: this.route, queryParams: { section: section.id }, replaceUrl: false });
     this.loadItems();
   }
 
   backToSections(): void {
     this.selectedSection = null;
     this.items = [];
+    this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: false });
   }
 
   loadItems(): void {

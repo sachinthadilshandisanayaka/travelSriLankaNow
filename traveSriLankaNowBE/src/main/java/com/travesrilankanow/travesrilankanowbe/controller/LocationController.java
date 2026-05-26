@@ -36,6 +36,11 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getLocationById(id));
     }
 
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<Location> getLocationBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(locationService.getLocationBySlug(slug));
+    }
+
     @GetMapping("/featured")
     public ResponseEntity<List<Location>> getFeaturedLocations() {
         return ResponseEntity.ok(locationService.getFeaturedLocations());

@@ -75,11 +75,15 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadPlaceDetails(+id);
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (slug) {
+      if (/^\d+$/.test(slug)) {
+        this.loadPlaceDetails(+slug);
+      } else {
+        this.loadPlaceDetailsBySlug(slug);
+      }
     } else {
-      this.error = 'No place ID provided';
+      this.error = 'No place provided';
       this.loading = false;
     }
     this.dataService.getEntityFieldConfig('place').subscribe({
@@ -94,6 +98,15 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.userSub) this.userSub.unsubscribe();
     document.body.style.overflow = '';
+  }
+
+  loadPlaceDetailsBySlug(slug: string): void {
+    this.loading = true;
+    this.error = null;
+    this.placeService.getPlaceBySlug(slug).subscribe({
+      next: (place) => { this.place = place; this.loading = false; },
+      error: () => { this.error = 'Failed to load place details. Please try again later.'; this.loading = false; }
+    });
   }
 
   loadPlaceDetails(id: number): void {

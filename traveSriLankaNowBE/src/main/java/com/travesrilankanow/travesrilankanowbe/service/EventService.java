@@ -28,6 +28,11 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
     }
 
+    public Event getEventBySlug(String slug) {
+        return eventRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with slug: " + slug));
+    }
+
     public List<Event> getFeaturedEvents() {
         return eventRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
     }
@@ -57,6 +62,9 @@ public class EventService {
 
     @Transactional
     public Event createEvent(Event event) {
+        if (event.getSlug() != null && !event.getSlug().isBlank() && eventRepository.existsBySlug(event.getSlug().trim())) {
+            throw new IllegalArgumentException("Slug '" + event.getSlug().trim() + "' is already in use by another event");
+        }
         // Wire bidirectional references before cascade-saving
         if (event.getEventLocations() != null) {
             for (EventLocation loc : event.getEventLocations()) {
@@ -130,6 +138,14 @@ public class EventService {
         }
         if (event.getAdditionalDetails() != null) {
             existing.setAdditionalDetails(event.getAdditionalDetails());
+        }
+
+        if (event.getSlug() != null && !event.getSlug().isBlank()) {
+            String newSlug = event.getSlug().trim();
+            eventRepository.findBySlug(newSlug)
+                    .filter(other -> !other.getId().equals(existing.getId()))
+                    .ifPresent(other -> { throw new IllegalArgumentException("Slug '" + newSlug + "' is already in use by another event"); });
+            existing.setSlug(newSlug);
         }
 
         // Replace event locations (orphanRemoval handles deletes)

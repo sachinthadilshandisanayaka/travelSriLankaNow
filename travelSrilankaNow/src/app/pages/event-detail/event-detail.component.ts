@@ -65,11 +65,15 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadEventDetails(+id);
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (slug) {
+      if (/^\d+$/.test(slug)) {
+        this.loadEventDetails(+slug);
+      } else {
+        this.loadEventDetailsBySlug(slug);
+      }
     } else {
-      this.error = 'No event ID provided';
+      this.error = 'No event provided';
       this.loading = false;
     }
     this.dataService.getEntityFieldConfig('event').subscribe({
@@ -94,6 +98,22 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     this.eventService.getEventById(id).subscribe({
+      next: (event) => {
+        this.event = event;
+        this.loading = false;
+        this.initPricingState();
+      },
+      error: () => {
+        this.error = 'Failed to load event details. Please try again later.';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadEventDetailsBySlug(slug: string): void {
+    this.loading = true;
+    this.error = null;
+    this.eventService.getEventBySlug(slug).subscribe({
       next: (event) => {
         this.event = event;
         this.loading = false;

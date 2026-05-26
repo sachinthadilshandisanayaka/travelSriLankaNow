@@ -27,16 +27,29 @@ export class LocationDetailComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadLocationDetails(+id);
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (slug) {
+      if (/^\d+$/.test(slug)) {
+        this.loadLocationDetails(+slug);
+      } else {
+        this.loadLocationDetailsBySlug(slug);
+      }
     } else {
-      this.error = 'No location ID provided';
+      this.error = 'No location provided';
       this.loading = false;
     }
     this.dataService.getEntityFieldConfig('location').subscribe({
       next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
       error: () => {}
+    });
+  }
+
+  loadLocationDetailsBySlug(slug: string): void {
+    this.loading = true;
+    this.error = null;
+    this.locationService.getLocationBySlug(slug).subscribe({
+      next: (location) => { this.location = location; this.loading = false; },
+      error: () => { this.error = 'Failed to load location details. Please try again later.'; this.loading = false; }
     });
   }
 
