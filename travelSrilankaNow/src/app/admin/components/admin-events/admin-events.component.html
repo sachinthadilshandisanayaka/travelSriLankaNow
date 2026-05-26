@@ -198,7 +198,22 @@
           <!-- Title -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Event Title *</label>
-            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Cultural Heritage Tour">
+            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Cultural Heritage Tour"
+                   (input)="onTitleChange($event.target.value)">
+          </div>
+
+          <!-- URL Slug -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">
+              URL Slug
+              <span class="admin-form__hint" style="margin-left:0.4rem;font-weight:400">optional · auto-generated from title if left blank</span>
+            </label>
+            <div class="slug-field">
+              <span class="slug-field__prefix">/events/</span>
+              <input class="admin-input slug-field__input" formControlName="slug" placeholder="cultural-heritage-tour"
+                     (input)="onSlugInput($event.target.value)">
+            </div>
+            <span class="admin-form__hint">Lowercase letters, numbers and hyphens only. Must be unique.</span>
           </div>
 
           <!-- Category -->

@@ -72,6 +72,10 @@ export class LocationService {
     return this.http.get<Location>(`${this.apiUrl}/${id}`);
   }
 
+  getLocationBySlug(slug: string): Observable<Location> {
+    return this.http.get<Location>(`${this.apiUrl}/slug/${slug}`);
+  }
+
   getFeaturedLocations(): Observable<Location[]> {
     return this.http.get<Location[]>(`${this.apiUrl}/featured`);
   }

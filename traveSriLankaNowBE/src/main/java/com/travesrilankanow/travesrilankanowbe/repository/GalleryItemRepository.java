@@ -9,9 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GalleryItemRepository extends JpaRepository<GalleryItem, Long> {
+
+    Optional<GalleryItem> findBySlug(String slug);
+    boolean existsBySlug(String slug);
 
     List<GalleryItem> findByFeaturedTrue();
 

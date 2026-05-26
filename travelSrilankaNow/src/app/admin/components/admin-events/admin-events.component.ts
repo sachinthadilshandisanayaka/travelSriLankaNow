@@ -42,6 +42,7 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
   isLoading = false;
   showModal = false;
   isEditMode = false;
+  slugManuallyEdited = false;
   showDeleteConfirm = false;
   deleteEventId: number | null = null;
   eventForm: FormGroup;
@@ -92,6 +93,7 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
     this.eventForm = this.fb.group({
       id: [null],
       title: ['', Validators.required],
+      slug: [''],
       description: ['', Validators.required],
       shortDescription: ['', Validators.required],
       imageUrl: [''],
@@ -172,8 +174,24 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
     });
   }
 
+  generateSlug(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  onTitleChange(value: string): void {
+    if (!this.slugManuallyEdited) {
+      this.eventForm.patchValue({ slug: this.generateSlug(value) }, { emitEvent: false });
+    }
+  }
+
+  onSlugInput(value: string): void {
+    this.slugManuallyEdited = true;
+    this.eventForm.patchValue({ slug: (value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').replace(/-{2,}/g, '-') }, { emitEvent: false });
+  }
+
   openAddModal(): void {
     this.isEditMode = false;
+    this.slugManuallyEdited = false;
     this.eventForm.reset({
       category: this.categories.length > 0 ? this.categories[0].code : '',
       price: 0,
@@ -192,6 +210,7 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
 
   openEditModal(event: any): void {
     this.isEditMode = true;
+    this.slugManuallyEdited = true;
     this.eventForm.patchValue({
       ...event,
       included: event.included ? event.included.join(', ') : '',
@@ -265,8 +284,8 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
           this.loadEvents();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to update event';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to update event';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }
@@ -279,8 +298,8 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
           this.loadEvents();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to create event';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to create event';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }

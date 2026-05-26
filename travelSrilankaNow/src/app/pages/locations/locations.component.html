@@ -142,7 +142,7 @@
          [class.grid-4]="gridColumns === 4">
       <a
         *ngFor="let location of locations; let i = index"
-        [routerLink]="['/locations', location.id]"
+        [routerLink]="['/locations', location.slug || location.id]"
         class="location-card card-stagger"
       >
         <div class="location-image">

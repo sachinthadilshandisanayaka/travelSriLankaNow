@@ -20,6 +20,7 @@ export class AdminGalleryComponent implements OnInit {
   isLoading = false;
   showModal = false;
   isEditMode = false;
+  slugManuallyEdited = false;
   showDeleteConfirm = false;
   deleteItemId: number | null = null;
   galleryForm: FormGroup;
@@ -39,6 +40,7 @@ export class AdminGalleryComponent implements OnInit {
       type: ['', Validators.required],
       url: [''],
       title: ['', Validators.required],
+      slug: [''],
       description: [''],
       category: ['', Validators.required],
       location: [''],
@@ -91,8 +93,24 @@ export class AdminGalleryComponent implements OnInit {
     });
   }
 
+  generateSlug(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  onTitleChange(value: string): void {
+    if (!this.slugManuallyEdited) {
+      this.galleryForm.patchValue({ slug: this.generateSlug(value) }, { emitEvent: false });
+    }
+  }
+
+  onSlugInput(value: string): void {
+    this.slugManuallyEdited = true;
+    this.galleryForm.patchValue({ slug: (value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').replace(/-{2,}/g, '-') }, { emitEvent: false });
+  }
+
   openAddModal(): void {
     this.isEditMode = false;
+    this.slugManuallyEdited = false;
     this.galleryForm.reset({
       type: this.types.length > 0 ? this.types[0].code : '',
       category: this.categories.length > 0 ? this.categories[0].code : '',
@@ -104,6 +122,7 @@ export class AdminGalleryComponent implements OnInit {
 
   openEditModal(item: any): void {
     this.isEditMode = true;
+    this.slugManuallyEdited = true;
     this.galleryForm.patchValue({
       ...item,
       tags: item.tags ? item.tags.join(', ') : ''
@@ -140,8 +159,8 @@ export class AdminGalleryComponent implements OnInit {
           this.loadGalleryItems();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to update gallery item';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to update gallery item';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }
@@ -154,8 +173,8 @@ export class AdminGalleryComponent implements OnInit {
           this.loadGalleryItems();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to create gallery item';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to create gallery item';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }

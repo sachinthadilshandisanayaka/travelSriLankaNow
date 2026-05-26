@@ -62,6 +62,9 @@ public class GalleryService {
 
     @Transactional
     public GalleryItem createGalleryItem(GalleryItem galleryItem) {
+        if (galleryItem.getSlug() != null && !galleryItem.getSlug().isBlank() && galleryItemRepository.existsBySlug(galleryItem.getSlug().trim())) {
+            throw new IllegalArgumentException("Slug '" + galleryItem.getSlug().trim() + "' is already in use by another gallery item");
+        }
         return galleryItemRepository.save(galleryItem);
     }
 
@@ -100,6 +103,13 @@ public class GalleryService {
         }
         if (galleryItem.getDisplayOrder() != null) {
             existingItem.setDisplayOrder(galleryItem.getDisplayOrder());
+        }
+        if (galleryItem.getSlug() != null && !galleryItem.getSlug().isBlank()) {
+            String newSlug = galleryItem.getSlug().trim();
+            galleryItemRepository.findBySlug(newSlug)
+                    .filter(other -> !other.getId().equals(existingItem.getId()))
+                    .ifPresent(other -> { throw new IllegalArgumentException("Slug '" + newSlug + "' is already in use by another gallery item"); });
+            existingItem.setSlug(newSlug);
         }
 
         return galleryItemRepository.save(existingItem);

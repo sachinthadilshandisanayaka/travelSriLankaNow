@@ -147,7 +147,7 @@
 
         <div class="location-grid">
           <a *ngFor="let location of featuredLocations; let i = index"
-             [routerLink]="['/locations', location.id]"
+             [routerLink]="['/locations', location.slug || location.id]"
              class="location-card card-stagger">
             <div class="location-image image-zoom">
               <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
@@ -192,7 +192,7 @@
 
         <div class="events-grid">
           <a *ngFor="let event of featuredEvents; let i = index"
-             [routerLink]="['/events', event.id]"
+             [routerLink]="['/events', event.slug || event.id]"
              class="event-card card-stagger">
             <div class="event-image image-zoom">
               <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
@@ -244,7 +244,7 @@
 
         <div class="places-grid">
           <a *ngFor="let place of featuredPlaces; let i = index"
-             [routerLink]="['/places', place.id]"
+             [routerLink]="['/places', place.slug || place.id]"
              class="place-card card-stagger">
             <div class="place-image image-zoom">
               <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
@@ -476,7 +476,7 @@
       </div>
       <div class="location-grid">
         <a *ngFor="let location of featuredLocations"
-           [routerLink]="['/locations', location.id]"
+           [routerLink]="['/locations', location.slug || location.id]"
            class="location-card card-stagger">
           <div class="location-image image-zoom">
             <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
@@ -509,7 +509,7 @@
       </div>
       <div class="events-grid">
         <a *ngFor="let event of featuredEvents"
-           [routerLink]="['/events', event.id]"
+           [routerLink]="['/events', event.slug || event.id]"
            class="event-card card-stagger">
           <div class="event-image image-zoom">
             <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
@@ -543,7 +543,7 @@
       </div>
       <div class="places-grid">
         <a *ngFor="let place of featuredPlaces"
-           [routerLink]="['/places', place.id]"
+           [routerLink]="['/places', place.slug || place.id]"
            class="place-card card-stagger">
           <div class="place-image image-zoom">
             <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
