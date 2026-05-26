@@ -23,6 +23,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
   isLoading = false;
   showModal = false;
   isEditMode = false;
+  slugManuallyEdited = false;
   showDeleteConfirm = false;
   deleteLocationId: number | null = null;
   locationForm: FormGroup;
@@ -64,6 +65,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
     this.locationForm = this.fb.group({
       id: [null],
       name: ['', Validators.required],
+      slug: [''],
       description: ['', Validators.required],
       shortDescription: ['', Validators.required],
       imageUrl: [''],
@@ -177,8 +179,24 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
     return details;
   }
 
+  generateSlug(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  onNameChange(value: string): void {
+    if (!this.slugManuallyEdited) {
+      this.locationForm.patchValue({ slug: this.generateSlug(value) }, { emitEvent: false });
+    }
+  }
+
+  onSlugInput(value: string): void {
+    this.slugManuallyEdited = true;
+    this.locationForm.patchValue({ slug: (value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '').replace(/-{2,}/g, '-') }, { emitEvent: false });
+  }
+
   openAddModal(): void {
     this.isEditMode = false;
+    this.slugManuallyEdited = false;
     this.locationForm.reset({
       category: this.categories.length > 0 ? this.categories[0].code : '',
       region: this.regions.length > 0 ? this.regions[0].code : '',
@@ -193,6 +211,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
 
   openEditModal(location: any): void {
     this.isEditMode = true;
+    this.slugManuallyEdited = true;
     this.locationForm.patchValue({
       ...location,
       activities: location.activities ? location.activities.join(', ') : '',
@@ -243,8 +262,8 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
           this.loadLocations();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to update location';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to update location';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }
@@ -257,8 +276,8 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
           this.loadLocations();
           this.hideMessageAfterDelay();
         },
-        error: () => {
-          this.errorMessage = 'Failed to create location';
+        error: (err: any) => {
+          this.errorMessage = err?.error?.message || 'Failed to create location';
           this.isLoading = false;
           this.hideMessageAfterDelay();
         }

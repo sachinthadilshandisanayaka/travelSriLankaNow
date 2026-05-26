@@ -68,6 +68,10 @@ export class PlaceService {
     return this.http.get<Place>(`${this.apiUrl}/${id}`);
   }
 
+  getPlaceBySlug(slug: string): Observable<Place> {
+    return this.http.get<Place>(`${this.apiUrl}/slug/${slug}`);
+  }
+
   getFeaturedPlaces(): Observable<Place[]> {
     return this.http.get<Place[]>(`${this.apiUrl}/featured`);
   }

@@ -46,6 +46,11 @@ public class PlaceController {
         return ResponseEntity.ok(placeService.getPlaceById(id));
     }
 
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<Place> getPlaceBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(placeService.getPlaceBySlug(slug));
+    }
+
     @GetMapping("/featured")
     public ResponseEntity<List<Place>> getFeaturedPlaces() {
         return ResponseEntity.ok(placeService.getFeaturedPlaces());

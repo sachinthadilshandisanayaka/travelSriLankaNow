@@ -26,6 +26,11 @@ public class LocationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Location not found with id: " + id));
     }
 
+    public Location getLocationBySlug(String slug) {
+        return locationRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Location not found with slug: " + slug));
+    }
+
     public List<Location> getFeaturedLocations() {
         return locationRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
     }
@@ -63,6 +68,9 @@ public class LocationService {
 
     @Transactional
     public Location createLocation(Location location) {
+        if (location.getSlug() != null && !location.getSlug().isBlank() && locationRepository.existsBySlug(location.getSlug().trim())) {
+            throw new IllegalArgumentException("Slug '" + location.getSlug().trim() + "' is already in use by another location");
+        }
         return locationRepository.save(location);
     }
 
@@ -113,6 +121,13 @@ public class LocationService {
         }
         if (location.getAdditionalDetails() != null) {
             existing.setAdditionalDetails(location.getAdditionalDetails());
+        }
+        if (location.getSlug() != null && !location.getSlug().isBlank()) {
+            String newSlug = location.getSlug().trim();
+            locationRepository.findBySlug(newSlug)
+                    .filter(other -> !other.getId().equals(existing.getId()))
+                    .ifPresent(other -> { throw new IllegalArgumentException("Slug '" + newSlug + "' is already in use by another location"); });
+            existing.setSlug(newSlug);
         }
 
         return locationRepository.save(existing);
