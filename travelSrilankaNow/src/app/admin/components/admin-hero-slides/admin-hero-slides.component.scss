@@ -344,6 +344,97 @@
   }
 }
 
+// ---- Style toggle button ----
+.style-toggle-btn {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  margin-top: 0.5rem; padding: 0.3rem 0.75rem;
+  border: 1px solid $admin-gray-300; border-radius: 20px;
+  background: $admin-gray-50; color: $admin-gray-600;
+  font-size: 0.8125rem; cursor: pointer; transition: all 0.15s;
+  svg { transition: transform 0.2s; }
+  &:hover { border-color: $admin-navy; color: $admin-navy; background: rgba($admin-navy, 0.04); }
+}
+
+// ---- Style panel ----
+.style-panel {
+  margin-top: 0.625rem;
+  border: 1px solid $admin-gray-200;
+  border-radius: 10px;
+  background: $admin-gray-50;
+  overflow: hidden;
+
+  &__inner { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+}
+
+.style-row {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+
+  &__label {
+    width: 70px; flex-shrink: 0;
+    font-size: 0.75rem; font-weight: 600;
+    color: $admin-gray-500; text-transform: uppercase;
+    letter-spacing: 0.04em; padding-top: 0.35rem;
+  }
+  &__control { flex: 1; font-size: 0.8125rem; }
+  &__chips { display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1; }
+  &__color-row { display: flex; align-items: center; gap: 0.375rem; flex-wrap: wrap; }
+}
+
+.chip {
+  padding: 0.25rem 0.625rem; border-radius: 20px; font-size: 0.75rem;
+  border: 1px solid $admin-gray-300; background: #fff;
+  color: $admin-gray-600; cursor: pointer; transition: all 0.12s;
+  white-space: nowrap;
+  &--sm { padding: 0.2rem 0.5rem; font-size: 0.6875rem; }
+  &--icon { padding: 0.25rem 0.5rem; display: flex; align-items: center; }
+  &--active { border-color: $admin-navy; background: $admin-navy; color: #fff; }
+  &:hover:not(.chip--active) { border-color: $admin-navy; color: $admin-navy; }
+}
+
+.color-swatch {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid $admin-gray-300; cursor: pointer; transition: transform 0.12s;
+  &:hover { transform: scale(1.2); }
+  &--active { border-color: $admin-navy; box-shadow: 0 0 0 2px $admin-navy; }
+}
+.color-input {
+  width: 28px; height: 28px; padding: 1px; border-radius: 50%;
+  border: 2px solid $admin-gray-300; cursor: pointer; background: none;
+  &::-webkit-color-swatch-wrapper { padding: 0; }
+  &::-webkit-color-swatch { border-radius: 50%; border: none; }
+}
+
+.style-preview {
+  margin-top: 0.25rem; padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #0f2854 0%, #1a3a6b 100%);
+  border-radius: 8px; min-height: 52px;
+  color: #fff; font-size: 1.5rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  word-break: break-word; transition: all 0.2s;
+}
+
+.style-reset-btn {
+  align-self: flex-start; font-size: 0.75rem;
+  background: none; border: none; color: $admin-gray-400;
+  cursor: pointer; padding: 0; text-decoration: underline;
+  &:hover { color: $admin-gray-600; }
+}
+
+// ---- Content align picker ----
+.align-picker {
+  display: flex; gap: 0.5rem;
+
+  &__btn {
+    display: flex; align-items: center; gap: 0.375rem;
+    padding: 0.4rem 0.875rem; border-radius: 6px;
+    border: 1px solid $admin-gray-300; background: #fff;
+    font-size: 0.8125rem; color: $admin-gray-600; cursor: pointer;
+    transition: all 0.15s;
+    &--active { border-color: $admin-navy; background: rgba($admin-navy, 0.06); color: $admin-navy; font-weight: 600; }
+    &:hover:not(&--active) { border-color: $admin-gray-400; }
+  }
+}
+
 // ---- Video upload button ----
 .video-upload-btn {
   display: inline-flex;

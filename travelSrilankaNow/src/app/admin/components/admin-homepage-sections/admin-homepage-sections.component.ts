@@ -84,6 +84,17 @@ export class AdminHomepageSectionsComponent implements OnInit {
   isLoadingImages = false;
   gallerySpeed = 30;
   galleryPauseOnHover = true;
+  galleryStyle = 'slider';
+  galleryColumns = 3;
+  galleryGap = 'normal';
+  galleryShowTitles = false;
+
+  readonly GALLERY_STYLES = [
+    { id: 'slider',    name: 'Auto Slider', desc: 'Horizontal scrolling ribbon' },
+    { id: 'masonry',   name: 'Masonry',     desc: 'Pinterest-style varying heights' },
+    { id: 'bento',     name: 'Bento Grid',  desc: 'Featured focal image + tiles' },
+    { id: 'grid-tilt', name: '3D Tilt Grid',desc: 'Cursor-responsive 3D effect' },
+  ];
 
   // Custom content modal
   showCustomModal = false;
@@ -275,10 +286,14 @@ export class AdminHomepageSectionsComponent implements OnInit {
   openGalleryPickerModal(section: HomepageSection): void {
     this.gallerySection = section;
     const config = this.parseGalleryConfig(section.config);
-    this.selectedImages = [...(config.images || [])];
-    this.gallerySpeed = config.speed || 30;
+    this.selectedImages    = [...(config.images || [])];
+    this.gallerySpeed      = config.speed || 30;
     this.galleryPauseOnHover = config.pauseOnHover !== false;
-    this.imageSearchTerm = '';
+    this.galleryStyle      = (config as any).galleryStyle  || 'slider';
+    this.galleryColumns    = (config as any).columns       || 3;
+    this.galleryGap        = (config as any).gap           || 'normal';
+    this.galleryShowTitles = (config as any).showTitles    || false;
+    this.imageSearchTerm   = '';
     this.showGalleryPickerModal = true;
     this.loadAvailableImages();
   }
@@ -362,9 +377,13 @@ export class AdminHomepageSectionsComponent implements OnInit {
   saveGalleryConfig(): void {
     if (!this.gallerySection) return;
     const config: GallerySliderConfig = {
-      images: this.selectedImages,
-      speed: this.gallerySpeed,
-      pauseOnHover: this.galleryPauseOnHover
+      images:        this.selectedImages,
+      speed:         this.gallerySpeed,
+      pauseOnHover:  this.galleryPauseOnHover,
+      galleryStyle:  this.galleryStyle as any,
+      columns:       this.galleryColumns as any,
+      gap:           this.galleryGap as any,
+      showTitles:    this.galleryShowTitles,
     };
     const updateData: HomepageSection = { ...this.gallerySection, config: JSON.stringify(config) };
     this.isSaving = true;

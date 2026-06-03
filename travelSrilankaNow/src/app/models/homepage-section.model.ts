@@ -17,10 +17,16 @@ export interface HomepageSectionConfig {
   showViewAll?: boolean;
 }
 
+export type GalleryStyle = 'slider' | 'masonry' | 'bento' | 'grid-tilt';
+
 export interface GallerySliderConfig {
   images: GallerySliderImage[];
   speed: number;
   pauseOnHover: boolean;
+  galleryStyle?: GalleryStyle;   // defaults to 'slider' when absent
+  columns?: 2 | 3 | 4;          // masonry / grid-tilt column count
+  gap?: 'tight' | 'normal' | 'wide';
+  showTitles?: boolean;          // show image title overlay on hover
 }
 
 export interface GallerySliderImage {

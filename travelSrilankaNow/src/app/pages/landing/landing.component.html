@@ -94,10 +94,13 @@
             </div>
 
             <!-- Content -->
-            <div class="slide-content" [class.slide-content--visible]="i === currentSlideIndex">
+            <div class="slide-content"
+                 [class.slide-content--visible]="i === currentSlideIndex"
+                 [class.slide-content--left]="slide.contentAlign === 'left'"
+                 [class.slide-content--right]="slide.contentAlign === 'right'">
               <div class="slide-content-inner">
-                <h1 class="slide-title">{{ slide.title }}</h1>
-                <p *ngIf="slide.subtitle" class="slide-subtitle">{{ slide.subtitle }}</p>
+                <h1 class="slide-title" [ngStyle]="getTextStyle(slide.titleStyle)">{{ slide.title }}</h1>
+                <p *ngIf="slide.subtitle" class="slide-subtitle" [ngStyle]="getTextStyle(slide.subtitleStyle)">{{ slide.subtitle }}</p>
                 <div class="slide-buttons" *ngIf="slide.buttonText">
                   <a [routerLink]="slide.buttonLink || '/locations'" class="btn-primary btn-slide">
                     <span>{{ slide.buttonText }}</span>
@@ -294,26 +297,84 @@
     </section>
   </ng-container>
 
-  <!-- ========== IMAGE GALLERY SLIDER ========== -->
+  <!-- ========== IMAGE GALLERY (multi-style) ========== -->
   <ng-container *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
     <ng-container *ngIf="getGalleryConfig(section.id) as galleryConf">
-      <section class="gallery-slider-section" *ngIf="galleryConf.images && galleryConf.images.length > 0">
-        <div class="gallery-slider-header" *ngIf="section.title">
+      <section class="gallery-section" *ngIf="galleryConf.images && galleryConf.images.length > 0">
+        <div class="gallery-section__header" *ngIf="section.title">
           <h2>{{ section.title }}</h2>
           <p *ngIf="section.subtitle">{{ section.subtitle }}</p>
         </div>
-        <div class="gallery-slider-wrapper" [class.gallery-slider-wrapper--pause-on-hover]="galleryConf.pauseOnHover">
-          <div class="gallery-slider-track"
-               [style.animation-duration]="galleryConf.speed + 's'">
-            <div class="gallery-slide" *ngFor="let img of galleryConf.images">
-              <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
-            </div>
-            <!-- Duplicate for seamless loop -->
-            <div class="gallery-slide" *ngFor="let img of galleryConf.images">
-              <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
+
+        <!-- SLIDER (default) -->
+        <ng-container *ngIf="!galleryConf.galleryStyle || galleryConf.galleryStyle === 'slider'">
+          <div class="gallery-slider-wrapper" [class.gallery-slider-wrapper--pause-on-hover]="galleryConf.pauseOnHover">
+            <div class="gallery-slider-track" [style.animation-duration]="galleryConf.speed + 's'">
+              <div class="gallery-slide" *ngFor="let img of galleryConf.images">
+                <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
+              </div>
+              <div class="gallery-slide" *ngFor="let img of galleryConf.images">
+                <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
+              </div>
             </div>
           </div>
-        </div>
+        </ng-container>
+
+        <!-- MASONRY -->
+        <ng-container *ngIf="galleryConf.galleryStyle === 'masonry'">
+          <div class="gallery-masonry"
+               [class.gallery-masonry--2]="galleryConf.columns === 2"
+               [class.gallery-masonry--4]="galleryConf.columns === 4"
+               [class.gallery-masonry--gap-tight]="galleryConf.gap === 'tight'"
+               [class.gallery-masonry--gap-wide]="galleryConf.gap === 'wide'">
+            <div class="gallery-masonry__item" *ngFor="let img of galleryConf.images">
+              <img [src]="img.url | cloudinaryOptimize:600:0:85" [alt]="img.title || 'Gallery'" loading="lazy">
+              <div class="gallery-item__title-overlay" *ngIf="galleryConf.showTitles && img.title">
+                <span>{{ img.title }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- BENTO GRID -->
+        <ng-container *ngIf="galleryConf.galleryStyle === 'bento'">
+          <div class="gallery-bento"
+               [class.gallery-bento--gap-tight]="galleryConf.gap === 'tight'"
+               [class.gallery-bento--gap-wide]="galleryConf.gap === 'wide'">
+            <div *ngFor="let img of galleryConf.images; let i = index"
+                 class="gallery-bento__item"
+                 [class.gallery-bento__item--featured]="i % 5 === 0"
+                 [class.gallery-bento__item--tall]="i % 7 === 3">
+              <img [src]="img.url | cloudinaryOptimize:800:600:88" [alt]="img.title || 'Gallery'" loading="lazy">
+              <div class="gallery-item__title-overlay" *ngIf="galleryConf.showTitles && img.title">
+                <span>{{ img.title }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- GRID TILT (cursor-responsive 3D) -->
+        <ng-container *ngIf="galleryConf.galleryStyle === 'grid-tilt'">
+          <div class="gallery-tilt-grid"
+               [class.gallery-tilt-grid--2]="galleryConf.columns === 2"
+               [class.gallery-tilt-grid--4]="galleryConf.columns === 4"
+               [class.gallery-tilt-grid--gap-tight]="galleryConf.gap === 'tight'"
+               [class.gallery-tilt-grid--gap-wide]="galleryConf.gap === 'wide'">
+            <div *ngFor="let img of galleryConf.images"
+                 class="gallery-tilt-item"
+                 (mousemove)="onTiltMove($event)"
+                 (mouseleave)="onTiltLeave($event)">
+              <div class="gallery-tilt-item__inner">
+                <img [src]="img.url | cloudinaryOptimize:600:450:88" [alt]="img.title || 'Gallery'" loading="lazy">
+                <div class="gallery-tilt-item__glare"></div>
+                <div class="gallery-item__title-overlay" *ngIf="galleryConf.showTitles && img.title">
+                  <span>{{ img.title }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
       </section>
     </ng-container>
   </ng-container>

@@ -1,11 +1,13 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
+import com.travesrilankanow.travesrilankanowbe.entity.converter.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "hero_slides")
@@ -32,6 +34,19 @@ public class HeroSlide {
 
     // Direct video URL (MP4/WebM) — used when mediaType = "video"
     private String videoUrl;
+
+    // Per-slide text styling stored as JSON — font, size, color, shadow, etc.
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> titleStyle;
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = JsonMapConverter.class)
+    private Map<String, Object> subtitleStyle;
+
+    // "left" | "center" | "right" — position of the text block on the slide
+    @Column(nullable = false, columnDefinition = "varchar(10) default 'center'")
+    private String contentAlign = "center";
 
     private String buttonText;
 

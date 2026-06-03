@@ -166,23 +166,61 @@
 <div *ngIf="showGalleryPickerModal" class="admin-modal gallery-picker-modal">
   <div class="admin-modal__content gallery-picker-modal__content">
     <div class="admin-modal__header">
-      <h2>Configure Image Gallery Slider</h2>
+      <h2>Configure Photo Gallery</h2>
       <button class="admin-modal__close" (click)="closeGalleryPickerModal()">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
 
     <div class="admin-modal__body gallery-picker-modal__body">
-      <!-- Settings row -->
+
+      <!-- ── Gallery Style Picker ── -->
+      <div class="gallery-style-section">
+        <h4 class="gallery-picker-modal__sub-title">Gallery Layout Style</h4>
+        <div class="gallery-style-grid">
+          <label *ngFor="let style of GALLERY_STYLES"
+                 class="gallery-style-card"
+                 [class.gallery-style-card--active]="galleryStyle === style.id">
+            <input type="radio" name="galleryStyle" [value]="style.id" [(ngModel)]="galleryStyle" style="display:none">
+            <div class="gallery-style-card__check" *ngIf="galleryStyle === style.id">✓</div>
+            <div class="gallery-style-card__name">{{ style.name }}</div>
+            <div class="gallery-style-card__desc">{{ style.desc }}</div>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── Layout Options ── -->
       <div class="gallery-settings">
-        <div class="admin-form__group">
-          <label class="admin-form__label">Scroll Speed (seconds for full loop)</label>
+        <div class="admin-form__group" *ngIf="galleryStyle === 'slider'">
+          <label class="admin-form__label">Scroll Speed (s for full loop)</label>
           <input type="number" class="admin-input" [(ngModel)]="gallerySpeed" min="10" max="120">
         </div>
-        <div class="admin-form__group">
+        <div class="admin-form__group" *ngIf="galleryStyle === 'slider'">
           <label class="admin-checkbox">
             <input type="checkbox" [(ngModel)]="galleryPauseOnHover">
             <span>Pause on hover</span>
+          </label>
+        </div>
+        <div class="admin-form__group" *ngIf="galleryStyle !== 'slider'">
+          <label class="admin-form__label">Columns</label>
+          <select class="admin-select" [(ngModel)]="galleryColumns">
+            <option [value]="2">2 columns</option>
+            <option [value]="3">3 columns (default)</option>
+            <option [value]="4">4 columns</option>
+          </select>
+        </div>
+        <div class="admin-form__group" *ngIf="galleryStyle !== 'slider'">
+          <label class="admin-form__label">Gap</label>
+          <select class="admin-select" [(ngModel)]="galleryGap">
+            <option value="tight">Tight</option>
+            <option value="normal">Normal</option>
+            <option value="wide">Wide</option>
+          </select>
+        </div>
+        <div class="admin-form__group" *ngIf="galleryStyle !== 'slider'">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="galleryShowTitles">
+            <span>Show image titles on hover</span>
           </label>
         </div>
       </div>

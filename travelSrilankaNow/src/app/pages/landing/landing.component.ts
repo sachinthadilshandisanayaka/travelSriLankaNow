@@ -253,7 +253,45 @@ export class LandingComponent implements OnInit, OnDestroy {
   }
 
   getGalleryConfig(sectionId: number | undefined): GallerySliderConfig {
-    return this.gallerySectionConfig.get(sectionId!) || { images: [], speed: 30, pauseOnHover: true };
+    return this.gallerySectionConfig.get(sectionId!) || { images: [], speed: 30, pauseOnHover: true, galleryStyle: 'slider' };
+  }
+
+  // Hero slide text styles ───────────────────────────────────────────────────
+  getTextStyle(style: any): { [k: string]: string } {
+    if (!style || typeof style !== 'object') return {};
+    const css: { [k: string]: string } = {};
+    if (style['fontFamily'])    css['font-family']    = style['fontFamily'];
+    if (style['fontSize'])      css['font-size']      = style['fontSize'];
+    if (style['fontWeight'])    css['font-weight']    = style['fontWeight'];
+    if (style['color'])         css['color']          = style['color'];
+    // textShadow 'none' must override the default; '' removes custom without override
+    if (style['textShadow'] !== undefined && style['textShadow'] !== '')
+      css['text-shadow'] = style['textShadow'];
+    if (style['letterSpacing']) css['letter-spacing'] = style['letterSpacing'];
+    if (style['textTransform']) css['text-transform'] = style['textTransform'];
+    if (style['textAlign'])     css['text-align']     = style['textAlign'];
+    if (style['lineHeight'])    css['line-height']    = style['lineHeight'];
+    return css;
+  }
+
+  // Gallery 3D tilt ──────────────────────────────────────────────────────────
+  onTiltMove(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement;
+    const inner = el.querySelector('.gallery-tilt-item__inner') as HTMLElement;
+    if (!inner) return;
+    const rect = el.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width  - 0.5;
+    const y = (event.clientY - rect.top)  / rect.height - 0.5;
+    inner.style.transition = 'transform 0.05s ease';
+    inner.style.transform  = `perspective(800px) rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale3d(1.03,1.03,1.03)`;
+  }
+
+  onTiltLeave(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement;
+    const inner = el.querySelector('.gallery-tilt-item__inner') as HTMLElement;
+    if (!inner) return;
+    inner.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
+    inner.style.transform  = '';
   }
 
   getCustomConfig(sectionId: number | undefined): CustomContentConfig {

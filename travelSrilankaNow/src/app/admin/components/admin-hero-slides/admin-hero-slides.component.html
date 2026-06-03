@@ -179,14 +179,51 @@
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Title *</label>
             <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Discover Ancient Sri Lanka">
-            <p class="admin-form__hint">Main heading displayed on the slide</p>
+            <!-- Style toggle -->
+            <button type="button" class="style-toggle-btn" (click)="titleStyleOpen = !titleStyleOpen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              {{ titleStyleOpen ? 'Hide' : 'Customize' }} Title Style
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"
+                   [style.transform]="titleStyleOpen ? 'rotate(180deg)' : ''"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="style-panel" *ngIf="titleStyleOpen">
+              <ng-container *ngTemplateOutlet="stylePanel; context: { target: 'title', text: heroSlideForm.get('title')?.value || 'Preview Title' }"></ng-container>
+            </div>
           </div>
 
           <!-- Subtitle -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Subtitle</label>
             <input type="text" formControlName="subtitle" class="admin-input" placeholder="e.g., Experience the wonder of 2000 years of heritage">
-            <p class="admin-form__hint">Secondary text shown below the title</p>
+            <button type="button" class="style-toggle-btn" (click)="subtitleStyleOpen = !subtitleStyleOpen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              {{ subtitleStyleOpen ? 'Hide' : 'Customize' }} Subtitle Style
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"
+                   [style.transform]="subtitleStyleOpen ? 'rotate(180deg)' : ''"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="style-panel" *ngIf="subtitleStyleOpen">
+              <ng-container *ngTemplateOutlet="stylePanel; context: { target: 'subtitle', text: heroSlideForm.get('subtitle')?.value || 'Preview subtitle text' }"></ng-container>
+            </div>
+          </div>
+
+          <!-- Content Alignment -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Content Alignment</label>
+            <div class="align-picker">
+              <button type="button" class="align-picker__btn" [class.align-picker__btn--active]="contentAlign === 'left'" (click)="contentAlign = 'left'">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 5h14v2H3V5zm0 4h10v2H3V9zm0 4h14v2H3v-2z"/></svg>
+                Left
+              </button>
+              <button type="button" class="align-picker__btn" [class.align-picker__btn--active]="contentAlign === 'center'" (click)="contentAlign = 'center'">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 5h14v2H3V5zm3 4h8v2H6V9zm-3 4h14v2H3v-2z"/></svg>
+                Center
+              </button>
+              <button type="button" class="align-picker__btn" [class.align-picker__btn--active]="contentAlign === 'right'" (click)="contentAlign = 'right'">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 5h14v2H3V5zm4 4h10v2H7V9zm-4 4h14v2H3v-2z"/></svg>
+                Right
+              </button>
+            </div>
+            <p class="admin-form__hint">Where the text block appears horizontally on the slide</p>
           </div>
 
           <!-- Media Type Toggle -->
@@ -326,4 +363,120 @@
     </div>
   </div>
 </div>
+
+<!-- ── Shared style-panel ng-template ───────────────────────────────────── -->
+<ng-template #stylePanel let-target="target" let-text="text">
+  <div class="style-panel__inner">
+
+    <!-- Font Family -->
+    <div class="style-row">
+      <span class="style-row__label">Font</span>
+      <select class="admin-select style-row__control"
+              [value]="getStyleProp(target, 'fontFamily')"
+              (change)="setStyle(target, 'fontFamily', $any($event.target).value)">
+        <option value="">Default</option>
+        <option *ngFor="let f of fontOptions" [value]="f.value" [style.font-family]="f.value">{{ f.label }}</option>
+      </select>
+    </div>
+
+    <!-- Font Size -->
+    <div class="style-row">
+      <span class="style-row__label">Size</span>
+      <div class="style-row__chips">
+        <button *ngFor="let s of sizeOptions" type="button"
+                class="chip" [class.chip--active]="getStyleProp(target,'fontSize') === s.value"
+                (click)="setStyle(target,'fontSize', s.value)">{{ s.label }}</button>
+      </div>
+    </div>
+
+    <!-- Font Weight -->
+    <div class="style-row">
+      <span class="style-row__label">Weight</span>
+      <div class="style-row__chips">
+        <button *ngFor="let w of weightOptions" type="button"
+                class="chip" [class.chip--active]="getStyleProp(target,'fontWeight') === w.value"
+                (click)="setStyle(target,'fontWeight', w.value)"
+                [style.font-weight]="w.value">{{ w.label }}</button>
+      </div>
+    </div>
+
+    <!-- Color -->
+    <div class="style-row">
+      <span class="style-row__label">Color</span>
+      <div class="style-row__color-row">
+        <span *ngFor="let c of colorPresets" class="color-swatch"
+              [style.background]="c"
+              [class.color-swatch--active]="getStyleProp(target,'color') === c"
+              (click)="setStyle(target,'color', c)"></span>
+        <input type="color"
+               [value]="getStyleProp(target,'color') || '#ffffff'"
+               (input)="setStyle(target,'color', $any($event.target).value)"
+               class="color-input" title="Custom colour">
+      </div>
+    </div>
+
+    <!-- Text Shadow -->
+    <div class="style-row">
+      <span class="style-row__label">Shadow</span>
+      <div class="style-row__chips">
+        <button *ngFor="let sh of shadowPresets" type="button"
+                class="chip" [class.chip--active]="getStyleProp(target,'textShadow') === sh.value"
+                (click)="setStyle(target,'textShadow', sh.value)">{{ sh.label }}</button>
+      </div>
+    </div>
+
+    <!-- Letter Spacing -->
+    <div class="style-row">
+      <span class="style-row__label">Spacing</span>
+      <div class="style-row__chips">
+        <button *ngFor="let sp of spacingOptions" type="button"
+                class="chip chip--sm" [class.chip--active]="getStyleProp(target,'letterSpacing') === sp.value"
+                (click)="setStyle(target,'letterSpacing', sp.value)">{{ sp.label }}</button>
+      </div>
+    </div>
+
+    <!-- Transform -->
+    <div class="style-row">
+      <span class="style-row__label">Case</span>
+      <div class="style-row__chips">
+        <button type="button" class="chip" [class.chip--active]="getStyleProp(target,'textTransform') === 'none' || !getStyleProp(target,'textTransform')"
+                (click)="setStyle(target,'textTransform','none')">Normal</button>
+        <button type="button" class="chip" [class.chip--active]="getStyleProp(target,'textTransform') === 'uppercase'"
+                (click)="setStyle(target,'textTransform','uppercase')" style="text-transform:uppercase">UPPER</button>
+        <button type="button" class="chip" [class.chip--active]="getStyleProp(target,'textTransform') === 'capitalize'"
+                (click)="setStyle(target,'textTransform','capitalize')" style="text-transform:capitalize">Capitalize</button>
+      </div>
+    </div>
+
+    <!-- Text Align -->
+    <div class="style-row">
+      <span class="style-row__label">Align</span>
+      <div class="style-row__chips">
+        <button type="button" class="chip chip--icon" [class.chip--active]="getStyleProp(target,'textAlign') === 'left' || !getStyleProp(target,'textAlign')"
+                (click)="setStyle(target,'textAlign','left')">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="14"><path d="M1 3h14v1.5H1V3zm0 3h10v1.5H1V6zm0 3h14v1.5H1V9zm0 3h10v1.5H1V12z"/></svg>
+        </button>
+        <button type="button" class="chip chip--icon" [class.chip--active]="getStyleProp(target,'textAlign') === 'center'"
+                (click)="setStyle(target,'textAlign','center')">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="14"><path d="M1 3h14v1.5H1V3zm2 3h10v1.5H3V6zm-2 3h14v1.5H1V9zm2 3h10v1.5H3V12z"/></svg>
+        </button>
+        <button type="button" class="chip chip--icon" [class.chip--active]="getStyleProp(target,'textAlign') === 'right'"
+                (click)="setStyle(target,'textAlign','right')">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="14"><path d="M1 3h14v1.5H1V3zm4 3h10v1.5H5V6zm-4 3h14v1.5H1V9zm4 3h10v1.5H5V12z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live preview -->
+    <div class="style-preview" [ngStyle]="previewStyle(target)">
+      {{ text }}
+    </div>
+
+    <!-- Reset -->
+    <button type="button" class="style-reset-btn"
+            (click)="target === 'title' ? (titleStyle = {}) : (subtitleStyle = {})">
+      Reset to default
+    </button>
+  </div>
+</ng-template>
 
