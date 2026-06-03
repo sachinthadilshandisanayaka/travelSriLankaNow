@@ -406,6 +406,10 @@ export class AdminApiService {
     return this.http.post(`${this.apiUrl}/upload/image`, formData);
   }
 
+  uploadVideo(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload/video`, formData);
+  }
+
   // Entity Field Configs
   getEntityFieldConfig(entityType: string): Observable<EntityFieldConfig> {
     return this.http.get<EntityFieldConfig>(`${this.apiUrl}/entity-field-configs/${entityType}`);

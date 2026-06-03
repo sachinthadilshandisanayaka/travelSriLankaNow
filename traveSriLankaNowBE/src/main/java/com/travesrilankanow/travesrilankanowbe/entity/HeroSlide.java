@@ -26,6 +26,13 @@ public class HeroSlide {
     @Column(nullable = false)
     private String imageUrl;
 
+    // "image" (default) or "video"
+    @Column(nullable = false, columnDefinition = "varchar(10) default 'image'")
+    private String mediaType = "image";
+
+    // Direct video URL (MP4/WebM) — used when mediaType = "video"
+    private String videoUrl;
+
     private String buttonText;
 
     private String buttonLink;

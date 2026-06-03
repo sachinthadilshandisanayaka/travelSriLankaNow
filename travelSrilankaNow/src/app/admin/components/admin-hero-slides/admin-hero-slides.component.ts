@@ -56,7 +56,9 @@ export class AdminHeroSlidesComponent implements OnInit {
       id: [null],
       title: ['', Validators.required],
       subtitle: [''],
+      mediaType: ['image'],
       imageUrl: [''],
+      videoUrl: [''],
       buttonText: [''],
       buttonLink: [''],
       displayOrder: [0],
@@ -88,7 +90,9 @@ export class AdminHeroSlidesComponent implements OnInit {
 
   openAddModal(): void {
     this.isEditMode = false;
+    this.isVideoUploading = false;
     this.heroSlideForm.reset({
+      mediaType: 'image',
       displayOrder: 0,
       active: true,
       displayDuration: 5000
@@ -262,6 +266,37 @@ export class AdminHeroSlidesComponent implements OnInit {
 
   onImageUploaded(url: string): void {
     this.heroSlideForm.patchValue({ imageUrl: url });
+  }
+
+  isVideoUploading = false;
+  videoUploadError = '';
+
+  onVideoFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+
+    this.isVideoUploading = true;
+    this.videoUploadError = '';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'travel-sri-lanka/videos');
+
+    this.apiService.uploadVideo(formData).subscribe({
+      next: (res: any) => {
+        this.heroSlideForm.patchValue({ videoUrl: res.data.url });
+        this.isVideoUploading = false;
+      },
+      error: (err: any) => {
+        this.videoUploadError = err?.error?.message || 'Video upload failed';
+        this.isVideoUploading = false;
+      }
+    });
+  }
+
+  get isVideoMode(): boolean {
+    return this.heroSlideForm.get('mediaType')?.value === 'video';
   }
 
   formatDuration(ms: number): string {

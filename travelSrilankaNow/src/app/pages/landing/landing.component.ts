@@ -13,6 +13,10 @@ import { HeroSlide } from '../../models/hero-slide.model';
 import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
 
+// Module-level flag — survives SPA navigation (Angular keeps the module loaded),
+// but resets on hard/normal browser refresh (module is re-evaluated from scratch).
+let splashShown = false;
+
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
@@ -59,12 +63,17 @@ export class LandingComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.renderer.addClass(this.document.body, 'loading-active');
-
-    setTimeout(() => {
+    if (splashShown) {
+      // SPA navigation back to home — skip overlay entirely
+      this.showLoadingOverlay = false;
       this.minDisplayTimeMet = true;
-      this.checkDismissOverlay();
-    }, this.MIN_DISPLAY_TIME);
+    } else {
+      this.renderer.addClass(this.document.body, 'loading-active');
+      setTimeout(() => {
+        this.minDisplayTimeMet = true;
+        this.checkDismissOverlay();
+      }, this.MIN_DISPLAY_TIME);
+    }
 
     this.loadHomepageSections();
   }
@@ -76,6 +85,7 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   private checkDismissOverlay(): void {
     if (this.minDisplayTimeMet && this.dataReady) {
+      splashShown = true;
       this.loadingFadeOut = true;
       setTimeout(() => {
         this.showLoadingOverlay = false;

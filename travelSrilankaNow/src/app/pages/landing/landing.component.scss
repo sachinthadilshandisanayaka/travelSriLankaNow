@@ -372,6 +372,14 @@
   .carousel-slide--active & img {
     transform: scale(1.05);
   }
+
+  // Video slides fill the same space; no zoom effect (motion would be distracting)
+  .slide-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
 }
 
 .slide-overlay {

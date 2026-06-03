@@ -3,6 +3,8 @@ export interface HeroSlide {
   title: string;
   subtitle?: string;
   imageUrl: string;
+  mediaType?: 'image' | 'video'; // defaults to 'image'
+  videoUrl?: string;             // direct MP4/WebM URL when mediaType = 'video'
   buttonText?: string;
   buttonLink?: string;
   displayOrder: number;

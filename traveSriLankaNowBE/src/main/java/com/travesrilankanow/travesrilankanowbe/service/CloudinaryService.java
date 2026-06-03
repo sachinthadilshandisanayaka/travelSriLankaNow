@@ -34,6 +34,15 @@ public class CloudinaryService {
             "image/webp"
     );
 
+    private static final List<String> ALLOWED_VIDEO_TYPES = Arrays.asList(
+            "video/mp4",
+            "video/webm",
+            "video/ogg",
+            "video/quicktime"
+    );
+
+    private static final long MAX_VIDEO_SIZE = 200 * 1024 * 1024; // 200MB
+
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     public Map<String, Object> uploadImage(MultipartFile file, String folder) throws IOException {
@@ -126,6 +135,36 @@ public class CloudinaryService {
     // No server-side transformations with MinIO — returns original URL unchanged.
     public String getOptimizedUrl(String url, Integer width, Integer height, Integer quality) {
         return url;
+    }
+
+    public Map<String, Object> uploadVideo(MultipartFile file, String folder) throws IOException {
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File is empty or null");
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_VIDEO_TYPES.contains(contentType))
+            throw new IllegalArgumentException("Invalid video type. Allowed: MP4, WebM, OGG, MOV");
+        if (file.getSize() > MAX_VIDEO_SIZE)
+            throw new IllegalArgumentException("Video too large. Maximum size is 200MB");
+
+        String ext = getExtension(file.getOriginalFilename(), contentType);
+        String objectKey = (folder != null && !folder.isBlank() ? folder.replaceAll("^/+|/+$", "") + "/" : "")
+                + UUID.randomUUID() + "." + ext;
+
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectKey)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(contentType)
+                    .build());
+        } catch (MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO upload failed: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Upload failed: " + e.getMessage(), e);
+        }
+
+        String url = buildUrl(objectKey);
+        log.info("Video uploaded to MinIO: {}", url);
+        return Map.of("url", url, "publicId", objectKey, "bytes", file.getSize(), "format", ext);
     }
 
     /** Upload raw bytes with an explicit object key (used for image variants). */

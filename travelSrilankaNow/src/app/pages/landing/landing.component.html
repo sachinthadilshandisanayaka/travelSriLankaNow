@@ -78,9 +78,18 @@
                [class.carousel-slide--active]="i === currentSlideIndex"
                [class.carousel-slide--prev]="i === (currentSlideIndex === 0 ? heroSlides.length - 1 : currentSlideIndex - 1)"
                [class.carousel-slide--next]="i === (currentSlideIndex === heroSlides.length - 1 ? 0 : currentSlideIndex + 1)">
-            <!-- Background Image -->
+            <!-- Background Media (image or video) -->
             <div class="slide-background">
-              <img [src]="slide.imageUrl" [alt]="slide.title" />
+              <ng-container *ngIf="slide.mediaType === 'video' && slide.videoUrl; else slideImage">
+                <video class="slide-video"
+                       [src]="slide.videoUrl"
+                       autoplay muted loop playsinline
+                       [attr.aria-label]="slide.title">
+                </video>
+              </ng-container>
+              <ng-template #slideImage>
+                <img [src]="slide.imageUrl" [alt]="slide.title" />
+              </ng-template>
               <div class="slide-overlay"></div>
             </div>
 
@@ -438,7 +447,12 @@
              class="carousel-slide"
              [class.carousel-slide--active]="i === currentSlideIndex">
           <div class="slide-background">
-            <img [src]="slide.imageUrl" [alt]="slide.title" />
+            <ng-container *ngIf="slide.mediaType === 'video' && slide.videoUrl; else fallbackSlideImage">
+              <video class="slide-video" [src]="slide.videoUrl" autoplay muted loop playsinline></video>
+            </ng-container>
+            <ng-template #fallbackSlideImage>
+              <img [src]="slide.imageUrl" [alt]="slide.title" />
+            </ng-template>
             <div class="slide-overlay"></div>
           </div>
           <div class="slide-content" [class.slide-content--visible]="i === currentSlideIndex">
