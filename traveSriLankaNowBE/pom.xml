@@ -84,11 +84,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Cloudinary SDK for image uploads -->
+        <!-- MinIO SDK for image uploads -->
         <dependency>
-            <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-http44</artifactId>
-            <version>1.36.0</version>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.7</version>
         </dependency>
 
         <!-- Flyway for database migrations -->
