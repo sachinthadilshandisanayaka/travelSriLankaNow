@@ -18,7 +18,9 @@
   <div *ngIf="error" class="admin-alert admin-alert--error">{{ error }}</div>
 
   <div class="users-card">
-    <div *ngIf="loading" class="admin-loading">Loading users...</div>
+    <div class="skeleton-list" *ngIf="loading">
+      <div class="skeleton-row" *ngFor="let _ of [1,2,3,4]"></div>
+    </div>
 
     <table *ngIf="!loading" class="users-table">
       <thead>

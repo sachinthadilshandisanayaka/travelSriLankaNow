@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { MoreSectionService } from '../../services/more-section.service';
 import { NavConfigService } from '../../services/nav-config.service';
 import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { MoreSection } from '../../models/more-section.model';
 import { NavConfig } from '../../models/nav-config.model';
 
@@ -28,6 +29,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isMoreOpen = false;
   isUserMenuOpen = false;
   currentUser: CustomerUser | null = null;
+  logoUrl = '';
 
   navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
@@ -38,6 +40,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private moreSectionService: MoreSectionService,
     private navConfigService: NavConfigService,
     private customerAuthService: CustomerAuthService,
+    private siteSettingsService: SiteSettingsService,
     private renderer: Renderer2,
     private router: Router,
     @Inject(DOCUMENT) private document: Document
@@ -48,6 +51,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.loadMoreSections();
     this.userSub = this.customerAuthService.currentUser$.subscribe(user => {
       this.currentUser = user;
+    });
+    this.siteSettingsService.getSettingByKey('logo_url').subscribe({
+      next: (setting) => { if (setting?.value) this.logoUrl = setting.value; },
+      error: () => {}
     });
   }
 

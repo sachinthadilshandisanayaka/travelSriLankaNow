@@ -61,6 +61,10 @@ export interface CustomContentConfig {
   buttonUrl?: string;
   buttonColor?: string;
   buttonTextColor?: string;
+  // Split-layout specific
+  splitImage?: string;           // image shown in the image column
+  splitImagePosition?: 'left' | 'right';  // which side the image is on
+  splitImageAlt?: string;
   // Legacy rich-text fallback (kept for backward compatibility)
   content?: string;
   textColor?: string;

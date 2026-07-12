@@ -1,6 +1,6 @@
 export interface SlideTextStyle {
   fontFamily?: string;
-  fontSize?: string;
+  fontSize?: string;      // e.g. "3.5rem"
   fontWeight?: string;
   color?: string;
   textShadow?: string;
@@ -8,6 +8,46 @@ export interface SlideTextStyle {
   textTransform?: 'none' | 'uppercase' | 'capitalize' | 'lowercase';
   textAlign?: 'left' | 'center' | 'right';
   lineHeight?: string;
+  // Outline / stroke
+  textStroke?: string;    // e.g. "2px #ffffff"
+  fillMode?: 'filled' | 'hollow' | 'semi'; // hollow = color:transparent
+}
+
+export interface GalleryImage {
+  imageUrl: string;
+  label: string;
+  link: string;
+  contentType: string;
+}
+
+export interface HeroSlideGalleryItem {
+  id?: number;
+  contentType: string;
+  contentId: number;
+  imageUrl: string;
+  label: string;
+  link: string;
+  displayOrder: number;
+}
+
+export interface HeroSlideGallery {
+  id?: number;
+  heroSlideId?: number;
+  enabled: boolean;
+  items: HeroSlideGalleryItem[];
+}
+
+export interface ContentTypeInfo {
+  key: string;
+  displayName: string;
+  icon: string;
+}
+
+export interface ContentItem {
+  id: number;
+  name: string;
+  imageUrl: string;
+  link: string;
 }
 
 export interface HeroSlide {
@@ -27,4 +67,5 @@ export interface HeroSlide {
   displayDuration: number;
   createdAt?: string;
   updatedAt?: string;
+  galleryImages?: GalleryImage[];
 }

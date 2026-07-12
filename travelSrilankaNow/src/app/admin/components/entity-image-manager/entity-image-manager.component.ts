@@ -26,16 +26,8 @@ export class EntityImageManagerComponent implements OnChanges {
     }
   }
 
-  getThumbnail(url: string, size: number = 150): string {
-    if (!url || !url.includes('cloudinary.com')) {
-      return url;
-    }
-    const transformations = `q_70,f_auto,w_${size},h_${size},c_fill`;
-    const parts = url.split('/upload/');
-    if (parts.length === 2) {
-      return `${parts[0]}/upload/${transformations}/${parts[1]}`;
-    }
-    return url;
+  getThumbnail(url: string, _size: number = 150): string {
+    return url || '';
   }
 
   isPrimary(url: string): boolean {

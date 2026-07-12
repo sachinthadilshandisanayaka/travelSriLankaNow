@@ -16,9 +16,11 @@
 
   <div *ngIf="success" class="admin-alert admin-alert--success">{{ success }}</div>
   <div *ngIf="error" class="admin-alert admin-alert--error">{{ error }}</div>
-  <div *ngIf="loading" class="admin-loading">Loading roles...</div>
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skeleton-row skeleton-row--tall" *ngFor="let _ of [1,2,3]"></div>
+  </div>
 
-  <div *ngFor="let role of roles" class="role-card">
+  <div *ngFor="let role of roles" class="role-card" [hidden]="loading">
     <div class="role-card__header">
       <div class="role-card__info">
         <div class="role-card__title-row">

@@ -24,7 +24,13 @@ import { AdminBookingsComponent } from './components/admin-bookings/admin-bookin
 import { AdminBookingSettingsComponent } from './components/admin-booking-settings/admin-booking-settings.component';
 import { AdminUsersComponent } from './components/admin-users/admin-users.component';
 import { AdminRolesComponent } from './components/admin-roles/admin-roles.component';
+import { AdminMediaComponent } from './components/admin-media/admin-media.component';
 import { AdminFloatingSocialComponent } from './components/admin-floating-social/admin-floating-social.component';
+import { AdminCompaniesComponent } from './components/admin-companies/admin-companies.component';
+import { AdminInvoiceTemplatesComponent } from './components/admin-invoice-templates/admin-invoice-templates.component';
+import { AdminInvoiceFormsComponent } from './components/admin-invoice-forms/admin-invoice-forms.component';
+import { AdminInvoicesComponent } from './components/admin-invoices/admin-invoices.component';
+import { AdminInvoiceNewComponent } from './components/admin-invoice-new/admin-invoice-new.component';
 
 const routes: Routes = [
   {
@@ -42,7 +48,39 @@ const routes: Routes = [
       // Profile — no section permission needed, any authenticated user
       { path: 'profile', component: AdminProfileComponent },
 
-      // Operations
+      // Operations — Invoice & Company Management
+      {
+        path: 'companies',
+        component: AdminCompaniesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'COMPANY_MANAGEMENT:VIEW' }
+      },
+      {
+        path: 'invoice-templates',
+        component: AdminInvoiceTemplatesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'INVOICE_TEMPLATE:VIEW' }
+      },
+      {
+        path: 'invoice-forms',
+        component: AdminInvoiceFormsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'INVOICE_FORM:VIEW' }
+      },
+      {
+        path: 'invoices/new',
+        component: AdminInvoiceNewComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'INVOICE_GENERATE:CREATE' }
+      },
+      {
+        path: 'invoices',
+        component: AdminInvoicesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'INVOICE_HISTORY:VIEW' }
+      },
+
+      // Operations — Bookings
       {
         path: 'bookings',
         component: AdminBookingsComponent,
@@ -161,6 +199,12 @@ const routes: Routes = [
         data: { permission: 'ROLE_MANAGEMENT:VIEW' }
       },
 
+      {
+        path: 'media',
+        component: AdminMediaComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'MEDIA:VIEW' }
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

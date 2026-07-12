@@ -1,0 +1,182 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Companies</h1>
+    <button class="btn-primary" (click)="openCreate()">+ New Company</button>
+  </div>
+
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skeleton-row" *ngFor="let _ of [1,2,3,4]"></div>
+  </div>
+
+  <div class="companies-grid" *ngIf="!loading">
+    <div class="company-card" *ngFor="let company of companies" (click)="selectCompany(company)">
+      <div class="company-logo" *ngIf="company.logoUrl">
+        <img [src]="company.logoUrl" [alt]="company.name">
+      </div>
+      <div class="company-logo placeholder" *ngIf="!company.logoUrl">
+        {{ company.name[0] }}
+      </div>
+      <div class="company-info">
+        <h3>{{ company.name }}</h3>
+        <p>{{ company.city }}, {{ company.country }}</p>
+        <p class="currency-badge">{{ company.currency }} · {{ company.invoicePrefix }}</p>
+      </div>
+      <div class="company-actions" (click)="$event.stopPropagation()">
+        <button class="btn-icon" (click)="openEdit(company)" title="Edit">✏️</button>
+        <button class="btn-icon danger" (click)="deactivate(company.id)" title="Deactivate">🗑</button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="companies.length === 0">
+      No companies yet. Click "+ New Company" to add one.
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Form Modal -->
+<div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+  <div class="modal-panel large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingId ? 'Edit Company' : 'New Company' }}</h2>
+      <button class="btn-close" (click)="closeForm()">✕</button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()" class="company-form">
+      <div class="form-section-title">Basic Info</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Company Name *</label>
+          <input formControlName="name" placeholder="e.g. Bandula Tours Ltd">
+        </div>
+        <div class="form-field">
+          <label>Registration No.</label>
+          <input formControlName="regNumber">
+        </div>
+        <div class="form-field">
+          <label>Tax ID</label>
+          <input formControlName="taxId">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Address Line 1</label>
+          <input formControlName="addressLine1">
+        </div>
+        <div class="form-field">
+          <label>Address Line 2</label>
+          <input formControlName="addressLine2">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>City</label><input formControlName="city"></div>
+        <div class="form-field"><label>Country</label><input formControlName="country"></div>
+        <div class="form-field"><label>Phone</label><input formControlName="phone"></div>
+        <div class="form-field"><label>Email</label><input formControlName="email" type="email"></div>
+      </div>
+
+      <div class="form-section-title">Invoice Settings</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Currency</label>
+          <select formControlName="currency">
+            <option value="LKR">LKR</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Tax Label</label>
+          <input formControlName="taxLabel" placeholder="VAT">
+        </div>
+        <div class="form-field">
+          <label>Invoice Prefix</label>
+          <input formControlName="invoicePrefix" placeholder="INV">
+        </div>
+        <div class="form-field">
+          <label>Payment Terms (days)</label>
+          <input formControlName="paymentTermsDays" type="number">
+        </div>
+      </div>
+
+      <div class="form-section-title">Bank Details</div>
+      <div class="form-row">
+        <div class="form-field"><label>Bank Name</label><input formControlName="bankName"></div>
+        <div class="form-field"><label>Account No.</label><input formControlName="bankAccountNo"></div>
+        <div class="form-field"><label>SWIFT/BIC</label><input formControlName="bankSwift"></div>
+      </div>
+
+      <div class="form-section-title">Email Settings (Brevo)</div>
+      <div class="form-row">
+        <div class="form-field"><label>From Name</label><input formControlName="brevoFromName"></div>
+        <div class="form-field"><label>From Email</label><input formControlName="brevoFromEmail" type="email"></div>
+      </div>
+
+      <div class="form-field">
+        <label>Terms & Conditions</label>
+        <textarea formControlName="termsConditions" rows="3"></textarea>
+      </div>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || saving">
+          {{ saving ? 'Saving...' : 'Save Company' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<app-confirm-dialog
+  [(visible)]="confirmVisible"
+  [title]="confirmTitle"
+  [message]="confirmMessage"
+  type="danger"
+  (confirmed)="onConfirmed()">
+</app-confirm-dialog>
+
+<!-- Company Detail Side Panel -->
+<div class="side-panel-overlay" *ngIf="selectedCompany" (click)="closeDetail()">
+  <div class="side-panel" (click)="$event.stopPropagation()">
+    <div class="side-panel-header">
+      <h2>{{ selectedCompany.name }}</h2>
+      <button class="btn-close" (click)="closeDetail()">✕</button>
+    </div>
+    <div class="tab-bar">
+      <button [class.active]="activeTab === 'details'" (click)="activeTab = 'details'">Details</button>
+      <button [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">Users</button>
+      <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Change Log</button>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'details'">
+      <div class="detail-row"><span>Reg No.</span><strong>{{ selectedCompany.regNumber || '-' }}</strong></div>
+      <div class="detail-row"><span>Currency</span><strong>{{ selectedCompany.currency }}</strong></div>
+      <div class="detail-row"><span>Tax Label</span><strong>{{ selectedCompany.taxLabel }}</strong></div>
+      <div class="detail-row"><span>Invoice Prefix</span><strong>{{ selectedCompany.invoicePrefix }}</strong></div>
+      <div class="detail-row"><span>Invoices Generated</span><strong>{{ selectedCompany.invoiceSeq }}</strong></div>
+      <div class="detail-row"><span>Email</span><strong>{{ selectedCompany.email || '-' }}</strong></div>
+      <div class="detail-row"><span>Phone</span><strong>{{ selectedCompany.phone || '-' }}</strong></div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'users'">
+      <div class="user-row" *ngFor="let user of companyUsers">
+        <span>{{ user.firstName }} {{ user.lastName }} ({{ user.username }})</span>
+        <button class="btn-icon danger" (click)="removeUser(selectedCompany.id, user.id)">Remove</button>
+      </div>
+      <div class="empty-state" *ngIf="companyUsers.length === 0">No users assigned.</div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'log'">
+      <div class="log-row" *ngFor="let log of changeLog">
+        <div class="log-meta">{{ log.changedBy }} · {{ log.changedAt | date:'short' }}</div>
+        <div class="log-change">
+          <strong>{{ log.fieldName }}</strong>:
+          <span class="old-val">{{ log.oldValue || '(empty)' }}</span> →
+          <span class="new-val">{{ log.newValue }}</span>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="changeLog.length === 0">No changes recorded yet.</div>
+    </div>
+  </div>
+</div>

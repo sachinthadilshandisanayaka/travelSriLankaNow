@@ -1,0 +1,96 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Invoice History</h1>
+    <button class="btn-primary" (click)="newInvoice()">+ Generate Invoice</button>
+  </div>
+
+  <div class="filters">
+    <select [(ngModel)]="selectedCompanyId" (ngModelChange)="page=0; loadInvoices()">
+      <option *ngFor="let c of companies" [value]="c.id">{{ c.name }}</option>
+    </select>
+    <select [(ngModel)]="statusFilter" (ngModelChange)="page=0; loadInvoices()">
+      <option value="">All Statuses</option>
+      <option *ngFor="let s of statuses.slice(1)" [value]="s">{{ s }}</option>
+    </select>
+    <span class="total-count">{{ totalElements }} invoices</span>
+  </div>
+
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skeleton-row" *ngFor="let _ of [1,2,3,4,5]"></div>
+  </div>
+
+  <div class="invoices-table" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Customer</th>
+          <th>Tour</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of invoices" (click)="viewDetail(inv)" class="clickable">
+          <td><strong>{{ inv.invoiceNumber }}</strong></td>
+          <td>{{ inv.customerName }}<br><small>{{ inv.customerEmail }}</small></td>
+          <td>{{ inv.tourName }}<br><small>{{ inv.tourDuration }}</small></td>
+          <td>{{ inv.invoiceDate | date:'mediumDate' }}</td>
+          <td><strong>{{ inv.currency }} {{ inv.totalAmount | number:'1.2-2' }}</strong></td>
+          <td><span class="status-badge {{statusClass(inv.status)}}">{{ inv.status }}</span></td>
+          <td class="actions" (click)="$event.stopPropagation()">
+            <button class="btn-sm" (click)="downloadPdf(inv)" [disabled]="!inv.pdfUrl" title="Download PDF">⬇ PDF</button>
+            <button class="btn-sm" (click)="openEmailModal(inv)" [disabled]="!inv.pdfUrl" title="Send Email">✉</button>
+            <button class="btn-sm" (click)="markPaid(inv)" *ngIf="inv.status === 'SENT'" title="Mark Paid">✓ Paid</button>
+            <button class="btn-sm danger" (click)="openVoidModal(inv)" *ngIf="inv.status !== 'VOID'" title="Void">⊘</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="invoices.length === 0">No invoices found.</div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="prevPage()" [disabled]="page === 0">← Prev</button>
+      <span>Page {{ page + 1 }} of {{ totalPages }}</span>
+      <button (click)="nextPage()" [disabled]="page >= totalPages - 1">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Modal -->
+<div class="modal-overlay" *ngIf="showEmailModal" (click)="showEmailModal=false">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Send Invoice via Email</h2>
+      <button class="btn-close" (click)="showEmailModal=false">✕</button>
+    </div>
+    <div class="form-field"><label>To *</label><input [(ngModel)]="emailTo" type="email"></div>
+    <div class="form-field"><label>CC</label><input [(ngModel)]="emailCc" placeholder="comma-separated"></div>
+    <div class="form-field"><label>Subject</label><input [(ngModel)]="emailSubject"></div>
+    <div class="error-msg" *ngIf="emailError">{{ emailError }}</div>
+    <div class="form-actions">
+      <button class="btn-secondary" (click)="showEmailModal=false">Cancel</button>
+      <button class="btn-primary" (click)="sendEmail()" [disabled]="sendingEmail">
+        {{ sendingEmail ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Void Modal -->
+<div class="modal-overlay" *ngIf="showVoidModal" (click)="showVoidModal=false">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Void Invoice {{ selectedInvoice?.invoiceNumber }}</h2>
+      <button class="btn-close" (click)="showVoidModal=false">✕</button>
+    </div>
+    <div class="form-field"><label>Reason (optional)</label><textarea [(ngModel)]="voidReason" rows="3"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" (click)="showVoidModal=false">Cancel</button>
+      <button class="btn-danger" (click)="voidInvoice()">Void Invoice</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,166 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Media Library</h1>
+        <p>Manage all uploaded images and media files</p>
+      </div>
+      <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--primary" (click)="showUploadPanel = !showUploadPanel">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload Media
+        </button>
+      </div>
+    </header>
+
+    <!-- Toast messages -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">{{ successMessage }}</div>
+    <div *ngIf="errorMessage"   class="admin-toast admin-toast--error">{{ errorMessage }}</div>
+
+    <!-- Stats bar -->
+    <div class="media-stats" *ngIf="stats">
+      <div class="media-stat">
+        <span class="media-stat__value">{{ totalElements }}</span>
+        <span class="media-stat__label">Total Files</span>
+      </div>
+      <div class="media-stat">
+        <span class="media-stat__value">{{ formatSize(stats.totalStorageBytes) }}</span>
+        <span class="media-stat__label">Storage Used</span>
+      </div>
+      <div class="media-stat" *ngFor="let entry of stats.countByType | keyvalue">
+        <span class="media-stat__value">{{ entry.value }}</span>
+        <span class="media-stat__label">{{ typeLabel(entry.key) }}</span>
+      </div>
+    </div>
+
+    <!-- Upload panel -->
+    <div class="upload-panel" *ngIf="showUploadPanel">
+      <div class="upload-panel__header">
+        <span>Upload New Image</span>
+        <button type="button" (click)="showUploadPanel = false" class="upload-panel__close">×</button>
+      </div>
+      <app-image-upload
+        [folder]="'travel-sri-lanka/general'"
+        [label]="'Select Image'"
+        (imageUploaded)="onImageUploaded($event)">
+      </app-image-upload>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="media-toolbar">
+      <input type="text" class="admin-input media-toolbar__search"
+             placeholder="Search by filename…"
+             [value]="searchTerm"
+             (input)="onSearch($any($event.target).value)">
+
+      <select class="admin-select media-toolbar__filter" [(ngModel)]="filterType" (change)="onFilterChange()">
+        <option *ngFor="let t of mediaTypes" [value]="t.value">{{ t.label }}</option>
+      </select>
+
+      <button *ngIf="filterType || searchTerm" class="admin-btn admin-btn--secondary admin-btn--sm"
+              (click)="clearFilter()">Clear</button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+    </div>
+
+    <!-- Media grid + detail panel -->
+    <div class="media-layout" *ngIf="!isLoading">
+      <!-- Grid -->
+      <div class="media-grid">
+        <div *ngIf="items.length === 0" class="media-empty">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <p>No media files found</p>
+        </div>
+
+        <div *ngFor="let item of items"
+             class="media-card"
+             [class.media-card--selected]="selectedItem?.id === item.id"
+             (click)="selectItem(item)">
+          <div class="media-card__thumb">
+            <img [src]="item.thumbnailUrl || item.url" [alt]="item.altText || item.originalFilename"
+                 loading="lazy" (error)="$any($event.target).src = item.url">
+          </div>
+          <div class="media-card__info">
+            <span class="media-card__name">{{ item.originalFilename }}</span>
+            <span class="media-card__meta">{{ typeLabel(item.mediaType) }} · {{ formatSize(item.fileSize || 0) }}</span>
+          </div>
+          <button class="media-card__delete" (click)="$event.stopPropagation(); confirmDelete(item.id)"
+                  title="Delete">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      <div class="media-detail" *ngIf="selectedItem">
+        <div class="media-detail__preview">
+          <img [src]="selectedItem.url" [alt]="selectedItem.altText || selectedItem.originalFilename">
+        </div>
+        <div class="media-detail__meta">
+          <h3>{{ selectedItem.originalFilename }}</h3>
+          <table class="meta-table">
+            <tr><td>Type</td><td>{{ typeLabel(selectedItem.mediaType) }}</td></tr>
+            <tr *ngIf="selectedItem.width"><td>Dimensions</td><td>{{ selectedItem.width }} × {{ selectedItem.height }}px</td></tr>
+            <tr *ngIf="selectedItem.fileSize"><td>Size</td><td>{{ formatSize(selectedItem.fileSize) }}</td></tr>
+            <tr *ngIf="selectedItem.format"><td>Format</td><td>{{ selectedItem.format?.toUpperCase() }}</td></tr>
+            <tr *ngIf="selectedItem.altText"><td>Alt text</td><td>{{ selectedItem.altText }}</td></tr>
+            <tr *ngIf="selectedItem.entityReference"><td>Linked to</td><td>{{ selectedItem.entityReference }}</td></tr>
+            <tr><td>Uploaded</td><td>{{ selectedItem.createdAt | date:'dd MMM yyyy' }}</td></tr>
+          </table>
+          <div class="media-detail__url">
+            <label>URL</label>
+            <input type="text" class="admin-input" [value]="selectedItem.url" readonly
+                   (click)="$any($event.target).select()">
+          </div>
+          <button class="admin-btn admin-btn--danger admin-btn--sm"
+                  (click)="confirmDelete(selectedItem.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="admin-pagination" *ngIf="totalPages > 1 && !isLoading">
+      <button class="admin-pagination__btn" (click)="prevPage()" [disabled]="currentPage === 0">‹</button>
+      <span class="admin-pagination__info">{{ currentPage + 1 }} / {{ totalPages }}</span>
+      <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">›</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Delete confirm dialog -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon admin-confirm__icon--danger">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete Media</h3>
+      <p class="admin-confirm__text">This will permanently delete the file. This cannot be undone.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="deleteMedia()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

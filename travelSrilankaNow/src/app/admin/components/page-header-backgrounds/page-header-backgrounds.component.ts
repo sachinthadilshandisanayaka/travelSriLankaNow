@@ -40,7 +40,9 @@ export class PageHeaderBackgroundsComponent implements OnInit {
       id: [null],
       pageType: [this.selectedPageType, Validators.required],
       imageUrl: [''],
+      subtitle: [''],
       title: [''],
+      description: [''],
       overlayColor: [this.defaultOverlayColor],
       overlayOpacity: [this.defaultOverlayOpacity, [Validators.min(0), Validators.max(1)]],
       isActive: [false],
@@ -92,7 +94,9 @@ export class PageHeaderBackgroundsComponent implements OnInit {
       id: background.id,
       pageType: background.pageType,
       imageUrl: background.imageUrl || '',
+      subtitle: (background as any).subtitle || '',
       title: background.title || '',
+      description: (background as any).description || '',
       overlayColor: background.overlayColor || this.defaultOverlayColor,
       overlayOpacity: background.overlayOpacity ?? this.defaultOverlayOpacity,
       isActive: background.isActive,
@@ -259,16 +263,30 @@ export class PageHeaderBackgroundsComponent implements OnInit {
   }
 
   updateOverlayColor(): void {
-    const opacity = this.backgroundForm.get('overlayOpacity')?.value || this.defaultOverlayOpacity;
-    // Extract hex color and rebuild with opacity
-    const currentColor = this.backgroundForm.get('overlayColor')?.value || this.defaultOverlayColor;
-    // This is a simplified approach - the actual color picker should handle this
+    // Rebuild overlayColor with the new opacity from the slider so the stored value stays in sync
+    const opacity = this.backgroundForm.get('overlayOpacity')?.value ?? this.defaultOverlayOpacity;
+    const current = this.backgroundForm.get('overlayColor')?.value || this.defaultOverlayColor;
+    const updated = this.applyOpacityToColor(current, opacity);
+    this.backgroundForm.patchValue({ overlayColor: updated }, { emitEvent: false });
   }
 
+  /** Returns the overlay style for the live preview, applying the current opacity slider value. */
   getPreviewOverlayStyle(): { [key: string]: string } {
-    const color = this.backgroundForm.get('overlayColor')?.value || this.defaultOverlayColor;
-    return {
-      'background-color': color
-    };
+    const color   = this.backgroundForm.get('overlayColor')?.value  || this.defaultOverlayColor;
+    const opacity = this.backgroundForm.get('overlayOpacity')?.value ?? this.defaultOverlayOpacity;
+    return { 'background-color': this.applyOpacityToColor(color, opacity) };
+  }
+
+  getActiveOverlayStyle(): { [key: string]: string } {
+    if (!this.activeBackground) return {};
+    const color   = this.activeBackground.overlayColor   || this.defaultOverlayColor;
+    const opacity = this.activeBackground.overlayOpacity ?? this.defaultOverlayOpacity;
+    return { 'background-color': this.applyOpacityToColor(color, opacity) };
+  }
+
+  /** Extract R,G,B from an rgba/rgb string and return a new rgba with the given opacity. */
+  private applyOpacityToColor(colorStr: string, opacity: number): string {
+    const m = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    return m ? `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${opacity})` : colorStr;
   }
 }

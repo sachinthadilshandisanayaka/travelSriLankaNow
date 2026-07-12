@@ -15,7 +15,7 @@ import {
 export class AdminUsersComponent implements OnInit {
   users: AdminUserDto[] = [];
   roles: AdminRoleDto[] = [];
-  loading = false;
+  loading = true;
   error = '';
   success = '';
   formError = '';

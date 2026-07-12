@@ -732,6 +732,43 @@
   color: #ffffff;
 }
 
+// ── Split image position toggle ─────────────────────────────────────────────
+.split-position-toggle {
+  display: flex; gap: 0.625rem; margin-top: 0.5rem;
+}
+
+.split-pos-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border: 2px solid $admin-gray-200;
+  border-radius: 8px; background: #fff;
+  font-size: 0.8125rem; color: $admin-gray-600;
+  cursor: pointer; transition: all 0.15s;
+
+  &--active {
+    border-color: $admin-navy;
+    background: rgba($admin-navy, 0.05);
+    color: $admin-navy; font-weight: 600;
+  }
+  &:hover:not(&--active) { border-color: $admin-gray-400; }
+}
+
+// ── Gallery creation info box ────────────────────────────────────────────────
+.gallery-create-info {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba($admin-navy, 0.04);
+  border: 1px solid rgba($admin-navy, 0.12);
+  border-radius: 8px;
+  font-size: 0.875rem; color: $admin-gray-600; line-height: 1.5;
+  svg { flex-shrink: 0; margin-top: 1px; color: $admin-navy; }
+}
+
+// hint label in section card
+.section-card__config-hint {
+  color: $admin-gray-400; font-style: italic; font-size: 0.6875rem;
+}
+
 // ── Gallery style picker ────────────────────────────────────────────────────
 .gallery-style-section {
   margin-bottom: 1.25rem;

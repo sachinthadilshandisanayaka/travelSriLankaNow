@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { BookingCountService } from '../../services/booking-count.service';
+import { ContentStatsService } from '../../services/content-stats.service';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -19,6 +20,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   showPendingBanner = true;
   private displayNameSub!: Subscription;
   private pendingSub!: Subscription;
+  private statsSub!: Subscription;
   stats = {
     locations: { total: 0 },
     events: { total: 0 },
@@ -30,6 +32,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     private authService: AdminAuthService,
     private apiService: AdminApiService,
     private bookingCount: BookingCountService,
+    private contentStats: ContentStatsService,
     private router: Router
   ) {}
 
@@ -45,11 +48,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     }
 
     this.loadStats();
+    this.statsSub = this.contentStats.changes$.subscribe(() => this.loadStats());
   }
 
   ngOnDestroy(): void {
     if (this.displayNameSub) this.displayNameSub.unsubscribe();
     if (this.pendingSub) this.pendingSub.unsubscribe();
+    if (this.statsSub) this.statsSub.unsubscribe();
   }
 
   private loadStats(): void {

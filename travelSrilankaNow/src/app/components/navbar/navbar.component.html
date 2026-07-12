@@ -1,8 +1,9 @@
 <nav class="navbar" [class.scrolled]="isScrolled">
   <div class="container navbar-content">
-    <!-- Simple Logo -->
+    <!-- Logo: image from Site Settings, or text fallback -->
     <a routerLink="/" class="logo" (click)="closeMenu()">
-      <h2 class="logo-text">Travel<span>SriLankaNow</span></h2>
+      <img *ngIf="logoUrl" [src]="logoUrl" alt="TravelSriLankaNow" class="logo-img">
+      <h2 *ngIf="!logoUrl" class="logo-text">Travel<span>SriLankaNow</span></h2>
     </a>
 
     <div class="nav-links" [class.active]="isMenuOpen">

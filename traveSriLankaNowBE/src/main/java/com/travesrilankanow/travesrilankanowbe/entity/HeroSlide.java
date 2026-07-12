@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -25,8 +26,7 @@ public class HeroSlide {
 
     private String subtitle;
 
-    @Column(nullable = false)
-    private String imageUrl;
+    private String imageUrl; // nullable — video slides have no image
 
     // "image" (default) or "video"
     @Column(nullable = false, columnDefinition = "varchar(10) default 'image'")
@@ -64,6 +64,10 @@ public class HeroSlide {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    /** Populated at query time for the public API — not stored in DB. */
+    @Transient
+    private List<Map<String, String>> galleryImages;
 
     @PrePersist
     protected void onCreate() {

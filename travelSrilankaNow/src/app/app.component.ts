@@ -1,6 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Title } from '@angular/platform-browser';
+import { filter, switchMap } from 'rxjs/operators';
+import { SiteSettingsService, SiteSettingsMap } from './services/site-settings.service';
+
+const PAGE_TITLES: Record<string, string> = {
+  '':             '',
+  'locations':    'Locations',
+  'gallery':      'Gallery',
+  'events':       'Events',
+  'places':       'Places',
+  'more':         '',
+  'admin':        'Admin',
+  'my-bookings':  'My Bookings',
+  'login':        'Login',
+  'register':     'Register',
+};
 
 @Component({
   selector: 'app-root',
@@ -11,16 +26,50 @@ export class AppComponent implements OnInit {
   title = 'travelSrilankaNow';
   isAdminRoute = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private titleService: Title,
+    private siteSettings: SiteSettingsService
+  ) {}
 
   ngOnInit(): void {
+    this.siteSettings.getSettingsAsMap().subscribe(settings => {
+      this.applyTitle(this.router.url, settings);
+    });
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      switchMap((event: any) =>
+        this.siteSettings.getSettingsAsMap().pipe(
+          filter(settings => !!settings),
+          filter((_, i) => i === 0)
+        )
+      )
+    ).subscribe({ error: () => {} });
+
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.isAdminRoute = event.url.startsWith('/admin');
+      this.siteSettings.getSettingsAsMap().subscribe(settings => {
+        this.applyTitle(event.url, settings);
+      });
     });
 
-    // Check initial route
     this.isAdminRoute = this.router.url.startsWith('/admin');
+  }
+
+  private applyTitle(url: string, settings: SiteSettingsMap): void {
+    const siteName = settings['site_name'] || 'Travel Sri Lanka Now';
+    const tagline  = settings['site_tagline'] || 'Explore Beautiful Sri Lanka';
+
+    const segment = url.split('/').filter(Boolean)[0] || '';
+    const pageName = PAGE_TITLES[segment] ?? '';
+
+    const tabTitle = pageName
+      ? `${pageName} | ${siteName}`
+      : `${siteName} | ${tagline}`;
+
+    this.titleService.setTitle(tabTitle);
   }
 }

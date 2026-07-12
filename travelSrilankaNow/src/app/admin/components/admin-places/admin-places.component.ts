@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
+import { ContentStatsService } from '../../services/content-stats.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
 import { FieldDefinition } from '../../../models/more-section.model';
 
@@ -61,7 +62,8 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: AdminApiService,
     private fb: FormBuilder,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private contentStats: ContentStatsService
   ) {
     this.placeForm = this.fb.group({
       id: [null],
@@ -379,6 +381,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
           this.successMessage = 'Place created successfully!';
           this.closeModal();
           this.loadPlaces();
+          this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
         error: (err: any) => {
@@ -402,6 +405,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
     this.apiService.deletePlace(this.deletePlaceId).subscribe({
       next: () => {
         this.successMessage = 'Place deleted successfully!';
+        this.contentStats.notify();
         this.showDeleteConfirm = false;
         this.deletePlaceId = null;
         this.loadPlaces();

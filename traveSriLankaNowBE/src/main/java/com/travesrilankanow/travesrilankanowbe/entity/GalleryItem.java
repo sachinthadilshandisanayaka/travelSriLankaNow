@@ -64,5 +64,7 @@ public class GalleryItem {
         if (displayOrder == null) displayOrder = 0;
         if (featured == null) featured = false;
         if (uploadDate == null) uploadDate = LocalDateTime.now();
+        // Fall back to url so the DB NOT NULL constraint is never violated
+        if (thumbnailUrl == null || thumbnailUrl.isBlank()) thumbnailUrl = url;
     }
 }

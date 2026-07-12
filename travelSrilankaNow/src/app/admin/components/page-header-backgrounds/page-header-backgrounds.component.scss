@@ -568,3 +568,60 @@
     }
   }
 }
+
+// ── Opacity slider ────────────────────────────────────────────────────────
+.opacity-row {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+
+.opacity-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, $admin-navy 0%, $admin-navy calc(var(--val, 70) * 1%), $admin-gray-200 calc(var(--val, 70) * 1%), $admin-gray-200 100%);
+  outline: none; cursor: pointer;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: $admin-navy; cursor: pointer;
+  }
+}
+
+.opacity-value {
+  min-width: 36px; text-align: right;
+  font-size: 0.8125rem; font-weight: 600; color: $admin-navy;
+}
+
+// ── Page text section heading ─────────────────────────────────────────────
+.page-text-section {
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid $admin-navy;
+  background: rgba($admin-navy, 0.03);
+  border-radius: 0 6px 6px 0;
+
+  &__heading {
+    font-size: 0.875rem; font-weight: 600; color: $admin-navy;
+    display: flex; align-items: center; gap: 0.375rem; margin: 0 0 0.25rem;
+  }
+  &__hint { font-size: 0.75rem; color: $admin-gray-500; margin: 0; }
+}
+
+// ── Preview text labels ───────────────────────────────────────────────────
+.preview-tag {
+  display: inline-block;
+  padding: 0.2rem 0.625rem; border-radius: 20px;
+  background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #fff; margin-bottom: 0.375rem;
+}
+.preview-title {
+  display: block;
+  font-size: 1.125rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;
+}
+.preview-desc {
+  display: block;
+  font-size: 0.75rem; color: rgba(255,255,255,0.8); line-height: 1.4;
+  max-width: 320px;
+}

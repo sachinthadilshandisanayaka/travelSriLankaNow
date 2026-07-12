@@ -2,8 +2,14 @@
   <div class="container">
     <div class="footer-content">
       <div class="footer-section">
-        <h3>Travel<span>SriLankaNow</span></h3>
-        <p class="footer-description">{{ 'footer.description' | translate }}</p>
+        <!-- Logo image if set, otherwise site name text -->
+        <a routerLink="/" class="footer-brand">
+          <img *ngIf="logoUrl" [src]="logoUrl" [alt]="siteName" class="footer-logo">
+          <h3 *ngIf="!logoUrl">{{ siteName }}</h3>
+        </a>
+        <p class="footer-description">
+          {{ footerDescription || ('footer.description' | translate) }}
+        </p>
       </div>
 
       <div class="footer-section">
@@ -37,7 +43,7 @@
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; {{ currentYear }} TravelSriLankaNow. {{ 'footer.rights' | translate }}.</p>
+      <p>&copy; {{ currentYear }} {{ siteName }}. {{ 'footer.rights' | translate }}.</p>
     </div>
   </div>
 </footer>

@@ -159,6 +159,12 @@ export class AdminHomepageSectionsComponent implements OnInit {
     CUSTOM_CONTENT: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'
   };
 
+  // Gallery creation modal
+  showGalleryCreateModal = false;
+  galleryCreateTitle = '';
+  galleryCreateSubtitle = '';
+  galleryCreating = false;
+
   // Drag and Drop
   draggedIndex: number | null = null;
   dragOverIndex = -1;
@@ -221,7 +227,54 @@ export class AdminHomepageSectionsComponent implements OnInit {
   }
 
   isDeletable(section: HomepageSection): boolean {
-    return section.sectionType === 'CUSTOM_CONTENT';
+    return section.sectionType === 'CUSTOM_CONTENT' || section.sectionType === 'IMAGE_GALLERY_SLIDER';
+  }
+
+  // ---- Gallery Section Creation ----
+  openGalleryCreateModal(): void {
+    this.galleryCreateTitle = 'Photo Gallery';
+    this.galleryCreateSubtitle = '';
+    this.showGalleryCreateModal = true;
+  }
+
+  closeGalleryCreateModal(): void {
+    this.showGalleryCreateModal = false;
+    this.galleryCreateTitle = '';
+    this.galleryCreateSubtitle = '';
+  }
+
+  createGallerySection(): void {
+    if (!this.galleryCreateTitle.trim()) return;
+    this.galleryCreating = true;
+
+    const maxOrder = this.sections.length
+      ? Math.max(...this.sections.map(s => s.displayOrder || 0)) + 1
+      : 1;
+
+    const newSection: HomepageSection = {
+      sectionType: 'IMAGE_GALLERY_SLIDER',
+      title: this.galleryCreateTitle.trim(),
+      subtitle: this.galleryCreateSubtitle.trim() || undefined,
+      displayOrder: maxOrder,
+      isActive: true
+    };
+
+    this.apiService.createHomepageSection(newSection).subscribe({
+      next: (created: HomepageSection) => {
+        this.galleryCreating = false;
+        this.closeGalleryCreateModal();
+        this.loadSections();
+        this.successMessage = 'Photo Gallery section created!';
+        this.hideMessageAfterDelay();
+        // Auto-open the gallery picker so user can immediately configure images
+        setTimeout(() => this.openGalleryPickerModal(created), 400);
+      },
+      error: () => {
+        this.galleryCreating = false;
+        this.errorMessage = 'Failed to create gallery section';
+        this.hideMessageAfterDelay();
+      }
+    });
   }
 
   // ---- Standard Edit Modal ----
@@ -307,10 +360,10 @@ export class AdminHomepageSectionsComponent implements OnInit {
   loadAvailableImages(): void {
     this.isLoadingImages = true;
     forkJoin({
-      locations: this.apiService.getLocations(0, 100),
-      events: this.apiService.getEvents(0, 100),
-      places: this.apiService.getPlaces(0, 100),
-      gallery: this.apiService.getGalleryItems(0, 100)
+      locations: this.apiService.getLocations(0, 500),
+      events:    this.apiService.getEvents(0, 500),
+      places:    this.apiService.getPlaces(0, 500),
+      gallery:   this.apiService.getGalleryItems(0, 500)
     }).subscribe({
       next: ({ locations, events, places, gallery }) => {
         const imgs: AvailableImage[] = [];
@@ -326,8 +379,10 @@ export class AdminHomepageSectionsComponent implements OnInit {
           if (p.imageUrl) imgs.push({ url: p.imageUrl, title: p.name, sourceType: 'place', sourceId: p.id });
           (p.images || []).forEach((img: string) => imgs.push({ url: img, title: p.name, sourceType: 'place', sourceId: p.id }));
         });
+        // Gallery items use `url` (not `imageUrl`) — this was the primary bug
         (gallery?.content || []).forEach((g: any) => {
-          if (g.imageUrl) imgs.push({ url: g.imageUrl, title: g.title || 'Gallery', sourceType: 'gallery', sourceId: g.id });
+          const imageUrl = g.url || g.imageUrl;
+          if (imageUrl) imgs.push({ url: imageUrl, title: g.title || 'Gallery', sourceType: 'gallery', sourceId: g.id });
         });
 
         // De-duplicate by URL
@@ -456,7 +511,8 @@ export class AdminHomepageSectionsComponent implements OnInit {
       split: {
         backgroundColor: '#ffffff',
         titleColor: '#1e293b', titleAlign: 'left',
-        descriptionColor: '#64748b', descriptionAlign: 'left'
+        descriptionColor: '#64748b', descriptionAlign: 'left',
+        splitImagePosition: 'left'
       }
     };
     this.customConfig = { ...this.customConfig, template: templateId as any, ...defaults[templateId] };
@@ -468,6 +524,18 @@ export class AdminHomepageSectionsComponent implements OnInit {
 
   clearBgImage(): void {
     this.customConfig = { ...this.customConfig, backgroundImage: '' };
+  }
+
+  onSplitImageUploaded(url: string): void {
+    this.customConfig = { ...this.customConfig, splitImage: url };
+  }
+
+  clearSplitImage(): void {
+    this.customConfig = { ...this.customConfig, splitImage: '' };
+  }
+
+  setSplitImagePosition(pos: 'left' | 'right'): void {
+    this.customConfig = { ...this.customConfig, splitImagePosition: pos };
   }
 
   getOverlayStyle(): { [key: string]: string } {
@@ -497,11 +565,25 @@ export class AdminHomepageSectionsComponent implements OnInit {
       style['backgroundSize'] = this.customConfig.backgroundEffect === 'contain' ? 'contain' :
                                  this.customConfig.backgroundEffect === 'tile' ? 'auto' : 'cover';
       style['backgroundRepeat'] = this.customConfig.backgroundEffect === 'tile' ? 'repeat' : 'no-repeat';
-      style['backgroundPosition'] = 'center';
+      style['backgroundPosition'] = this.customConfig.backgroundEffect === 'parallax' ? 'center center' : 'center';
     }
+    // Section Height — show in preview
     if (this.customConfig.minHeight) style['minHeight'] = this.customConfig.minHeight;
-    if (this.customConfig.padding) style['padding'] = this.customConfig.padding;
+    if (this.customConfig.padding)   style['padding']   = this.customConfig.padding;
+    // Vertical alignment — show in preview
+    if (this.customConfig.verticalAlign) {
+      style['display'] = 'flex';
+      style['flexDirection'] = 'column';
+      const vMap: Record<string, string> = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
+      style['justifyContent'] = vMap[this.customConfig.verticalAlign] || 'flex-start';
+    }
     return style;
+  }
+
+  /** Preview inner content alignment (mirrors landing getCustomInnerStyle) */
+  getPreviewInnerStyle(): { [k: string]: string } {
+    const align = this.customConfig.titleAlign || 'left';
+    return { 'textAlign': align };
   }
 
   saveCustomSection(): void {

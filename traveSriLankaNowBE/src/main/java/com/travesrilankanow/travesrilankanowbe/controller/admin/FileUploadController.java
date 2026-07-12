@@ -87,7 +87,7 @@ public class FileUploadController {
     @PreAuthorize("hasAuthority('MEDIA:CREATE')")
     public ResponseEntity<Map<String, Object>> uploadVideo(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "folder", defaultValue = "travel-sri-lanka/videos") String folder
+            @RequestParam(value = "folder", defaultValue = "videos") String folder
     ) {
         try {
             Map<String, Object> result = cloudinaryService.uploadVideo(file, folder);

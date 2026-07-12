@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
 
 export interface SiteSetting {
@@ -22,6 +22,10 @@ export interface SiteSetting {
 })
 export class AdminSiteSettingsComponent implements OnInit {
   settings: SiteSetting[] = [];
+  // Pre-computed groups — never call getGroupedSettings() from the template directly
+  // (calling it in *ngFor recreates all DOM elements every change-detection cycle,
+  //  which swallows click events between mousedown and mouseup)
+  settingGroups: { category: string; label: string; settings: SiteSetting[] }[] = [];
   isLoading = false;
   showModal = false;
   isEditMode = false;
@@ -69,12 +73,12 @@ export class AdminSiteSettingsComponent implements OnInit {
 
   initForm(): void {
     this.settingForm = this.fb.group({
-      category: ['GENERAL', Validators.required],
-      key: ['', [Validators.required, Validators.pattern(/^[a-z_]+$/)]],
-      label: ['', Validators.required],
-      value: ['', Validators.required],
+      category: ['GENERAL'],
+      key: [''],
+      label: [''],
+      value: [''],
       icon: [''],
-      sortOrder: [1, [Validators.required, Validators.min(1)]],
+      sortOrder: [0],
       isActive: [true]
     });
   }
@@ -84,6 +88,7 @@ export class AdminSiteSettingsComponent implements OnInit {
     this.adminApiService.getSiteSettings().subscribe({
       next: (data) => {
         this.settings = data;
+        this.settingGroups = this.getGroupedSettings();
         this.isLoading = false;
       },
       error: (error) => {
@@ -103,7 +108,7 @@ export class AdminSiteSettingsComponent implements OnInit {
       label: '',
       value: '',
       icon: '',
-      sortOrder: 1,
+      sortOrder: 0,
       isActive: true
     });
     this.settingForm.get('key')?.enable();
@@ -148,14 +153,15 @@ export class AdminSiteSettingsComponent implements OnInit {
 
     request.subscribe({
       next: () => {
+        this.isLoading = false;
         this.successMessage = this.isEditMode ? 'Setting updated successfully' : 'Setting created successfully';
         this.closeModal();
         this.loadSettings();
         this.clearMessageAfterDelay();
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to save setting';
         this.isLoading = false;
+        this.errorMessage = error.error?.message || 'Failed to save setting';
         this.clearMessageAfterDelay();
       }
     });
@@ -242,6 +248,10 @@ export class AdminSiteSettingsComponent implements OnInit {
       label: this.getCategoryLabel(category),
       settings: grouped[category].sort((a, b) => a.sortOrder - b.sortOrder)
     }));
+  }
+
+  onLogoUploaded(url: string): void {
+    this.settingForm.patchValue({ value: url });
   }
 
   private clearMessageAfterDelay(): void {

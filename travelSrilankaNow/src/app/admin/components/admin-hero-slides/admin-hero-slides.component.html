@@ -66,7 +66,6 @@
             <div class="hero-slide-card__overlay">
               <span class="hero-slide-card__order">#{{ slide.displayOrder }}</span>
             </div>
-            <!-- Status Badge -->
             <div class="hero-slide-card__status" [class.hero-slide-card__status--active]="slide.active" [class.hero-slide-card__status--inactive]="!slide.active">
               {{ slide.active ? 'Active' : 'Inactive' }}
             </div>
@@ -142,25 +141,19 @@
           <strong>{{ totalElements }}</strong> slides
         </div>
         <div class="admin-pagination__controls">
-          <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">
-            Previous
-          </button>
+          <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">Previous</button>
           <button *ngFor="let page of [].constructor(totalPages); let i = index"
                   class="admin-pagination__btn"
                   [class.admin-pagination__btn--active]="currentPage === i"
-                  (click)="goToPage(i)">
-            {{ i + 1 }}
-          </button>
-          <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
-            Next
-          </button>
+                  (click)="goToPage(i)">{{ i + 1 }}</button>
+          <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">Next</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add/Edit Modal -->
+<!-- ════════════════════════════ Add/Edit Modal ════════════════════════════ -->
 <div *ngIf="showModal" class="admin-modal">
   <div class="admin-modal__content admin-modal__content--large">
     <div class="admin-modal__header">
@@ -179,7 +172,6 @@
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Title *</label>
             <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Discover Ancient Sri Lanka">
-            <!-- Style toggle -->
             <button type="button" class="style-toggle-btn" (click)="titleStyleOpen = !titleStyleOpen">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               {{ titleStyleOpen ? 'Hide' : 'Customize' }} Title Style
@@ -243,7 +235,7 @@
             </div>
           </div>
 
-          <!-- Image Upload (shown when mediaType = image) -->
+          <!-- Image Upload -->
           <div class="admin-form__group admin-form__group--full" *ngIf="!isVideoMode">
             <app-image-upload
               [currentImageUrl]="heroSlideForm.get('imageUrl')?.value"
@@ -254,16 +246,12 @@
             <p class="admin-form__hint">Recommended: 1920×1080px, 16:9 aspect ratio</p>
           </div>
 
-          <!-- Video Upload (shown when mediaType = video) -->
+          <!-- Video Upload -->
           <div class="admin-form__group admin-form__group--full" *ngIf="isVideoMode">
             <label class="admin-form__label">Video</label>
-
-            <!-- Preview existing video -->
             <div class="video-preview" *ngIf="heroSlideForm.get('videoUrl')?.value">
               <video [src]="heroSlideForm.get('videoUrl')?.value" controls muted style="max-width:100%;border-radius:6px;max-height:160px;"></video>
             </div>
-
-            <!-- Upload new video -->
             <label class="video-upload-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <span *ngIf="!isVideoUploading">{{ heroSlideForm.get('videoUrl')?.value ? 'Replace Video' : 'Upload Video' }}</span>
@@ -271,8 +259,6 @@
               <input type="file" accept="video/mp4,video/webm,video/ogg" (change)="onVideoFileSelected($event)" style="display:none">
             </label>
             <p class="admin-form__hint" style="color:#dc2626" *ngIf="videoUploadError">{{ videoUploadError }}</p>
-
-            <!-- Or paste URL -->
             <div style="margin-top:0.75rem;">
               <label class="admin-form__label" style="font-size:0.8125rem;font-weight:500">Or paste direct video URL</label>
               <input type="url" formControlName="videoUrl" class="admin-input" placeholder="https://…/video.mp4">
@@ -291,7 +277,6 @@
           <div class="admin-form__group">
             <label class="admin-form__label">Button Link</label>
             <input type="text" formControlName="buttonLink" class="admin-input" placeholder="e.g., /locations or /events">
-            <p class="admin-form__hint">Page to navigate when button is clicked</p>
           </div>
 
           <!-- Display Duration -->
@@ -300,14 +285,12 @@
             <select formControlName="displayDuration" class="admin-select">
               <option *ngFor="let preset of durationPresets" [value]="preset.value">{{ preset.label }}</option>
             </select>
-            <p class="admin-form__hint">How long this slide is shown before transitioning</p>
           </div>
 
           <!-- Display Order -->
           <div class="admin-form__group">
             <label class="admin-form__label">Display Order</label>
             <input type="number" formControlName="displayOrder" class="admin-input" min="0">
-            <p class="admin-form__hint">Lower numbers appear first (auto-assigned if left at 0)</p>
           </div>
 
           <!-- Active Status -->
@@ -317,6 +300,81 @@
               <span>Active - Show this slide in the carousel</span>
             </label>
           </div>
+
+          <!-- ══════════════ Gallery Section (edit mode only) ══════════════ -->
+          <div class="admin-form__group admin-form__group--full gallery-section" *ngIf="isEditMode">
+            <div class="gallery-section__header">
+              <div class="gallery-section__title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>Image Gallery <em>(below subtitle)</em></span>
+              </div>
+              <label class="gallery-toggle">
+                <input type="checkbox" [(ngModel)]="gallery.enabled" [ngModelOptions]="{standalone: true}">
+                <span class="gallery-toggle__track">
+                  <span class="gallery-toggle__thumb"></span>
+                </span>
+                <span class="gallery-toggle__label">{{ gallery.enabled ? 'Enabled' : 'Disabled' }}</span>
+              </label>
+            </div>
+
+            <div *ngIf="isGalleryLoading" class="gallery-loading">Loading gallery…</div>
+
+            <div *ngIf="!isGalleryLoading && gallery.enabled" class="gallery-items-list">
+              <!-- Selected items -->
+              <div *ngIf="gallery.items.length === 0" class="gallery-empty">
+                <p>No images selected. Click <strong>Add Images</strong> to choose from your content.</p>
+              </div>
+
+              <div class="gallery-items-grid" *ngIf="gallery.items.length > 0">
+                <div *ngFor="let item of gallery.items; let idx = index" class="gallery-item-card">
+                  <img [src]="item.imageUrl" [alt]="item.label" class="gallery-item-card__img">
+                  <div class="gallery-item-card__info">
+                    <span class="gallery-item-card__label">{{ item.label }}</span>
+                    <span class="gallery-item-card__type">{{ getContentTypeLabel(item.contentType) }}</span>
+                  </div>
+                  <div class="gallery-item-card__actions">
+                    <button type="button" class="gallery-item-btn" (click)="moveGalleryItem(idx, idx-1)" [disabled]="idx === 0" title="Move left">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button type="button" class="gallery-item-btn" (click)="moveGalleryItem(idx, idx+1)" [disabled]="idx === gallery.items.length-1" title="Move right">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button type="button" class="gallery-item-btn gallery-item-btn--danger" (click)="removeGalleryItem(idx)" title="Remove">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="gallery-actions">
+                <button type="button" class="admin-btn admin-btn--secondary" (click)="openImagePicker()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 4v16m8-8H4"/></svg>
+                  Add Images
+                </button>
+                <div class="gallery-save-row">
+                  <span class="gallery-save-success" *ngIf="gallerySuccess">{{ gallerySuccess }}</span>
+                  <span class="gallery-save-error" *ngIf="galleryError">{{ galleryError }}</span>
+                  <button type="button" class="admin-btn admin-btn--primary" (click)="saveGallery()" [disabled]="isGallerySaving">
+                    <svg *ngIf="!isGallerySaving" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <svg *ngIf="isGallerySaving" class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="16" height="16">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    {{ isGallerySaving ? 'Saving…' : 'Save Gallery' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p *ngIf="!gallery.enabled && !isGalleryLoading" class="admin-form__hint" style="margin-top:0.5rem">
+              Enable the gallery to display an expanding image strip below the subtitle on this slide.
+            </p>
+          </div>
+          <!-- ════════════════════════════════════════════════════════════════ -->
+
         </div>
       </div>
 
@@ -364,6 +422,100 @@
   </div>
 </div>
 
+<!-- ════════════════════════ Image Picker Modal ════════════════════════════ -->
+<div *ngIf="showImagePicker" class="picker-modal">
+  <div class="picker-modal__backdrop" (click)="closeImagePicker()"></div>
+  <div class="picker-modal__panel">
+    <div class="picker-modal__header">
+      <div class="picker-header-left">
+        <button *ngIf="selectedContentType" type="button" class="picker-back-btn" (click)="backToContentTypes()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 18l-6-6 6-6"/></svg>
+          Back
+        </button>
+        <h3>
+          <span *ngIf="!selectedContentType">Select Content Type</span>
+          <span *ngIf="selectedContentType">{{ selectedContentType.displayName }}</span>
+        </h3>
+      </div>
+      <button type="button" class="admin-modal__close" (click)="closeImagePicker()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="picker-modal__body">
+      <!-- Step 1: Content type grid -->
+      <div *ngIf="!selectedContentType" class="picker-ct-grid">
+        <button *ngFor="let ct of contentTypes"
+                type="button"
+                class="picker-ct-card"
+                (click)="selectContentType(ct)">
+          <div class="picker-ct-card__icon">
+            <svg *ngIf="ct.icon === 'calendar'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <svg *ngIf="ct.icon === 'map-pin'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg *ngIf="ct.icon === 'compass'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <svg *ngIf="ct.icon === 'image'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <svg *ngIf="!['calendar','map-pin','compass','image'].includes(ct.icon)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <span>{{ ct.displayName }}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Step 2: Items from selected content type -->
+      <div *ngIf="selectedContentType" class="picker-items-panel">
+        <div class="picker-search-row">
+          <input type="text" class="admin-input" placeholder="Search…"
+                 [(ngModel)]="pickerSearch" [ngModelOptions]="{standalone: true}"
+                 (keyup.enter)="onPickerSearch()" (input)="onPickerSearch()">
+          <span class="picker-selected-count" *ngIf="pickerSelected.size > 0">
+            {{ pickerSelected.size }} selected
+          </span>
+        </div>
+
+        <div *ngIf="pickerLoading" class="picker-loading">Loading…</div>
+
+        <div *ngIf="!pickerLoading && pickerItems.length === 0" class="picker-empty">
+          No items found.
+        </div>
+
+        <div *ngIf="!pickerLoading && pickerItems.length > 0" class="picker-items-grid">
+          <div *ngFor="let item of pickerItems"
+               class="picker-item"
+               [class.picker-item--selected]="isPickerItemSelected(item)"
+               (click)="togglePickerItem(item)">
+            <div class="picker-item__img-wrap">
+              <img [src]="item.imageUrl" [alt]="item.name" class="picker-item__img">
+              <div class="picker-item__check" *ngIf="isPickerItemSelected(item)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <span class="picker-item__name">{{ item.name }}</span>
+          </div>
+        </div>
+
+        <!-- Picker pagination -->
+        <div class="picker-pagination" *ngIf="pickerTotalPages > 1">
+          <button type="button" class="admin-pagination__btn" (click)="pickerPrevPage()" [disabled]="pickerPage === 0">Prev</button>
+          <span>{{ pickerPage + 1 }} / {{ pickerTotalPages }}</span>
+          <button type="button" class="admin-pagination__btn" (click)="pickerNextPage()" [disabled]="pickerPage >= pickerTotalPages - 1">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="picker-modal__footer" *ngIf="selectedContentType">
+      <span class="picker-hint">Click items to select, then add to gallery</span>
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="backToContentTypes()">Back</button>
+      <button type="button" class="admin-btn admin-btn--primary"
+              (click)="addSelectedToGallery()"
+              [disabled]="pickerSelected.size === 0">
+        Add {{ pickerSelected.size > 0 ? pickerSelected.size : '' }} Selected
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Shared style-panel ng-template ───────────────────────────────────── -->
 <ng-template #stylePanel let-target="target" let-text="text">
   <div class="style-panel__inner">
@@ -379,13 +531,14 @@
       </select>
     </div>
 
-    <!-- Font Size -->
+    <!-- Font Size (range slider) -->
     <div class="style-row">
       <span class="style-row__label">Size</span>
-      <div class="style-row__chips">
-        <button *ngFor="let s of sizeOptions" type="button"
-                class="chip" [class.chip--active]="getStyleProp(target,'fontSize') === s.value"
-                (click)="setStyle(target,'fontSize', s.value)">{{ s.label }}</button>
+      <div class="font-size-row">
+        <input type="range" class="size-slider" min="1" max="8" step="0.25"
+               [value]="getFontSizeNum(target)"
+               (input)="onFontSizeChange(target, $any($event.target).value)">
+        <span class="size-value">{{ getFontSizeNum(target) }}rem</span>
       </div>
     </div>
 
@@ -408,10 +561,40 @@
               [style.background]="c"
               [class.color-swatch--active]="getStyleProp(target,'color') === c"
               (click)="setStyle(target,'color', c)"></span>
-        <input type="color"
-               [value]="getStyleProp(target,'color') || '#ffffff'"
+        <input type="color" [value]="getStyleProp(target,'color') || '#ffffff'"
                (input)="setStyle(target,'color', $any($event.target).value)"
                class="color-input" title="Custom colour">
+      </div>
+    </div>
+
+    <!-- Outline / Stroke -->
+    <div class="style-row">
+      <span class="style-row__label">Outline</span>
+      <div class="style-row__chips">
+        <button type="button" class="chip" [class.chip--active]="!hasStroke(target)" (click)="clearStroke(target)">None</button>
+        <button *ngFor="let w of strokeWidths" type="button"
+                class="chip" [class.chip--active]="getStrokeWidth(target) === w"
+                (click)="setStrokeWidth(target, w)">{{ w }}</button>
+      </div>
+      <input *ngIf="hasStroke(target)" type="color"
+             [value]="getStrokeColor(target)"
+             (input)="setStrokeColor(target, $any($event.target).value)"
+             class="color-input" style="margin-left:0.375rem" title="Stroke colour">
+    </div>
+
+    <!-- Fill mode -->
+    <div class="style-row" *ngIf="hasStroke(target)">
+      <span class="style-row__label">Fill</span>
+      <div class="style-row__chips">
+        <button type="button" class="chip"
+                [class.chip--active]="getStyleProp(target,'fillMode') === 'filled' || !getStyleProp(target,'fillMode')"
+                (click)="setStyle(target,'fillMode','filled')">Filled</button>
+        <button type="button" class="chip"
+                [class.chip--active]="getStyleProp(target,'fillMode') === 'hollow'"
+                (click)="setStyle(target,'fillMode','hollow')">Hollow</button>
+        <button type="button" class="chip"
+                [class.chip--active]="getStyleProp(target,'fillMode') === 'semi'"
+                (click)="setStyle(target,'fillMode','semi')">Semi</button>
       </div>
     </div>
 
@@ -468,9 +651,7 @@
     </div>
 
     <!-- Live preview -->
-    <div class="style-preview" [ngStyle]="previewStyle(target)">
-      {{ text }}
-    </div>
+    <div class="style-preview" [ngStyle]="previewStyle(target)">{{ text }}</div>
 
     <!-- Reset -->
     <button type="button" class="style-reset-btn"
@@ -479,4 +660,3 @@
     </button>
   </div>
 </ng-template>
-

@@ -226,14 +226,16 @@
 
           <!-- Location -->
           <div class="admin-form__group">
-            <label class="admin-form__label">Location *</label>
+            <label class="admin-form__label">Location</label>
             <input type="text" formControlName="location" class="admin-input" placeholder="e.g., Kandy, Sri Lanka">
           </div>
 
           <!-- Price -->
           <div class="admin-form__group">
-            <label class="admin-form__label">Price (USD) *</label>
-            <input type="number" formControlName="price" class="admin-input" min="0" step="0.01" placeholder="0.00">
+            <label class="admin-form__label">Price (USD)
+              <span class="admin-form__hint" style="margin-left:0.3rem;font-weight:400">optional · use Pricing Options below for advanced pricing</span>
+            </label>
+            <input type="number" formControlName="price" class="admin-input" min="0" step="0.01" placeholder="Leave blank if using Pricing Options">
           </div>
 
           <!-- Duration -->
@@ -383,8 +385,16 @@
                 <input type="number" class="admin-input admin-input--sm" placeholder="Amount" min="0" step="0.01"
                        [value]="p.amount" (input)="p.amount = +$any($event.target).value">
 
-                <input *ngIf="p.pricingType === 'GROUP'" type="number" class="admin-input admin-input--sm" placeholder="Min group size"
-                       min="2" [value]="p.groupSize" (input)="p.groupSize = +$any($event.target).value">
+                <ng-container *ngIf="p.pricingType === 'GROUP'">
+                  <input type="number" class="admin-input admin-input--sm" placeholder="Min people"
+                         min="1" [value]="p.groupSizeMin"
+                         (input)="p.groupSizeMin = +$any($event.target).value || null"
+                         title="Minimum group size">
+                  <input type="number" class="admin-input admin-input--sm" placeholder="Max people"
+                         min="1" [value]="p.groupSizeMax"
+                         (input)="p.groupSizeMax = +$any($event.target).value || null"
+                         title="Maximum group size (leave blank for no limit)">
+                </ng-container>
 
                 <input type="text" class="admin-input admin-input--sm" placeholder="Label (optional)" [(ngModel)]="p.label" [ngModelOptions]="{standalone: true}">
               </div>

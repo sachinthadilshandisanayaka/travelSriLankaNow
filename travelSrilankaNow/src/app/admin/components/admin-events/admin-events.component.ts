@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
+import { ContentStatsService } from '../../services/content-stats.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
 import { FieldDefinition } from '../../../models/more-section.model';
 
@@ -19,7 +20,9 @@ interface PricingItem {
   currencyCode: string;
   amount: number | null;
   pricingType: 'PER_PERSON' | 'GROUP' | 'FULL_EVENT';
-  groupSize: number | null;
+  groupSize: number | null;     // legacy
+  groupSizeMin: number | null;  // min group size
+  groupSizeMax: number | null;  // max group size (null = no upper limit)
   label: string;
   isPrimary: boolean;
   displayOrder: number;
@@ -88,7 +91,8 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: AdminApiService,
     private fb: FormBuilder,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private contentStats: ContentStatsService
   ) {
     this.eventForm = this.fb.group({
       id: [null],
@@ -98,8 +102,8 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
       shortDescription: ['', Validators.required],
       imageUrl: [''],
       category: ['cultural', Validators.required],
-      location: ['', Validators.required],
-      price: [0, [Validators.required, Validators.min(0)]],
+      location: [''],
+      price: [null, [Validators.min(0)]],
       duration: ['', Validators.required],
       maxParticipants: [0, [Validators.required, Validators.min(1)]],
       availableSpots: [0, [Validators.required, Validators.min(0)]],
@@ -233,6 +237,8 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
           amount: p.amount ?? null,
           pricingType: p.pricingType || 'PER_PERSON',
           groupSize: p.groupSize ?? null,
+          groupSizeMin: p.groupSizeMin ?? p.groupSize ?? null,
+          groupSizeMax: p.groupSizeMax ?? null,
           label: p.label || '',
           isPrimary: !!p.isPrimary,
           displayOrder: p.displayOrder ?? 0
@@ -296,6 +302,7 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
           this.successMessage = 'Event created successfully!';
           this.closeModal();
           this.loadEvents();
+          this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
         error: (err: any) => {
@@ -322,6 +329,7 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
         this.showDeleteConfirm = false;
         this.deleteEventId = null;
         this.loadEvents();
+        this.contentStats.notify();
         this.hideMessageAfterDelay();
       },
       error: () => {
@@ -411,6 +419,8 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
       amount: null,
       pricingType: 'PER_PERSON',
       groupSize: null,
+      groupSizeMin: null,
+      groupSizeMax: null,
       label: '',
       isPrimary: this.pricings.length === 0,
       displayOrder: this.pricings.length

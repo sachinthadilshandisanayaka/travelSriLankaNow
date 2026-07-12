@@ -15,19 +15,43 @@
 .footer-content {
   display: grid;
   grid-template-columns: 1fr;
-  gap: $spacing-2xl;
+  gap: $spacing-xl;
   margin-bottom: $spacing-2xl;
-
-  @include respond-to('md') {
-    margin-bottom: $spacing-3xl;
-  }
+  text-align: center;   // centre all sections on mobile
 
   @include respond-to('md') {
     grid-template-columns: repeat(2, 1fr);
+    text-align: left;
+    gap: $spacing-2xl;
+    margin-bottom: $spacing-3xl;
   }
 
   @include respond-to('lg') {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1.6fr 1fr 1.4fr 1fr;  // brand column slightly wider
+  }
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;       // centre logo on mobile
+  text-decoration: none;
+  margin-bottom: $spacing-md;
+
+  @include respond-to('md') {
+    align-items: flex-start; // left-align on desktop
+  }
+}
+
+.footer-logo {
+  height: 80px;              // comfortable height for a footer column
+  width: auto;
+  max-width: 100%;           // never overflow the column
+  object-fit: contain;
+  display: block;
+
+  @include respond-to('lg') {
+    height: 90px;
   }
 }
 
@@ -65,10 +89,14 @@
 
 .footer-description {
   line-height: $line-height-relaxed;
-  max-width: 100%;
+  max-width: 320px;
+  margin-left: auto;   // centre the block on mobile (works with text-align:center parent)
+  margin-right: auto;
 
   @include respond-to('md') {
     max-width: 280px;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 
@@ -102,6 +130,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-sm;
+  justify-content: center;   // centre on mobile
+
+  @include respond-to('md') {
+    justify-content: flex-start;
+  }
 
   a {
     color: $warm-gray;

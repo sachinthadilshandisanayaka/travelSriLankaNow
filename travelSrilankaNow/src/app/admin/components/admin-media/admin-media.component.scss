@@ -1,0 +1,191 @@
+@import '../../styles/admin-shared';
+
+.media-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.media-stat {
+  background: $admin-gray-50;
+  border: 1px solid $admin-gray-200;
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+
+  &__value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: $admin-navy;
+  }
+  &__label {
+    font-size: 0.6875rem;
+    color: $admin-gray-500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+.upload-panel {
+  background: $admin-gray-50;
+  border: 1px solid $admin-gray-200;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: $admin-gray-800;
+  }
+  &__close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: $admin-gray-400;
+    &:hover { color: $admin-gray-700; }
+  }
+}
+
+.media-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+
+  &__search { flex: 1; }
+  &__filter { width: 180px; }
+}
+
+.media-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+
+  @media (min-width: 1200px) {
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.media-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: $admin-gray-400;
+
+  svg { width: 48px; height: 48px; margin: 0 auto 0.75rem; display: block; }
+  p { font-size: 0.9375rem; }
+}
+
+.media-card {
+  position: relative;
+  border: 2px solid $admin-gray-200;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: $admin-gray-50;
+
+  &:hover { border-color: $admin-navy; box-shadow: 0 2px 8px rgba($admin-navy, 0.1); }
+  &--selected { border-color: $admin-navy; box-shadow: 0 0 0 3px rgba($admin-navy, 0.15); }
+
+  &__thumb {
+    aspect-ratio: 1;
+    overflow: hidden;
+    img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  }
+
+  &__info {
+    padding: 0.4rem 0.5rem 0.5rem;
+  }
+  &__name {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $admin-gray-800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  &__meta {
+    font-size: 0.6875rem;
+    color: $admin-gray-400;
+  }
+
+  &__delete {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(239,68,68,0.85);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  &:hover &__delete { opacity: 1; }
+}
+
+// Detail panel
+.media-detail {
+  border: 1px solid $admin-gray-200;
+  border-radius: 10px;
+  overflow: hidden;
+  align-self: start;
+  position: sticky;
+  top: 80px;
+
+  &__preview {
+    background: #1e293b;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    img { max-width: 100%; max-height: 200px; object-fit: contain; display: block; }
+  }
+
+  &__meta {
+    padding: 1rem;
+    h3 { font-size: 0.875rem; font-weight: 600; margin: 0 0 0.75rem; color: $admin-gray-800; word-break: break-word; }
+  }
+
+  &__url {
+    margin: 0.75rem 0;
+    label { font-size: 0.75rem; font-weight: 600; color: $admin-gray-500; display: block; margin-bottom: 0.25rem; }
+    input { font-size: 0.75rem; font-family: monospace; }
+  }
+}
+
+.meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin-bottom: 0.5rem;
+
+  td { padding: 0.25rem 0.375rem; }
+  td:first-child { color: $admin-gray-500; font-weight: 500; width: 80px; }
+  td:last-child { color: $admin-gray-800; word-break: break-word; }
+  tr { border-bottom: 1px solid $admin-gray-100; }
+}

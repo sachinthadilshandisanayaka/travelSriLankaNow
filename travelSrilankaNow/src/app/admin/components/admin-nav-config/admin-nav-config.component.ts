@@ -9,7 +9,7 @@ import { NavConfigService } from '../../../services/nav-config.service';
 })
 export class AdminNavConfigComponent implements OnInit {
   navLinks: NavConfig[] = [];
-  loading = false;
+  loading = true;
   saving = false;
   editingId: number | null = null;
   editLabel = '';

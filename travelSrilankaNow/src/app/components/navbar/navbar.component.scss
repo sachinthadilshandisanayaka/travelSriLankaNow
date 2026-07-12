@@ -112,6 +112,19 @@
   &:hover .logo-text {
     transform: translateX(2px);
   }
+
+  .logo-img {
+    height: 44px;
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
+    display: block;
+    transition: opacity 0.2s ease;
+
+    @include respond-to('lg') { height: 50px; }
+  }
+
+  &:hover .logo-img { opacity: 0.9; }
 }
 
 // ==================== Navigation Links with Animated Border ====================

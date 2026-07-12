@@ -63,7 +63,7 @@
 
         <div *ngIf="activeBackground" class="active-preview">
           <div class="active-preview__image" [style.backgroundImage]="'url(' + activeBackground.imageUrl + ')'">
-            <div class="active-preview__overlay" [style.backgroundColor]="activeBackground.overlayColor || defaultOverlayColor"></div>
+            <div class="active-preview__overlay" [ngStyle]="getActiveOverlayStyle()"></div>
             <div class="active-preview__content">
               <span class="active-preview__label">{{ getPageTypeLabel(selectedPageType) }} Page Header</span>
               <span class="active-preview__title" *ngIf="activeBackground.title">{{ activeBackground.title }}</span>
@@ -184,10 +184,34 @@
             <p class="admin-form__hint">The page where this background will be used</p>
           </div>
 
+          <!-- Page text content (tag / title / description) -->
+          <div class="admin-form__group admin-form__group--full">
+            <div class="page-text-section">
+              <h4 class="page-text-section__heading">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-2.207 2.207L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+                Page Content
+              </h4>
+              <p class="page-text-section__hint">These values appear on the public page. Leave blank to keep the site defaults.</p>
+            </div>
+          </div>
+
           <div class="admin-form__group">
-            <label class="admin-form__label">Title <span class="optional">(Optional)</span></label>
-            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Summer Collection">
-            <p class="admin-form__hint">Internal label to identify this background</p>
+            <label class="admin-form__label">Tag / Subtitle</label>
+            <input type="text" formControlName="subtitle" class="admin-input" placeholder="e.g., Experience Sri Lanka">
+            <p class="admin-form__hint">Small pill label above the title</p>
+          </div>
+
+          <div class="admin-form__group">
+            <label class="admin-form__label">Page Title</label>
+            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Events &amp; Festivals">
+            <p class="admin-form__hint">Main heading of the page</p>
+          </div>
+
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Description</label>
+            <textarea formControlName="description" class="admin-textarea" rows="2"
+                      placeholder="e.g., Immerse yourself in the vibrant culture and traditions…"></textarea>
+            <p class="admin-form__hint">Short description shown below the title</p>
           </div>
 
           <!-- Image Upload Section - Full Width -->
@@ -220,8 +244,13 @@
 
           <div class="admin-form__group">
             <label class="admin-form__label">Overlay Opacity</label>
-            <input type="number" formControlName="overlayOpacity" class="admin-input" min="0" max="1" step="0.1">
-            <p class="admin-form__hint">Value from 0 (transparent) to 1 (solid)</p>
+            <div class="opacity-row">
+              <input type="range" class="opacity-slider" formControlName="overlayOpacity"
+                     min="0" max="1" step="0.05"
+                     (input)="updateOverlayColor()">
+              <span class="opacity-value">{{ (backgroundForm.get('overlayOpacity')?.value || 0) | number:'1.2-2' }}</span>
+            </div>
+            <p class="admin-form__hint">0 = fully transparent · 1 = fully opaque</p>
           </div>
 
           <!-- Live Preview - Full Width -->
@@ -231,8 +260,9 @@
               <div class="background-preview__image" [style.backgroundImage]="'url(' + backgroundForm.get('imageUrl')?.value + ')'">
                 <div class="background-preview__overlay" [ngStyle]="getPreviewOverlayStyle()"></div>
                 <div class="background-preview__text">
-                  <span>{{ getPageTypeLabel(backgroundForm.get('pageType')?.value) }}</span>
-                  <span>Sample Header Text</span>
+                  <span class="preview-tag">{{ backgroundForm.get('subtitle')?.value || getPageTypeLabel(backgroundForm.get('pageType')?.value) }}</span>
+                  <span class="preview-title">{{ backgroundForm.get('title')?.value || 'Page Title' }}</span>
+                  <span class="preview-desc" *ngIf="backgroundForm.get('description')?.value">{{ backgroundForm.get('description')?.value }}</span>
                 </div>
               </div>
             </div>
