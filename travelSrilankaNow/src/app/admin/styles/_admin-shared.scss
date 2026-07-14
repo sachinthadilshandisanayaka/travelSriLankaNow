@@ -1057,7 +1057,6 @@ select {
     font-weight: 700;
     color: $admin-gray-900;
     margin: 0 0 0.75rem 0;
-    animation: fadeIn 0.3s ease 0.2s both;
   }
 
   &__text {
@@ -1065,7 +1064,6 @@ select {
     color: $admin-gray-500;
     margin: 0 0 1.5rem 0;
     line-height: 1.5;
-    animation: fadeIn 0.3s ease 0.3s both;
   }
 
   &__actions {
