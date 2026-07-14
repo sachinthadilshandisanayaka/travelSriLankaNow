@@ -80,6 +80,7 @@ pipeline {
                                 git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
                                 git reset --hard origin/${env.DEPLOY_BRANCH}
                             else
+                                rm -rf /root/travelSriLankaNow &&
                                 git clone --branch ${env.DEPLOY_BRANCH} https://github.com/sachinthadilshan/travelSriLankaNow.git /root/travelSriLankaNow
                             fi
                         '
