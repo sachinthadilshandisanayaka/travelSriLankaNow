@@ -9,7 +9,9 @@
   <div *ngIf="successMsg" class="admin-alert admin-alert--success">{{ successMsg }}</div>
   <div *ngIf="errorMsg"   class="admin-alert admin-alert--error">{{ errorMsg }}</div>
 
-  <div *ngIf="loading" class="admin-loading">Loading…</div>
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skeleton-row" *ngFor="let _ of [1,2,3,4,5]"></div>
+  </div>
 
   <div *ngIf="!loading" class="nav-table-card">
     <table class="nav-table">

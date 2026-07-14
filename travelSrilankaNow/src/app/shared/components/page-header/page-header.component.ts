@@ -50,10 +50,18 @@ export class PageHeaderComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (bg: PageHeaderBackground | null) => {
         if (bg && bg.imageUrl) {
           this.backgroundImage = bg.imageUrl;
+          // Apply overlayOpacity as the alpha channel (fixes the opacity slider bug)
           this.overlayStyle = {
-            'background-color': bg.overlayColor || 'rgba(28, 77, 141, 0.7)'
+            'background-color': this.buildOverlayColor(
+              bg.overlayColor || 'rgba(28, 77, 141, 0.7)',
+              bg.overlayOpacity ?? 0.7
+            )
           };
         }
+        // Override hardcoded @Input values with DB values when present
+        if (bg?.subtitle)     this.subtitle     = bg.subtitle;
+        if (bg?.title)        this.title        = bg.title;
+        if (bg?.description)  this.description  = bg.description;
         this.isLoadingBackground = false;
         this.cdr.detectChanges();
         this.tryInitAnimation();
@@ -71,6 +79,15 @@ export class PageHeaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.viewInitialized && this.showAnimation && !this.backgroundImage && this.lottieContainer) {
       setTimeout(() => this.initAnimation(), 0);
     }
+  }
+
+  /** Extract the RGB from an rgba/rgb string and apply the given opacity as alpha. */
+  private buildOverlayColor(colorStr: string, opacity: number): string {
+    const match = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (match) {
+      return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${opacity})`;
+    }
+    return colorStr;
   }
 
   ngOnDestroy(): void {

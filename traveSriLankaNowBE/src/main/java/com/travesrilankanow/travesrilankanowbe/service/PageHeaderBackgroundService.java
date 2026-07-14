@@ -57,7 +57,9 @@ public class PageHeaderBackgroundService {
 
         background.setPageType(backgroundDetails.getPageType());
         background.setImageUrl(backgroundDetails.getImageUrl());
+        background.setSubtitle(backgroundDetails.getSubtitle());
         background.setTitle(backgroundDetails.getTitle());
+        background.setDescription(backgroundDetails.getDescription());
         background.setOverlayColor(backgroundDetails.getOverlayColor());
         background.setOverlayOpacity(backgroundDetails.getOverlayOpacity());
         background.setDisplayOrder(backgroundDetails.getDisplayOrder());

@@ -26,6 +26,10 @@ public class PageHeaderBackground {
     private String imageUrl;
 
     private String title;
+    private String subtitle;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @Column(nullable = false)
     private String overlayColor = "rgba(28, 77, 141, 0.7)";

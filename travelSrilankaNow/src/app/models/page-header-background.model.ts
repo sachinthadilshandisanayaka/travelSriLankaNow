@@ -5,6 +5,8 @@ export interface PageHeaderBackground {
   pageType: PageType;
   imageUrl: string;
   title?: string;
+  subtitle?: string;
+  description?: string;
   overlayColor?: string;
   overlayOpacity?: number;
   isActive: boolean;

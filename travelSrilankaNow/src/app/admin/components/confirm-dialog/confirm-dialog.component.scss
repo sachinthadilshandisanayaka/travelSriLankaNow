@@ -1,0 +1,46 @@
+.dialog-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.dialog-panel {
+  background: #fff; border-radius: 20px; padding: 32px 28px; width: 100%; max-width: 420px;
+  text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.dialog-icon {
+  width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; margin: 0 auto 16px;
+  &.danger { background: #fef2f2; svg { color: #ef4444; } }
+  &.warning { background: #fffbeb; svg { color: #f59e0b; } }
+  &.info { background: #eff6ff; svg { color: #3b82f6; } }
+  svg { width: 28px; height: 28px; }
+}
+
+.dialog-title { font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 8px; }
+.dialog-message { font-size: 14px; color: #6b7280; margin: 0 0 24px; line-height: 1.5; }
+
+.dialog-actions {
+  display: flex; gap: 12px; justify-content: center;
+}
+
+.btn-cancel {
+  flex: 1; padding: 11px; border-radius: 10px; border: 1.5px solid #e5e7eb;
+  background: #fff; color: #374151; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: #f9fafb; }
+}
+
+.btn-confirm {
+  flex: 1; padding: 11px; border-radius: 10px; border: none;
+  font-size: 14px; font-weight: 600; cursor: pointer; color: #fff;
+  transition: opacity 0.15s;
+  &.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  &.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  &.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  &:hover { opacity: 0.9; }
+}

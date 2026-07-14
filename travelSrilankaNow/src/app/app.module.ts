@@ -21,8 +21,8 @@ import { LocationDetailComponent } from './pages/location-detail/location-detail
 import { PlaceDetailComponent } from './pages/place-detail/place-detail.component';
 import { MoreSectionDetailComponent } from './pages/more-section-detail/more-section-detail.component';
 import { MoreSectionItemDetailComponent } from './pages/more-section-item-detail/more-section-item-detail.component';
-import { CloudinaryOptimizePipe, CloudinaryThumbnailPipe } from './pipes/cloudinary.pipe';
 import { TranslatePipe } from './pipes/translate.pipe';
+import { VideoAutoplayDirective } from './directives/video-autoplay.directive';
 import { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 import { ImageLightboxComponent } from './shared/components/image-lightbox/image-lightbox.component';
 import { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
@@ -49,9 +49,8 @@ import { SharedModule } from './shared/shared.module';
     PlaceDetailComponent,
     MoreSectionDetailComponent,
     MoreSectionItemDetailComponent,
-    CloudinaryOptimizePipe,
-    CloudinaryThumbnailPipe,
     TranslatePipe,
+    VideoAutoplayDirective,
     PageHeaderComponent,
     ImageLightboxComponent,
     LanguageSwitcherComponent,

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { CloudinaryService, UploadProgress } from '../../../services/cloudinary.service';
+import { StorageService, UploadProgress } from '../../../services/storage.service';
 
 @Component({
   selector: 'app-image-upload',
@@ -25,7 +25,7 @@ export class ImageUploadComponent implements OnInit {
 
   multipleProgress: UploadProgress[] = [];
 
-  constructor(private cloudinaryService: CloudinaryService) {}
+  constructor(private storageService: StorageService) {}
 
   ngOnInit(): void {
     if (this.currentImageUrl) {
@@ -87,7 +87,7 @@ export class ImageUploadComponent implements OnInit {
     };
     reader.readAsDataURL(file);
 
-    this.cloudinaryService.uploadImage(file, this.folder).subscribe({
+    this.storageService.uploadImage(file, this.folder).subscribe({
       next: (progress) => {
         this.uploadProgress = progress.progress;
         if (progress.status === 'completed' && progress.url) {
@@ -116,7 +116,7 @@ export class ImageUploadComponent implements OnInit {
     this.errorMessage = '';
     this.multipleProgress = validFiles.map(() => ({ progress: 0, status: 'uploading' as const }));
 
-    this.cloudinaryService.uploadMultipleImages(validFiles, this.folder).subscribe({
+    this.storageService.uploadMultipleImages(validFiles, this.folder).subscribe({
       next: (progressArray) => {
         this.multipleProgress = progressArray;
         const allCompleted = progressArray.every(p => p.status === 'completed' || p.status === 'error');

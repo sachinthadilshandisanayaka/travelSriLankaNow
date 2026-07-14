@@ -240,3 +240,19 @@ code {
     color: #475569;
   }
 }
+
+.logo-upload-preview {
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  background: #1e293b;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .logo-preview-img {
+    max-height: 60px;
+    max-width: 200px;
+    object-fit: contain;
+  }
+}

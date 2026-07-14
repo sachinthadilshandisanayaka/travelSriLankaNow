@@ -83,6 +83,33 @@ public class FileUploadController {
         ));
     }
 
+    @PostMapping("/video")
+    @PreAuthorize("hasAuthority('MEDIA:CREATE')")
+    public ResponseEntity<Map<String, Object>> uploadVideo(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "folder", defaultValue = "videos") String folder
+    ) {
+        try {
+            Map<String, Object> result = cloudinaryService.uploadVideo(file, folder);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Video uploaded successfully",
+                    "data", result
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        } catch (IOException e) {
+            log.error("Error uploading video to storage", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "message", "Failed to upload video. Please try again."
+            ));
+        }
+    }
+
     @DeleteMapping("/image")
     @PreAuthorize("hasAuthority('MEDIA:DELETE')")
     public ResponseEntity<Map<String, Object>> deleteImage(@RequestParam("publicId") String publicId) {

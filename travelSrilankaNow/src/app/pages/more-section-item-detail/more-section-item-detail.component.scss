@@ -286,86 +286,247 @@
 }
 
 // ===== Article Content (Quill HTML output) =====
+// Note: ::ng-deep is required — [innerHTML] elements don't receive Angular's
+// _ngcontent attribute, so encapsulated descendant selectors never match.
 .article-content {
   background: $white;
   border-radius: $radius-lg;
-  padding: 2.5rem 3rem;
-  box-shadow: 0 2px 16px rgba($primary-navy-dark, 0.07);
+  padding: 2.75rem 3.5rem;
+  box-shadow: 0 2px 20px rgba($primary-navy-dark, 0.06);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.0625rem;
   line-height: 1.85;
   color: #374151;
-  font-size: 1.0625rem;
 
   @media (max-width: 768px) {
-    padding: 1.5rem 1.25rem;
-    font-size: $font-size-base;
+    padding: 1.75rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid rgba($primary-navy-dark, 0.06);
+    border-bottom: 1px solid rgba($primary-navy-dark, 0.06);
   }
+}
 
-  h1, h2, h3, h4 {
+// All child rules use ::ng-deep so they pierce Angular's encapsulation
+// and apply to elements rendered via [innerHTML].
+:host ::ng-deep .article-content {
+
+  // --- Headings ---
+  h1, h2, h3, h4, h5, h6 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: $primary-navy-dark;
-    margin: 2rem 0 0.75rem;
+    font-weight: 700;
     line-height: 1.3;
-    font-weight: $font-weight-bold;
+    margin: 2.25rem 0 0.625rem;
+
     &:first-child { margin-top: 0; }
   }
 
-  h2 { font-size: 1.6rem; }
-  h3 { font-size: 1.3rem; }
-  h4 { font-size: 1.1rem; }
+  h1 {
+    font-size: 1.75rem;
+    letter-spacing: -0.03em;
+    font-weight: 800;
 
-  p { margin-bottom: 1.1rem; }
+    @media (max-width: 768px) { font-size: 1.5rem; }
+  }
 
+  h2 {
+    font-size: 1.3125rem;    // ~21px — clear section break, not overwhelming
+    letter-spacing: -0.02em;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid rgba($primary-navy-dark, 0.08);
+    margin-top: 2.75rem;
+
+    @media (max-width: 768px) { font-size: 1.1875rem; }
+  }
+
+  h3 {
+    font-size: 1.0625rem;    // same height as body but bold + styled
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: $primary-navy;
+    margin-top: 2rem;
+
+    @media (max-width: 768px) { font-size: 1rem; }
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #4b5563;
+    margin-top: 1.5rem;
+  }
+
+  // --- Body text ---
+  p {
+    margin-bottom: 1.4rem;
+    // Respect inline font-size set by the Quill size picker
+    span[style] { line-height: inherit; }
+  }
+
+  // Lead paragraph — first <p> after a heading gets slightly larger text
+  h2 + p, h3 + p {
+    font-size: 1.0625rem;
+    color: #1f2937;
+  }
+
+  // --- Inline font-size spans from Quill size picker ---
+  // Inline styles always win; this rule just ensures line-height doesn't break.
+  span[style*="font-size"] {
+    line-height: 1.6;
+  }
+
+  // --- Images ---
   img {
     max-width: 100%;
+    height: auto;
     border-radius: $radius-md;
-    margin: 1.25rem 0;
+    margin: 2rem auto;
     display: block;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+    @media (max-width: 768px) {
+      border-radius: $radius-sm;
+      margin: 1.25rem -1.25rem;   // bleed to edges on mobile
+      width: calc(100% + 2.5rem);
+      max-width: calc(100% + 2.5rem);
+      border-radius: 0;
+    }
   }
 
+  // --- Blockquote ---
   blockquote {
-    border-left: 4px solid $primary-navy;
-    padding: 0.75rem 1.25rem;
-    margin: 1.5rem 0;
+    position: relative;
+    border-left: 3px solid $primary-navy;
+    padding: 1rem 1.5rem 1rem 2rem;
+    margin: 2rem 0;
     font-style: italic;
-    color: #6b7280;
-    background: rgba($primary-navy, 0.04);
+    font-size: 1.125rem;
+    color: #374151;
+    background: linear-gradient(135deg, rgba($primary-navy, 0.035), rgba($primary-navy, 0.015));
     border-radius: 0 $radius-sm $radius-sm 0;
+
+    &::before {
+      content: '\201C';
+      position: absolute;
+      top: -0.25rem;
+      left: 0.5rem;
+      font-size: 3rem;
+      line-height: 1;
+      color: $primary-navy;
+      opacity: 0.25;
+      font-family: Georgia, serif;
+      font-style: normal;
+    }
+
+    p { margin-bottom: 0; }
+
+    @media (max-width: 768px) {
+      padding: 0.875rem 1rem 0.875rem 1.5rem;
+      font-size: 1rem;
+    }
   }
 
+  // --- Lists ---
   ul, ol {
     padding-left: 1.75rem;
-    margin-bottom: 1.1rem;
-    li { margin-bottom: 0.35rem; }
+    margin: 0 0 1.4rem;
+
+    li {
+      margin-bottom: 0.5rem;
+      padding-left: 0.25rem;
+
+      &::marker { color: $primary-navy; }
+    }
+
+    ul, ol { margin-top: 0.5rem; margin-bottom: 0; }
   }
 
+  ul { list-style-type: disc; }
+  ol { list-style-type: decimal; }
+
+  // Quill indent levels
+  .ql-indent-1 { padding-left: 3rem; }
+  .ql-indent-2 { padding-left: 6rem; }
+  .ql-indent-3 { padding-left: 9rem; }
+
+  // --- Links ---
   a {
     color: $primary-navy;
-    text-decoration: underline;
-    &:hover { color: $primary-navy-dark; }
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    transition: color 0.2s, background-size 0.2s;
+
+    &:hover {
+      color: $primary-navy-dark;
+      background-size: 0% 1px;
+    }
   }
 
+  // --- Horizontal Rule / Divider ---
+  hr, .ql-hr {
+    border: none;
+    text-align: center;
+    margin: 2.5rem 0;
+
+    &::before {
+      content: '· · ·';
+      letter-spacing: 0.6em;
+      font-size: 1.25rem;
+      color: rgba($primary-navy-dark, 0.3);
+    }
+  }
+
+  // --- Code ---
   code {
     background: rgba($primary-navy, 0.06);
-    border-radius: $radius-sm;
-    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
     font-size: 0.875em;
-    font-family: monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    color: #be185d;
   }
 
   pre {
-    background: #1e293b;
+    background: #0f172a;
     color: #e2e8f0;
     border-radius: $radius-md;
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem;
     overflow-x: auto;
-    margin: 1.5rem 0;
-    font-size: 0.875em;
+    margin: 2rem 0;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    -webkit-overflow-scrolling: touch;
 
     code {
       background: transparent;
       padding: 0;
       color: inherit;
+      border-radius: 0;
     }
   }
+
+  // --- Alignment (Quill classes) ---
+  .ql-align-center { text-align: center; }
+  .ql-align-right  { text-align: right; }
+  .ql-align-justify { text-align: justify; }
+
+  // --- Text color/background (Quill inline) ---
+  span[style*="color"]            { }   // pass-through
+  span[style*="background-color"] { }   // pass-through
+
+  // --- Font families (Quill) ---
+  .ql-font-Arial       { font-family: Arial, sans-serif; }
+  .ql-font-Georgia     { font-family: Georgia, serif; }
+  .ql-font-Tahoma      { font-family: Tahoma, sans-serif; }
+  .ql-font-Verdana     { font-family: Verdana, sans-serif; }
+  .ql-font-CourierNew  { font-family: 'Courier New', monospace; }
 }
 
 // ===== Simple mode description =====

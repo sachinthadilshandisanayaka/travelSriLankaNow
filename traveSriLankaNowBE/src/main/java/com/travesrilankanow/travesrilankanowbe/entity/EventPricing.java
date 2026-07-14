@@ -36,7 +36,11 @@ public class EventPricing {
     @Column(nullable = false)
     private PricingType pricingType;
 
-    private Integer groupSize;
+    @Deprecated
+    private Integer groupSize; // legacy — kept for backward compat; use groupSizeMin/Max
+
+    private Integer groupSizeMin;
+    private Integer groupSizeMax;
 
     @Column(length = 100)
     private String label;

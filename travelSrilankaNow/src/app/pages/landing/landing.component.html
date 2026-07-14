@@ -1,38 +1,3 @@
-<!-- ========== LOADING OVERLAY ========== -->
-<div *ngIf="showLoadingOverlay"
-     class="loading-overlay"
-     [class.loading-overlay--fade-out]="loadingFadeOut">
-
-  <!-- Traveling Lines Animation -->
-  <div class="traveling-lines">
-    <div class="traveling-line traveling-line--1"></div>
-    <div class="traveling-line traveling-line--2"></div>
-    <div class="traveling-line traveling-line--3"></div>
-    <div class="traveling-line traveling-line--4"></div>
-    <div class="traveling-line traveling-line--5"></div>
-  </div>
-
-  <!-- Logo -->
-  <div class="loading-logo">
-    <img src="assets/images/Logo_without_bg.png" alt="Travel Sri Lanka Now" />
-  </div>
-
-  <!-- Site Name -->
-  <div class="loading-brand">
-    <h1 class="loading-brand__title">
-      Travel<span>SriLankaNow</span>
-    </h1>
-    <p class="loading-brand__tagline">{{ 'loading.tagline' | translate }}</p>
-  </div>
-
-  <!-- Progress Bar -->
-  <div class="loading-progress">
-    <div class="loading-progress__track">
-      <div class="loading-progress__bar"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Dynamic Sections Rendering -->
 <ng-container *ngFor="let section of homepageSections">
 
@@ -73,22 +38,36 @@
       <div *ngIf="heroSlides.length > 0" class="hero-carousel">
         <!-- Slides -->
         <div class="carousel-slides">
-          <div *ngFor="let slide of heroSlides; let i = index"
+          <div *ngFor="let slide of heroSlides; let i = index; trackBy: trackSlideById"
                class="carousel-slide"
                [class.carousel-slide--active]="i === currentSlideIndex"
                [class.carousel-slide--prev]="i === (currentSlideIndex === 0 ? heroSlides.length - 1 : currentSlideIndex - 1)"
                [class.carousel-slide--next]="i === (currentSlideIndex === heroSlides.length - 1 ? 0 : currentSlideIndex + 1)">
-            <!-- Background Image -->
+            <!-- Background Media (image or video) -->
             <div class="slide-background">
-              <img [src]="slide.imageUrl" [alt]="slide.title" />
+              <ng-container *ngIf="slide.mediaType === 'video' && slide.videoUrl; else slideImage">
+                <video class="slide-video"
+                       appVideoAutoplay [videoSrc]="slide.videoUrl"
+                       muted loop playsinline webkit-playsinline
+                       preload="auto"
+                       [attr.aria-label]="slide.title">
+                </video>
+              </ng-container>
+              <ng-template #slideImage>
+                <img [src]="slide.imageUrl" [alt]="slide.title" />
+              </ng-template>
               <div class="slide-overlay"></div>
             </div>
 
             <!-- Content -->
-            <div class="slide-content" [class.slide-content--visible]="i === currentSlideIndex">
+            <div class="slide-content"
+                 [class.slide-content--visible]="i === currentSlideIndex"
+                 [class.slide-content--left]="slide.contentAlign === 'left'"
+                 [class.slide-content--right]="slide.contentAlign === 'right'"
+                 [class.slide-content--has-gallery]="slideHasGallery(slide)">
               <div class="slide-content-inner">
-                <h1 class="slide-title">{{ slide.title }}</h1>
-                <p *ngIf="slide.subtitle" class="slide-subtitle">{{ slide.subtitle }}</p>
+                <h1 class="slide-title" [ngStyle]="getTextStyle(slide.titleStyle)">{{ slide.title }}</h1>
+                <p *ngIf="slide.subtitle" class="slide-subtitle" [ngStyle]="getTextStyle(slide.subtitleStyle)">{{ slide.subtitle }}</p>
                 <div class="slide-buttons" *ngIf="slide.buttonText">
                   <a [routerLink]="slide.buttonLink || '/locations'" class="btn-primary btn-slide">
                     <span>{{ slide.buttonText }}</span>
@@ -99,6 +78,30 @@
                     <span class="btn-corner btn-corner--br"></span>
                   </a>
                 </div>
+
+                <!-- ── Expanding slit gallery ── -->
+                <div class="slit-gallery"
+                     *ngIf="slideHasGallery(slide)"
+                     [class.slit-gallery--visible]="i === currentSlideIndex">
+                  <div *ngFor="let img of slide.galleryImages; let gi = index"
+                       class="slit-option"
+                       [class.slit-option--active]="getActiveGallerySlit(i) === gi"
+                       [style.--slit-bg]="'url(' + img.imageUrl + ')'"
+                       (mouseenter)="setGallerySlit(i, gi, $event)"
+                       (click)="setGallerySlit(i, gi, $event)">
+                    <div class="slit-shadow"></div>
+                    <div class="slit-label">
+                      <a *ngIf="img.link" [routerLink]="img.link" class="slit-label__link"
+                         (click)="$event.stopPropagation()">
+                        {{ img.label }}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                      <span *ngIf="!img.link" class="slit-label__text">{{ img.label }}</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- ──────────────────────────── -->
+
               </div>
             </div>
           </div>
@@ -150,7 +153,7 @@
              [routerLink]="['/locations', location.slug || location.id]"
              class="location-card card-stagger">
             <div class="location-image image-zoom">
-              <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
+              <img [src]="location.imageUrl" [alt]="location.name" />
               <div class="image-overlay">
                 <span class="category-badge">{{ location.category }}</span>
               </div>
@@ -195,7 +198,7 @@
              [routerLink]="['/events', event.slug || event.id]"
              class="event-card card-stagger">
             <div class="event-image image-zoom">
-              <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
+              <img [src]="event.imageUrl" [alt]="event.title || event.name" />
               <div class="event-badge-wrapper">
                 <span class="type-badge">{{ event.category }}</span>
                 <span class="price-badge">${{ event.price }}</span>
@@ -247,7 +250,7 @@
              [routerLink]="['/places', place.slug || place.id]"
              class="place-card card-stagger">
             <div class="place-image image-zoom">
-              <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
+              <img [src]="place.imageUrl" [alt]="place.name" />
               <div class="place-badge-wrapper">
                 <span class="type-badge">{{ place.type }}</span>
               </div>
@@ -285,26 +288,100 @@
     </section>
   </ng-container>
 
-  <!-- ========== IMAGE GALLERY SLIDER ========== -->
+  <!-- ========== IMAGE GALLERY (multi-style) ========== -->
   <ng-container *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
     <ng-container *ngIf="getGalleryConfig(section.id) as galleryConf">
-      <section class="gallery-slider-section" *ngIf="galleryConf.images && galleryConf.images.length > 0">
-        <div class="gallery-slider-header" *ngIf="section.title">
+      <section class="gallery-section" *ngIf="galleryConf.images && galleryConf.images.length > 0">
+        <div class="gallery-section__header" *ngIf="section.title">
           <h2>{{ section.title }}</h2>
           <p *ngIf="section.subtitle">{{ section.subtitle }}</p>
         </div>
-        <div class="gallery-slider-wrapper" [class.gallery-slider-wrapper--pause-on-hover]="galleryConf.pauseOnHover">
-          <div class="gallery-slider-track"
-               [style.animation-duration]="galleryConf.speed + 's'">
-            <div class="gallery-slide" *ngFor="let img of galleryConf.images">
-              <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
-            </div>
-            <!-- Duplicate for seamless loop -->
-            <div class="gallery-slide" *ngFor="let img of galleryConf.images">
-              <img [src]="img.url | cloudinaryOptimize:600:400:85" [alt]="img.title || 'Gallery'" loading="lazy">
+
+        <!-- SLIDER (default) -->
+        <ng-container *ngIf="!galleryConf.galleryStyle || galleryConf.galleryStyle === 'slider'">
+          <div class="gallery-slider-wrapper" [class.gallery-slider-wrapper--pause-on-hover]="galleryConf.pauseOnHover">
+            <div class="gallery-slider-track" [style.animation-duration]="galleryConf.speed + 's'">
+              <div class="gallery-slide" *ngFor="let img of galleryConf.images">
+                <img [src]="img.url" [alt]="img.title || 'Gallery'" loading="lazy">
+              </div>
+              <div class="gallery-slide" *ngFor="let img of galleryConf.images">
+                <img [src]="img.url" [alt]="img.title || 'Gallery'" loading="lazy">
+              </div>
             </div>
           </div>
-        </div>
+        </ng-container>
+
+        <!-- MASONRY -->
+        <ng-container *ngIf="galleryConf.galleryStyle === 'masonry'">
+          <div class="gallery-masonry"
+               [class.gallery-masonry--2]="galleryConf.columns === 2"
+               [class.gallery-masonry--4]="galleryConf.columns === 4"
+               [class.gallery-masonry--gap-tight]="galleryConf.gap === 'tight'"
+               [class.gallery-masonry--gap-wide]="galleryConf.gap === 'wide'">
+            <div class="gallery-masonry__item"
+                 *ngFor="let img of galleryConf.images"
+                 [class.gallery-item--clickable]="getGalleryItemLink(img)"
+                 (click)="onGalleryImageClick(img)">
+              <img [src]="img.url" [alt]="img.title || 'Gallery'" loading="lazy">
+              <div class="gallery-item__title-overlay" *ngIf="galleryConf.showTitles && img.title">
+                <span>{{ img.title }}</span>
+              </div>
+              <div class="gallery-item__link-badge" *ngIf="getGalleryItemLink(img)">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- BENTO GRID -->
+        <ng-container *ngIf="galleryConf.galleryStyle === 'bento'">
+          <div class="gallery-bento"
+               [class.gallery-bento--gap-tight]="galleryConf.gap === 'tight'"
+               [class.gallery-bento--gap-wide]="galleryConf.gap === 'wide'">
+            <div *ngFor="let img of galleryConf.images; let i = index"
+                 class="gallery-bento__item"
+                 [class.gallery-bento__item--featured]="i % 5 === 0"
+                 [class.gallery-bento__item--tall]="i % 7 === 3"
+                 [class.gallery-item--clickable]="getGalleryItemLink(img)"
+                 (click)="onGalleryImageClick(img)">
+              <img [src]="img.url" [alt]="img.title || 'Gallery'" loading="lazy">
+              <div class="gallery-item__title-overlay" *ngIf="galleryConf.showTitles && img.title">
+                <span>{{ img.title }}</span>
+              </div>
+              <div class="gallery-item__link-badge" *ngIf="getGalleryItemLink(img)">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- GRID TILT (cursor-responsive 3D) -->
+        <ng-container *ngIf="galleryConf.galleryStyle === 'grid-tilt'">
+          <div class="gallery-tilt-grid"
+               [class.gallery-tilt-grid--2]="galleryConf.columns === 2"
+               [class.gallery-tilt-grid--4]="galleryConf.columns === 4"
+               [class.gallery-tilt-grid--gap-tight]="galleryConf.gap === 'tight'"
+               [class.gallery-tilt-grid--gap-wide]="galleryConf.gap === 'wide'">
+            <div *ngFor="let img of galleryConf.images"
+                 class="gallery-tilt-item"
+                 [class.gallery-item--clickable]="getGalleryItemLink(img)"
+                 (mousemove)="onTiltMove($event)"
+                 (mouseleave)="onTiltLeave($event)"
+                 (click)="onGalleryImageClick(img)">
+              <div class="gallery-tilt-item__inner">
+                <img [src]="img.url" [alt]="img.title || 'Gallery'" loading="lazy">
+                <div class="gallery-tilt-item__glare"></div>
+                <div class="gallery-item__title-overlay" *ngIf="galleryConf.showTitles && img.title">
+                  <span>{{ img.title }}</span>
+                </div>
+                <div class="gallery-item__link-badge" *ngIf="getGalleryItemLink(img)">
+                  <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
       </section>
     </ng-container>
   </ng-container>
@@ -312,31 +389,82 @@
   <!-- ========== CUSTOM CONTENT ========== -->
   <ng-container *ngIf="section.sectionType === 'CUSTOM_CONTENT'">
     <ng-container *ngIf="getCustomConfig(section.id) as customConf">
-      <section class="custom-content-section custom-content-section--{{ customConf.template || 'minimal' }}"
-               [ngStyle]="getCustomSectionStyle(customConf)">
-        <!-- Dynamic overlay -->
-        <div class="custom-content-section__overlay"
-             [ngStyle]="getCustomOverlayStyle(customConf)">
-        </div>
-        <div class="custom-content-section__inner container">
 
-          <!-- New structured layout: title + description + CTA -->
+      <!-- ── SPLIT LAYOUT — separate two-column structure ── -->
+      <section *ngIf="customConf.template === 'split'"
+               class="custom-split-section"
+               [style.backgroundColor]="customConf.backgroundColor || '#ffffff'">
+        <div class="custom-split"
+             [class.custom-split--image-right]="customConf.splitImagePosition === 'right'">
+
+          <!-- Image panel -->
+          <div class="custom-split__image-panel">
+            <img *ngIf="customConf.splitImage" [src]="customConf.splitImage"
+                 [alt]="customConf.splitImageAlt || customConf.title || ''" loading="lazy">
+            <div *ngIf="!customConf.splitImage" class="custom-split__image-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Text panel -->
+          <div class="custom-split__text-panel">
+            <h2 *ngIf="customConf.title"
+                class="custom-split__title"
+                [style.color]="customConf.titleColor || '#1e293b'"
+                [style.fontSize]="customConf.titleSize || ''">
+              {{ customConf.title }}
+            </h2>
+            <p *ngIf="customConf.description"
+               class="custom-split__desc"
+               [style.color]="customConf.descriptionColor || '#64748b'">
+              {{ customConf.description }}
+            </p>
+            <div *ngIf="customConf.buttonText" class="custom-split__cta">
+              <a *ngIf="customConf.buttonUrl; else splitNoLink"
+                 [routerLink]="customConf.buttonUrl"
+                 class="custom-content-section__btn"
+                 [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                 [style.color]="customConf.buttonTextColor || '#ffffff'">
+                {{ customConf.buttonText }}
+              </a>
+              <ng-template #splitNoLink>
+                <button type="button" class="custom-content-section__btn"
+                        [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                        [style.color]="customConf.buttonTextColor || '#ffffff'">
+                  {{ customConf.buttonText }}
+                </button>
+              </ng-template>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── ALL OTHER TEMPLATES (minimal, dark, image-overlay) ── -->
+      <section *ngIf="customConf.template !== 'split'"
+               class="custom-content-section custom-content-section--{{ customConf.template || 'minimal' }}"
+               [ngStyle]="getCustomSectionStyle(customConf)">
+        <!-- Overlay (used by image-overlay) -->
+        <div class="custom-content-section__overlay" [ngStyle]="getCustomOverlayStyle(customConf)"></div>
+        <!-- text-align + block margin applied once on __inner so all children inherit it -->
+        <div class="custom-content-section__inner container"
+             [ngStyle]="getCustomInnerStyle(customConf)">
+
           <ng-container *ngIf="customConf.title || customConf.description || customConf.buttonText">
             <h2 *ngIf="customConf.title"
                 class="custom-content-section__title"
                 [style.color]="customConf.titleColor"
-                [style.textAlign]="customConf.titleAlign || 'left'"
                 [style.fontSize]="customConf.titleSize || ''">
               {{ customConf.title }}
             </h2>
             <p *ngIf="customConf.description"
                class="custom-content-section__desc"
-               [style.color]="customConf.descriptionColor"
-               [style.textAlign]="customConf.descriptionAlign || 'left'">
+               [style.color]="customConf.descriptionColor">
               {{ customConf.description }}
             </p>
-            <div *ngIf="customConf.buttonText" class="custom-content-section__cta"
-                 [style.textAlign]="customConf.titleAlign || 'left'">
+            <div *ngIf="customConf.buttonText" class="custom-content-section__cta">
               <a *ngIf="customConf.buttonUrl; else noLinkBtn"
                  [routerLink]="customConf.buttonUrl"
                  class="custom-content-section__btn"
@@ -354,7 +482,7 @@
             </div>
           </ng-container>
 
-          <!-- Legacy fallback: sections created with the old rich-text editor -->
+          <!-- Legacy rich-text fallback -->
           <div *ngIf="!customConf.title && !customConf.description && !customConf.buttonText && customConf.content"
                class="custom-content-section__text"
                [ngStyle]="getCustomTextStyle(customConf)"
@@ -363,6 +491,7 @@
 
         </div>
       </section>
+
     </ng-container>
   </ng-container>
 
@@ -438,7 +567,15 @@
              class="carousel-slide"
              [class.carousel-slide--active]="i === currentSlideIndex">
           <div class="slide-background">
-            <img [src]="slide.imageUrl" [alt]="slide.title" />
+            <ng-container *ngIf="slide.mediaType === 'video' && slide.videoUrl; else fallbackSlideImage">
+              <video class="slide-video"
+                     appVideoAutoplay [videoSrc]="slide.videoUrl"
+                     muted loop playsinline webkit-playsinline preload="auto">
+              </video>
+            </ng-container>
+            <ng-template #fallbackSlideImage>
+              <img [src]="slide.imageUrl" [alt]="slide.title" />
+            </ng-template>
             <div class="slide-overlay"></div>
           </div>
           <div class="slide-content" [class.slide-content--visible]="i === currentSlideIndex">
@@ -479,7 +616,7 @@
            [routerLink]="['/locations', location.slug || location.id]"
            class="location-card card-stagger">
           <div class="location-image image-zoom">
-            <img [src]="location.imageUrl | cloudinaryOptimize:400:300:80" [alt]="location.name" />
+            <img [src]="location.imageUrl" [alt]="location.name" />
             <div class="image-overlay"><span class="category-badge">{{ location.category }}</span></div>
           </div>
           <div class="location-content">
@@ -512,7 +649,7 @@
            [routerLink]="['/events', event.slug || event.id]"
            class="event-card card-stagger">
           <div class="event-image image-zoom">
-            <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title || event.name" />
+            <img [src]="event.imageUrl" [alt]="event.title || event.name" />
             <div class="event-badge-wrapper">
               <span class="type-badge">{{ event.category }}</span><span class="price-badge">${{ event.price }}</span>
             </div>
@@ -546,7 +683,7 @@
            [routerLink]="['/places', place.slug || place.id]"
            class="place-card card-stagger">
           <div class="place-image image-zoom">
-            <img [src]="place.imageUrl | cloudinaryOptimize:400:300:80" [alt]="place.name" />
+            <img [src]="place.imageUrl" [alt]="place.name" />
             <div class="place-badge-wrapper"><span class="type-badge">{{ place.type }}</span></div>
           </div>
           <div class="place-content">

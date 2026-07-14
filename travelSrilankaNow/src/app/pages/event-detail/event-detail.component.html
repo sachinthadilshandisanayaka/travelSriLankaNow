@@ -17,7 +17,7 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <div class="hero-image">
-        <img [src]="event.imageUrl | cloudinaryOptimize:1200:600:85" [alt]="event.title" />
+        <img [src]="event.imageUrl" [alt]="event.title" />
         <div class="hero-overlay"></div>
         <div class="hero-content">
           <span class="category-badge">
@@ -118,14 +118,14 @@
             <h2>Photo Gallery</h2>
             <div class="gallery-section">
               <div class="gallery-main" (click)="openLightbox(selectedImageIndex)" style="cursor: pointer;">
-                <img [src]="event.images[selectedImageIndex] | cloudinaryOptimize:800:500:85" [alt]="event.title" loading="lazy" />
+                <img [src]="event.images[selectedImageIndex]" [alt]="event.title" loading="lazy" />
               </div>
               <div class="gallery-thumbnails">
                 <div *ngFor="let image of event.images; let i = index"
                      class="thumbnail"
                      [class.active]="i === selectedImageIndex"
                      (click)="selectImage(i)">
-                  <img [src]="image | cloudinaryThumbnail:100" [alt]="event.title + ' - ' + (i + 1)" loading="lazy" />
+                  <img [src]="image" [alt]="event.title + ' - ' + (i + 1)" loading="lazy" />
                 </div>
               </div>
             </div>
@@ -180,8 +180,20 @@
                       <div class="pricing-option__label">
                         {{ pricing.label || getPricingTypeLabel(pricing.pricingType) }}
                       </div>
-                      <div class="pricing-option__sublabel" *ngIf="pricing.pricingType === 'GROUP' && pricing.groupSize">
-                        Min {{ pricing.groupSize }} people
+                      <!-- Group size range -->
+                      <div class="pricing-option__sublabel" *ngIf="pricing.pricingType === 'GROUP'">
+                        <ng-container *ngIf="pricing.groupSizeMin && pricing.groupSizeMax">
+                          {{ pricing.groupSizeMin }}–{{ pricing.groupSizeMax }} people
+                        </ng-container>
+                        <ng-container *ngIf="pricing.groupSizeMin && !pricing.groupSizeMax">
+                          Min {{ pricing.groupSizeMin }} people
+                        </ng-container>
+                        <ng-container *ngIf="!pricing.groupSizeMin && pricing.groupSizeMax">
+                          Up to {{ pricing.groupSizeMax }} people
+                        </ng-container>
+                        <ng-container *ngIf="!pricing.groupSizeMin && !pricing.groupSizeMax && pricing.groupSize">
+                          Min {{ pricing.groupSize }} people
+                        </ng-container>
                       </div>
                     </div>
                   </div>

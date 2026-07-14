@@ -1,0 +1,134 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div>
+      <h1>Invoice Templates</h1>
+      <p class="subtitle">Upload HTML templates · Assign to multiple companies</p>
+    </div>
+    <button class="btn-primary" (click)="showUpload=true; error=''">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      Upload Template
+    </button>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skeleton-row" *ngFor="let _ of [1,2,3]"></div>
+  </div>
+
+  <!-- Template table -->
+  <div class="templates-card" *ngIf="!loading">
+    <table *ngIf="templates.length > 0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Version</th>
+          <th>Uploaded By</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Assigned Companies</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of templates">
+          <td>
+            <div class="template-name">{{ t.name }}</div>
+            <div class="template-desc" *ngIf="t.description">{{ t.description }}</div>
+          </td>
+          <td><span class="version-badge">v{{ t.version }}</span></td>
+          <td>{{ t.uploadedBy }}</td>
+          <td>{{ t.createdAt | date:'mediumDate' }}</td>
+          <td><span class="status-badge" [class.active]="t.isActive" [class.inactive]="!t.isActive">{{ t.isActive ? 'Active' : 'Inactive' }}</span></td>
+          <td>
+            <div class="assignments">
+              <span class="assign-chip" *ngFor="let a of activeAssignments(t)">
+                {{ a.companyName }}
+                <button class="chip-remove" (click)="removeAssignment(a.assignmentId, a.companyName, t)" title="Remove">×</button>
+              </span>
+              <span class="no-assign" *ngIf="activeAssignments(t).length === 0">Not assigned</span>
+            </div>
+          </td>
+          <td class="row-actions">
+            <button class="btn-sm" (click)="openAssign(t)">+ Assign</button>
+            <button class="btn-sm danger" (click)="deactivate(t)" *ngIf="t.isActive">Deactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="empty-state" *ngIf="templates.length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      <p>No templates yet. Upload your first HTML invoice template.</p>
+      <button class="btn-primary" (click)="showUpload=true">Upload Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" *ngIf="showUpload" (click)="showUpload=false; error=''">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Upload Invoice Template</h2>
+      <button class="btn-close" (click)="showUpload=false">×</button>
+    </div>
+    <p class="modal-hint">Upload an HTML file. Use <code ngNonBindable>{{customerName}}</code>, <code ngNonBindable>{{tourName}}</code>, <code ngNonBindable>{{totalAmount}}</code> etc. as Mustache placeholders.</p>
+    <div class="form-field">
+      <label>Template Name *</label>
+      <input [(ngModel)]="uploadName" placeholder="e.g. Standard Tour Invoice">
+    </div>
+    <div class="form-field">
+      <label>Description</label>
+      <input [(ngModel)]="uploadDescription" placeholder="Optional description">
+    </div>
+    <div class="form-field">
+      <label>Auto-assign to Company</label>
+      <select [(ngModel)]="uploadCompanyId">
+        <option [ngValue]="null">-- No auto-assign --</option>
+        <option *ngFor="let c of companies" [value]="c.id">{{ c.name }}</option>
+      </select>
+    </div>
+    <div class="file-upload-area" (click)="fileInput.click()" [class.has-file]="!!selectedFile">
+      <input #fileInput type="file" accept=".html,.htm" (change)="onFileSelect($event)" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <span *ngIf="!selectedFile">Click to select HTML template file</span>
+      <span *ngIf="selectedFile" class="file-selected">{{ selectedFileName }}</span>
+    </div>
+    <div class="error-msg" *ngIf="error">{{ error }}</div>
+    <div class="form-actions">
+      <button class="btn-secondary" (click)="showUpload=false">Cancel</button>
+      <button class="btn-primary" (click)="upload()" [disabled]="uploading">{{ uploading ? 'Uploading...' : 'Upload' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Modal -->
+<div class="modal-overlay" *ngIf="showAssign" (click)="showAssign=false; error=''">
+  <div class="modal-panel small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Assign to Company</h2>
+      <button class="btn-close" (click)="showAssign=false">×</button>
+    </div>
+    <p class="template-label" *ngIf="selectedTemplate">Template: <strong>{{ selectedTemplate.name }}</strong></p>
+    <div class="form-field">
+      <label>Select Company *</label>
+      <select [(ngModel)]="assignCompanyId">
+        <option [ngValue]="null">-- Select company --</option>
+        <option *ngFor="let c of companiesForAssign" [value]="c.id">{{ c.name }}</option>
+      </select>
+    </div>
+    <p class="no-companies-msg" *ngIf="companiesForAssign.length === 0">All companies are already assigned to this template.</p>
+    <div class="error-msg" *ngIf="error">{{ error }}</div>
+    <div class="form-actions">
+      <button class="btn-secondary" (click)="showAssign=false">Cancel</button>
+      <button class="btn-primary" (click)="saveAssign()" [disabled]="assigning || companiesForAssign.length === 0">{{ assigning ? 'Assigning...' : 'Assign' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<app-confirm-dialog
+  [(visible)]="confirmVisible"
+  [title]="confirmTitle"
+  [message]="confirmMessage"
+  type="danger"
+  (confirmed)="onConfirmed()">
+</app-confirm-dialog>

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { FieldDefinition } from '../../models/more-section.model';
+import { ContentTypeInfo, ContentItem, HeroSlideGallery } from '../../models/hero-slide.model';
 
 export interface EntityFieldConfig {
   id?: number;
@@ -406,6 +407,31 @@ export class AdminApiService {
     return this.http.post(`${this.apiUrl}/upload/image`, formData);
   }
 
+  uploadVideo(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload/video`, formData);
+  }
+
+  // Media Library
+  getAllMedia(page = 0, size = 20): Observable<any> {
+    return this.http.get(`${this.apiUrl}/media`, { params: { page: String(page), size: String(size) } });
+  }
+
+  getMediaByType(type: string, page = 0, size = 20): Observable<any> {
+    return this.http.get(`${this.apiUrl}/media/type/${type}`, { params: { page: String(page), size: String(size) } });
+  }
+
+  searchMedia(query: string, page = 0, size = 20): Observable<any> {
+    return this.http.get(`${this.apiUrl}/media/search`, { params: { query, page: String(page), size: String(size) } });
+  }
+
+  getMediaStats(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/media/stats`);
+  }
+
+  deleteMedia(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/media/${id}`);
+  }
+
   // Entity Field Configs
   getEntityFieldConfig(entityType: string): Observable<EntityFieldConfig> {
     return this.http.get<EntityFieldConfig>(`${this.apiUrl}/entity-field-configs/${entityType}`);
@@ -414,4 +440,77 @@ export class AdminApiService {
   upsertEntityFieldConfig(entityType: string, fieldDefinitions: FieldDefinition[]): Observable<EntityFieldConfig> {
     return this.http.put<EntityFieldConfig>(`${this.apiUrl}/entity-field-configs/${entityType}`, fieldDefinitions);
   }
+
+  // Hero Slide Gallery
+  getHeroSlideGallery(slideId: number): Observable<HeroSlideGallery> {
+    return this.http.get<HeroSlideGallery>(`${this.apiUrl}/hero-slides/${slideId}/gallery`);
+  }
+
+  saveHeroSlideGallery(slideId: number, gallery: { enabled: boolean; items: any[] }): Observable<HeroSlideGallery> {
+    return this.http.put<HeroSlideGallery>(`${this.apiUrl}/hero-slides/${slideId}/gallery`, gallery);
+  }
+
+  // Dynamic Content Types (for gallery image picker)
+  getContentTypes(): Observable<ContentTypeInfo[]> {
+    return this.http.get<ContentTypeInfo[]>(`${this.apiUrl}/content-types`);
+  }
+
+  getContentTypeItems(type: string, page = 0, size = 24, search?: string): Observable<{ content: ContentItem[]; totalElements: number; totalPages: number; page: number }> {
+    let params = new HttpParams().set('page', String(page)).set('size', String(size));
+    if (search) params = params.set('search', search);
+    return this.http.get<any>(`${this.apiUrl}/content-types/${type}/items`, { params });
+  }
+
+  // ─── Companies ───────────────────────────────────────────────────────────────
+  getCompanies(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/companies`); }
+  getCompany(id: number): Observable<any> { return this.http.get(`${this.apiUrl}/companies/${id}`); }
+  getMyCompany(): Observable<any> { return this.http.get(`${this.apiUrl}/companies/my-company`); }
+  createCompany(data: any): Observable<any> { return this.http.post(`${this.apiUrl}/companies`, data); }
+  updateCompany(id: number, data: any): Observable<any> { return this.http.put(`${this.apiUrl}/companies/${id}`, data); }
+  deactivateCompany(id: number): Observable<any> { return this.http.patch(`${this.apiUrl}/companies/${id}/deactivate`, {}); }
+  getCompanyUsers(companyId: number): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/companies/${companyId}/users`); }
+  addCompanyUser(companyId: number, data: any): Observable<any> { return this.http.post(`${this.apiUrl}/companies/${companyId}/users`, data); }
+  removeCompanyUser(companyId: number, userId: number): Observable<any> { return this.http.delete(`${this.apiUrl}/companies/${companyId}/users/${userId}`); }
+  getCompanyChangeLog(companyId: number): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/companies/${companyId}/change-log`); }
+  uploadCompanyLogo(companyId: number, formData: FormData): Observable<any> { return this.http.post(`${this.apiUrl}/companies/${companyId}/logo`, formData); }
+  uploadCompanySignature(companyId: number, formData: FormData): Observable<any> { return this.http.post(`${this.apiUrl}/companies/${companyId}/signature`, formData); }
+
+  // ─── Invoice Templates ────────────────────────────────────────────────────────
+  getInvoiceTemplates(companyId?: number): Observable<any[]> {
+    const params = companyId ? new HttpParams().set('companyId', String(companyId)) : new HttpParams();
+    return this.http.get<any[]>(`${this.apiUrl}/invoice-templates`, { params });
+  }
+  uploadInvoiceTemplate(formData: FormData): Observable<any> { return this.http.post(`${this.apiUrl}/invoice-templates`, formData); }
+  assignInvoiceTemplate(id: number, data: any): Observable<any> { return this.http.put(`${this.apiUrl}/invoice-templates/${id}/assign`, data); }
+  removeTemplateAssignment(assignmentId: number): Observable<any> { return this.http.delete(`${this.apiUrl}/invoice-templates/assignments/${assignmentId}`); }
+  deactivateInvoiceTemplate(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/invoice-templates/${id}`); }
+
+  // ─── Invoice Forms ────────────────────────────────────────────────────────────
+  getInvoiceForms(companyId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/invoice-forms`, { params: new HttpParams().set('companyId', String(companyId)) });
+  }
+  getInvoiceFormById(id: number): Observable<any> { return this.http.get(`${this.apiUrl}/invoice-forms/${id}`); }
+  createInvoiceForm(companyId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/invoice-forms?companyId=${companyId}`, data);
+  }
+  updateInvoiceForm(id: number, data: any): Observable<any> { return this.http.put(`${this.apiUrl}/invoice-forms/${id}`, data); }
+  deactivateInvoiceForm(id: number): Observable<any> { return this.http.patch(`${this.apiUrl}/invoice-forms/${id}/deactivate`, {}); }
+  addInvoiceFormField(formId: number, data: any): Observable<any> { return this.http.post(`${this.apiUrl}/invoice-forms/${formId}/fields`, data); }
+  updateInvoiceFormField(formId: number, fieldId: number, data: any): Observable<any> { return this.http.put(`${this.apiUrl}/invoice-forms/${formId}/fields/${fieldId}`, data); }
+  deleteInvoiceFormField(formId: number, fieldId: number): Observable<any> { return this.http.delete(`${this.apiUrl}/invoice-forms/${formId}/fields/${fieldId}`); }
+
+  // ─── Invoices ─────────────────────────────────────────────────────────────────
+  getInvoices(companyId: number, status?: string, page = 0, size = 20): Observable<any> {
+    let params = new HttpParams().set('companyId', String(companyId)).set('page', String(page)).set('size', String(size));
+    if (status) params = params.set('status', status);
+    return this.http.get(`${this.apiUrl}/invoices`, { params });
+  }
+  getInvoice(id: number): Observable<any> { return this.http.get(`${this.apiUrl}/invoices/${id}`); }
+  previewInvoice(data: any): Observable<any> { return this.http.post(`${this.apiUrl}/invoices/preview`, data); }
+  generateInvoice(data: any): Observable<any> { return this.http.post(`${this.apiUrl}/invoices`, data); }
+  getInvoicePdfUrl(id: number): Observable<any> { return this.http.get(`${this.apiUrl}/invoices/${id}/pdf-url`); }
+  sendInvoiceEmail(id: number, data: any): Observable<any> { return this.http.post(`${this.apiUrl}/invoices/${id}/send-email`, data); }
+  voidInvoice(id: number, reason?: string): Observable<any> { return this.http.patch(`${this.apiUrl}/invoices/${id}/void`, { reason }); }
+  updateInvoiceStatus(id: number, status: string): Observable<any> { return this.http.patch(`${this.apiUrl}/invoices/${id}/status`, { status }); }
+
 }

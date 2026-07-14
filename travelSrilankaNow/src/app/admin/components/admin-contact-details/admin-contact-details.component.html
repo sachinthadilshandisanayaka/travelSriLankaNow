@@ -50,7 +50,9 @@
   </div>
 
   <!-- List -->
-  <div *ngIf="loading" class="contact-loading">Loading…</div>
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skeleton-row" *ngFor="let _ of [1,2,3]"></div>
+  </div>
 
   <div *ngIf="!loading && contacts.length === 0 && !showAddForm" class="contact-empty">
     No contact details yet. Click "+ Add Contact" to add one.

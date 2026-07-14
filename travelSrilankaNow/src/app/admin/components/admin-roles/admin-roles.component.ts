@@ -20,7 +20,7 @@ export class AdminRolesComponent implements OnInit {
   roles: AdminRoleDto[] = [];
   allPermissions: PermissionDto[] = [];
   permissionGroups: PermissionGroup[] = [];
-  loading = false;
+  loading = true;
   error = '';
   success = '';
   formError = '';

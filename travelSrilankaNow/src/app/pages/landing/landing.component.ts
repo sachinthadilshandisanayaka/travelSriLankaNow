@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, Renderer2, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { EventService } from '../../services/event.service';
 import { PlaceService } from '../../services/place.service';
@@ -40,12 +40,8 @@ export class LandingComponent implements OnInit, OnDestroy {
   sectionsLoaded = false;
   useFallbackLayout = false;
 
-  // Loading overlay
-  showLoadingOverlay = true;
-  loadingFadeOut = false;
-  private minDisplayTimeMet = false;
-  private dataReady = false;
-  private readonly MIN_DISPLAY_TIME = 2500;
+  private visibilityObserver: IntersectionObserver | null = null;
+  private onPageVisible = () => this.syncVideoPlayback();
 
   constructor(
     private locationService: LocationService,
@@ -54,34 +50,17 @@ export class LandingComponent implements OnInit, OnDestroy {
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
     private socialMediaContentService: SocialMediaContentService,
-    private renderer: Renderer2,
-    @Inject(DOCUMENT) private document: Document
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.renderer.addClass(this.document.body, 'loading-active');
-
-    setTimeout(() => {
-      this.minDisplayTimeMet = true;
-      this.checkDismissOverlay();
-    }, this.MIN_DISPLAY_TIME);
-
     this.loadHomepageSections();
   }
 
   ngOnDestroy(): void {
     this.stopSlideTimer();
-    this.renderer.removeClass(this.document.body, 'loading-active');
-  }
-
-  private checkDismissOverlay(): void {
-    if (this.minDisplayTimeMet && this.dataReady) {
-      this.loadingFadeOut = true;
-      setTimeout(() => {
-        this.showLoadingOverlay = false;
-        this.renderer.removeClass(this.document.body, 'loading-active');
-      }, 600);
-    }
+    if (this.visibilityObserver) { this.visibilityObserver.disconnect(); this.visibilityObserver = null; }
+    document.removeEventListener('visibilitychange', this.onPageVisible);
   }
 
   private loadHomepageSections(): void {
@@ -89,8 +68,6 @@ export class LandingComponent implements OnInit, OnDestroy {
       next: (sections) => {
         this.homepageSections = sections;
         this.sectionsLoaded = true;
-        this.dataReady = true;
-        this.checkDismissOverlay();
 
         // Parse configs
         sections.forEach(section => {
@@ -117,8 +94,6 @@ export class LandingComponent implements OnInit, OnDestroy {
         // Fallback: load all data with defaults
         this.useFallbackLayout = true;
         this.sectionsLoaded = true;
-        this.dataReady = true;
-        this.checkDismissOverlay();
         this.loadHeroSlides();
         this.loadFallbackData();
       }
@@ -168,6 +143,8 @@ export class LandingComponent implements OnInit, OnDestroy {
         if (slides.length > 1) {
           this.startSlideTimer();
         }
+        // Defer to let Angular render the video elements, then set up resume listeners
+        setTimeout(() => this.setupVideoResume(), 400);
       },
       error: () => {
         this.heroSlides = [];
@@ -243,11 +220,118 @@ export class LandingComponent implements OnInit, OnDestroy {
   }
 
   getGalleryConfig(sectionId: number | undefined): GallerySliderConfig {
-    return this.gallerySectionConfig.get(sectionId!) || { images: [], speed: 30, pauseOnHover: true };
+    return this.gallerySectionConfig.get(sectionId!) || { images: [], speed: 30, pauseOnHover: true, galleryStyle: 'slider' };
+  }
+
+  // Called from slide transitions and visibility-restore — forces the active video to play.
+  syncVideoPlayback(): void {
+    const active = document.querySelector<HTMLVideoElement>(
+      '.hero-carousel .carousel-slide--active video'
+    );
+    // IMPORTANT: only pause/play when there IS a video in the active slide.
+    // If active is null the current slide is an image — leave other videos alone.
+    if (!active) return;
+    document.querySelectorAll<HTMLVideoElement>('.hero-carousel video').forEach(v => {
+      if (v !== active) { try { v.pause(); } catch (_) {} }
+    });
+    active.play().catch(() => {});
+  }
+
+  // Attach the visibility/scroll listeners once after slides are rendered.
+  private setupVideoResume(): void {
+    document.addEventListener('visibilitychange', this.onPageVisible);
+
+    if (typeof IntersectionObserver !== 'undefined') {
+      const carousel = document.querySelector('.hero-carousel');
+      if (carousel) {
+        if (this.visibilityObserver) { this.visibilityObserver.disconnect(); }
+        this.visibilityObserver = new IntersectionObserver(
+          entries => { if (entries[0].isIntersecting) this.syncVideoPlayback(); },
+          { threshold: 0.2 }
+        );
+        this.visibilityObserver.observe(carousel);
+      }
+    }
+  }
+
+  // Hero slide text styles ───────────────────────────────────────────────────
+  getTextStyle(style: any): { [k: string]: string } {
+    if (!style || typeof style !== 'object') return {};
+    const css: { [k: string]: string } = {};
+    if (style['fontFamily'])    css['font-family']    = style['fontFamily'];
+    if (style['fontSize'])      css['font-size']      = style['fontSize'];
+    if (style['fontWeight'])    css['font-weight']    = style['fontWeight'];
+    if (style['letterSpacing']) css['letter-spacing'] = style['letterSpacing'];
+    if (style['textTransform']) css['text-transform'] = style['textTransform'];
+    if (style['textAlign'])     css['text-align']     = style['textAlign'];
+    if (style['lineHeight'])    css['line-height']    = style['lineHeight'];
+    if (style['textShadow'] !== undefined && style['textShadow'] !== '')
+      css['text-shadow'] = style['textShadow'];
+    // Outline/stroke support
+    if (style['textStroke']) {
+      css['-webkit-text-stroke'] = style['textStroke'];
+    }
+    // Fill mode: hollow = transparent fill, semi = faint fill
+    if (style['fillMode'] === 'hollow') {
+      css['color'] = 'transparent';
+    } else if (style['fillMode'] === 'semi') {
+      css['color'] = 'rgba(255,255,255,0.2)';
+    } else if (style['color']) {
+      css['color'] = style['color'];
+    }
+    return css;
+  }
+
+  // Gallery image click navigation ─────────────────────────────────────────
+  /** Returns the RouterLink commands for a gallery image, or null if not navigable. */
+  getGalleryItemLink(img: any): any[] | null {
+    if (!img || !img.sourceType || !img.sourceId) return null;
+    switch (img.sourceType) {
+      case 'location': return ['/locations', img.sourceId];
+      case 'event':    return ['/events',    img.sourceId];
+      case 'place':    return ['/places',    img.sourceId];
+      default:         return null;
+    }
+  }
+
+  onGalleryImageClick(img: any): void {
+    const link = this.getGalleryItemLink(img);
+    if (link) { this.router.navigate(link); }
+  }
+
+  // Gallery 3D tilt ──────────────────────────────────────────────────────────
+  onTiltMove(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement;
+    const inner = el.querySelector('.gallery-tilt-item__inner') as HTMLElement;
+    if (!inner) return;
+    const rect = el.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width  - 0.5;
+    const y = (event.clientY - rect.top)  / rect.height - 0.5;
+    inner.style.transition = 'transform 0.05s ease';
+    inner.style.transform  = `perspective(800px) rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale3d(1.03,1.03,1.03)`;
+  }
+
+  onTiltLeave(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement;
+    const inner = el.querySelector('.gallery-tilt-item__inner') as HTMLElement;
+    if (!inner) return;
+    inner.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
+    inner.style.transform  = '';
   }
 
   getCustomConfig(sectionId: number | undefined): CustomContentConfig {
     return this.customSectionConfigs.get(sectionId!) || { template: 'minimal' };
+  }
+
+  /** Returns inline styles for the __inner content wrapper: text-align + block alignment */
+  getCustomInnerStyle(config: CustomContentConfig): { [k: string]: string } {
+    const align = config.titleAlign || 'left';
+    const css: { [k: string]: string } = { 'text-align': align };
+    // Also align the block itself so right/center-aligned sections look correct
+    if (align === 'center') { css['margin-left'] = 'auto'; css['margin-right'] = 'auto'; }
+    else if (align === 'right') { css['margin-left'] = 'auto'; css['margin-right'] = '0'; }
+    else                        { css['margin-left'] = '0';    css['margin-right'] = 'auto'; }
+    return css;
   }
 
   getCustomSectionStyle(config: CustomContentConfig): { [key: string]: string } {
@@ -318,6 +402,24 @@ export class LandingComponent implements OnInit, OnDestroy {
     return labels[platform] || platform;
   }
 
+  // ── Hero slide gallery slit state ─────────────────────────────────────────
+  /** Tracks which slit panel is expanded in each slide (keyed by slideIndex). */
+  activeGallerySlit: Map<number, number> = new Map();
+
+  getActiveGallerySlit(slideIndex: number): number {
+    return this.activeGallerySlit.get(slideIndex) ?? 0;
+  }
+
+  setGallerySlit(slideIndex: number, slitIndex: number, event: Event): void {
+    event.stopPropagation();
+    this.activeGallerySlit.set(slideIndex, slitIndex);
+  }
+
+  slideHasGallery(slide: HeroSlide): boolean {
+    return !!(slide.galleryImages && slide.galleryImages.length > 0);
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   // Hero Slider controls
   private startSlideTimer(): void {
     this.stopSlideTimer();
@@ -344,6 +446,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.isTransitioning = false;
       this.startSlideTimer();
+      this.syncVideoPlayback();
     }, 800);
   }
 
@@ -356,6 +459,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.isTransitioning = false;
       this.startSlideTimer();
+      this.syncVideoPlayback();
     }, 800);
   }
 
@@ -366,10 +470,15 @@ export class LandingComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.isTransitioning = false;
       this.startSlideTimer();
+      this.syncVideoPlayback();
     }, 800);
   }
 
   get currentSlide(): HeroSlide | null {
     return this.heroSlides[this.currentSlideIndex] || null;
+  }
+
+  trackSlideById(_index: number, slide: HeroSlide): number {
+    return slide.id || _index;
   }
 }

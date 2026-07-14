@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService, PageResponse } from '../../services/admin-api.service';
+import { ContentStatsService } from '../../services/content-stats.service';
 import { MasterDataService, MasterData } from '../../../services/master-data.service';
 
 @Component({
@@ -33,7 +34,8 @@ export class AdminGalleryComponent implements OnInit {
   constructor(
     private apiService: AdminApiService,
     private fb: FormBuilder,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private contentStats: ContentStatsService
   ) {
     this.galleryForm = this.fb.group({
       id: [null],
@@ -171,6 +173,7 @@ export class AdminGalleryComponent implements OnInit {
           this.successMessage = 'Gallery item created successfully!';
           this.closeModal();
           this.loadGalleryItems();
+          this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
         error: (err: any) => {
@@ -194,6 +197,7 @@ export class AdminGalleryComponent implements OnInit {
     this.apiService.deleteGalleryItem(this.deleteItemId).subscribe({
       next: () => {
         this.successMessage = 'Gallery item deleted successfully!';
+        this.contentStats.notify();
         this.showDeleteConfirm = false;
         this.deleteItemId = null;
         this.loadGalleryItems();

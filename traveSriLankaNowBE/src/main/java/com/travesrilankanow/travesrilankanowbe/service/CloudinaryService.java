@@ -1,9 +1,10 @@
 package com.travesrilankanow.travesrilankanowbe.service;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import io.minio.*;
+import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,13 +12,20 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CloudinaryService {
 
-    private final Cloudinary cloudinary;
+    private final MinioClient minioClient;
+
+    @Value("${minio.bucket-name}")
+    private String bucketName;
+
+    @Value("${minio.public-url}")
+    private String publicUrl;
 
     private static final List<String> ALLOWED_CONTENT_TYPES = Arrays.asList(
             "image/jpeg",
@@ -26,91 +34,95 @@ public class CloudinaryService {
             "image/webp"
     );
 
+    private static final List<String> ALLOWED_VIDEO_TYPES = Arrays.asList(
+            "video/mp4",
+            "video/webm",
+            "video/ogg",
+            "video/quicktime"
+    );
+
+    private static final long MAX_VIDEO_SIZE = 200 * 1024 * 1024; // 200MB
+
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     public Map<String, Object> uploadImage(MultipartFile file, String folder) throws IOException {
         validateFile(file);
 
-        Map<String, Object> options = ObjectUtils.asMap(
-                "folder", folder,
-                "resource_type", "image",
-                "overwrite", true,
-                "unique_filename", true
-        );
+        String ext = getExtension(file.getOriginalFilename(), file.getContentType());
+        String objectKey = (folder != null && !folder.isBlank() ? folder.replaceAll("^/+|/+$", "") + "/" : "")
+                + UUID.randomUUID() + "." + ext;
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectKey)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
+        } catch (MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO upload failed: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Upload failed: " + e.getMessage(), e);
+        }
 
-        log.info("Image uploaded successfully to Cloudinary: {}", uploadResult.get("secure_url"));
+        String url = buildUrl(objectKey);
+        log.info("Image uploaded to MinIO: {}", url);
 
         return Map.of(
-                "url", uploadResult.get("secure_url"),
-                "publicId", uploadResult.get("public_id"),
-                "width", uploadResult.get("width"),
-                "height", uploadResult.get("height"),
-                "format", uploadResult.get("format"),
-                "bytes", uploadResult.get("bytes")
+                "url", url,
+                "publicId", objectKey,
+                "width", 0,
+                "height", 0,
+                "format", ext,
+                "bytes", file.getSize()
         );
     }
 
-    public void deleteImage(String publicId) throws IOException {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-        log.info("Image deleted from Cloudinary: {} - Result: {}", publicId, result.get("result"));
-    }
-
-    private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty or null");
-        }
-
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
-            throw new IllegalArgumentException(
-                    "Invalid file type. Allowed types: JPEG, PNG, GIF, WebP"
-            );
-        }
-
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException(
-                    "File too large. Maximum size is 10MB"
-            );
+    public void deleteImage(String objectKey) throws IOException {
+        if (objectKey == null || objectKey.isBlank()) return;
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectKey)
+                    .build());
+            log.info("Deleted from MinIO: {}", objectKey);
+        } catch (MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO delete failed: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Delete failed: " + e.getMessage(), e);
         }
     }
 
     public String extractPublicId(String url) {
-        if (url == null || !url.contains("cloudinary.com")) {
-            return null;
-        }
+        if (url == null || url.isBlank()) return null;
         try {
-            String[] parts = url.split("/upload/");
-            if (parts.length == 2) {
-                String path = parts[1];
-                // Remove version prefix (e.g., v1234567890/)
-                if (path.matches("^v\\d+/.*")) {
-                    path = path.substring(path.indexOf('/') + 1);
-                }
-                // Remove file extension
-                int lastDot = path.lastIndexOf('.');
-                if (lastDot > 0) {
-                    path = path.substring(0, lastDot);
-                }
-                return path;
+            // URL pattern: {publicUrl}/{bucket}/{objectKey}
+            String prefix = publicUrl.replaceAll("/+$", "") + "/" + bucketName + "/";
+            if (url.startsWith(prefix)) {
+                return url.substring(prefix.length());
+            }
+            // Also handle localhost URL patterns when publicUrl differs at runtime
+            if (url.contains("/" + bucketName + "/")) {
+                int idx = url.indexOf("/" + bucketName + "/");
+                return url.substring(idx + bucketName.length() + 2);
             }
         } catch (Exception e) {
-            log.warn("Failed to extract public ID from URL: {}", url);
+            log.warn("Failed to extract object key from URL: {}", url);
         }
         return null;
     }
 
     public void deleteImageByUrl(String imageUrl) {
-        String publicId = extractPublicId(imageUrl);
-        if (publicId != null) {
+        if (imageUrl == null || imageUrl.isBlank()) return;
+        String objectKey = extractPublicId(imageUrl);
+        if (objectKey != null) {
             try {
-                deleteImage(publicId);
+                deleteImage(objectKey);
             } catch (Exception e) {
-                log.warn("Failed to delete image from Cloudinary: {} - {}", imageUrl, e.getMessage());
+                log.warn("Failed to delete image from MinIO: {} - {}", imageUrl, e.getMessage());
             }
+        } else {
+            log.debug("Skipping delete — could not resolve object key from URL: {}", imageUrl);
         }
     }
 
@@ -120,28 +132,90 @@ public class CloudinaryService {
         }
     }
 
+    // No server-side transformations with MinIO — returns original URL unchanged.
     public String getOptimizedUrl(String url, Integer width, Integer height, Integer quality) {
-        if (url == null || !url.contains("cloudinary.com")) {
-            return url;
-        }
-
-        StringBuilder transformations = new StringBuilder();
-        transformations.append("q_").append(quality != null ? quality : 80);
-        transformations.append(",f_auto");
-
-        if (width != null) {
-            transformations.append(",w_").append(width);
-        }
-        if (height != null) {
-            transformations.append(",h_").append(height);
-        }
-        transformations.append(",c_fill");
-
-        String[] parts = url.split("/upload/");
-        if (parts.length == 2) {
-            return parts[0] + "/upload/" + transformations + "/" + parts[1];
-        }
-
         return url;
+    }
+
+    public Map<String, Object> uploadVideo(MultipartFile file, String folder) throws IOException {
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File is empty or null");
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_VIDEO_TYPES.contains(contentType))
+            throw new IllegalArgumentException("Invalid video type. Allowed: MP4, WebM, OGG, MOV");
+        if (file.getSize() > MAX_VIDEO_SIZE)
+            throw new IllegalArgumentException("Video too large. Maximum size is 200MB");
+
+        String ext = getExtension(file.getOriginalFilename(), contentType);
+        String objectKey = (folder != null && !folder.isBlank() ? folder.replaceAll("^/+|/+$", "") + "/" : "")
+                + UUID.randomUUID() + "." + ext;
+
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectKey)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(contentType)
+                    .build());
+        } catch (MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO upload failed: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Upload failed: " + e.getMessage(), e);
+        }
+
+        String url = buildUrl(objectKey);
+        log.info("Video uploaded to MinIO: {}", url);
+        return Map.of("url", url, "publicId", objectKey, "bytes", file.getSize(), "format", ext);
+    }
+
+    /** Upload raw bytes with an explicit object key (used for image variants). */
+    public String uploadBytes(byte[] data, String objectKey, String contentType) throws IOException {
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectKey)
+                    .stream(new java.io.ByteArrayInputStream(data), data.length, -1)
+                    .contentType(contentType)
+                    .build());
+        } catch (MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO upload failed: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Upload failed: " + e.getMessage(), e);
+        }
+        return buildUrl(objectKey);
+    }
+
+    // --- helpers ---
+
+    public String buildUrl(String objectKey) {
+        return publicUrl.replaceAll("/+$", "") + "/" + bucketName + "/" + objectKey;
+    }
+
+    private String getExtension(String filename, String contentType) {
+        if (filename != null && filename.contains(".")) {
+            return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+        }
+        if (contentType != null) {
+            return switch (contentType) {
+                case "image/jpeg" -> "jpg";
+                case "image/png" -> "png";
+                case "image/gif" -> "gif";
+                case "image/webp" -> "webp";
+                default -> "jpg";
+            };
+        }
+        return "jpg";
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty or null");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Invalid file type. Allowed types: JPEG, PNG, GIF, WebP");
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("File too large. Maximum size is 10MB");
+        }
     }
 }

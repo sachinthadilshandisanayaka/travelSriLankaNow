@@ -22,6 +22,11 @@ export class FooterComponent implements OnInit {
   contactPhone = '';
   contactAddress = '';
 
+  // Dynamic brand fields from Site Settings
+  siteName = 'TravelSriLankaNow';
+  footerDescription = '';
+  logoUrl = '';
+
   constructor(private siteSettingsService: SiteSettingsService) { }
 
   ngOnInit(): void {
@@ -41,6 +46,18 @@ export class FooterComponent implements OnInit {
         url: setting.value,
         label: setting.label
       }));
+    });
+
+    this.siteSettingsService.getSettingByKey('site_name').subscribe(s => {
+      if (s?.value) this.siteName = s.value;
+    });
+
+    this.siteSettingsService.getSettingByKey('footer_description').subscribe(s => {
+      if (s?.value) this.footerDescription = s.value;
+    });
+
+    this.siteSettingsService.getSettingByKey('logo_url').subscribe(s => {
+      if (s?.value) this.logoUrl = s.value;
     });
   }
 

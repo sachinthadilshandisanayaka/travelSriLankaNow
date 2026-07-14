@@ -60,7 +60,7 @@
 
       <!-- Settings Grouped by Category -->
       <div *ngIf="settings.length > 0" class="settings-groups">
-        <div *ngFor="let group of getGroupedSettings()" class="settings-group">
+        <div *ngFor="let group of settingGroups" class="settings-group">
           <div class="settings-group__header">
             <h2>{{ group.label }}</h2>
             <span class="settings-group__count">{{ group.settings.length }} items</span>
@@ -122,19 +122,19 @@
                     <button
                       class="status-toggle"
                       [class.status-toggle--active]="setting.isActive"
-                      (click)="toggleStatus(setting)"
+                      (click)="toggleStatus(setting)" type="button"
                       [title]="setting.isActive ? 'Click to deactivate' : 'Click to activate'">
                       {{ setting.isActive ? 'Active' : 'Inactive' }}
                     </button>
                   </td>
                   <td>
                     <div class="table-actions">
-                      <button class="admin-btn admin-btn--ghost" (click)="openEditModal(setting)" title="Edit">
+                      <button class="admin-btn admin-btn--ghost" (click)="openEditModal(setting)" type="button" title="Edit">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                       </button>
-                      <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete(setting.id!)" title="Delete">
+                      <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete(setting.id!)" type="button" title="Delete">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -193,7 +193,7 @@
           <!-- Sort Order -->
           <div class="admin-form__group">
             <label class="admin-form__label">Sort Order *</label>
-            <input type="number" formControlName="sortOrder" class="admin-input" min="1">
+            <input type="number" formControlName="sortOrder" class="admin-input" min="0">
           </div>
 
           <!-- Label -->
@@ -202,9 +202,24 @@
             <input type="text" formControlName="label" class="admin-input" placeholder="e.g., Email Address">
           </div>
 
-          <!-- Value -->
-          <div class="admin-form__group admin-form__group--full">
-            <label class="admin-form__label">Value *</label>
+          <!-- Value: image-upload for logo_url, textarea for everything else -->
+          <div class="admin-form__group admin-form__group--full"
+               *ngIf="settingForm.get('key')?.value === 'logo_url'">
+            <label class="admin-form__label">Site Logo</label>
+            <div class="logo-upload-preview" *ngIf="settingForm.get('value')?.value">
+              <img [src]="settingForm.get('value')?.value" alt="Current logo" class="logo-preview-img">
+            </div>
+            <app-image-upload
+              [currentImageUrl]="settingForm.get('value')?.value || ''"
+              [folder]="'site'"
+              [label]="'Logo Image'"
+              (imageUploaded)="onLogoUploaded($event)">
+            </app-image-upload>
+            <p class="admin-form__hint">Recommended: PNG with transparent background, height ~50px</p>
+          </div>
+          <div class="admin-form__group admin-form__group--full"
+               *ngIf="settingForm.get('key')?.value !== 'logo_url'">
+            <label class="admin-form__label">Value</label>
             <textarea formControlName="value" class="admin-textarea" rows="3" placeholder="Enter the setting value"></textarea>
           </div>
 
@@ -247,7 +262,7 @@
       <h3 class="admin-confirm__title">Delete Setting</h3>
       <p class="admin-confirm__text">Are you sure you want to delete this setting? This action cannot be undone.</p>
       <div class="admin-confirm__actions">
-        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--secondary" type="button" (click)="cancelDelete()">Cancel</button>
         <button class="admin-btn admin-btn--danger" (click)="deleteSetting()" [disabled]="isLoading">
           <span *ngIf="!isLoading">Delete</span>
           <span *ngIf="isLoading" class="admin-btn__loading">

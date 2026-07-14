@@ -17,10 +17,16 @@ export interface HomepageSectionConfig {
   showViewAll?: boolean;
 }
 
+export type GalleryStyle = 'slider' | 'masonry' | 'bento' | 'grid-tilt';
+
 export interface GallerySliderConfig {
   images: GallerySliderImage[];
   speed: number;
   pauseOnHover: boolean;
+  galleryStyle?: GalleryStyle;   // defaults to 'slider' when absent
+  columns?: 2 | 3 | 4;          // masonry / grid-tilt column count
+  gap?: 'tight' | 'normal' | 'wide';
+  showTitles?: boolean;          // show image title overlay on hover
 }
 
 export interface GallerySliderImage {
@@ -55,6 +61,10 @@ export interface CustomContentConfig {
   buttonUrl?: string;
   buttonColor?: string;
   buttonTextColor?: string;
+  // Split-layout specific
+  splitImage?: string;           // image shown in the image column
+  splitImagePosition?: 'left' | 'right';  // which side the image is on
+  splitImageAlt?: string;
   // Legacy rich-text fallback (kept for backward compatibility)
   content?: string;
   textColor?: string;

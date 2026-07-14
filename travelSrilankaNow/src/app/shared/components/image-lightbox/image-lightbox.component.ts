@@ -46,15 +46,7 @@ export class ImageLightboxComponent {
   }
 
   getOptimizedUrl(url: string): string {
-    if (!url || !url.includes('cloudinary.com')) {
-      return url;
-    }
-    const transformations = 'q_85,f_auto,w_1200,c_limit';
-    const parts = url.split('/upload/');
-    if (parts.length === 2) {
-      return `${parts[0]}/upload/${transformations}/${parts[1]}`;
-    }
-    return url;
+    return url || '';
   }
 
   @HostListener('document:keydown', ['$event'])

@@ -28,6 +28,13 @@ import { AdminUsersComponent } from './components/admin-users/admin-users.compon
 import { AdminRolesComponent } from './components/admin-roles/admin-roles.component';
 import { HasPermissionDirective } from './directives/has-permission.directive';
 import { AdminFloatingSocialComponent } from './components/admin-floating-social/admin-floating-social.component';
+import { AdminMediaComponent } from './components/admin-media/admin-media.component';
+import { AdminCompaniesComponent } from './components/admin-companies/admin-companies.component';
+import { AdminInvoiceTemplatesComponent } from './components/admin-invoice-templates/admin-invoice-templates.component';
+import { AdminInvoiceFormsComponent } from './components/admin-invoice-forms/admin-invoice-forms.component';
+import { AdminInvoicesComponent } from './components/admin-invoices/admin-invoices.component';
+import { AdminInvoiceNewComponent } from './components/admin-invoice-new/admin-invoice-new.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -67,12 +74,19 @@ import { SharedModule } from '../shared/shared.module';
     EntityImageManagerComponent,
     AdminNavConfigComponent,
     AdminContactDetailsComponent,
+    AdminMediaComponent,
     AdminBookingsComponent,
     AdminBookingSettingsComponent,
     AdminUsersComponent,
     AdminRolesComponent,
     AdminFloatingSocialComponent,
-    HasPermissionDirective
+    HasPermissionDirective,
+    AdminCompaniesComponent,
+    AdminInvoiceTemplatesComponent,
+    AdminInvoiceFormsComponent,
+    AdminInvoicesComponent,
+    AdminInvoiceNewComponent,
+    ConfirmDialogComponent
   ],
   imports: [
     CommonModule,
@@ -88,7 +102,8 @@ import { SharedModule } from '../shared/shared.module';
   exports: [
     AdvancedImageUploadComponent,
     ImageEditorComponent,
-    HasPermissionDirective
+    HasPermissionDirective,
+    ConfirmDialogComponent
   ]
 })
 export class AdminModule { }

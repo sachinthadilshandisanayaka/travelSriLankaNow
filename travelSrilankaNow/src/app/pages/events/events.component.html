@@ -138,7 +138,7 @@
         class="event-card card-stagger"
       >
         <div class="event-image">
-          <img [src]="event.imageUrl | cloudinaryOptimize:400:300:80" [alt]="event.title" />
+          <img [src]="event.imageUrl" [alt]="event.title" />
           <div class="event-badge-wrapper">
             <span class="type-badge">{{ event.category }}</span>
             <span class="price-badge">${{ event.price }}</span>

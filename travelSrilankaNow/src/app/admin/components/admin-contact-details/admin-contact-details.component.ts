@@ -15,7 +15,7 @@ export class AdminContactDetailsComponent implements OnInit, OnChanges {
   @Input() entityId!: number;
 
   contacts: ContactDetail[] = [];
-  loading = false;
+  loading = true;
   saving = false;
   editingId: number | null = null;
   showAddForm = false;

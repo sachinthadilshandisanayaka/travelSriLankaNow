@@ -1,0 +1,204 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div class="breadcrumb"><a (click)="cancel()">Invoices</a> › Generate Invoice</div>
+    <div class="step-indicator">
+      <span [class.active]="step >= 1" [class.done]="step > 1">1. Fill Details</span>
+      <span class="sep">›</span>
+      <span [class.active]="step >= 2" [class.done]="step > 2">2. Preview</span>
+      <span class="sep">›</span>
+      <span [class.active]="step >= 3">3. Confirm</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: Fill Form -->
+  <div class="step-content" *ngIf="step === 1">
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Setup</h2>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Company *</label>
+          <select [(ngModel)]="selectedCompanyId" (ngModelChange)="onCompanyChange()">
+            <option *ngFor="let c of companies" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Invoice Form</label>
+          <div class="select-loading" *ngIf="loadingForms">
+            <div class="skeleton-select"></div>
+          </div>
+          <select *ngIf="!loadingForms" [(ngModel)]="selectedFormId" (ngModelChange)="onFormChange($event)">
+            <option [ngValue]="null">-- No form --</option>
+            <option *ngFor="let f of forms" [value]="f.id">{{ f.name }}</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Template</label>
+          <div class="select-loading" *ngIf="loadingTemplates">
+            <div class="skeleton-select"></div>
+          </div>
+          <select *ngIf="!loadingTemplates" [(ngModel)]="selectedTemplateId">
+            <option [ngValue]="null">-- No template --</option>
+            <option *ngFor="let t of templates" [value]="t.id">{{ t.name }} v{{ t.version }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-header"><h2>Customer & Tour Details</h2></div>
+      <div class="form-row">
+        <div class="form-field"><label>Customer Name</label><input [(ngModel)]="customerName"></div>
+        <div class="form-field"><label>Contact</label><input [(ngModel)]="customerContact"></div>
+        <div class="form-field"><label>Email</label><input [(ngModel)]="customerEmail" type="email"></div>
+        <div class="form-field"><label>Country</label><input [(ngModel)]="customerCountry"></div>
+        <div class="form-field"><label>ID/Passport No.</label><input [(ngModel)]="customerIdNumber"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Tour Name</label><input [(ngModel)]="tourName"></div>
+        <div class="form-field"><label>Duration</label><input [(ngModel)]="tourDuration" placeholder="5 Days / 4 Nights"></div>
+        <div class="form-field"><label>Invoice Date</label><input [(ngModel)]="invoiceDate" type="date"></div>
+        <div class="form-field"><label>Due Date</label><input [(ngModel)]="dueDate" type="date"></div>
+      </div>
+    </div>
+
+    <!-- Dynamic form fields loading -->
+    <div class="form-section" *ngIf="loadingFields">
+      <div class="section-header"><h2>Additional Info</h2></div>
+      <div class="skeleton-fields">
+        <div class="skeleton-field" *ngFor="let _ of [1,2,3]"></div>
+      </div>
+    </div>
+
+    <!-- Dynamic form fields -->
+    <div class="form-section" *ngIf="!loadingFields && regularFields.length > 0">
+      <div class="section-header"><h2>Additional Info</h2></div>
+      <div class="form-row">
+        <ng-container *ngFor="let f of regularFields">
+          <div class="form-field" *ngIf="f.fieldType !== 'CHECKBOX'">
+            <label>{{ f.label }}<span class="req" *ngIf="f.isRequired">*</span></label>
+            <select *ngIf="f.fieldType === 'DROPDOWN'" [(ngModel)]="dynamicValues[f.fieldKey]">
+              <option [ngValue]="null">-- Select --</option>
+              <option *ngFor="let o of f.options" [value]="o.value">{{ o.label }}</option>
+            </select>
+            <textarea *ngIf="f.fieldType === 'TEXTAREA'" [(ngModel)]="dynamicValues[f.fieldKey]" rows="3" [placeholder]="f.placeholder || ''"></textarea>
+            <input *ngIf="f.fieldType !== 'DROPDOWN' && f.fieldType !== 'TEXTAREA'"
+              [(ngModel)]="dynamicValues[f.fieldKey]"
+              [type]="f.fieldType === 'NUMBER' ? 'number' : f.fieldType === 'DATE' ? 'date' : f.fieldType === 'EMAIL' ? 'email' : 'text'"
+              [placeholder]="f.placeholder || ''">
+          </div>
+          <div class="form-field toggle-field" *ngIf="f.fieldType === 'CHECKBOX'">
+            <label><input type="checkbox" [(ngModel)]="dynamicValues[f.fieldKey]"> {{ f.label }}</label>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-header"><h2>Line Items</h2></div>
+      <table class="line-items-table">
+        <thead>
+          <tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of lineItems; let i = index">
+            <td><input [(ngModel)]="item.description" placeholder="Service or item"></td>
+            <td><input [(ngModel)]="item.quantity" type="number" min="0" (ngModelChange)="updateLineItem(item)"></td>
+            <td><input [(ngModel)]="item.unitPrice" type="number" min="0" (ngModelChange)="updateLineItem(item)"></td>
+            <td class="line-total">{{ item.lineTotal | number:'1.2-2' }}</td>
+            <td><button class="btn-icon danger" (click)="removeLineItem(i)">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn-add-row" (click)="addLineItem()">+ Add Row</button>
+    </div>
+
+    <div class="form-section pricing-section">
+      <div class="section-header"><h2>Pricing</h2></div>
+      <div class="pricing-grid">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Discount Type</label>
+            <select [(ngModel)]="discountType" (ngModelChange)="recalculate()">
+              <option value="">None</option>
+              <option value="RATE">Percentage (%)</option>
+              <option value="AMOUNT">Fixed Amount</option>
+            </select>
+          </div>
+          <div class="form-field" *ngIf="discountType">
+            <label>Discount Value</label>
+            <input [(ngModel)]="discountValue" type="number" min="0" (ngModelChange)="recalculate()">
+          </div>
+          <div class="form-field" *ngIf="discountType">
+            <label>Apply Discount On Tax?</label>
+            <input type="checkbox" [(ngModel)]="discountOnTax" (ngModelChange)="recalculate()">
+          </div>
+          <div class="form-field">
+            <label>Tax Rate (%)</label>
+            <input [(ngModel)]="taxRate" type="number" min="0" (ngModelChange)="recalculate()">
+          </div>
+        </div>
+        <div class="pricing-summary">
+          <div class="price-row"><span>Subtotal</span><strong>{{ subtotal | number:'1.2-2' }}</strong></div>
+          <div class="price-row" *ngIf="discountAmount > 0"><span>Discount</span><strong>- {{ discountAmount | number:'1.2-2' }}</strong></div>
+          <div class="price-row" *ngIf="taxAmount > 0"><span>Tax</span><strong>+ {{ taxAmount | number:'1.2-2' }}</strong></div>
+          <div class="price-row total"><span>Total</span><strong>{{ totalAmount | number:'1.2-2' }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" *ngIf="error">{{ error }}</div>
+    <div class="step-actions">
+      <button class="btn-secondary" (click)="cancel()">Cancel</button>
+      <button class="btn-primary" (click)="preview()" [disabled]="!selectedCompanyId || generating">
+        {{ generating ? 'Generating Preview...' : 'Preview →' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Preview -->
+  <div class="step-content" *ngIf="step === 2">
+    <div class="preview-section">
+      <div class="invoice-summary">
+        <h2>Invoice Preview</h2>
+        <div class="summary-grid">
+          <div class="summary-item"><span>Invoice #</span><strong>{{ previewInvoice?.invoiceNumber }}</strong></div>
+          <div class="summary-item"><span>Customer</span><strong>{{ previewInvoice?.customerName }}</strong></div>
+          <div class="summary-item"><span>Tour</span><strong>{{ previewInvoice?.tourName }}</strong></div>
+          <div class="summary-item"><span>Total</span><strong>{{ previewInvoice?.currency }} {{ previewInvoice?.totalAmount | number:'1.2-2' }}</strong></div>
+        </div>
+        <button class="btn-secondary" (click)="openPreviewPdf()" *ngIf="previewPdfUrl">📄 View Draft PDF</button>
+        <div class="no-pdf-note" *ngIf="!previewPdfUrl">No template assigned — PDF will not be generated.</div>
+      </div>
+    </div>
+    <div class="step-actions">
+      <button class="btn-secondary" (click)="back()">← Back</button>
+      <button class="btn-primary" (click)="step = 3">Confirm & Generate →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Confirm -->
+  <div class="step-content" *ngIf="step === 3">
+    <div class="confirm-section">
+      <h2>Confirm Invoice</h2>
+      <p>Click "Generate" to finalize the invoice. Optionally send it by email immediately.</p>
+
+      <div class="email-toggle">
+        <label><input type="checkbox" [(ngModel)]="sendEmail"> Send invoice by email after generating</label>
+      </div>
+
+      <div class="email-fields" *ngIf="sendEmail">
+        <div class="form-field"><label>To</label><input [(ngModel)]="emailTo" type="email"></div>
+        <div class="form-field"><label>CC (optional)</label><input [(ngModel)]="emailCc"></div>
+      </div>
+    </div>
+    <div class="error-msg" *ngIf="error">{{ error }}</div>
+    <div class="step-actions">
+      <button class="btn-secondary" (click)="back()">← Back</button>
+      <button class="btn-primary" (click)="confirm()" [disabled]="confirming">
+        {{ confirming ? 'Generating...' : '✓ Generate Invoice' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ package com.travesrilankanow.travesrilankanowbe.service;
 
 import com.travesrilankanow.travesrilankanowbe.entity.HeroSlide;
 import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
+import com.travesrilankanow.travesrilankanowbe.repository.HeroSlideGalleryRepository;
 import com.travesrilankanow.travesrilankanowbe.repository.HeroSlideRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +20,38 @@ import java.util.List;
 public class HeroSlideService {
 
     private final HeroSlideRepository heroSlideRepository;
+    private final HeroSlideGalleryRepository heroSlideGalleryRepository;
     private final CloudinaryService cloudinaryService;
 
     public List<HeroSlide> getActiveHeroSlides() {
-        return heroSlideRepository.findByActiveTrueOrderByDisplayOrderAsc();
+        var slides = heroSlideRepository.findByActiveTrueOrderByDisplayOrderAsc();
+        attachGalleryImages(slides);
+        return slides;
+    }
+
+    private void attachGalleryImages(List<HeroSlide> slides) {
+        if (slides.isEmpty()) return;
+        var ids = slides.stream().map(HeroSlide::getId).toList();
+        var galleryMap = heroSlideGalleryRepository.findEnabledWithItemsBySlideIds(ids)
+                .stream()
+                .collect(Collectors.toMap(g -> g.getHeroSlide().getId(), g -> g));
+
+        slides.forEach(slide -> {
+            var gallery = galleryMap.get(slide.getId());
+            if (gallery != null && gallery.isEnabled() && !gallery.getItems().isEmpty()) {
+                var images = gallery.getItems().stream()
+                        .map(item -> {
+                            Map<String, String> m = new java.util.HashMap<>();
+                            m.put("imageUrl", item.getImageUrl());
+                            m.put("label", item.getLabel() != null ? item.getLabel() : "");
+                            m.put("link", item.getLink() != null ? item.getLink() : "");
+                            m.put("contentType", item.getContentType());
+                            return m;
+                        })
+                        .toList();
+                slide.setGalleryImages(images);
+            }
+        });
     }
 
     public Page<HeroSlide> getAllHeroSlidesPaginated(Pageable pageable) {
@@ -48,6 +79,11 @@ public class HeroSlideService {
         heroSlide.setTitle(heroSlideDetails.getTitle());
         heroSlide.setSubtitle(heroSlideDetails.getSubtitle());
         heroSlide.setImageUrl(heroSlideDetails.getImageUrl());
+        heroSlide.setMediaType(heroSlideDetails.getMediaType() != null ? heroSlideDetails.getMediaType() : "image");
+        heroSlide.setVideoUrl(heroSlideDetails.getVideoUrl());
+        heroSlide.setTitleStyle(heroSlideDetails.getTitleStyle());
+        heroSlide.setSubtitleStyle(heroSlideDetails.getSubtitleStyle());
+        heroSlide.setContentAlign(heroSlideDetails.getContentAlign() != null ? heroSlideDetails.getContentAlign() : "center");
         heroSlide.setButtonText(heroSlideDetails.getButtonText());
         heroSlide.setButtonLink(heroSlideDetails.getButtonLink());
         heroSlide.setDisplayOrder(heroSlideDetails.getDisplayOrder());

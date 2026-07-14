@@ -8,6 +8,10 @@
         <p>Manage order, visibility, and content of homepage sections</p>
       </div>
       <div class="admin-header__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="openGalleryCreateModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Add Photo Gallery
+        </button>
         <button class="admin-btn admin-btn--secondary" (click)="openCustomModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           Add Custom Section
@@ -74,6 +78,7 @@
           <p *ngIf="section.subtitle" class="section-card__subtitle">{{ section.subtitle }}</p>
           <div class="section-card__config" *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
             <span class="section-card__config-item">{{ parseGalleryConfig(section.config).images.length }} images</span>
+            <span class="section-card__config-item section-card__config-hint">Click ✏️ to configure images &amp; style</span>
           </div>
           <div class="section-card__config" *ngIf="section.sectionType === 'CUSTOM_CONTENT'">
             <span class="section-card__config-item">Template: {{ parseCustomConfig(section.config).template || 'minimal' }}</span>
@@ -162,27 +167,107 @@
   </div>
 </div>
 
+<!-- ======== Add Photo Gallery Modal ======== -->
+<div *ngIf="showGalleryCreateModal" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>Add Photo Gallery Section</h2>
+      <button class="admin-modal__close" (click)="closeGalleryCreateModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <div class="admin-form__grid">
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Section Title *</label>
+          <input type="text" class="admin-input" [(ngModel)]="galleryCreateTitle"
+                 placeholder="e.g., Our Highlights" maxlength="100">
+          <p class="admin-form__hint">Displayed as the heading above the gallery</p>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Subtitle</label>
+          <input type="text" class="admin-input" [(ngModel)]="galleryCreateSubtitle"
+                 placeholder="e.g., A selection of our favourite moments" maxlength="200">
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <div class="gallery-create-info">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+            After creating, you'll be taken directly to configure images and choose the gallery style (Slider, Masonry, Bento, or 3D Tilt).
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="admin-modal__footer">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeGalleryCreateModal()">Cancel</button>
+      <button type="button" class="admin-btn admin-btn--primary"
+              [disabled]="!galleryCreateTitle.trim() || galleryCreating"
+              (click)="createGallerySection()">
+        <svg *ngIf="!galleryCreating" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01"/></svg>
+        {{ galleryCreating ? 'Creating…' : 'Create &amp; Configure Images' }}
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ======== Gallery Image Picker Modal ======== -->
 <div *ngIf="showGalleryPickerModal" class="admin-modal gallery-picker-modal">
   <div class="admin-modal__content gallery-picker-modal__content">
     <div class="admin-modal__header">
-      <h2>Configure Image Gallery Slider</h2>
+      <h2>Configure Photo Gallery</h2>
       <button class="admin-modal__close" (click)="closeGalleryPickerModal()">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
 
     <div class="admin-modal__body gallery-picker-modal__body">
-      <!-- Settings row -->
+
+      <!-- ── Gallery Style Picker ── -->
+      <div class="gallery-style-section">
+        <h4 class="gallery-picker-modal__sub-title">Gallery Layout Style</h4>
+        <div class="gallery-style-grid">
+          <label *ngFor="let style of GALLERY_STYLES"
+                 class="gallery-style-card"
+                 [class.gallery-style-card--active]="galleryStyle === style.id">
+            <input type="radio" name="galleryStyle" [value]="style.id" [(ngModel)]="galleryStyle" style="display:none">
+            <div class="gallery-style-card__check" *ngIf="galleryStyle === style.id">✓</div>
+            <div class="gallery-style-card__name">{{ style.name }}</div>
+            <div class="gallery-style-card__desc">{{ style.desc }}</div>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── Layout Options ── -->
       <div class="gallery-settings">
-        <div class="admin-form__group">
-          <label class="admin-form__label">Scroll Speed (seconds for full loop)</label>
+        <div class="admin-form__group" *ngIf="galleryStyle === 'slider'">
+          <label class="admin-form__label">Scroll Speed (s for full loop)</label>
           <input type="number" class="admin-input" [(ngModel)]="gallerySpeed" min="10" max="120">
         </div>
-        <div class="admin-form__group">
+        <div class="admin-form__group" *ngIf="galleryStyle === 'slider'">
           <label class="admin-checkbox">
             <input type="checkbox" [(ngModel)]="galleryPauseOnHover">
             <span>Pause on hover</span>
+          </label>
+        </div>
+        <div class="admin-form__group" *ngIf="galleryStyle !== 'slider'">
+          <label class="admin-form__label">Columns</label>
+          <select class="admin-select" [(ngModel)]="galleryColumns">
+            <option [value]="2">2 columns</option>
+            <option [value]="3">3 columns (default)</option>
+            <option [value]="4">4 columns</option>
+          </select>
+        </div>
+        <div class="admin-form__group" *ngIf="galleryStyle !== 'slider'">
+          <label class="admin-form__label">Gap</label>
+          <select class="admin-select" [(ngModel)]="galleryGap">
+            <option value="tight">Tight</option>
+            <option value="normal">Normal</option>
+            <option value="wide">Wide</option>
+          </select>
+        </div>
+        <div class="admin-form__group" *ngIf="galleryStyle !== 'slider'">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="galleryShowTitles">
+            <span>Show image titles on hover</span>
           </label>
         </div>
       </div>
@@ -327,8 +412,53 @@
         </div>
       </div>
 
-      <!-- ③b Background Image -->
-      <div class="custom-form-block">
+      <!-- ③b Split Image (only for split template) -->
+      <div class="custom-form-block" *ngIf="customConfig.template === 'split'">
+        <h4 class="custom-section-label">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zm0 4a1 1 0 000 2h8a1 1 0 000-2H3zm0 4a1 1 0 000 2h14a1 1 0 100-2H3z"/></svg>
+          Split Panel Image *
+        </h4>
+        <p class="admin-form__hint" style="margin-bottom:0.75rem">This image fills the left (or right) column of the split layout.</p>
+        <app-image-upload
+          [currentImageUrl]="customConfig.splitImage || ''"
+          folder="custom-content"
+          label="Panel Image"
+          (imageUploaded)="onSplitImageUploaded($event)">
+        </app-image-upload>
+
+        <div style="margin-top:0.875rem">
+          <label class="admin-form__label">Image Position</label>
+          <div class="split-position-toggle">
+            <button type="button"
+                    class="split-pos-btn"
+                    [class.split-pos-btn--active]="!customConfig.splitImagePosition || customConfig.splitImagePosition === 'left'"
+                    (click)="setSplitImagePosition('left')">
+              <svg viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="22">
+                <rect x="1" y="1" width="8" height="10" rx="1.5" fill="currentColor" opacity=".35"/>
+                <rect x="11" y="1" width="8" height="2.5" rx="1"/>
+                <rect x="11" y="5" width="6" height="2" rx="1"/>
+                <rect x="11" y="8.5" width="7" height="2" rx="1"/>
+              </svg>
+              Image Left
+            </button>
+            <button type="button"
+                    class="split-pos-btn"
+                    [class.split-pos-btn--active]="customConfig.splitImagePosition === 'right'"
+                    (click)="setSplitImagePosition('right')">
+              <svg viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="22">
+                <rect x="1" y="1" width="8" height="2.5" rx="1"/>
+                <rect x="1" y="5" width="6" height="2" rx="1"/>
+                <rect x="1" y="8.5" width="7" height="2" rx="1"/>
+                <rect x="11" y="1" width="8" height="10" rx="1.5" fill="currentColor" opacity=".35"/>
+              </svg>
+              Image Right
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③c Background Image (hidden for split — split uses splitImage above) -->
+      <div class="custom-form-block" *ngIf="customConfig.template !== 'split'">
         <h4 class="custom-section-label">Background Image <span class="admin-form__hint">(optional)</span></h4>
         <app-image-upload
           [currentImageUrl]="customConfig.backgroundImage || ''"
@@ -480,7 +610,7 @@
                *ngIf="hasOverlay()"
                [ngStyle]="getOverlayStyle()">
           </div>
-          <div class="custom-preview-inner">
+          <div class="custom-preview-inner" [ngStyle]="getPreviewInnerStyle()">
             <p class="custom-preview-empty" *ngIf="!customConfig.title && !customConfig.description && !customConfig.buttonText">Title &amp; description will appear here</p>
             <div *ngIf="customConfig.title"
                  class="custom-preview-title"
