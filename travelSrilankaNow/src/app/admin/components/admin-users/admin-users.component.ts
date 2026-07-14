@@ -21,6 +21,7 @@ export class AdminUsersComponent implements OnInit {
   formError = '';
 
   showCreateModal = false;
+  showCreatePassword = false;
   showEditModal = false;
   showDeleteConfirm = false;
   selectedUser: AdminUserDto | null = null;

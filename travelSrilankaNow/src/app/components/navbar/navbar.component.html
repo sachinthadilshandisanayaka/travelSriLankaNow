@@ -1,9 +1,12 @@
 <nav class="navbar" [class.scrolled]="isScrolled">
   <div class="container navbar-content">
-    <!-- Logo: image from Site Settings, or text fallback -->
+    <!-- Logo: image + site name stacked, or text fallback -->
     <a routerLink="/" class="logo" (click)="closeMenu()">
-      <img *ngIf="logoUrl" [src]="logoUrl" alt="TravelSriLankaNow" class="logo-img">
-      <h2 *ngIf="!logoUrl" class="logo-text">Travel<span>SriLankaNow</span></h2>
+      <div class="logo-brand">
+        <img *ngIf="logoUrl" [src]="logoUrl" [alt]="siteName || 'Logo'" class="logo-img">
+        <span *ngIf="siteName" class="logo-site-name">{{ siteName }}</span>
+        <h2 *ngIf="!logoUrl && !siteName" class="logo-text">Travel<span>SriLankaNow</span></h2>
+      </div>
     </a>
 
     <div class="nav-links" [class.active]="isMenuOpen">
