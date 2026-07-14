@@ -68,7 +68,27 @@ pipeline {
             }
         }
 
-        // ── 2. Push .env secrets and nginx config to the server ───────────
+        // ── 2. Pull the correct branch on the server ──────────────────────
+        stage('Pull Code') {
+            steps {
+                sshagent([env.SSH_CRED_ID]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                            if [ -d /root/travelSriLankaNow/.git ]; then
+                                cd /root/travelSriLankaNow &&
+                                git fetch --all &&
+                                git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
+                                git reset --hard origin/${env.DEPLOY_BRANCH}
+                            else
+                                git clone --branch ${env.DEPLOY_BRANCH} https://github.com/sachinthadilshan/travelSriLankaNow.git /root/travelSriLankaNow
+                            fi
+                        '
+                    """
+                }
+            }
+        }
+
+        // ── 3. Push .env secrets and nginx config to the server ───────────
         stage('Push Config') {
             steps {
                 withCredentials([file(credentialsId: env.SECRETS_CRED_ID, variable: 'SECRETS_FILE')]) {
@@ -85,22 +105,6 @@ pipeline {
                                 ${env.CLIENT_SERVER}:/root/travelSriLankaNow/nginx/default.conf
                         """
                     }
-                }
-            }
-        }
-
-        // ── 3. Pull the correct branch on the server ──────────────────────
-        stage('Pull Code') {
-            steps {
-                sshagent([env.SSH_CRED_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
-                            cd /root/travelSriLankaNow &&
-                            git fetch --all &&
-                            git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
-                            git reset --hard origin/${env.DEPLOY_BRANCH}
-                        '
-                    """
                 }
             }
         }
