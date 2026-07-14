@@ -44,15 +44,25 @@
 }
 
 .footer-logo {
-  height: 80px;              // comfortable height for a footer column
+  height: 80px;
   width: auto;
-  max-width: 100%;           // never overflow the column
+  max-width: 100%;
   object-fit: contain;
   display: block;
 
   @include respond-to('lg') {
     height: 90px;
   }
+}
+
+.footer-site-name {
+  display: block;
+  font-family: $font-primary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $primary-navy-dark;
+  margin-top: $spacing-xs;
+  letter-spacing: -0.01em;
 }
 
 .footer-section {

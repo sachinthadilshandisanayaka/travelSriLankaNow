@@ -55,6 +55,7 @@ pipeline {
                     env.SSH_CRED_ID     = cfg.SSH_CRED_ID ?: "ssh-key-${projectId.toLowerCase()}"
                     env.SECRETS_CRED_ID = "${projectId}-secrets"
                     env.COMPOSE_PROJECT = projectId.toLowerCase()
+                    env.NGINX_CONF_FILE = cfg.NGINX_CONF ?: 'nginx'
 
                     echo """
 ╔══════════════════════════════════════════════════╗
@@ -68,7 +69,28 @@ pipeline {
             }
         }
 
-        // ── 2. Push .env secrets and nginx config to the server ───────────
+        // ── 2. Pull the correct branch on the server ──────────────────────
+        stage('Pull Code') {
+            steps {
+                sshagent([env.SSH_CRED_ID]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                            if [ -d /root/travelSriLankaNow/.git ]; then
+                                cd /root/travelSriLankaNow &&
+                                git fetch --all &&
+                                git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
+                                git reset --hard origin/${env.DEPLOY_BRANCH}
+                            else
+                                rm -rf /root/travelSriLankaNow &&
+                                git clone --branch ${env.DEPLOY_BRANCH} https://github.com/sachinthadilshan/travelSriLankaNow.git /root/travelSriLankaNow
+                            fi
+                        '
+                    """
+                }
+            }
+        }
+
+        // ── 3. Push .env secrets and nginx config to the server ───────────
         stage('Push Config') {
             steps {
                 withCredentials([file(credentialsId: env.SECRETS_CRED_ID, variable: 'SECRETS_FILE')]) {
@@ -78,29 +100,13 @@ pipeline {
                         // Push secrets as .env
                         sh "scp -o StrictHostKeyChecking=no \$SECRETS_FILE ${env.CLIENT_SERVER}:/root/travelSriLankaNow/.env"
 
-                        // Push this project's nginx config
+                        // Push this project's nginx config (NGINX_CONF in config.env selects the file)
                         sh """
                             scp -o StrictHostKeyChecking=no \
-                                clients/${env.PROJECT_ID}/nginx.conf \
+                                clients/${env.PROJECT_ID}/${env.NGINX_CONF_FILE}.conf \
                                 ${env.CLIENT_SERVER}:/root/travelSriLankaNow/nginx/default.conf
                         """
                     }
-                }
-            }
-        }
-
-        // ── 3. Pull the correct branch on the server ──────────────────────
-        stage('Pull Code') {
-            steps {
-                sshagent([env.SSH_CRED_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
-                            cd /root/travelSriLankaNow &&
-                            git fetch --all &&
-                            git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
-                            git reset --hard origin/${env.DEPLOY_BRANCH}
-                        '
-                    """
                 }
             }
         }

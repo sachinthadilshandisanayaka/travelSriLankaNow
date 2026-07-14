@@ -30,6 +30,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isUserMenuOpen = false;
   currentUser: CustomerUser | null = null;
   logoUrl = '';
+  siteName = '';
 
   navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
@@ -54,6 +55,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.siteSettingsService.getSettingByKey('logo_url').subscribe({
       next: (setting) => { if (setting?.value) this.logoUrl = setting.value; },
+      error: () => {}
+    });
+    this.siteSettingsService.getSettingByKey('site_name').subscribe({
+      next: (setting) => { if (setting?.value) this.siteName = setting.value; },
       error: () => {}
     });
   }
