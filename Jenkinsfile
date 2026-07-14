@@ -72,20 +72,22 @@ pipeline {
         // ── 2. Pull the correct branch on the server ──────────────────────
         stage('Pull Code') {
             steps {
-                sshagent([env.SSH_CRED_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
-                            if [ -d /root/travelSriLankaNow/.git ]; then
-                                cd /root/travelSriLankaNow &&
-                                git fetch --all &&
-                                git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
-                                git reset --hard origin/${env.DEPLOY_BRANCH}
-                            else
-                                rm -rf /root/travelSriLankaNow &&
-                                git clone --branch ${env.DEPLOY_BRANCH} https://github.com/sachinthadilshan/travelSriLankaNow.git /root/travelSriLankaNow
-                            fi
-                        '
-                    """
+                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
+                    sshagent([env.SSH_CRED_ID]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                                if [ -d /root/travelSriLankaNow/.git ]; then
+                                    cd /root/travelSriLankaNow &&
+                                    git fetch --all &&
+                                    git checkout -B ${env.DEPLOY_BRANCH} --track origin/${env.DEPLOY_BRANCH} 2>/dev/null || true &&
+                                    git reset --hard origin/${env.DEPLOY_BRANCH}
+                                else
+                                    rm -rf /root/travelSriLankaNow &&
+                                    git clone --branch ${env.DEPLOY_BRANCH} https://${GH_USER}:${GH_TOKEN}@github.com/sachinthadilshan/travelSriLankaNow.git /root/travelSriLankaNow
+                                fi
+                            '
+                        """
+                    }
                 }
             }
         }
