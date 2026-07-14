@@ -83,6 +83,27 @@
   z-index: $z-index-fixed + 1;
   position: relative;
 
+  .logo-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .logo-site-name {
+    font-size: 0.625rem;
+    font-weight: $font-weight-semibold;
+    color: $white;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    line-height: 1;
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .logo-site-name { opacity: 1; }
+
   .logo-text {
     font-family: $font-primary;
     font-size: $font-size-base;
