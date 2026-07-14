@@ -129,3 +129,71 @@ INSERT INTO homepage_sections (section_type, title, subtitle, display_order, is_
 ('UPCOMING_EVENTS', 'Upcoming Events', 'Don''t miss these exciting events', 3, true, '{"itemsCount":6,"showViewAll":true}', NOW(), NOW()),
 ('PLACES', 'Where to Stay', 'Find the perfect place for your journey', 4, true, '{"itemsCount":6,"showViewAll":true}', NOW(), NOW()),
 ('SOCIAL_MEDIA', 'Follow Us', 'Stay connected on social media', 5, true, '{"itemsCount":8,"showViewAll":false}', NOW(), NOW());
+
+-- Site Settings: Additional keys (logo, footer, floating social)
+INSERT INTO site_settings (category, setting_key, label, value, icon, sort_order, is_active, created_at, updated_at) VALUES
+('GENERAL', 'logo_url',                'Site Logo',               'assets/images/Logo_without_bg.png', 'image', 0,  true, NOW(), NOW()),
+('GENERAL', 'footer_description',      'Footer Description',      'Discover the pearl of the Indian Ocean. Explore pristine beaches, ancient temples, lush tea plantations, and vibrant wildlife.', 'info', 3, true, NOW(), NOW()),
+('GENERAL', 'floating_social_buttons', 'Floating Social Buttons', '[]', 'share', 10, true, NOW(), NOW())
+ON CONFLICT (setting_key) DO NOTHING;
+
+-- ── RBAC: Permissions ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS permissions (
+    id            BIGSERIAL PRIMARY KEY,
+    function_code VARCHAR(50)  NOT NULL,
+    action        VARCHAR(20)  NOT NULL,
+    description   VARCHAR(200),
+    CONSTRAINT uq_perm UNIQUE (function_code, action)
+);
+
+CREATE TABLE IF NOT EXISTS admin_roles (
+    id             BIGSERIAL PRIMARY KEY,
+    code           VARCHAR(50)  UNIQUE NOT NULL,
+    name           VARCHAR(100) NOT NULL,
+    description    TEXT,
+    is_system_role BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at     TIMESTAMP             DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS admin_role_permissions (
+    role_id       BIGINT NOT NULL REFERENCES admin_roles(id) ON DELETE CASCADE,
+    permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, permission_id)
+);
+
+INSERT INTO permissions (function_code, action, description) VALUES
+('DASHBOARD','VIEW','View dashboard overview'),
+('LOCATIONS','VIEW','View locations'),('LOCATIONS','CREATE','Create locations'),('LOCATIONS','UPDATE','Edit locations'),('LOCATIONS','DELETE','Delete locations'),
+('EVENTS','VIEW','View events'),('EVENTS','CREATE','Create events'),('EVENTS','UPDATE','Edit events'),('EVENTS','DELETE','Delete events'),
+('PLACES','VIEW','View places'),('PLACES','CREATE','Create places'),('PLACES','UPDATE','Edit places'),('PLACES','DELETE','Delete places'),
+('GALLERY','VIEW','View gallery'),('GALLERY','CREATE','Upload gallery items'),('GALLERY','UPDATE','Edit gallery items'),('GALLERY','DELETE','Delete gallery items'),
+('HERO_SLIDES','VIEW','View hero slides'),('HERO_SLIDES','CREATE','Create hero slides'),('HERO_SLIDES','UPDATE','Edit / reorder hero slides'),('HERO_SLIDES','DELETE','Delete hero slides'),
+('PAGE_HEADERS','VIEW','View page header backgrounds'),('PAGE_HEADERS','CREATE','Create page header backgrounds'),('PAGE_HEADERS','UPDATE','Edit page header backgrounds'),('PAGE_HEADERS','DELETE','Delete page header backgrounds'),
+('HOMEPAGE_SECTIONS','VIEW','View homepage sections'),('HOMEPAGE_SECTIONS','CREATE','Create homepage sections'),('HOMEPAGE_SECTIONS','UPDATE','Edit / reorder homepage sections'),('HOMEPAGE_SECTIONS','DELETE','Delete homepage sections'),
+('MORE_SECTIONS','VIEW','View custom CMS sections'),('MORE_SECTIONS','CREATE','Create custom CMS sections'),('MORE_SECTIONS','UPDATE','Edit custom CMS sections'),('MORE_SECTIONS','DELETE','Delete custom CMS sections'),
+('NAV_CONFIG','VIEW','View navigation config'),('NAV_CONFIG','UPDATE','Edit navigation config'),
+('SOCIAL_MEDIA','VIEW','View social media content'),('SOCIAL_MEDIA','CREATE','Create social media content'),('SOCIAL_MEDIA','UPDATE','Edit social media content'),('SOCIAL_MEDIA','DELETE','Delete social media content'),
+('SITE_SETTINGS','VIEW','View site settings'),('SITE_SETTINGS','CREATE','Create site settings'),('SITE_SETTINGS','UPDATE','Edit site settings'),('SITE_SETTINGS','DELETE','Delete site settings'),
+('CONTACT_DETAILS','VIEW','View contact details'),('CONTACT_DETAILS','CREATE','Create contact details'),('CONTACT_DETAILS','UPDATE','Edit contact details'),('CONTACT_DETAILS','DELETE','Delete contact details'),
+('MASTER_DATA','VIEW','View master data'),('MASTER_DATA','CREATE','Create master data entries'),('MASTER_DATA','UPDATE','Edit master data entries'),('MASTER_DATA','DELETE','Delete master data entries'),
+('ENTITY_FIELDS','VIEW','View entity field configs'),('ENTITY_FIELDS','UPDATE','Edit entity field configs'),
+('MEDIA','VIEW','View media library'),('MEDIA','CREATE','Upload media'),('MEDIA','UPDATE','Edit media metadata'),('MEDIA','DELETE','Delete media'),
+('BOOKINGS','VIEW','View bookings'),('BOOKINGS','UPDATE','Update booking status'),('BOOKINGS','EXPORT','Export booking data'),
+('BOOKING_SETTINGS','VIEW','View booking settings'),('BOOKING_SETTINGS','CREATE','Create booking settings'),('BOOKING_SETTINGS','UPDATE','Edit booking settings'),('BOOKING_SETTINGS','DELETE','Delete booking settings'),
+('USER_MANAGEMENT','VIEW','View admin users'),('USER_MANAGEMENT','CREATE','Create admin users'),('USER_MANAGEMENT','UPDATE','Edit admin users'),('USER_MANAGEMENT','DELETE','Delete / deactivate admin users'),
+('ROLE_MANAGEMENT','VIEW','View roles'),('ROLE_MANAGEMENT','CREATE','Create custom roles'),('ROLE_MANAGEMENT','UPDATE','Edit roles and permissions'),('ROLE_MANAGEMENT','DELETE','Delete custom roles')
+ON CONFLICT (function_code, action) DO NOTHING;
+
+INSERT INTO admin_roles (code, name, description, is_system_role) VALUES
+('SUPER_ADMIN',       'Super Administrator', 'Full unrestricted access to all features',           TRUE),
+('CONTENT_MANAGER',   'Content Manager',     'Manage all site content',                            TRUE),
+('BOOKING_MANAGER',   'Booking Manager',     'Manage bookings and booking configuration',          TRUE),
+('MASTER_DATA_ADMIN', 'Master Data Admin',   'Manage master data and entity field configs',        TRUE),
+('MEDIA_MANAGER',     'Media Manager',       'Manage the media library',                           TRUE),
+('READONLY_VIEWER',   'Read-Only Viewer',    'View access to all features, no modifications',      TRUE)
+ON CONFLICT (code) DO NOTHING;
+
+-- SUPER_ADMIN gets all permissions
+INSERT INTO admin_role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM admin_roles r, permissions p WHERE r.code = 'SUPER_ADMIN'
+ON CONFLICT DO NOTHING;
