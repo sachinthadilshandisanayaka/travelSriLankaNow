@@ -77,6 +77,7 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@travelsrilankanow.com}
       SPRING_FLYWAY_ENABLED: "${FLYWAY_ENABLED:-false}"
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:4200}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9000}
     restart: unless-stopped
     depends_on:
       postgres:
