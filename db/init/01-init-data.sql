@@ -218,3 +218,18 @@ INSERT INTO nav_config (route_path, label_key, label_override, display_order, is
     ('/gallery',   'nav.gallery',   NULL, 4, TRUE, FALSE),
     ('/places',    'nav.places',    NULL, 5, TRUE, FALSE)
 ON CONFLICT DO NOTHING;
+
+-- Booking Types (referenced as FK by event_bookings.booking_type)
+CREATE TABLE IF NOT EXISTS bk_types (
+    id          BIGSERIAL    PRIMARY KEY,
+    code        VARCHAR(50)  UNIQUE NOT NULL,
+    name        VARCHAR(100) NOT NULL,
+    description TEXT,
+    entity_type VARCHAR(20)  NOT NULL,
+    is_active   BOOLEAN      NOT NULL DEFAULT TRUE
+);
+
+INSERT INTO bk_types (code, name, description, entity_type, is_active) VALUES
+    ('EVENT', 'Event Booking', 'Booking for an event or activity',   'EVENT', TRUE),
+    ('PLACE', 'Place Booking', 'Booking / reservation for a place',  'PLACE', TRUE)
+ON CONFLICT (code) DO NOTHING;
