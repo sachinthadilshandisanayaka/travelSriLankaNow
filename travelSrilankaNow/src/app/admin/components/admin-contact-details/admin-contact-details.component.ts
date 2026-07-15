@@ -22,6 +22,9 @@ export class AdminContactDetailsComponent implements OnInit, OnChanges {
   successMsg = '';
   errorMsg = '';
 
+  showDeleteDialog = false;
+  contactIdToDelete: number | null = null;
+
   allTypes = ALL_CONTACT_TYPES;
   typeMeta = CONTACT_TYPE_META;
 
@@ -126,7 +129,15 @@ export class AdminContactDetailsComponent implements OnInit, OnChanges {
   }
 
   delete(id: number): void {
-    if (!confirm('Delete this contact?')) return;
+    this.contactIdToDelete = id;
+    this.showDeleteDialog = true;
+  }
+
+  confirmDelete(): void {
+    if (this.contactIdToDelete == null) return;
+    const id = this.contactIdToDelete;
+    this.showDeleteDialog = false;
+    this.contactIdToDelete = null;
     this.contactService.delete(id).subscribe({
       next: () => {
         this.contacts = this.contacts.filter(c => c.id !== id);

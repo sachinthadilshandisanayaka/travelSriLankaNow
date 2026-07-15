@@ -27,10 +27,14 @@ export class AdminMasterDataComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
-  // Modal state
+  // Add/Edit modal state
   showModal = false;
   isEditing = false;
   currentItem: MasterData = this.getEmptyItem();
+
+  // Delete confirmation modal state
+  showDeleteModal = false;
+  itemToDelete: MasterData | null = null;
 
   // Type display names
   typeDisplayNames: { [key: string]: string } = {
@@ -159,18 +163,30 @@ export class AdminMasterDataComponent implements OnInit {
 
   deleteItem(item: MasterData): void {
     if (!item.id) return;
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
 
-    if (confirm(`Are you sure you want to delete "${item.displayName}"?`)) {
-      this.adminApiService.deleteMasterData(item.id).subscribe({
-        next: () => {
-          this.loadData();
-          this.masterDataService.clearCache(item.type);
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || 'Failed to delete item';
-        }
-      });
-    }
+  confirmDelete(): void {
+    if (!this.itemToDelete?.id) return;
+    const item = this.itemToDelete;
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
+
+    this.adminApiService.deleteMasterData(item.id!).subscribe({
+      next: () => {
+        this.loadData();
+        this.masterDataService.clearCache(item.type);
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Failed to delete item';
+      }
+    });
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
   }
 
   toggleActive(item: MasterData): void {
