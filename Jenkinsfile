@@ -126,9 +126,16 @@ pipeline {
                 sshagent([env.SSH_CRED_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
-                            cd /root/travelSriLankaNow &&
-                            COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose down --remove-orphans &&
-                            COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose up -d --build
+                            cd /root/travelSriLankaNow
+
+                            # Graceful stop of compose-tracked containers
+                            COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose down --remove-orphans --timeout 60 2>&1 || true
+
+                            # Force-remove any leftover containers with this project prefix
+                            # (catches zombies that lost their compose labels from a partial/manual run)
+                            docker ps -a --format "{{.Names}}" | grep "^${env.COMPOSE_PROJECT}-" | xargs -r docker rm -f 2>/dev/null || true
+
+                            COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose up -d --build --force-recreate
                         '
                     """
                 }
