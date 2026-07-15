@@ -70,6 +70,12 @@ pipeline {
                     env.ALLOWED_ORIGINS    = domain ? "https://${domain},https://www.${domain}" : 'http://localhost:4200'
                     env.MINIO_PUBLIC_URL   = domain ? "https://${domain}/storage" : 'http://localhost:9000'
 
+                    // Branding — injected into index.html OG meta at build time
+                    env.DOMAIN            = domain
+                    env.SITE_NAME         = cfg.SITE_NAME ?: 'Travel Sri Lanka Now'
+                    env.SITE_TAGLINE      = cfg.SITE_TAGLINE ?: 'Explore Beautiful Sri Lanka'
+                    env.SITE_DESCRIPTION  = cfg.SITE_DESCRIPTION ?: 'Discover the best travel destinations in Sri Lanka.'
+
                     echo """
 ╔══════════════════════════════════════════════════╗
   Project    : ${projectId}
@@ -136,13 +142,21 @@ pipeline {
                         ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
                             cd /root/travelSriLankaNow
 
-                            echo "==> [1/3] Stopping compose-tracked containers..."
+                            echo "==> [1/4] Patching client branding in index.html..."
+                            sed -i \
+                                -e "s|__SITE_NAME__|${env.SITE_NAME}|g" \
+                                -e "s|__DOMAIN__|${env.DOMAIN}|g" \
+                                -e "s|__SITE_TAGLINE__|${env.SITE_TAGLINE}|g" \
+                                -e "s|__SITE_DESCRIPTION__|${env.SITE_DESCRIPTION}|g" \
+                                travelSrilankaNow/src/index.html
+
+                            echo "==> [2/4] Stopping compose-tracked containers..."
                             COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose down --remove-orphans --timeout 60 2>&1 || true
 
-                            echo "==> [2/3] Force-removing any leftover containers..."
+                            echo "==> [3/4] Force-removing any leftover containers..."
                             docker ps -a --format "{{.Names}}" | grep "^${env.COMPOSE_PROJECT}-" | xargs -r docker rm -f 2>/dev/null || true
 
-                            echo "==> [3/3] Building and starting containers..."
+                            echo "==> [4/4] Building and starting containers..."
                             COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose up -d --build --force-recreate 2>&1
 
                             echo "==> Build & Deploy complete."
