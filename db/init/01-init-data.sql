@@ -197,3 +197,24 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO admin_role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM admin_roles r, permissions p WHERE r.code = 'SUPER_ADMIN'
 ON CONFLICT DO NOTHING;
+
+-- Default navigation bar items
+CREATE TABLE IF NOT EXISTS nav_config (
+    id BIGSERIAL PRIMARY KEY,
+    route_path VARCHAR(255) NOT NULL,
+    label_key VARCHAR(100) NOT NULL,
+    label_override VARCHAR(100),
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+    is_fixed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO nav_config (route_path, label_key, label_override, display_order, is_visible, is_fixed) VALUES
+    ('/',          'nav.home',      NULL, 1, TRUE, TRUE),
+    ('/locations', 'nav.locations', NULL, 2, TRUE, FALSE),
+    ('/events',    'nav.events',    NULL, 3, TRUE, FALSE),
+    ('/gallery',   'nav.gallery',   NULL, 4, TRUE, FALSE),
+    ('/places',    'nav.places',    NULL, 5, TRUE, FALSE)
+ON CONFLICT DO NOTHING;
