@@ -76,6 +76,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@travelsrilankanow.com}
       SPRING_FLYWAY_ENABLED: "${FLYWAY_ENABLED:-false}"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:4200}
     restart: unless-stopped
     depends_on:
       postgres:
