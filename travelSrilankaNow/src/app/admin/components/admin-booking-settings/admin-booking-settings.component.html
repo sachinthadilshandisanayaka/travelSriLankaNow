@@ -498,3 +498,12 @@
   </div>
 
 </div>
+
+<app-confirm-dialog
+  [(visible)]="showDeleteDialog"
+  title="Delete?"
+  [message]="deleteDialogMessage"
+  confirmText="Delete"
+  type="danger"
+  (confirmed)="confirmDelete()">
+</app-confirm-dialog>

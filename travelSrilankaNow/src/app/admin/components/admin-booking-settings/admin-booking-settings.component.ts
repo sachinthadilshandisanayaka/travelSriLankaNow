@@ -101,6 +101,11 @@ export class AdminBookingSettingsComponent implements OnInit {
   availForm: BkAvailabilityConfig = this.blankAvail();
   availPage = 0;
 
+  // ── Shared delete dialog ──
+  showDeleteDialog = false;
+  deleteDialogMessage = '';
+  private pendingDeleteAction: (() => void) | null = null;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -191,11 +196,14 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   deleteType(t: BkType): void {
-    if (!confirm(`Delete booking type "${t.name}"? All conditions and terms linked to "${t.code}" must be removed first.`)) return;
-    this.http.delete(`${this.apiBase}/types/${t.id}`).subscribe({
-      next: () => { this.types = this.types.filter(x => x.id !== t.id); },
-      error: () => { this.typesError = 'Cannot delete — booking type may still be in use.'; }
-    });
+    this.deleteDialogMessage = `Delete booking type "${t.name}"? All conditions and terms linked to "${t.code}" must be removed first.`;
+    this.pendingDeleteAction = () => {
+      this.http.delete(`${this.apiBase}/types/${t.id}`).subscribe({
+        next: () => { this.types = this.types.filter(x => x.id !== t.id); },
+        error: () => { this.typesError = 'Cannot delete — booking type may still be in use.'; }
+      });
+    };
+    this.showDeleteDialog = true;
   }
 
   private blankType(): BkType {
@@ -245,11 +253,14 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   deleteCondition(c: BkCondition): void {
-    if (!confirm(`Delete rule "${c.description || c.conditionType}"?`)) return;
-    this.http.delete(`${this.apiBase}/conditions/${c.id}`).subscribe({
-      next: () => { this.conditions = this.conditions.filter(x => x.id !== c.id); },
-      error: () => { this.conditionsError = 'Failed to delete rule.'; }
-    });
+    this.deleteDialogMessage = `Delete rule "${c.description || c.conditionType}"?`;
+    this.pendingDeleteAction = () => {
+      this.http.delete(`${this.apiBase}/conditions/${c.id}`).subscribe({
+        next: () => { this.conditions = this.conditions.filter(x => x.id !== c.id); },
+        error: () => { this.conditionsError = 'Failed to delete rule.'; }
+      });
+    };
+    this.showDeleteDialog = true;
   }
 
   toggleConditionActive(c: BkCondition): void {
@@ -312,10 +323,13 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   deleteTerms(t: BkTerms): void {
-    if (!confirm(`Delete terms v${t.version} for ${t.bookingTypeCode}?`)) return;
-    this.http.delete(`${this.apiBase}/terms/${t.id}`).subscribe({
-      next: () => { this.terms = this.terms.filter(x => x.id !== t.id); }
-    });
+    this.deleteDialogMessage = `Delete terms v${t.version} for ${t.bookingTypeCode}? This action cannot be undone.`;
+    this.pendingDeleteAction = () => {
+      this.http.delete(`${this.apiBase}/terms/${t.id}`).subscribe({
+        next: () => { this.terms = this.terms.filter(x => x.id !== t.id); }
+      });
+    };
+    this.showDeleteDialog = true;
   }
 
   toggleTermsExpand(id: number): void {
@@ -364,10 +378,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   deleteAvail(a: BkAvailabilityConfig): void {
-    if (!confirm(`Delete availability config for ${a.bookingTypeCode}?`)) return;
-    this.http.delete(`${this.apiBase}/availability/${a.id}`).subscribe({
-      next: () => { this.availability = this.availability.filter(x => x.id !== a.id); }
-    });
+    this.deleteDialogMessage = `Delete availability config for ${a.bookingTypeCode}?`;
+    this.pendingDeleteAction = () => {
+      this.http.delete(`${this.apiBase}/availability/${a.id}`).subscribe({
+        next: () => { this.availability = this.availability.filter(x => x.id !== a.id); }
+      });
+    };
+    this.showDeleteDialog = true;
+  }
+
+  confirmDelete(): void {
+    this.pendingDeleteAction?.();
+    this.pendingDeleteAction = null;
+    this.showDeleteDialog = false;
   }
 
   private blankAvail(): BkAvailabilityConfig {

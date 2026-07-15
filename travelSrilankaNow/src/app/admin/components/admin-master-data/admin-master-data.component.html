@@ -128,6 +128,16 @@
   </div>
 </div>
 
+<app-confirm-dialog
+  [(visible)]="showDeleteModal"
+  title="Delete item?"
+  [message]="'&quot;' + (itemToDelete?.displayName || '') + '&quot; will be permanently removed. This action cannot be undone.'"
+  confirmText="Delete"
+  type="danger"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()">
+</app-confirm-dialog>
+
 <!-- Add/Edit Modal -->
 <div *ngIf="showModal" class="admin-modal">
   <div class="admin-modal__content admin-modal__content--sm">

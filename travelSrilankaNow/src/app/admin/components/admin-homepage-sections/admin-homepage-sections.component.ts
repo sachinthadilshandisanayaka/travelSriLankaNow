@@ -75,6 +75,10 @@ export class AdminHomepageSectionsComponent implements OnInit {
   editForm: FormGroup;
   editingSection: HomepageSection | null = null;
 
+  // Delete confirmation dialog
+  showDeleteDialog = false;
+  sectionToDelete: HomepageSection | null = null;
+
   // Gallery slider image picker modal
   showGalleryPickerModal = false;
   gallerySection: HomepageSection | null = null;
@@ -631,7 +635,15 @@ export class AdminHomepageSectionsComponent implements OnInit {
   }
 
   deleteSection(section: HomepageSection): void {
-    if (!confirm(`Delete "${section.title}"?`)) return;
+    this.sectionToDelete = section;
+    this.showDeleteDialog = true;
+  }
+
+  confirmDeleteSection(): void {
+    if (!this.sectionToDelete?.id) return;
+    const section = this.sectionToDelete;
+    this.showDeleteDialog = false;
+    this.sectionToDelete = null;
     this.apiService.deleteHomepageSection(section.id!).subscribe({
       next: () => {
         this.successMessage = 'Section deleted!';
@@ -696,6 +708,14 @@ export class AdminHomepageSectionsComponent implements OnInit {
     this.sections.splice(targetIndex, 0, removed);
     this.hasOrderChanged = true;
     this.draggedIndex = null;
+  }
+
+  get hasGallerySection(): boolean {
+    return this.sections.some(s => s.sectionType === 'IMAGE_GALLERY_SLIDER');
+  }
+
+  get existingGallerySection(): HomepageSection | undefined {
+    return this.sections.find(s => s.sectionType === 'IMAGE_GALLERY_SLIDER');
   }
 
   hideMessageAfterDelay(): void {
