@@ -135,7 +135,61 @@ pipeline {
             }
         }
 
-        // ── 5. Health check ───────────────────────────────────────────────
+        // ── 5. Fix stored media URLs ──────────────────────────────────────
+        // Replaces any http://localhost:9000/ URLs left in the DB (uploaded
+        // before MINIO_PUBLIC_URL was set) with the correct public prefix.
+        // Idempotent — rows already using the correct URL are untouched.
+        stage('Fix DB URLs') {
+            steps {
+                script {
+                    writeFile file: 'fix-urls.sql', text: """\
+DO \$MIGRATE\$
+DECLARE
+  old_prefix TEXT := 'http://localhost:9000/';
+  new_prefix TEXT := '${env.MINIO_PUBLIC_URL}/';
+BEGIN
+  UPDATE companies                SET logo_url           = REPLACE(logo_url,           old_prefix, new_prefix) WHERE logo_url           LIKE 'http://localhost:9000/%';
+  UPDATE companies                SET signature_url      = REPLACE(signature_url,      old_prefix, new_prefix) WHERE signature_url      LIKE 'http://localhost:9000/%';
+  UPDATE event_images             SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE events                   SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE gallery_items            SET url                = REPLACE(url,                old_prefix, new_prefix) WHERE url                LIKE 'http://localhost:9000/%';
+  UPDATE gallery_items            SET thumbnail_url      = REPLACE(thumbnail_url,      old_prefix, new_prefix) WHERE thumbnail_url      LIKE 'http://localhost:9000/%';
+  UPDATE hero_slide_gallery_items SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE hero_slides              SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE hero_slides              SET video_url          = REPLACE(video_url,          old_prefix, new_prefix) WHERE video_url          LIKE 'http://localhost:9000/%';
+  UPDATE location_images          SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE locations                SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE media                    SET url                = REPLACE(url,                old_prefix, new_prefix) WHERE url                LIKE 'http://localhost:9000/%';
+  UPDATE media                    SET medium_url         = REPLACE(medium_url,         old_prefix, new_prefix) WHERE medium_url         LIKE 'http://localhost:9000/%';
+  UPDATE media                    SET optimized_url      = REPLACE(optimized_url,      old_prefix, new_prefix) WHERE optimized_url      LIKE 'http://localhost:9000/%';
+  UPDATE media                    SET thumbnail_url      = REPLACE(thumbnail_url,      old_prefix, new_prefix) WHERE thumbnail_url      LIKE 'http://localhost:9000/%';
+  UPDATE more_section_items       SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE more_sections            SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE page_header_backgrounds  SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE place_images             SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE places                   SET image_url          = REPLACE(image_url,          old_prefix, new_prefix) WHERE image_url          LIKE 'http://localhost:9000/%';
+  UPDATE site_settings            SET value              = REPLACE(value,              old_prefix, new_prefix) WHERE value              LIKE 'http://localhost:9000/%';
+  UPDATE social_media_content     SET url                = REPLACE(url,                old_prefix, new_prefix) WHERE url                LIKE 'http://localhost:9000/%';
+  UPDATE social_media_content     SET thumbnail_url      = REPLACE(thumbnail_url,      old_prefix, new_prefix) WHERE thumbnail_url      LIKE 'http://localhost:9000/%';
+  UPDATE users                    SET profile_image_url  = REPLACE(profile_image_url,  old_prefix, new_prefix) WHERE profile_image_url  LIKE 'http://localhost:9000/%';
+  RAISE NOTICE 'URL migration complete: % -> %', old_prefix, new_prefix;
+END \$MIGRATE\$;
+"""
+                }
+                sshagent([env.SSH_CRED_ID]) {
+                    sh "scp -o StrictHostKeyChecking=no fix-urls.sql ${env.CLIENT_SERVER}:/tmp/fix-urls-${env.COMPOSE_PROJECT}.sql"
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                            until docker exec ${env.COMPOSE_PROJECT}-postgres-1 pg_isready -U postgres -q; do sleep 2; done
+                            docker exec -i ${env.COMPOSE_PROJECT}-postgres-1 psql -U postgres -d travel_srilanka_db < /tmp/fix-urls-${env.COMPOSE_PROJECT}.sql
+                            rm /tmp/fix-urls-${env.COMPOSE_PROJECT}.sql
+                        '
+                    """
+                }
+            }
+        }
+
+        // ── 6. Health check ───────────────────────────────────────────────
         stage('Health Check') {
             steps {
                 sh 'sleep 30'
