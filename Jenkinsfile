@@ -21,6 +21,14 @@
 pipeline {
     agent any
 
+    environment {
+        // ServerAliveInterval keeps the TCP connection alive through silent Docker
+        // operations (image layer removal, large builds) that produce no output
+        // for tens of seconds and would otherwise cause Jenkins to declare the
+        // durable task dead (JENKINS-48300 / exit code -1).
+        SSH_OPTS = '-o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10'
+    }
+
     stages {
 
         // ── 1. Detect project from branch name ────────────────────────────
@@ -80,7 +88,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
                     sshagent([env.SSH_CRED_ID]) {
                         sh """
-                            ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                            ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
                                 if [ -d /root/travelSriLankaNow/.git ]; then
                                     cd /root/travelSriLankaNow &&
                                     git fetch --all &&
@@ -102,16 +110,16 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: env.SECRETS_CRED_ID, variable: 'SECRETS_FILE')]) {
                     sshagent([env.SSH_CRED_ID]) {
-                        sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'mkdir -p /root/travelSriLankaNow/nginx'"
+                        sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'mkdir -p /root/travelSriLankaNow/nginx'"
 
                         // Push secrets as .env then append non-secret derived vars
-                        sh "scp -o StrictHostKeyChecking=no \$SECRETS_FILE ${env.CLIENT_SERVER}:/root/travelSriLankaNow/.env"
-                        sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'echo \"ALLOWED_ORIGINS=${env.ALLOWED_ORIGINS}\" >> /root/travelSriLankaNow/.env'"
-                        sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'echo \"MINIO_PUBLIC_URL=${env.MINIO_PUBLIC_URL}\" >> /root/travelSriLankaNow/.env'"
+                        sh "scp ${env.SSH_OPTS} \$SECRETS_FILE ${env.CLIENT_SERVER}:/root/travelSriLankaNow/.env"
+                        sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'echo \"ALLOWED_ORIGINS=${env.ALLOWED_ORIGINS}\" >> /root/travelSriLankaNow/.env'"
+                        sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'echo \"MINIO_PUBLIC_URL=${env.MINIO_PUBLIC_URL}\" >> /root/travelSriLankaNow/.env'"
 
                         // Push this project's nginx config (NGINX_CONF in config.env selects the file)
                         sh """
-                            scp -o StrictHostKeyChecking=no \
+                            scp ${env.SSH_OPTS} \
                                 clients/${env.PROJECT_ID}/${env.NGINX_CONF_FILE}.conf \
                                 ${env.CLIENT_SERVER}:/root/travelSriLankaNow/nginx/default.conf
                         """
@@ -125,17 +133,19 @@ pipeline {
             steps {
                 sshagent([env.SSH_CRED_ID]) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                        ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
                             cd /root/travelSriLankaNow
 
-                            # Graceful stop of compose-tracked containers
+                            echo "==> [1/3] Stopping compose-tracked containers..."
                             COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose down --remove-orphans --timeout 60 2>&1 || true
 
-                            # Force-remove any leftover containers with this project prefix
-                            # (catches zombies that lost their compose labels from a partial/manual run)
+                            echo "==> [2/3] Force-removing any leftover containers..."
                             docker ps -a --format "{{.Names}}" | grep "^${env.COMPOSE_PROJECT}-" | xargs -r docker rm -f 2>/dev/null || true
 
-                            COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose up -d --build --force-recreate
+                            echo "==> [3/3] Building and starting containers..."
+                            COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose up -d --build --force-recreate 2>&1
+
+                            echo "==> Build & Deploy complete."
                         '
                     """
                 }
@@ -184,9 +194,9 @@ END \$MIGRATE\$;
 """
                 }
                 sshagent([env.SSH_CRED_ID]) {
-                    sh "scp -o StrictHostKeyChecking=no fix-urls.sql ${env.CLIENT_SERVER}:/tmp/fix-urls-${env.COMPOSE_PROJECT}.sql"
+                    sh "scp ${env.SSH_OPTS} fix-urls.sql ${env.CLIENT_SERVER}:/tmp/fix-urls-${env.COMPOSE_PROJECT}.sql"
                     sh """
-                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                        ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
                             until docker exec ${env.COMPOSE_PROJECT}-postgres-1 pg_isready -U postgres -q; do sleep 2; done
                             docker exec -i ${env.COMPOSE_PROJECT}-postgres-1 psql -U postgres -d travel_srilanka_db < /tmp/fix-urls-${env.COMPOSE_PROJECT}.sql
                             rm /tmp/fix-urls-${env.COMPOSE_PROJECT}.sql
@@ -202,7 +212,7 @@ END \$MIGRATE\$;
                 sh 'sleep 30'
                 sshagent([env.SSH_CRED_ID]) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                        ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
                             COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose ps
                         '
                     """
@@ -219,7 +229,7 @@ END \$MIGRATE\$;
             echo "❌ [${env.PROJECT_ID}] Deployment failed"
             sshagent([env.SSH_CRED_ID]) {
                 sh """
-                    ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} '
+                    ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
                         cd /root/travelSriLankaNow &&
                         COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose logs --tail=100
                     ' || true
