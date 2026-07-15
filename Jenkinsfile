@@ -57,9 +57,10 @@ pipeline {
                     env.COMPOSE_PROJECT = projectId.toLowerCase()
                     env.NGINX_CONF_FILE = cfg.NGINX_CONF ?: 'nginx'
 
-                    // Build ALLOWED_ORIGINS from DOMAIN so it never needs to be in secrets
+                    // Build ALLOWED_ORIGINS and MINIO_PUBLIC_URL from DOMAIN — not secrets
                     def domain = cfg.DOMAIN ?: ''
-                    env.ALLOWED_ORIGINS = domain ? "https://${domain},https://www.${domain}" : 'http://localhost:4200'
+                    env.ALLOWED_ORIGINS    = domain ? "https://${domain},https://www.${domain}" : 'http://localhost:4200'
+                    env.MINIO_PUBLIC_URL   = domain ? "https://${domain}/storage" : 'http://localhost:9000'
 
                     echo """
 ╔══════════════════════════════════════════════════╗
@@ -106,6 +107,7 @@ pipeline {
                         // Push secrets as .env then append non-secret derived vars
                         sh "scp -o StrictHostKeyChecking=no \$SECRETS_FILE ${env.CLIENT_SERVER}:/root/travelSriLankaNow/.env"
                         sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'echo \"ALLOWED_ORIGINS=${env.ALLOWED_ORIGINS}\" >> /root/travelSriLankaNow/.env'"
+                        sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'echo \"MINIO_PUBLIC_URL=${env.MINIO_PUBLIC_URL}\" >> /root/travelSriLankaNow/.env'"
 
                         // Push this project's nginx config (NGINX_CONF in config.env selects the file)
                         sh """
