@@ -1,6 +1,42 @@
-// Main content wrapper for route animations
 .main-content {
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+.route-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+
+  .route-loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+
+    span {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      font-family: system-ui, sans-serif;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .spinner-ring {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
