@@ -85,13 +85,21 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "https://travelsrilankanow.lk",
-                "https://www.travelsrilankanow.lk",
-                "http://95.216.188.135",
-                "https://95.216.188.135"
-        ));
+
+        // Base origins always allowed (local dev)
+        List<String> origins = new java.util.ArrayList<>(List.of("http://localhost:4200"));
+
+        // Per-client domain injected via ALLOWED_ORIGINS env var (comma-separated)
+        // e.g. "https://ruklaktravels.com,https://www.ruklaktravels.com"
+        String envOrigins = System.getenv("ALLOWED_ORIGINS");
+        if (envOrigins != null && !envOrigins.isBlank()) {
+            for (String o : envOrigins.split(",")) {
+                String trimmed = o.trim();
+                if (!trimmed.isEmpty()) origins.add(trimmed);
+            }
+        }
+
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",

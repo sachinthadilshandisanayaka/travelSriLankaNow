@@ -57,6 +57,10 @@ pipeline {
                     env.COMPOSE_PROJECT = projectId.toLowerCase()
                     env.NGINX_CONF_FILE = cfg.NGINX_CONF ?: 'nginx'
 
+                    // Build ALLOWED_ORIGINS from DOMAIN so it never needs to be in secrets
+                    def domain = cfg.DOMAIN ?: ''
+                    env.ALLOWED_ORIGINS = domain ? "https://${domain},https://www.${domain}" : 'http://localhost:4200'
+
                     echo """
 ╔══════════════════════════════════════════════════╗
   Project    : ${projectId}
@@ -99,8 +103,9 @@ pipeline {
                     sshagent([env.SSH_CRED_ID]) {
                         sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'mkdir -p /root/travelSriLankaNow/nginx'"
 
-                        // Push secrets as .env
+                        // Push secrets as .env then append non-secret derived vars
                         sh "scp -o StrictHostKeyChecking=no \$SECRETS_FILE ${env.CLIENT_SERVER}:/root/travelSriLankaNow/.env"
+                        sh "ssh -o StrictHostKeyChecking=no ${env.CLIENT_SERVER} 'echo \"ALLOWED_ORIGINS=${env.ALLOWED_ORIGINS}\" >> /root/travelSriLankaNow/.env'"
 
                         // Push this project's nginx config (NGINX_CONF in config.env selects the file)
                         sh """

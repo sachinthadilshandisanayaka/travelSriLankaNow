@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, switchMap } from 'rxjs/operators';
 import { SiteSettingsService, SiteSettingsMap } from './services/site-settings.service';
@@ -25,6 +25,7 @@ const PAGE_TITLES: Record<string, string> = {
 export class AppComponent implements OnInit {
   title = 'travelSrilankaNow';
   isAdminRoute = false;
+  isNavigating = false;
 
   constructor(
     private router: Router,
@@ -33,13 +34,15 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isAdminRoute = this.router.url.startsWith('/admin');
+
     this.siteSettings.getSettingsAsMap().subscribe(settings => {
       this.applyTitle(this.router.url, settings);
     });
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
-      switchMap((event: any) =>
+      switchMap((_event: any) =>
         this.siteSettings.getSettingsAsMap().pipe(
           filter(settings => !!settings),
           filter((_, i) => i === 0)
@@ -47,16 +50,20 @@ export class AppComponent implements OnInit {
       )
     ).subscribe({ error: () => {} });
 
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.isAdminRoute = event.url.startsWith('/admin');
-      this.siteSettings.getSettingsAsMap().subscribe(settings => {
-        this.applyTitle(event.url, settings);
-      });
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.isAdminRoute = event.url.startsWith('/admin');
+        this.isNavigating = true;
+      } else if (event instanceof NavigationEnd) {
+        this.isAdminRoute = event.url.startsWith('/admin');
+        this.isNavigating = false;
+        this.siteSettings.getSettingsAsMap().subscribe(settings => {
+          this.applyTitle(event.url, settings);
+        });
+      } else if (event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.isNavigating = false;
+      }
     });
-
-    this.isAdminRoute = this.router.url.startsWith('/admin');
   }
 
   private applyTitle(url: string, settings: SiteSettingsMap): void {
