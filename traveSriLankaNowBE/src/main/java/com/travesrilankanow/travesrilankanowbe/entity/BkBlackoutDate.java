@@ -1,5 +1,6 @@
 package com.travesrilankanow.travesrilankanowbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class BkBlackoutDate {
     @Column(name = "nav_booking_config_id", nullable = false)
     private Long navBookingConfigId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nav_booking_config_id", insertable = false, updatable = false)
     @ToString.Exclude
