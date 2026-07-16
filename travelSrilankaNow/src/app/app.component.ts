@@ -31,10 +31,11 @@ export class AppComponent implements OnInit {
     private router: Router,
     private titleService: Title,
     private siteSettings: SiteSettingsService
-  ) {}
+  ) {
+    this.isAdminRoute = this.router.url.startsWith('/admin');
+  }
 
   ngOnInit(): void {
-    this.isAdminRoute = this.router.url.startsWith('/admin');
 
     this.siteSettings.getSettingsAsMap().subscribe(settings => {
       this.applyTitle(this.router.url, settings);

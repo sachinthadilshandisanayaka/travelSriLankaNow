@@ -809,43 +809,71 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
 }
 
 // ─── Nav Booking Rules ────────────────────────────────────────────
-.bks-filter-row {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 16px;
-  .bks-label { font-size: 13px; font-weight: 500; color: $gray-700; white-space: nowrap; }
-}
-.bks-select--sm { width: 220px; }
-
 .bks-rule-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 14px;
 }
 
-.bks-rule-card {
+.bks-nav-rule-card {
   background: #fff;
   border: 1px solid $gray-200;
   border-radius: $radius-md;
   overflow: hidden;
   box-shadow: $shadow-sm;
+  transition: box-shadow .2s;
+
+  &:hover { box-shadow: $shadow-md; }
   &--inactive { opacity: .6; }
 
   &__head {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 10px 14px;
     background: $gray-50;
     border-bottom: 1px solid $gray-200;
   }
-  &__titles { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
-  &__nav   { color: $blue; }
-  &__arrow { color: $gray-400; }
-  &__type  { color: $gray-700; }
-  &__actions { display: flex; gap: 4px; }
+
+  &__titles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 0;
+  }
+
+  &__nav   { color: $blue; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  &__arrow { color: $gray-400; flex-shrink: 0; }
+  &__type  { color: $gray-700; white-space: nowrap; }
+  &__actions { display: flex; gap: 4px; flex-shrink: 0; margin-left: 8px; }
 
   &__body {
     padding: 10px 14px;
-    display: flex; flex-wrap: wrap; gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
   }
+}
+
+.bks-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $gray-200;
+  background: #fff;
+  color: $gray-500;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  flex-shrink: 0;
+
+  &:hover { background: $gray-50; color: $gray-700; border-color: $gray-300; }
+
+  &--danger:hover { background: $red-l; color: $red; border-color: #fca5a5; }
 }
 
 .bks-rule-pill {
@@ -883,7 +911,7 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   &:hover:not(.bks-dow-btn--on) { background: $gray-200; }
 }
 
-.bks-blackout-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.bks-blackout-list { display: flex; flex-direction: column; gap: 6px; }
 .bks-blackout-row {
   display: flex; align-items: center; gap: 10px;
   padding: 6px 10px; background: $gray-50; border-radius: $radius-sm;
