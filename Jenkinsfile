@@ -240,11 +240,16 @@ END \$MIGRATE\$;
             echo "✅ [${env.PROJECT_ID}] Deployed successfully → ${env.CLIENT_SERVER}"
         }
         failure {
-            echo "❌ [${env.PROJECT_ID}] Deployment failed"
+            echo "❌ [${env.PROJECT_ID}] Deployment failed — attempting to restore last running state"
             sshagent([env.SSH_CRED_ID]) {
+                // Bring the stack back up with whatever images are already built.
+                // This ensures the site stays live even when a new deploy fails mid-way.
                 sh """
                     ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} '
-                        cd /root/travelSriLankaNow &&
+                        cd /root/travelSriLankaNow
+                        echo "==> Restoring stack..."
+                        COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose up -d 2>&1 || true
+                        echo "==> Last 100 log lines:"
                         COMPOSE_PROJECT_NAME=${env.COMPOSE_PROJECT} docker compose logs --tail=100
                     ' || true
                 """
