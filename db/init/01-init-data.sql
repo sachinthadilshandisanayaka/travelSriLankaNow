@@ -201,7 +201,7 @@ ON CONFLICT DO NOTHING;
 -- Default navigation bar items
 CREATE TABLE IF NOT EXISTS nav_config (
     id BIGSERIAL PRIMARY KEY,
-    route_path VARCHAR(255) NOT NULL,
+    route_path VARCHAR(255) NOT NULL UNIQUE,
     label_key VARCHAR(100) NOT NULL,
     label_override VARCHAR(100),
     display_order INTEGER NOT NULL DEFAULT 0,
@@ -217,7 +217,7 @@ INSERT INTO nav_config (route_path, label_key, label_override, display_order, is
     ('/events',    'nav.events',    NULL, 3, TRUE, FALSE),
     ('/gallery',   'nav.gallery',   NULL, 4, TRUE, FALSE),
     ('/places',    'nav.places',    NULL, 5, TRUE, FALSE)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (route_path) DO NOTHING;
 
 -- Booking Types (referenced as FK by event_bookings.booking_type)
 CREATE TABLE IF NOT EXISTS bk_types (
