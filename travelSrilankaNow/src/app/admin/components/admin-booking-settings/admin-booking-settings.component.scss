@@ -805,3 +805,86 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   min-width: 64px;
   text-align: center;
 }
+
+// ─── Nav Booking Rules ────────────────────────────────────────────
+.bks-filter-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+  .bks-label { font-size: 13px; font-weight: 500; color: $gray-700; white-space: nowrap; }
+}
+.bks-select--sm { width: 220px; }
+
+.bks-rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.bks-rule-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  &--inactive { opacity: .6; }
+
+  &__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: $gray-50;
+    border-bottom: 1px solid $gray-200;
+  }
+  &__titles { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+  &__nav   { color: $blue; }
+  &__arrow { color: $gray-400; }
+  &__type  { color: $gray-700; }
+  &__actions { display: flex; gap: 4px; }
+
+  &__body {
+    padding: 10px 14px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+}
+
+.bks-rule-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: $blue-l; color: $blue;
+  &--warn    { background: $amber-l; color: $amber; }
+  &--inactive{ background: $gray-100; color: $gray-500; }
+}
+
+// Modal size variant
+.bks-modal--lg { max-width: 640px; width: 100%; }
+
+.bks-mode-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px;
+}
+.bks-mode-card {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px;
+  border: 2px solid $gray-200; border-radius: $radius-sm;
+  cursor: pointer; font-size: 12px;
+  strong { font-size: 13px; }
+  &--active { border-color: $blue; background: $blue-l; strong { color: $blue; } }
+  &:hover:not(.bks-mode-card--active) { border-color: $gray-300; background: $gray-50; }
+}
+
+.bks-dow-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;
+}
+.bks-dow-btn {
+  padding: 4px 10px; border-radius: 20px; border: 1px solid $gray-200;
+  font-size: 11px; font-weight: 600; cursor: pointer; background: $gray-100; color: $gray-500;
+  &--on { background: $blue; color: #fff; border-color: $blue; }
+  &:hover:not(.bks-dow-btn--on) { background: $gray-200; }
+}
+
+.bks-blackout-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.bks-blackout-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px; background: $gray-50; border-radius: $radius-sm;
+}
+.bks-blackout-date { font-size: 13px; font-weight: 600; color: $gray-900; min-width: 100px; }
+.bks-blackout-reason { font-size: 12px; color: $gray-500; flex: 1; }

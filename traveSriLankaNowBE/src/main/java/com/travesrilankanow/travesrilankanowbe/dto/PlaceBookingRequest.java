@@ -13,4 +13,7 @@ public class PlaceBookingRequest {
     private String preferredTime;
     private Integer partySize;
     private String message;
+
+    /** Nav route that initiated the booking (e.g. "/places"). Used to apply NavBookingConfig rules. */
+    private String navRoutePath;
 }

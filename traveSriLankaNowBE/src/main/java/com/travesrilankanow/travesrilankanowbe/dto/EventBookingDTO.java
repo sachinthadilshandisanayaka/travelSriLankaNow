@@ -46,6 +46,9 @@ public class EventBookingDTO {
 
     private Boolean termsAccepted;
 
+    /** Nav route that initiated the booking (e.g. "/events"). Used to apply NavBookingConfig rules. */
+    private String navRoutePath;
+
     @NotNull(message = "Total price is required")
     @Min(value = 0, message = "Price cannot be negative")
     private Double totalPrice;

@@ -46,6 +46,14 @@
       Availability
       <span class="bks-tab__count">{{ availability.length }}</span>
     </button>
+    <button class="bks-tab" [class.bks-tab--active]="activeTab === 'nav-rules'"
+            (click)="activeTab = 'nav-rules'; loadNavRules()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
+      </svg>
+      Nav Booking Rules
+      <span class="bks-tab__count">{{ navRules.length }}</span>
+    </button>
   </div>
 
   <!-- ════════════════ BOOKING TYPES ════════════════ -->
@@ -493,6 +501,253 @@
           <button class="bks-btn bks-btn--ghost" (click)="showAvailForm = false">Cancel</button>
           <button class="bks-btn bks-btn--primary" (click)="saveAvail()">Save Config</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════ NAV BOOKING RULES ════════════════ -->
+<div *ngIf="activeTab === 'nav-rules'" class="bks-panel">
+
+  <div class="bks-panel__header">
+    <div class="bks-panel__header-text">
+      <h2>Nav Booking Rules</h2>
+      <p>Map each navigation section to a booking type and define its conditions — date mode, lead time, party size, day-of-week restrictions, seasonal window, and blackout dates.</p>
+    </div>
+    <button class="bks-btn bks-btn--primary" (click)="openNewNavRule()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+      Add Rule
+    </button>
+  </div>
+
+  <div *ngIf="navRulesSuccess" class="bks-alert bks-alert--success">{{ navRulesSuccess }}</div>
+  <div *ngIf="navRulesError"   class="bks-alert bks-alert--error">{{ navRulesError }}</div>
+
+  <!-- Filter by nav item -->
+  <div class="bks-filter-row">
+    <label class="bks-label">Filter by Nav Item</label>
+    <select class="bks-select bks-select--sm" [(ngModel)]="selectedNavConfigId" (change)="onNavConfigFilterChange()">
+      <option [ngValue]="null">All nav items</option>
+      <option *ngFor="let n of navConfigs" [ngValue]="n.id">{{ n.labelOverride || n.routePath }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="navRulesLoading" class="bks-loading">Loading…</div>
+
+  <!-- Rule cards -->
+  <div *ngIf="!navRulesLoading" class="bks-rule-grid">
+    <div *ngFor="let rule of navRules" class="bks-rule-card" [class.bks-rule-card--inactive]="!rule.isActive">
+
+      <!-- Header -->
+      <div class="bks-rule-card__head">
+        <div class="bks-rule-card__titles">
+          <span class="bks-rule-card__nav">{{ navConfigLabel(rule.navConfigId) }}</span>
+          <span class="bks-rule-card__arrow">→</span>
+          <span class="bks-rule-card__type">{{ rule.bookingTypeCode }}</span>
+        </div>
+        <div class="bks-rule-card__actions">
+          <button class="bks-icon-btn" title="Edit" (click)="editNavRule(rule)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="bks-icon-btn" title="Blackout Dates" (click)="openBlackoutManager(rule)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></svg>
+          </button>
+          <button class="bks-icon-btn" [title]="rule.isActive ? 'Deactivate' : 'Activate'" (click)="toggleNavRuleActive(rule)">
+            <svg *ngIf="rule.isActive"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18.36 6.64A9 9 0 015.64 19.36M9 9l6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg *ngIf="!rule.isActive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 22a10 10 0 100-20 10 10 0 000 20z"/><path d="M12 8v4M12 16h.01"/></svg>
+          </button>
+          <button class="bks-icon-btn bks-icon-btn--danger" title="Delete" (click)="deleteNavRule(rule)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Conditions summary -->
+      <div class="bks-rule-card__body">
+        <div class="bks-rule-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          {{ rule.dateMode }}
+        </div>
+        <div class="bks-rule-pill" *ngIf="rule.minLeadDays">Min lead: {{ rule.minLeadDays }}d</div>
+        <div class="bks-rule-pill" *ngIf="rule.maxAdvanceDays">Max ahead: {{ rule.maxAdvanceDays }}d</div>
+        <div class="bks-rule-pill" *ngIf="rule.minStayDays || rule.maxStayDays">
+          Stay: {{ rule.minStayDays || '?' }}–{{ rule.maxStayDays || '∞' }}n
+        </div>
+        <div class="bks-rule-pill" *ngIf="rule.minParty > 1 || rule.maxParty">
+          Party: {{ rule.minParty }}–{{ rule.maxParty || '∞' }}
+        </div>
+        <div class="bks-rule-pill bks-rule-pill--warn" *ngIf="rule.requireAuth === true">Auth required</div>
+        <div class="bks-rule-pill" *ngIf="rule.allowedDow !== null && rule.allowedDow !== undefined">Days restricted</div>
+        <div class="bks-rule-pill" *ngIf="rule.bookingOpenFrom || rule.bookingOpenTo">Seasonal</div>
+        <div class="bks-rule-pill bks-rule-pill--inactive" *ngIf="!rule.isActive">Inactive</div>
+      </div>
+    </div>
+
+    <div *ngIf="navRules.length === 0" class="bks-empty">
+      No rules configured yet. Click "Add Rule" to map a nav item to a booking type.
+    </div>
+  </div>
+
+  <!-- ── Rule form modal ── -->
+  <div *ngIf="showNavRuleForm" class="bks-modal-backdrop" (click)="showNavRuleForm = false">
+    <div class="bks-modal bks-modal--lg" (click)="$event.stopPropagation()">
+      <div class="bks-modal__head">
+        <h3>{{ editingNavRule ? 'Edit' : 'New' }} Nav Booking Rule</h3>
+        <button class="bks-modal__close" (click)="showNavRuleForm = false">✕</button>
+      </div>
+      <div class="bks-modal__body">
+
+        <!-- Nav Item -->
+        <div class="bks-field">
+          <label class="bks-label">Nav Item <span class="bks-req">*</span></label>
+          <select class="bks-select" [(ngModel)]="navRuleForm.navConfigId" [disabled]="!!editingNavRule">
+            <option [ngValue]="0" disabled>Select nav item…</option>
+            <option *ngFor="let n of navConfigs" [ngValue]="n.id">{{ n.labelOverride || n.routePath }}</option>
+          </select>
+        </div>
+
+        <!-- Booking Type -->
+        <div class="bks-field">
+          <label class="bks-label">Booking Type <span class="bks-req">*</span></label>
+          <select class="bks-select" [(ngModel)]="navRuleForm.bookingTypeCode" [disabled]="!!editingNavRule">
+            <option value="" disabled>Select type…</option>
+            <option *ngFor="let t of types" [value]="t.code">{{ t.name }} ({{ t.code }})</option>
+          </select>
+        </div>
+
+        <!-- Date Mode -->
+        <div class="bks-field">
+          <label class="bks-label">Date Selection Mode <span class="bks-req">*</span></label>
+          <div class="bks-mode-grid">
+            <label *ngFor="let m of DATE_MODES" class="bks-mode-card" [class.bks-mode-card--active]="navRuleForm.dateMode === m.value">
+              <input type="radio" [value]="m.value" [(ngModel)]="navRuleForm.dateMode" hidden>
+              <strong>{{ m.label }}</strong>
+              <span>{{ m.desc }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Advance Booking Window -->
+        <div class="bks-field-row" *ngIf="navRuleForm.dateMode !== 'NONE'">
+          <div class="bks-field">
+            <label class="bks-label">Min Lead Days</label>
+            <input class="bks-input" type="number" min="0" [(ngModel)]="navRuleForm.minLeadDays" placeholder="0">
+            <span class="bks-hint">Must book at least N days in advance (0 = same-day OK)</span>
+          </div>
+          <div class="bks-field">
+            <label class="bks-label">Max Advance Days</label>
+            <input class="bks-input" type="number" min="1" [(ngModel)]="navRuleForm.maxAdvanceDays" placeholder="Unlimited">
+            <span class="bks-hint">Cannot book more than N days ahead (blank = no limit)</span>
+          </div>
+        </div>
+
+        <!-- Stay Duration (RANGE only) -->
+        <div class="bks-field-row" *ngIf="navRuleForm.dateMode === 'RANGE'">
+          <div class="bks-field">
+            <label class="bks-label">Min Stay (nights)</label>
+            <input class="bks-input" type="number" min="1" [(ngModel)]="navRuleForm.minStayDays" placeholder="No minimum">
+          </div>
+          <div class="bks-field">
+            <label class="bks-label">Max Stay (nights)</label>
+            <input class="bks-input" type="number" min="1" [(ngModel)]="navRuleForm.maxStayDays" placeholder="No maximum">
+          </div>
+        </div>
+
+        <!-- Party Size -->
+        <div class="bks-field-row">
+          <div class="bks-field">
+            <label class="bks-label">Min Party Size</label>
+            <input class="bks-input" type="number" min="1" [(ngModel)]="navRuleForm.minParty" placeholder="1">
+          </div>
+          <div class="bks-field">
+            <label class="bks-label">Max Party Size</label>
+            <input class="bks-input" type="number" min="1" [(ngModel)]="navRuleForm.maxParty" placeholder="Unlimited">
+          </div>
+        </div>
+
+        <!-- Day-of-week restriction -->
+        <div class="bks-field">
+          <label class="bks-label">Available Days</label>
+          <div class="bks-dow-row">
+            <button *ngFor="let d of DOW_LABELS; let i = index" type="button"
+                    class="bks-dow-btn" [class.bks-dow-btn--on]="isDowAllowed(i)"
+                    (click)="toggleDow(i)">{{ d }}</button>
+          </div>
+          <span class="bks-hint">All days selected = no restriction. Click a day to exclude it.</span>
+        </div>
+
+        <!-- Seasonal Window -->
+        <div class="bks-field-row">
+          <div class="bks-field">
+            <label class="bks-label">Booking Season From</label>
+            <input class="bks-input" type="date" [(ngModel)]="navRuleForm.bookingOpenFrom" placeholder="No restriction">
+            <span class="bks-hint">First date bookings are accepted</span>
+          </div>
+          <div class="bks-field">
+            <label class="bks-label">Booking Season To</label>
+            <input class="bks-input" type="date" [(ngModel)]="navRuleForm.bookingOpenTo" placeholder="No restriction">
+            <span class="bks-hint">Last date bookings are accepted</span>
+          </div>
+        </div>
+
+        <!-- Auth & Active -->
+        <div class="bks-field-row">
+          <label class="bks-checkbox-label">
+            <input type="checkbox" [(ngModel)]="navRuleForm.requireAuth">
+            Require login to book
+          </label>
+          <label class="bks-checkbox-label">
+            <input type="checkbox" [(ngModel)]="navRuleForm.isActive">
+            Active
+          </label>
+        </div>
+
+      </div>
+      <div class="bks-modal__foot">
+        <button class="bks-btn bks-btn--ghost" (click)="showNavRuleForm = false">Cancel</button>
+        <button class="bks-btn bks-btn--primary" (click)="saveNavRule()">Save Rule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Blackout Dates modal ── -->
+  <div *ngIf="showBlackoutForm" class="bks-modal-backdrop" (click)="showBlackoutForm = false">
+    <div class="bks-modal" (click)="$event.stopPropagation()">
+      <div class="bks-modal__head">
+        <h3>Blackout Dates</h3>
+        <button class="bks-modal__close" (click)="showBlackoutForm = false">✕</button>
+      </div>
+      <div class="bks-modal__body">
+        <p class="bks-hint" style="margin-bottom:12px">Add dates on which no bookings will be accepted (public holidays, maintenance, etc.)</p>
+
+        <!-- Add new blackout date -->
+        <div class="bks-field-row" style="align-items:flex-end">
+          <div class="bks-field">
+            <label class="bks-label">Date</label>
+            <input class="bks-input" type="date" [(ngModel)]="newBlackoutDate">
+          </div>
+          <div class="bks-field">
+            <label class="bks-label">Reason (optional)</label>
+            <input class="bks-input" type="text" [(ngModel)]="newBlackoutReason" placeholder="e.g. Public holiday">
+          </div>
+          <button class="bks-btn bks-btn--primary" [disabled]="!newBlackoutDate" (click)="addBlackoutDate()">Add</button>
+        </div>
+
+        <!-- Existing blackout dates -->
+        <div class="bks-blackout-list" *ngIf="blackoutDates.length > 0">
+          <div class="bks-blackout-row" *ngFor="let b of blackoutDates">
+            <span class="bks-blackout-date">{{ b.blackoutDate }}</span>
+            <span class="bks-blackout-reason">{{ b.reason || '—' }}</span>
+            <button class="bks-icon-btn bks-icon-btn--danger" (click)="removeBlackoutDate(b)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <p *ngIf="blackoutDates.length === 0" class="bks-empty" style="padding:12px 0">No blackout dates configured.</p>
+      </div>
+      <div class="bks-modal__foot">
+        <button class="bks-btn bks-btn--primary" (click)="showBlackoutForm = false">Done</button>
       </div>
     </div>
   </div>

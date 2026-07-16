@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import {
+  NavBookingConfig, BkBlackoutDate,
+  blankNavBookingConfig, DOW_LABELS, isDowAllowed, toggleDow
+} from '../../../models/nav-booking-config.model';
+import { AdminNavBookingConfigService } from '../../services/admin-nav-booking-config.service';
 
 export interface BkType {
   id?: number;
@@ -48,7 +53,7 @@ export interface BkAvailabilityConfig {
 export class AdminBookingSettingsComponent implements OnInit {
   private apiBase = `${environment.apiUrl}/admin/booking-settings`;
 
-  activeTab: 'types' | 'conditions' | 'terms' | 'availability' = 'conditions';
+  activeTab: 'types' | 'conditions' | 'terms' | 'availability' | 'nav-rules' = 'conditions';
 
   readonly PAGE_SIZE = 6;
 
@@ -101,18 +106,46 @@ export class AdminBookingSettingsComponent implements OnInit {
   availForm: BkAvailabilityConfig = this.blankAvail();
   availPage = 0;
 
+  // ── Nav Booking Rules ──
+  navConfigs: { id: number; routePath: string; labelKey: string; labelOverride?: string }[] = [];
+  navRules: NavBookingConfig[] = [];
+  navRulesLoading = false;
+  navRulesError = '';
+  navRulesSuccess = '';
+  showNavRuleForm = false;
+  editingNavRule: NavBookingConfig | null = null;
+  navRuleForm: NavBookingConfig = blankNavBookingConfig();
+  selectedNavConfigId: number | null = null;
+  // Blackout date management within a rule
+  showBlackoutForm = false;
+  blackoutConfigId: number | null = null;
+  blackoutDates: BkBlackoutDate[] = [];
+  newBlackoutDate = '';
+  newBlackoutReason = '';
+  readonly DOW_LABELS = DOW_LABELS;
+  readonly DATE_MODES = [
+    { value: 'SINGLE', label: 'Single Date',  desc: 'Customer picks one visit date (day tour, event)' },
+    { value: 'RANGE',  label: 'Date Range',   desc: 'Customer picks check-in + check-out (accommodation, multi-day tour)' },
+    { value: 'MULTI',  label: 'Multi-Date',   desc: 'Customer picks multiple individual dates (recurring sessions)' },
+    { value: 'NONE',   label: 'No Date',      desc: 'No date required (open voucher, gift package)' },
+  ];
+
   // ── Shared delete dialog ──
   showDeleteDialog = false;
   deleteDialogMessage = '';
   private pendingDeleteAction: (() => void) | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private navRuleService: AdminNavBookingConfigService
+  ) {}
 
   ngOnInit(): void {
     this.loadTypes();
     this.loadConditions();
     this.loadTerms();
     this.loadAvailability();
+    this.loadNavConfigs();
   }
 
   get activeTypeNames(): string[] {
@@ -396,5 +429,122 @@ export class AdminBookingSettingsComponent implements OnInit {
   private blankAvail(): BkAvailabilityConfig {
     const defaultType = this.activeTypeNames[0] ?? 'EVENT';
     return { bookingTypeCode: defaultType, entityId: null, allowMultiplePerDate: true, maxBookingsPerDate: null, active: true };
+  }
+
+  // ─────────────── NAV BOOKING RULES ───────────────
+
+  loadNavConfigs(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/admin/nav-config`).subscribe({
+      next: (d) => { this.navConfigs = d; },
+      error: () => {}
+    });
+  }
+
+  loadNavRules(navConfigId?: number): void {
+    this.navRulesLoading = true;
+    const obs = navConfigId
+      ? this.navRuleService.getByNavConfigId(navConfigId)
+      : this.navRuleService.getAll();
+    obs.subscribe({
+      next: (d) => { this.navRules = d; this.navRulesLoading = false; },
+      error: () => { this.navRulesError = 'Failed to load rules.'; this.navRulesLoading = false; }
+    });
+  }
+
+  onNavConfigFilterChange(): void {
+    this.loadNavRules(this.selectedNavConfigId ?? undefined);
+  }
+
+  openNewNavRule(): void {
+    this.navRuleForm = blankNavBookingConfig(this.selectedNavConfigId ?? 0);
+    this.editingNavRule = null;
+    this.showNavRuleForm = true;
+  }
+
+  editNavRule(rule: NavBookingConfig): void {
+    this.navRuleForm = { ...rule };
+    this.editingNavRule = rule;
+    this.showNavRuleForm = true;
+  }
+
+  saveNavRule(): void {
+    const obs = this.editingNavRule
+      ? this.navRuleService.update(this.navRuleForm.id!, this.navRuleForm)
+      : this.navRuleService.create(this.navRuleForm);
+    obs.subscribe({
+      next: () => {
+        this.navRulesSuccess = 'Rule saved.';
+        this.showNavRuleForm = false;
+        this.loadNavRules(this.selectedNavConfigId ?? undefined);
+        setTimeout(() => this.navRulesSuccess = '', 3000);
+      },
+      error: (e) => { this.navRulesError = e?.error?.message ?? 'Failed to save rule.'; }
+    });
+  }
+
+  toggleNavRuleActive(rule: NavBookingConfig): void {
+    this.navRuleService.toggleActive(rule.id!).subscribe({
+      next: (r) => { const i = this.navRules.findIndex(x => x.id === rule.id); if (i >= 0) this.navRules[i] = r; }
+    });
+  }
+
+  deleteNavRule(rule: NavBookingConfig): void {
+    const navLabel = rule.navConfig?.labelOverride || rule.navConfig?.routePath || '';
+    this.deleteDialogMessage = `Delete booking rule for "${rule.bookingTypeCode}" on "${navLabel}"?`;
+    this.pendingDeleteAction = () => {
+      this.navRuleService.delete(rule.id!).subscribe({
+        next: () => { this.navRules = this.navRules.filter(x => x.id !== rule.id); },
+        error: () => { this.navRulesError = 'Failed to delete rule.'; }
+      });
+    };
+    this.showDeleteDialog = true;
+  }
+
+  navConfigLabel(id: number): string {
+    const c = this.navConfigs.find(n => n.id === id);
+    return c ? (c.labelOverride || c.routePath) : String(id);
+  }
+
+  // Day-of-week helpers
+  isDowAllowed(dayIndex: number): boolean {
+    return isDowAllowed(this.navRuleForm.allowedDow, dayIndex);
+  }
+
+  toggleDow(dayIndex: number): void {
+    if (this.navRuleForm.allowedDow === null) {
+      // null = all days; first toggle selects all EXCEPT this day
+      this.navRuleForm.allowedDow = 127 ^ (1 << dayIndex); // 127 = all 7 bits
+    } else {
+      const next = toggleDow(this.navRuleForm.allowedDow, dayIndex);
+      // If all 7 bits set, reset to null (= unrestricted)
+      this.navRuleForm.allowedDow = next === 127 ? null : next;
+    }
+  }
+
+  // Blackout dates
+  openBlackoutManager(rule: NavBookingConfig): void {
+    this.blackoutConfigId = rule.id!;
+    this.blackoutDates = [];
+    this.newBlackoutDate = '';
+    this.newBlackoutReason = '';
+    this.showBlackoutForm = true;
+    this.navRuleService.getBlackoutDates(rule.id!).subscribe({
+      next: (d) => this.blackoutDates = d,
+      error: () => {}
+    });
+  }
+
+  addBlackoutDate(): void {
+    if (!this.blackoutConfigId || !this.newBlackoutDate) return;
+    this.navRuleService.addBlackoutDate(this.blackoutConfigId, this.newBlackoutDate, this.newBlackoutReason).subscribe({
+      next: (d) => { this.blackoutDates.push(d); this.newBlackoutDate = ''; this.newBlackoutReason = ''; },
+      error: (e) => { this.navRulesError = e?.error?.message ?? 'Failed to add date.'; }
+    });
+  }
+
+  removeBlackoutDate(b: BkBlackoutDate): void {
+    this.navRuleService.removeBlackoutDate(this.blackoutConfigId!, b.id!).subscribe({
+      next: () => { this.blackoutDates = this.blackoutDates.filter(x => x.id !== b.id); }
+    });
   }
 }
