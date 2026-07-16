@@ -58,16 +58,18 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   border-bottom: 2px solid $gray-200;
   margin-bottom: 28px;
   overflow-x: auto;
+  scrollbar-width: none; // Firefox
+  &::-webkit-scrollbar { display: none; } // Chrome/Safari
 }
 
 .bks-tab {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 11px 18px;
+  gap: 6px;
+  padding: 10px 14px;
   border: none;
   background: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   color: $gray-500;
   cursor: pointer;

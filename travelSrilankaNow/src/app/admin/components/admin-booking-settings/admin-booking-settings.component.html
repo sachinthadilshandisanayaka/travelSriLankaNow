@@ -528,7 +528,7 @@
   <div class="bks-filter-row">
     <label class="bks-label">Filter by Nav Item</label>
     <select class="bks-select bks-select--sm" [(ngModel)]="selectedNavConfigId" (change)="onNavConfigFilterChange()">
-      <option [ngValue]="null">All nav items</option>
+      <option [ngValue]="-1">All nav items</option>
       <option *ngFor="let n of navConfigs" [ngValue]="n.id">{{ n.labelOverride || n.routePath }}</option>
     </select>
   </div>

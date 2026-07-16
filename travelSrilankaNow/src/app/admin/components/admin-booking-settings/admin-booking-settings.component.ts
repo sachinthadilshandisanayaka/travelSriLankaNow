@@ -115,7 +115,7 @@ export class AdminBookingSettingsComponent implements OnInit {
   showNavRuleForm = false;
   editingNavRule: NavBookingConfig | null = null;
   navRuleForm: NavBookingConfig = blankNavBookingConfig();
-  selectedNavConfigId: number | null = null;
+  selectedNavConfigId = -1; // -1 = all nav items
   // Blackout date management within a rule
   showBlackoutForm = false;
   blackoutConfigId: number | null = null;
@@ -442,7 +442,8 @@ export class AdminBookingSettingsComponent implements OnInit {
 
   loadNavRules(navConfigId?: number): void {
     this.navRulesLoading = true;
-    const obs = navConfigId
+    this.navRulesError = '';
+    const obs = navConfigId && navConfigId > 0
       ? this.navRuleService.getByNavConfigId(navConfigId)
       : this.navRuleService.getAll();
     obs.subscribe({
@@ -452,11 +453,11 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   onNavConfigFilterChange(): void {
-    this.loadNavRules(this.selectedNavConfigId ?? undefined);
+    this.loadNavRules(this.selectedNavConfigId > 0 ? this.selectedNavConfigId : undefined);
   }
 
   openNewNavRule(): void {
-    this.navRuleForm = blankNavBookingConfig(this.selectedNavConfigId ?? 0);
+    this.navRuleForm = blankNavBookingConfig(this.selectedNavConfigId > 0 ? this.selectedNavConfigId : 0);
     this.editingNavRule = null;
     this.showNavRuleForm = true;
   }
