@@ -341,26 +341,27 @@
         </div>
 
         <!-- Date Range Picker (RANGE mode) -->
-        <div class="booking-form__row" *ngIf="dateMode === 'RANGE'">
-          <div class="booking-form__group">
-            <label>Check-in Date <span style="color:#e53e3e">*</span></label>
-            <input type="date" [(ngModel)]="booking.checkInDate" [min]="todayStr" (change)="onCheckInChange()" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
-            <small *ngIf="navBookingConfig && navBookingConfig.minLeadDays > 0" style="color:#6b7280;font-size:12px">Minimum {{ navBookingConfig.minLeadDays }} day(s) advance booking required</small>
-          </div>
-          <div class="booking-form__group">
-            <label>Check-out Date <span style="color:#e53e3e">*</span></label>
-            <input type="date" [(ngModel)]="booking.checkOutDate" [min]="checkOutMin || todayStr" [max]="checkOutMax" [disabled]="!booking.checkInDate" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
-            <small *ngIf="minStayDays > 1 || maxStayDays" style="color:#6b7280;font-size:12px">
-              <ng-container *ngIf="minStayDays > 1 && maxStayDays">{{ minStayDays }}–{{ maxStayDays }} nights</ng-container>
-              <ng-container *ngIf="minStayDays > 1 && !maxStayDays">Minimum {{ minStayDays }} nights</ng-container>
-              <ng-container *ngIf="minStayDays <= 1 && maxStayDays">Maximum {{ maxStayDays }} nights</ng-container>
-            </small>
-          </div>
-        </div>
-
-        <!-- Selected range summary -->
-        <div *ngIf="dateMode === 'RANGE' && booking.checkInDate && booking.checkOutDate" style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#166534;">
-          ✅ {{ booking.checkInDate | date:'EEE, MMM d' }} → {{ booking.checkOutDate | date:'EEE, MMM d, yyyy' }}
+        <div class="booking-form__group" *ngIf="dateMode === 'RANGE'">
+          <label>Select Dates <span style="color:#e53e3e">*</span></label>
+          <app-date-range-picker
+            mode="range"
+            [startDate]="booking.checkInDate || ''"
+            [endDate]="booking.checkOutDate || ''"
+            [minDate]="checkInMin"
+            [minStay]="minStayDays"
+            [maxStay]="maxStayDays || 0"
+            [blockedDates]="blockedDates"
+            placeholder="Select check-in & check-out"
+            (apply)="onDateRangeApply($event)">
+          </app-date-range-picker>
+          <small *ngIf="navBookingConfig && navBookingConfig.minLeadDays > 0" style="color:#6b7280;font-size:12px;margin-top:4px;display:block">
+            Minimum {{ navBookingConfig.minLeadDays }} day(s) advance booking required
+          </small>
+          <small *ngIf="minStayDays > 1 || maxStayDays" style="color:#6b7280;font-size:12px;margin-top:2px;display:block">
+            <ng-container *ngIf="minStayDays > 1 && maxStayDays">{{ minStayDays }}–{{ maxStayDays }} nights stay</ng-container>
+            <ng-container *ngIf="minStayDays > 1 && !maxStayDays">Minimum {{ minStayDays }} nights</ng-container>
+            <ng-container *ngIf="minStayDays <= 1 && maxStayDays">Maximum {{ maxStayDays }} nights</ng-container>
+          </small>
         </div>
 
         <!-- Inline Date Calendar (SINGLE / free-form modes) -->

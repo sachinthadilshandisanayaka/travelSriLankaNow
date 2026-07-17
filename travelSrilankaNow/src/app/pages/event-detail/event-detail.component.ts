@@ -136,6 +136,20 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     return new Date().toISOString().substring(0, 10);
   }
 
+  get checkInMin(): string {
+    if (this.navBookingConfig && this.navBookingConfig.minLeadDays > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + this.navBookingConfig.minLeadDays);
+      return d.toISOString().substring(0, 10);
+    }
+    return this.todayStr;
+  }
+
+  onDateRangeApply(event: { start: string; end: string }): void {
+    this.booking.checkInDate = event.start;
+    this.booking.checkOutDate = event.end;
+  }
+
   onCheckInChange(): void {
     // Reset check-out when check-in changes and current check-out is now invalid
     if (this.booking.checkInDate && this.booking.checkOutDate) {

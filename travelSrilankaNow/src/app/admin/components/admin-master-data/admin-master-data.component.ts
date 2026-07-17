@@ -36,6 +36,10 @@ export class AdminMasterDataComponent implements OnInit {
   showDeleteModal = false;
   itemToDelete: MasterData | null = null;
 
+  // Per-item toggle loading state
+  togglingIds = new Set<number>();
+  successMessage = '';
+
   // Type display names
   typeDisplayNames: { [key: string]: string } = {
     'EVENT_CATEGORY': 'Event Categories',
@@ -190,15 +194,38 @@ export class AdminMasterDataComponent implements OnInit {
   }
 
   toggleActive(item: MasterData): void {
-    if (!item.id) return;
+    if (!item.id || this.togglingIds.has(item.id)) return;
 
-    this.adminApiService.toggleMasterDataActive(item.id).subscribe({
+    const id = item.id;
+    this.togglingIds.add(id);
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    // Optimistic UI update
+    const previousState = item.isActive;
+    item.isActive = !item.isActive;
+
+    this.adminApiService.toggleMasterDataActive(id).subscribe({
       next: () => {
-        this.loadData();
+        this.togglingIds.delete(id);
+        this.successMessage = `"${item.displayName}" has been ${item.isActive ? 'activated' : 'deactivated'}.`;
         this.masterDataService.clearCache(item.type);
+        setTimeout(() => { this.successMessage = ''; }, 3000);
+        // Silent background refresh to sync with server
+        this.adminApiService.getMasterData().subscribe({
+          next: (data) => {
+            this.masterDataList = data;
+            this.filterByType();
+          },
+          error: () => {}
+        });
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to toggle status';
+        // Revert optimistic update
+        item.isActive = previousState;
+        this.togglingIds.delete(id);
+        this.errorMessage = error.error?.message || 'Failed to toggle status. Please try again.';
+        console.error('Toggle error:', error);
       }
     });
   }

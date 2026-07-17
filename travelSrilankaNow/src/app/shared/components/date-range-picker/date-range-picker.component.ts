@@ -25,6 +25,8 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
   @Input() minDate: string = '';
   @Input() placeholder: string = 'Select date';
   @Input() blockedDates: string[] = [];
+  @Input() minStay: number = 1;
+  @Input() maxStay: number = 0;
   @Output() apply = new EventEmitter<{ start: string; end: string }>();
   @Output() cancel = new EventEmitter<void>();
   @Output() monthChange = new EventEmitter<{ year: number; month: number }>();
@@ -277,7 +279,24 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
       ? (this.tempStart <= effectiveEnd ? effectiveEnd : this.tempStart) : '';
 
     const isBlocked = currentMonth && this.blockedDates.includes(dateStr);
-    const isPast = !!(this.minDate && dateStr < this.minDate);
+
+    // When picking checkout, enforce minStay / maxStay relative to tempStart
+    let effectiveMin = this.minDate;
+    let isAfterMax = false;
+    if (this.selectingEnd && this.tempStart) {
+      if (this.minStay > 0) {
+        const d = new Date(this.tempStart + 'T00:00:00');
+        d.setDate(d.getDate() + this.minStay);
+        const minCheckout = d.toISOString().split('T')[0];
+        if (!effectiveMin || minCheckout > effectiveMin) { effectiveMin = minCheckout; }
+      }
+      if (this.maxStay > 0) {
+        const d = new Date(this.tempStart + 'T00:00:00');
+        d.setDate(d.getDate() + this.maxStay);
+        isAfterMax = dateStr > d.toISOString().split('T')[0];
+      }
+    }
+    const isPast = !!(effectiveMin && dateStr < effectiveMin);
 
     return {
       date: dateStr,
@@ -287,7 +306,7 @@ export class DateRangePickerComponent implements OnInit, OnChanges {
       isStart: !!(rs && dateStr === rs),
       isEnd: !!(re && dateStr === re) || (this.mode === 'single' && dateStr === this.tempStart),
       inRange: !!(rs && re && dateStr > rs && dateStr < re),
-      isDisabled: isPast || isBlocked,
+      isDisabled: isPast || isBlocked || isAfterMax,
       isHover: dateStr === this.hoverDate,
       isBlocked
     };

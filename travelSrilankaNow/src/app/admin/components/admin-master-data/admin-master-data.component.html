@@ -24,6 +24,14 @@
       {{ errorMessage }}
     </div>
 
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      {{ successMessage }}
+    </div>
+
     <!-- Filter Section -->
     <div class="admin-filter">
       <div class="admin-filter__group">
@@ -89,11 +97,23 @@
               </td>
               <td>
                 <div class="admin-table__actions">
-                  <button class="admin-btn admin-btn--ghost" (click)="toggleActive(item)" [title]="item.isActive ? 'Deactivate' : 'Activate'">
-                    <svg *ngIf="item.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button
+                    class="admin-btn admin-btn--ghost"
+                    [class.admin-btn--toggling]="item.id && togglingIds.has(item.id)"
+                    (click)="toggleActive(item); $event.stopPropagation()"
+                    [disabled]="!!(item.id && togglingIds.has(item.id))"
+                    [title]="item.isActive ? 'Deactivate' : 'Activate'">
+                    <!-- Spinner while toggling -->
+                    <svg *ngIf="item.id && togglingIds.has(item.id)" class="admin-btn__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <!-- Deactivate icon -->
+                    <svg *ngIf="item.isActive && !(item.id && togglingIds.has(item.id))" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
                     </svg>
-                    <svg *ngIf="!item.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Activate icon -->
+                    <svg *ngIf="!item.isActive && !(item.id && togglingIds.has(item.id))" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                   </button>
