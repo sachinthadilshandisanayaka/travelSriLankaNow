@@ -53,9 +53,14 @@ public class EventBookingService {
 
         checkAvailability(EventBooking.BookingTypes.EVENT, dto.getEventId(), requestedDate);
 
+        // For RANGE mode, use checkInDate as the primary date
+        if (requestedDate == null && dto.getCheckInDate() != null) {
+            requestedDate = dto.getCheckInDate();
+        }
+
         // Validate against nav-item booking rules (lead time, party size, blackouts, etc.)
         navBookingConfigService.validateBooking(
-                dto.getNavRoutePath(), requestedDate, null,
+                dto.getNavRoutePath(), requestedDate, dto.getCheckOutDate(),
                 dto.getNumberOfPeople(), currentUsername != null);
 
         if (dto.getEventDateId() != null) {
@@ -82,6 +87,8 @@ public class EventBookingService {
         booking.setPaymentStatus(EventBooking.PaymentStatus.UNPAID);
         booking.setTermsAccepted(Boolean.TRUE.equals(dto.getTermsAccepted()));
         booking.setRequestedDate(requestedDate);
+        booking.setCheckInDate(dto.getCheckInDate());
+        booking.setCheckOutDate(dto.getCheckOutDate());
 
         // Append any free-text notes to specialRequests
         String notes = dto.getSpecialRequests() != null ? dto.getSpecialRequests() : "";

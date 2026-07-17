@@ -41,6 +41,12 @@ public class EventBookingDTO {
     /** Customer's chosen visit/event date. Stored as requestedDate on the booking record. */
     private LocalDate requestedDate;
 
+    /** Check-in date for RANGE mode bookings (e.g. multi-day tours). */
+    private LocalDate checkInDate;
+
+    /** Check-out date for RANGE mode bookings. */
+    private LocalDate checkOutDate;
+
     /** Legacy free-text field kept for backward compatibility */
     private String preferredDate;
 

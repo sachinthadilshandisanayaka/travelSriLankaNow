@@ -156,8 +156,11 @@
           </div>
         </div>
         <div class="bks-modal__footer">
-          <button class="bks-btn bks-btn--ghost" (click)="showTypeForm = false">Cancel</button>
-          <button class="bks-btn bks-btn--primary" (click)="saveType()">Save Type</button>
+          <button class="bks-btn bks-btn--ghost" (click)="showTypeForm = false" [disabled]="isSaving">Cancel</button>
+          <button class="bks-btn bks-btn--primary" (click)="saveType()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="bks-spinner bks-spinner--sm"></span>
+            <span>{{ isSaving ? 'Saving…' : 'Save Type' }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -282,8 +285,11 @@
           </div>
         </div>
         <div class="bks-modal__footer">
-          <button class="bks-btn bks-btn--ghost" (click)="showConditionForm = false">Cancel</button>
-          <button class="bks-btn bks-btn--primary" (click)="saveCondition()">Save Rule</button>
+          <button class="bks-btn bks-btn--ghost" (click)="showConditionForm = false" [disabled]="isSaving">Cancel</button>
+          <button class="bks-btn bks-btn--primary" (click)="saveCondition()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="bks-spinner bks-spinner--sm"></span>
+            <span>{{ isSaving ? 'Saving…' : 'Save Rule' }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -393,8 +399,11 @@
           </div>
         </div>
         <div class="bks-modal__footer">
-          <button class="bks-btn bks-btn--ghost" (click)="showTermsForm = false">Cancel</button>
-          <button class="bks-btn bks-btn--primary" (click)="saveTerms()">Save Terms</button>
+          <button class="bks-btn bks-btn--ghost" (click)="showTermsForm = false" [disabled]="isSaving">Cancel</button>
+          <button class="bks-btn bks-btn--primary" (click)="saveTerms()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="bks-spinner bks-spinner--sm"></span>
+            <span>{{ isSaving ? 'Saving…' : 'Save Terms' }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -498,8 +507,11 @@
           </div>
         </div>
         <div class="bks-modal__footer">
-          <button class="bks-btn bks-btn--ghost" (click)="showAvailForm = false">Cancel</button>
-          <button class="bks-btn bks-btn--primary" (click)="saveAvail()">Save Config</button>
+          <button class="bks-btn bks-btn--ghost" (click)="showAvailForm = false" [disabled]="isSaving">Cancel</button>
+          <button class="bks-btn bks-btn--primary" (click)="saveAvail()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="bks-spinner bks-spinner--sm"></span>
+            <span>{{ isSaving ? 'Saving…' : 'Save Config' }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -695,8 +707,11 @@
 
         </div>
         <div class="bks-modal__footer">
-          <button class="bks-btn bks-btn--ghost" (click)="showNavRuleForm = false">Cancel</button>
-          <button class="bks-btn bks-btn--primary" (click)="saveNavRule()">Save Rule</button>
+          <button class="bks-btn bks-btn--ghost" (click)="showNavRuleForm = false" [disabled]="isSaving">Cancel</button>
+          <button class="bks-btn bks-btn--primary" (click)="saveNavRule()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="bks-spinner bks-spinner--sm"></span>
+            <span>{{ isSaving ? 'Saving…' : 'Save Rule' }}</span>
+          </button>
         </div>
       </div>
     </div>

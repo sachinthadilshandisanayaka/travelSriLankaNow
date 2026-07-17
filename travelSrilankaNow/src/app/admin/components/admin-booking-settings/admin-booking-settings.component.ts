@@ -135,6 +135,10 @@ export class AdminBookingSettingsComponent implements OnInit {
   deleteDialogMessage = '';
   private pendingDeleteAction: (() => void) | null = null;
 
+  // ── Loading states ──
+  isSaving = false;
+  isDeleting = false;
+
   constructor(
     private http: HttpClient,
     private navRuleService: AdminNavBookingConfigService
@@ -214,17 +218,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveType(): void {
+    this.isSaving = true;
     const req = this.editingType
       ? this.http.put<BkType>(`${this.apiBase}/types/${this.typeForm.id}`, this.typeForm)
       : this.http.post<BkType>(`${this.apiBase}/types`, this.typeForm);
     req.subscribe({
       next: () => {
+        this.isSaving = false;
         this.typesSuccess = 'Booking type saved.';
         this.showTypeForm = false;
         this.loadTypes();
         setTimeout(() => this.typesSuccess = '', 3000);
       },
-      error: () => { this.typesError = 'Failed to save booking type.'; }
+      error: () => { this.isSaving = false; this.typesError = 'Failed to save booking type.'; }
     });
   }
 
@@ -271,17 +277,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveCondition(): void {
+    this.isSaving = true;
     const req = this.editingCondition
       ? this.http.put<BkCondition>(`${this.apiBase}/conditions/${this.conditionForm.id}`, this.conditionForm)
       : this.http.post<BkCondition>(`${this.apiBase}/conditions`, this.conditionForm);
     req.subscribe({
       next: () => {
+        this.isSaving = false;
         this.conditionsSuccess = 'Rule saved.';
         this.showConditionForm = false;
         this.loadConditions();
         setTimeout(() => this.conditionsSuccess = '', 3000);
       },
-      error: () => { this.conditionsError = 'Failed to save rule.'; }
+      error: () => { this.isSaving = false; this.conditionsError = 'Failed to save rule.'; }
     });
   }
 
@@ -337,14 +345,16 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveTerms(): void {
+    this.isSaving = true;
     this.http.post<BkTerms>(`${this.apiBase}/terms`, this.termsForm).subscribe({
       next: () => {
+        this.isSaving = false;
         this.termsSuccess = 'Terms saved.';
         this.showTermsForm = false;
         this.loadTerms();
         setTimeout(() => this.termsSuccess = '', 3000);
       },
-      error: () => { this.termsError = 'Failed to save terms.'; }
+      error: () => { this.isSaving = false; this.termsError = 'Failed to save terms.'; }
     });
   }
 
@@ -396,17 +406,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveAvail(): void {
+    this.isSaving = true;
     const req = this.availForm.id
       ? this.http.put<BkAvailabilityConfig>(`${this.apiBase}/availability/${this.availForm.id}`, this.availForm)
       : this.http.post<BkAvailabilityConfig>(`${this.apiBase}/availability`, this.availForm);
     req.subscribe({
       next: () => {
+        this.isSaving = false;
         this.availSuccess = 'Config saved.';
         this.showAvailForm = false;
         this.loadAvailability();
         setTimeout(() => this.availSuccess = '', 3000);
       },
-      error: () => { this.availError = 'Failed to save config.'; }
+      error: () => { this.isSaving = false; this.availError = 'Failed to save config.'; }
     });
   }
 
@@ -421,9 +433,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   confirmDelete(): void {
-    this.pendingDeleteAction?.();
+    this.isDeleting = true;
+    const action = this.pendingDeleteAction;
     this.pendingDeleteAction = null;
     this.showDeleteDialog = false;
+    if (action) {
+      // Wrap in setTimeout to let the dialog close and spinner render first
+      setTimeout(() => {
+        action();
+        this.isDeleting = false;
+      }, 0);
+    } else {
+      this.isDeleting = false;
+    }
   }
 
   private blankAvail(): BkAvailabilityConfig {
@@ -469,17 +491,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveNavRule(): void {
+    this.isSaving = true;
     const obs = this.editingNavRule
       ? this.navRuleService.update(this.navRuleForm.id!, this.navRuleForm)
       : this.navRuleService.create(this.navRuleForm);
     obs.subscribe({
       next: () => {
+        this.isSaving = false;
         this.navRulesSuccess = 'Rule saved.';
         this.showNavRuleForm = false;
         this.loadNavRules(this.selectedNavConfigId ?? undefined);
         setTimeout(() => this.navRulesSuccess = '', 3000);
       },
-      error: (e) => { this.navRulesError = e?.error?.message ?? 'Failed to save rule.'; }
+      error: (e) => { this.isSaving = false; this.navRulesError = e?.error?.message ?? 'Failed to save rule.'; }
     });
   }
 

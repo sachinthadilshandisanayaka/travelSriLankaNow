@@ -175,6 +175,16 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   border-top-color: $blue;
   border-radius: 50%;
   animation: bks-spin .7s linear infinite;
+
+  &--sm {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-width: 2px;
+    border-color: rgba(255,255,255,.4);
+    border-top-color: #fff;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
 }
 
 @keyframes bks-spin { to { transform: rotate(360deg); } }

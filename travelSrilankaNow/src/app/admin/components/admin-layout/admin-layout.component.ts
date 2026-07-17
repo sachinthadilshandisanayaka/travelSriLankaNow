@@ -15,6 +15,7 @@ import { catchError } from 'rxjs/operators';
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
   displayName = '';
+  roleName = '';
   isSidebarOpen = false;
   showLogoutConfirm = false;
   pendingCount = 0;
@@ -44,6 +45,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.displayNameSub = this.authService.displayName$.subscribe(name => {
       this.displayName = name;
     });
+    this.roleName = this.authService.getAdminRoleName() || this.authService.getRole() || 'Administrator';
     this.brandingSub = this.brandingService.branding$.subscribe(b => this.branding = b);
 
     // Only subscribe to pending bookings if the user has permission
