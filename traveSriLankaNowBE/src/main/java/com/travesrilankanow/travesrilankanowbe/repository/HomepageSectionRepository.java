@@ -15,7 +15,9 @@ public interface HomepageSectionRepository extends JpaRepository<HomepageSection
 
     List<HomepageSection> findAllByOrderByDisplayOrderAsc();
 
-    Optional<HomepageSection> findBySectionType(SectionType sectionType);
+    Optional<HomepageSection> findFirstBySectionType(SectionType sectionType);
+
+    List<HomepageSection> findAllBySectionType(SectionType sectionType);
 
     boolean existsBySectionType(SectionType sectionType);
 }

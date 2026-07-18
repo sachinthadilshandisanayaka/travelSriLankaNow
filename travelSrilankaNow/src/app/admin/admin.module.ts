@@ -35,6 +35,7 @@ import { AdminInvoiceFormsComponent } from './components/admin-invoice-forms/adm
 import { AdminInvoicesComponent } from './components/admin-invoices/admin-invoices.component';
 import { AdminInvoiceNewComponent } from './components/admin-invoice-new/admin-invoice-new.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { AdminCategorySettingsComponent } from './components/admin-category-settings/admin-category-settings.component';
 
 // New Advanced Image Upload Components
 import { AdvancedImageUploadComponent } from './components/advanced-image-upload/advanced-image-upload.component';
@@ -86,7 +87,8 @@ import { SharedModule } from '../shared/shared.module';
     AdminInvoiceFormsComponent,
     AdminInvoicesComponent,
     AdminInvoiceNewComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    AdminCategorySettingsComponent
   ],
   imports: [
     CommonModule,

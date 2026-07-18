@@ -58,16 +58,18 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   border-bottom: 2px solid $gray-200;
   margin-bottom: 28px;
   overflow-x: auto;
+  scrollbar-width: none; // Firefox
+  &::-webkit-scrollbar { display: none; } // Chrome/Safari
 }
 
 .bks-tab {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 11px 18px;
+  gap: 6px;
+  padding: 10px 14px;
   border: none;
   background: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   color: $gray-500;
   cursor: pointer;
@@ -173,6 +175,16 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   border-top-color: $blue;
   border-radius: 50%;
   animation: bks-spin .7s linear infinite;
+
+  &--sm {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-width: 2px;
+    border-color: rgba(255,255,255,.4);
+    border-top-color: #fff;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
 }
 
 @keyframes bks-spin { to { transform: rotate(360deg); } }
@@ -805,3 +817,114 @@ $shadow-lg: 0 20px 60px rgba(0,0,0,.18);
   min-width: 64px;
   text-align: center;
 }
+
+// ─── Nav Booking Rules ────────────────────────────────────────────
+.bks-rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.bks-nav-rule-card {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  transition: box-shadow .2s;
+
+  &:hover { box-shadow: $shadow-md; }
+  &--inactive { opacity: .6; }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: $gray-50;
+    border-bottom: 1px solid $gray-200;
+  }
+
+  &__titles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 0;
+  }
+
+  &__nav   { color: $blue; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  &__arrow { color: $gray-400; flex-shrink: 0; }
+  &__type  { color: $gray-700; white-space: nowrap; }
+  &__actions { display: flex; gap: 4px; flex-shrink: 0; margin-left: 8px; }
+
+  &__body {
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+.bks-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  border: 1px solid $gray-200;
+  background: #fff;
+  color: $gray-500;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  flex-shrink: 0;
+
+  &:hover { background: $gray-50; color: $gray-700; border-color: $gray-300; }
+
+  &--danger:hover { background: $red-l; color: $red; border-color: #fca5a5; }
+}
+
+.bks-rule-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: $blue-l; color: $blue;
+  &--warn    { background: $amber-l; color: $amber; }
+  &--inactive{ background: $gray-100; color: $gray-500; }
+}
+
+// Modal size variant
+.bks-modal--lg { max-width: 640px; width: 100%; }
+
+.bks-mode-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px;
+}
+.bks-mode-card {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px;
+  border: 2px solid $gray-200; border-radius: $radius-sm;
+  cursor: pointer; font-size: 12px;
+  strong { font-size: 13px; }
+  &--active { border-color: $blue; background: $blue-l; strong { color: $blue; } }
+  &:hover:not(.bks-mode-card--active) { border-color: $gray-300; background: $gray-50; }
+}
+
+.bks-dow-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;
+}
+.bks-dow-btn {
+  padding: 4px 10px; border-radius: 20px; border: 1px solid $gray-200;
+  font-size: 11px; font-weight: 600; cursor: pointer; background: $gray-100; color: $gray-500;
+  &--on { background: $blue; color: #fff; border-color: $blue; }
+  &:hover:not(.bks-dow-btn--on) { background: $gray-200; }
+}
+
+.bks-blackout-list { display: flex; flex-direction: column; gap: 6px; }
+.bks-blackout-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px; background: $gray-50; border-radius: $radius-sm;
+}
+.bks-blackout-date { font-size: 13px; font-weight: 600; color: $gray-900; min-width: 100px; }
+.bks-blackout-reason { font-size: 12px; color: $gray-500; flex: 1; }

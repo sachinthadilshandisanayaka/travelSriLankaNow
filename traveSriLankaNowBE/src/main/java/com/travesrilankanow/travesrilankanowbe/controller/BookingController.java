@@ -43,14 +43,15 @@ public class BookingController {
                 .body(bookingService.bookEvent(bookingDTO, username));
     }
 
-    /** Public endpoint — returns fully-booked dates for a given month so the FE calendar can block them. */
+    /** Public endpoint — returns fully-booked and blacked-out dates for a given month. */
     @GetMapping("/availability/blocked-dates")
     public ResponseEntity<List<String>> getBlockedDates(
             @RequestParam String bookingType,
             @RequestParam(required = false) Long entityId,
             @RequestParam int year,
-            @RequestParam int month) {
-        return ResponseEntity.ok(bookingService.getBlockedDates(bookingType, entityId, year, month));
+            @RequestParam int month,
+            @RequestParam(required = false) String routePath) {
+        return ResponseEntity.ok(bookingService.getBlockedDates(bookingType, entityId, year, month, routePath));
     }
 
     // ── Admin-protected ───────────────────────────────────────────────────────

@@ -64,12 +64,21 @@ $transition: 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 
     svg {
       width: 24px;
       height: 24px;
       color: white;
     }
+  }
+
+  &__logo-img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
   }
 
   &__brand-text {

@@ -1,0 +1,244 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Browse by Category</h1>
+        <p>Control the category showcase shown at the top of the public Events page</p>
+      </div>
+      <div class="admin-header__actions">
+        <!-- Master on/off toggle -->
+        <div class="master-toggle" [class.master-toggle--on]="masterEnabled">
+          <span class="master-toggle__label">
+            Section&nbsp;<strong>{{ masterEnabled ? 'ON' : 'OFF' }}</strong>
+          </span>
+          <button
+            class="master-toggle__track"
+            (click)="toggleMasterEnabled()"
+            [disabled]="togglingMaster || isLoading"
+            [title]="masterEnabled ? 'Disable section for visitors' : 'Enable section for visitors'">
+            <span class="master-toggle__thumb">
+              <svg *ngIf="togglingMaster" class="cs-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <button class="admin-btn admin-btn--ghost" (click)="loadData()" [disabled]="isLoading">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Toasts ── -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      {{ errorMessage }}
+    </div>
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- ── Disabled info banner ── -->
+    <div *ngIf="!isLoading && !masterEnabled && categories.length > 0" class="cs-info-banner">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>The Browse by Category section is <strong>hidden</strong> from visitors.
+        Toggle the section <strong>ON</strong> above to show it on the Events page.</span>
+    </div>
+
+    <!-- ── Initial loader ── -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+      </svg>
+    </div>
+
+    <!-- ── Category Cards ── -->
+    <div *ngIf="!isLoading" class="cs-grid">
+
+      <!-- Empty state -->
+      <div *ngIf="categories.length === 0" class="cs-empty">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+        <p>No event categories found. Add categories via Master Data Management first.</p>
+      </div>
+
+      <!-- One card per category -->
+      <div
+        *ngFor="let cat of categories; trackBy: trackById"
+        class="cs-card"
+        [class.cs-card--hidden]="!cat.isActive">
+
+        <ng-container *ngIf="states[cat.id]">
+
+          <!-- ── Image area (240 px tall) ── -->
+          <div class="cs-card__img-wrap">
+            <img
+              *ngIf="states[cat.id].editing.icon"
+              [src]="states[cat.id].editing.icon"
+              [alt]="cat.displayName"
+              class="cs-card__img" />
+
+            <!-- Loading spinner before events arrive -->
+            <div *ngIf="!states[cat.id].editing.icon && states[cat.id].loadingEvents"
+                 class="cs-card__img-placeholder">
+              <svg class="cs-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span>Finding images…</span>
+            </div>
+
+            <!-- No image and no events -->
+            <div *ngIf="!states[cat.id].editing.icon && !states[cat.id].loadingEvents"
+                 class="cs-card__img-placeholder">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>No event images yet</span>
+            </div>
+
+            <!-- Overlay: visibility badge + category name -->
+            <div class="cs-card__img-overlay">
+              <span class="cs-card__vis-badge"
+                [class.cs-card__vis-badge--on]="cat.isActive"
+                [class.cs-card__vis-badge--off]="!cat.isActive">
+                <svg *ngIf="cat.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <svg *ngIf="!cat.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                </svg>
+                {{ cat.isActive ? 'Visible' : 'Hidden' }}
+              </span>
+              <div class="cs-card__img-title">{{ cat.displayName }}</div>
+            </div>
+          </div>
+
+          <!-- ── Image picker toggle row ── -->
+          <div class="cs-card__picker-row">
+            <button
+              class="cs-card__pick-btn"
+              type="button"
+              (click)="togglePicker(cat.id)"
+              [disabled]="states[cat.id].loadingEvents">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span *ngIf="!states[cat.id].showPicker">Select Image</span>
+              <span *ngIf="states[cat.id].showPicker">Close Picker</span>
+            </button>
+            <span *ngIf="states[cat.id].events.length > 0" class="cs-card__img-count">
+              {{ states[cat.id].events.length }} photo{{ states[cat.id].events.length !== 1 ? 's' : '' }} available
+            </span>
+          </div>
+
+          <!-- ── Image picker panel ── -->
+          <div *ngIf="states[cat.id].showPicker" class="cs-picker">
+            <p *ngIf="states[cat.id].events.length === 0" class="cs-picker__empty">
+              No event images found in this category yet. Add events to this category first.
+            </p>
+            <div *ngIf="states[cat.id].events.length > 0" class="cs-img-grid">
+              <button
+                *ngFor="let ev of states[cat.id].events"
+                type="button"
+                class="cs-img-grid__item"
+                [class.cs-img-grid__item--active]="states[cat.id].editing.icon === ev.imageUrl"
+                (click)="selectImage(cat.id, ev.imageUrl)"
+                [title]="ev.title">
+                <img [src]="ev.imageUrl" [alt]="ev.title" />
+                <div *ngIf="states[cat.id].editing.icon === ev.imageUrl" class="cs-img-grid__check">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div class="cs-img-grid__label">{{ ev.title }}</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Editable fields ── -->
+          <div class="cs-card__body">
+            <div class="admin-form__group">
+              <label class="admin-form__label">Display Name</label>
+              <input
+                type="text"
+                class="admin-input"
+                [(ngModel)]="states[cat.id].editing.displayName"
+                placeholder="e.g. Day Tours" />
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Description
+                <span style="font-weight:400;color:#9ca3af">&nbsp;— shown on Events page</span>
+              </label>
+              <textarea
+                class="admin-textarea"
+                rows="3"
+                [(ngModel)]="states[cat.id].editing.description"
+                placeholder="Short description for visitors">
+              </textarea>
+            </div>
+          </div>
+
+          <!-- ── Footer ── -->
+          <div class="cs-card__footer">
+            <button
+              class="admin-btn admin-btn--primary"
+              [disabled]="isSaving(cat.id)"
+              (click)="saveItem(cat.id)">
+              <svg *ngIf="!isSaving(cat.id)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <svg *ngIf="isSaving(cat.id)" class="cs-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span>{{ isSaving(cat.id) ? 'Saving…' : 'Save Changes' }}</span>
+            </button>
+
+            <button
+              class="cs-card__vis-btn"
+              [class.cs-card__vis-btn--visible]="cat.isActive"
+              [disabled]="isToggling(cat.id)"
+              (click)="toggleActive(cat.id)"
+              type="button">
+              <svg *ngIf="isToggling(cat.id)" class="cs-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span *ngIf="!isToggling(cat.id) && cat.isActive">Hide from Visitors</span>
+              <span *ngIf="!isToggling(cat.id) && !cat.isActive">Show to Visitors</span>
+              <span *ngIf="isToggling(cat.id)">Updating…</span>
+            </button>
+          </div>
+
+        </ng-container>
+      </div>
+    </div>
+
+  </div>
+</div>
