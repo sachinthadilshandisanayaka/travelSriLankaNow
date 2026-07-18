@@ -150,6 +150,19 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.booking.checkOutDate = event.end;
   }
 
+  getNights(): number {
+    if (!this.booking.checkInDate || !this.booking.checkOutDate) { return 0; }
+    const a = new Date(this.booking.checkInDate).getTime();
+    const b = new Date(this.booking.checkOutDate).getTime();
+    return Math.max(0, Math.round((b - a) / 86400000));
+  }
+
+  formatDateDisplay(dateStr: string | null): string {
+    if (!dateStr) { return ''; }
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
   onCheckInChange(): void {
     // Reset check-out when check-in changes and current check-out is now invalid
     if (this.booking.checkInDate && this.booking.checkOutDate) {

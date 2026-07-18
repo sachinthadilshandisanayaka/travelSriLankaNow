@@ -110,7 +110,8 @@ export class AdminMasterDataComponent implements OnInit {
       description: '',
       sortOrder: 0,
       isActive: true,
-      color: '#3B82F6'
+      color: '#3B82F6',
+      icon: ''
     };
   }
 

@@ -362,6 +362,31 @@
             <ng-container *ngIf="minStayDays > 1 && !maxStayDays">Minimum {{ minStayDays }} nights</ng-container>
             <ng-container *ngIf="minStayDays <= 1 && maxStayDays">Maximum {{ maxStayDays }} nights</ng-container>
           </small>
+
+          <!-- Date Range Summary -->
+          <div *ngIf="booking.checkInDate && booking.checkOutDate" class="booking-date-summary">
+            <div class="booking-date-summary__row">
+              <div class="booking-date-summary__item">
+                <span class="booking-date-summary__label">Check-in</span>
+                <span class="booking-date-summary__value">{{ formatDateDisplay(booking.checkInDate) }}</span>
+              </div>
+              <div class="booking-date-summary__divider">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
+              <div class="booking-date-summary__item">
+                <span class="booking-date-summary__label">Check-out</span>
+                <span class="booking-date-summary__value">{{ formatDateDisplay(booking.checkOutDate) }}</span>
+              </div>
+            </div>
+            <div class="booking-date-summary__nights">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+              </svg>
+              <strong>{{ getNights() }}</strong>&nbsp;night<span *ngIf="getNights() !== 1">s</span>
+            </div>
+          </div>
         </div>
 
         <!-- Inline Date Calendar (SINGLE / free-form modes) -->

@@ -208,6 +208,13 @@
           </div>
         </div>
 
+        <!-- Image URL (icon) -->
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Image URL</label>
+          <input type="text" [(ngModel)]="currentItem.icon" class="admin-input" placeholder="https://example.com/image.jpg">
+          <small class="admin-form__hint">Used as category card background image on the public events page</small>
+        </div>
+
         <!-- Description -->
         <div class="admin-form__group admin-form__group--full">
           <label class="admin-form__label">Description</label>

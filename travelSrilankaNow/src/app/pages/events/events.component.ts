@@ -150,6 +150,18 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  filterInPlace(category: string): void {
+    this.selectedCategory = category;
+    this.currentPage = 0;
+    this.loadData();
+  }
+
+  getCategoryDisplayName(code: string): string {
+    if (!code) { return ''; }
+    const cat = this.categoryData.find(c => c.code === code);
+    return cat ? cat.displayName : code;
+  }
+
   onSearchChange(event: any): void {
     this.searchSubject.next(event.target.value);
   }
@@ -176,7 +188,10 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (page >= 0 && page < this.totalPages) {
       this.currentPage = page;
       this.loadData();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const target = document.querySelector('.filter-section') as HTMLElement;
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
