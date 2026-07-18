@@ -393,6 +393,13 @@ select {
       background: darken($admin-navy-dark, 5%);
       color: $admin-white;
     }
+
+    // Panel-open / active state
+    &.admin-btn--active {
+      background: $admin-navy-dark;
+      border-color: $admin-navy-dark;
+      color: $admin-white;
+    }
   }
 
   // Sky — light blue tinted button

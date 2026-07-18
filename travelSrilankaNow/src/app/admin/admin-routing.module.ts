@@ -31,7 +31,6 @@ import { AdminInvoiceTemplatesComponent } from './components/admin-invoice-templ
 import { AdminInvoiceFormsComponent } from './components/admin-invoice-forms/admin-invoice-forms.component';
 import { AdminInvoicesComponent } from './components/admin-invoices/admin-invoices.component';
 import { AdminInvoiceNewComponent } from './components/admin-invoice-new/admin-invoice-new.component';
-import { AdminCategorySettingsComponent } from './components/admin-category-settings/admin-category-settings.component';
 
 const routes: Routes = [
   {
@@ -176,12 +175,6 @@ const routes: Routes = [
       {
         path: 'master-data',
         component: AdminMasterDataComponent,
-        canActivate: [PermissionGuard],
-        data: { permission: 'MASTER_DATA:VIEW' }
-      },
-      {
-        path: 'category-settings',
-        component: AdminCategorySettingsComponent,
         canActivate: [PermissionGuard],
         data: { permission: 'MASTER_DATA:VIEW' }
       },
