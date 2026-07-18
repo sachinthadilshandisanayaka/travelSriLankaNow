@@ -35,7 +35,11 @@ CREATE TABLE IF NOT EXISTS site_settings (
 
 CREATE TABLE IF NOT EXISTS homepage_sections (
     id BIGSERIAL PRIMARY KEY,
-    section_type VARCHAR(255) NOT NULL UNIQUE,
+    section_type VARCHAR(255) NOT NULL
+        CHECK (section_type IN (
+            'HERO_SLIDER','FEATURED_LOCATIONS','UPCOMING_EVENTS','PLACES','SOCIAL_MEDIA',
+            'IMAGE_GALLERY_SLIDER','CUSTOM_CONTENT'
+        )),
     title VARCHAR(255) NOT NULL,
     subtitle VARCHAR(255),
     display_order INTEGER NOT NULL DEFAULT 0,
