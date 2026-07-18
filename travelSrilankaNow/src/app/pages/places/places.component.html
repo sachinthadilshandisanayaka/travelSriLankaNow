@@ -7,6 +7,56 @@
   [showAnimation]="true">
 </app-page-header>
 
+<!-- Browse by Category -->
+<section *ngIf="selectedType === 'all' && categoryData.length > 0" class="category-overview">
+  <div class="container">
+    <div class="category-overview__header">
+      <div class="category-overview__label">Browse by Category</div>
+      <h2 class="category-overview__title">Find Your Perfect Stay or Dining Experience</h2>
+      <p class="category-overview__subtitle">
+        Discover hotels, restaurants, cafes and more — filtered to exactly what you need.
+      </p>
+    </div>
+    <div class="category-grid">
+      <div
+        *ngFor="let cat of categoryData; let i = index"
+        class="cat-card card-stagger"
+        (click)="navigateToCategory(cat.code)"
+        tabindex="0"
+        (keydown.enter)="navigateToCategory(cat.code)"
+        role="button">
+        <div class="cat-card__img-wrap">
+          <img *ngIf="cat.icon" [src]="cat.icon" [alt]="cat.displayName" class="cat-card__img" />
+          <div *ngIf="!cat.icon" class="cat-card__img-fallback"
+               [ngStyle]="{'background': 'linear-gradient(160deg, ' + getCategoryColor(cat, i) + ' 0%, ' + getCategoryColor(cat, i) + 'bb 100%)'}">
+          </div>
+          <div class="cat-card__overlay" [ngStyle]="{'background': 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)'}"></div>
+          <div class="cat-card__content">
+            <div class="cat-card__icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/>
+              </svg>
+            </div>
+            <div class="cat-card__text">
+              <h3 class="cat-card__title">{{ cat.displayName }}</h3>
+              <p class="cat-card__desc" *ngIf="cat.description">{{ cat.description }}</p>
+              <p class="cat-card__desc" *ngIf="!cat.description">Explore places in this category.</p>
+              <div class="cat-card__cta">
+                <span>Explore</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card__color-bar" [ngStyle]="{'background': getCategoryColor(cat, i)}"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category-overview__divider"><span>or browse all places below</span></div>
+  </div>
+</section>
+
 <!-- Filter Section -->
 <section class="filter-section">
   <div class="container">

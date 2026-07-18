@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { AdminApiService } from '../../services/admin-api.service';
 
 interface CategoryItem {
@@ -13,7 +15,7 @@ interface CategoryItem {
   icon: string;
 }
 
-interface EventImage {
+interface ContentImage {
   id: number;
   title: string;
   imageUrl: string;
@@ -21,9 +23,9 @@ interface EventImage {
 
 interface CategoryState {
   editing: CategoryItem;
-  events: EventImage[];
+  images: ContentImage[];
   showPicker: boolean;
-  loadingEvents: boolean;
+  loadingImages: boolean;
 }
 
 @Component({
@@ -31,7 +33,11 @@ interface CategoryState {
   templateUrl: './admin-category-settings.component.html',
   styleUrls: ['./admin-category-settings.component.scss']
 })
-export class AdminCategorySettingsComponent implements OnInit {
+export class AdminCategorySettingsComponent implements OnInit, OnChanges {
+  @Input() categoryType: string = 'EVENT_CATEGORY';
+  @Input() contentLabel: string = '';
+  @Output() closed = new EventEmitter<void>();
+
   categories: CategoryItem[] = [];
   states: { [id: number]: CategoryState } = {};
 
@@ -48,6 +54,26 @@ export class AdminCategorySettingsComponent implements OnInit {
     this.loadData();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['categoryType'] && !changes['categoryType'].firstChange) {
+      this.loadData();
+    }
+  }
+
+  get sectionLabel(): string {
+    return this.contentLabel || this.defaultLabel();
+  }
+
+  private defaultLabel(): string {
+    const map: { [key: string]: string } = {
+      'EVENT_CATEGORY': 'Events',
+      'LOCATION_CATEGORY': 'Locations',
+      'PLACE_TYPE': 'Places',
+      'GALLERY_CATEGORY': 'Gallery'
+    };
+    return map[this.categoryType] || this.categoryType;
+  }
+
   get masterEnabled(): boolean {
     return this.categories.some(c => c.isActive);
   }
@@ -56,24 +82,26 @@ export class AdminCategorySettingsComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.categories = [];
+    this.states = {};
 
     this.adminApiService.getMasterData().subscribe({
       next: (data) => {
         this.categories = data
-          .filter((item: any) => item.type === 'EVENT_CATEGORY')
+          .filter((item: any) => item.type === this.categoryType)
           .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
 
         this.states = {};
         this.categories.forEach(item => {
           this.states[item.id] = {
             editing: { ...item },
-            events: [],
+            images: [],
             showPicker: false,
-            loadingEvents: true
+            loadingImages: true
           };
         });
         this.isLoading = false;
-        this.loadAllCategoryEvents();
+        this.loadAllCategoryImages();
       },
       error: () => {
         this.errorMessage = 'Failed to load category data. Please try again.';
@@ -82,25 +110,41 @@ export class AdminCategorySettingsComponent implements OnInit {
     });
   }
 
-  private loadAllCategoryEvents(): void {
+  private fetchImagesForCategory(categoryCode: string): Observable<ContentImage[]> {
+    switch (this.categoryType) {
+      case 'EVENT_CATEGORY':
+        return this.adminApiService.getEvents(0, 12, 'displayOrder,asc', undefined, categoryCode).pipe(
+          map((r: any) => (r.content || []).filter((e: any) => !!e.imageUrl).map((e: any) => ({ id: e.id, title: e.title, imageUrl: e.imageUrl }))),
+          catchError(() => of([]))
+        );
+      case 'LOCATION_CATEGORY':
+        return this.adminApiService.getLocations(0, 12, 'name,asc', undefined, categoryCode).pipe(
+          map((r: any) => (r.content || []).filter((l: any) => !!l.imageUrl).map((l: any) => ({ id: l.id, title: l.name, imageUrl: l.imageUrl }))),
+          catchError(() => of([]))
+        );
+      case 'PLACE_TYPE':
+        return this.adminApiService.getPlaces(0, 12, 'name,asc', undefined, categoryCode).pipe(
+          map((r: any) => (r.content || []).filter((p: any) => !!p.imageUrl).map((p: any) => ({ id: p.id, title: p.name, imageUrl: p.imageUrl }))),
+          catchError(() => of([]))
+        );
+      default:
+        return of([]);
+    }
+  }
+
+  private loadAllCategoryImages(): void {
     this.categories.forEach(cat => {
-      this.adminApiService.getEvents(0, 12, 'displayOrder,asc', undefined, cat.code).subscribe({
-        next: (response) => {
+      this.fetchImagesForCategory(cat.code).subscribe({
+        next: (images) => {
           if (!this.states[cat.id]) { return; }
-          const events: EventImage[] = (response.content || [])
-            .filter((e: any) => !!e.imageUrl)
-            .map((e: any) => ({ id: e.id, title: e.title, imageUrl: e.imageUrl }));
-          this.states[cat.id].events = events;
-          this.states[cat.id].loadingEvents = false;
-          // Auto-populate icon from first event image if not already set
-          if (!this.states[cat.id].editing.icon && events.length > 0) {
-            this.states[cat.id].editing.icon = events[0].imageUrl;
+          this.states[cat.id].images = images;
+          this.states[cat.id].loadingImages = false;
+          if (!this.states[cat.id].editing.icon && images.length > 0) {
+            this.states[cat.id].editing.icon = images[0].imageUrl;
           }
         },
         error: () => {
-          if (this.states[cat.id]) {
-            this.states[cat.id].loadingEvents = false;
-          }
+          if (this.states[cat.id]) { this.states[cat.id].loadingImages = false; }
         }
       });
     });
@@ -188,7 +232,7 @@ export class AdminCategorySettingsComponent implements OnInit {
           remaining--;
           if (remaining === 0) {
             this.togglingMaster = false;
-            this.successMessage = 'Browse by Category section ' + (targetState ? 'enabled' : 'disabled') + '.';
+            this.successMessage = 'Browse by Category ' + (targetState ? 'enabled' : 'disabled') + '.';
             setTimeout(() => { this.successMessage = ''; }, 3000);
           }
         },
@@ -196,9 +240,7 @@ export class AdminCategorySettingsComponent implements OnInit {
           cat.isActive = !targetState;
           if (this.states[cat.id]) { this.states[cat.id].editing.isActive = !targetState; }
           remaining--;
-          if (remaining === 0) {
-            this.togglingMaster = false;
-          }
+          if (remaining === 0) { this.togglingMaster = false; }
         }
       });
     });

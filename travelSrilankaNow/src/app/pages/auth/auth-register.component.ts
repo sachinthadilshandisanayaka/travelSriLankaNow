@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CustomerAuthService } from '../../services/customer-auth.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 
 @Component({
   selector: 'app-auth-register',
@@ -17,16 +18,21 @@ export class AuthRegisterComponent implements OnInit {
   phoneNumber = '';
   loading = false;
   error = '';
+  siteName = '';
   private returnUrl = '/';
 
   constructor(
     private authService: CustomerAuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private siteSettingsService: SiteSettingsService
   ) {}
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+    this.siteSettingsService.getSettingByKey('site_name').subscribe({
+      next: (setting) => { if (setting?.value) this.siteName = setting.value; }
+    });
   }
 
   register(): void {
