@@ -710,14 +710,6 @@ export class AdminHomepageSectionsComponent implements OnInit {
     this.draggedIndex = null;
   }
 
-  get hasGallerySection(): boolean {
-    return this.sections.some(s => s.sectionType === 'IMAGE_GALLERY_SLIDER');
-  }
-
-  get existingGallerySection(): HomepageSection | undefined {
-    return this.sections.find(s => s.sectionType === 'IMAGE_GALLERY_SLIDER');
-  }
-
   hideMessageAfterDelay(): void {
     setTimeout(() => { this.successMessage = ''; this.errorMessage = ''; }, 3000);
   }

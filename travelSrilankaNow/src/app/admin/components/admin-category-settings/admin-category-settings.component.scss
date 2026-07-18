@@ -1,0 +1,487 @@
+@import '../../styles/admin-shared';
+
+// ── Panel wrapper ──────────────────────────────────────────────────────────────
+.cat-panel {
+  border: 1.5px solid $admin-gray-200;
+  border-radius: $admin-radius-xl;
+  background: $admin-white;
+  box-shadow: $admin-shadow-md;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: $admin-gray-50;
+    border-bottom: 1.5px solid $admin-gray-200;
+    flex-wrap: wrap;
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      color: $admin-navy;
+    }
+  }
+
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.8125rem;
+    color: $admin-gray-500;
+    margin: 0;
+  }
+
+  &__grid {
+    padding: 1.25rem;
+  }
+}
+
+// ── Spin animation ─────────────────────────────────────────────────────────────
+@keyframes cs-spin { to { transform: rotate(360deg); } }
+@keyframes cs-fade-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+// ── Master toggle ──────────────────────────────────────────────────────────────
+.master-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+
+  &__label {
+    font-size: 0.875rem;
+    color: $admin-gray-600;
+    white-space: nowrap;
+
+    strong {
+      color: $admin-gray-400;
+      transition: color 0.2s;
+    }
+  }
+
+  &--on .master-toggle__label strong { color: $admin-success; }
+
+  &__track {
+    position: relative;
+    width: 3rem;
+    height: 1.625rem;
+    background: $admin-gray-300;
+    border-radius: $admin-radius-full;
+    border: none;
+    cursor: pointer;
+    transition: background 0.25s;
+    padding: 0;
+    flex-shrink: 0;
+
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &--on .master-toggle__track { background: $admin-success; }
+
+  &__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: $admin-white;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &--on .master-toggle__thumb { transform: translateX(1.375rem); }
+
+  &__spin {
+    width: 0.75rem;
+    height: 0.75rem;
+    animation: cs-spin 0.8s linear infinite;
+    circle { stroke: $admin-gray-300; }
+    path   { fill: $admin-gray-500; }
+  }
+}
+
+// ── Info banner ────────────────────────────────────────────────────────────────
+.cs-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  background: rgba($admin-warning, 0.08);
+  border: 1px solid rgba($admin-warning, 0.3);
+  border-radius: $admin-radius-lg;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: $admin-gray-700;
+  line-height: 1.5;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: $admin-warning;
+    margin-top: 1px;
+  }
+}
+
+// ── Spinner helper (used inline in buttons) ────────────────────────────────────
+.cs-spin {
+  width: 1rem;
+  height: 1rem;
+  animation: cs-spin 0.8s linear infinite;
+  flex-shrink: 0;
+  circle { stroke: rgba(255,255,255,0.35); }
+  path   { fill: currentColor; }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+.cs-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: $admin-gray-400;
+
+  svg {
+    width: 3rem;
+    height: 3rem;
+    color: $admin-gray-300;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    color: $admin-gray-500;
+    max-width: 340px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// ── Card grid ──────────────────────────────────────────────────────────────────
+.cs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 680px)  { grid-template-columns: 1fr; }
+}
+
+// ── Category Card ──────────────────────────────────────────────────────────────
+.cs-card {
+  display: flex;
+  flex-direction: column;
+  background: $admin-white;
+  border-radius: $admin-radius-xl;
+  border: 1.5px solid $admin-gray-200;
+  box-shadow: $admin-shadow;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+
+  &:hover { box-shadow: $admin-shadow-md; }
+
+  &--hidden {
+    opacity: 0.65;
+    border-style: dashed;
+  }
+
+  // ── Image area ──
+  &__img-wrap {
+    position: relative;
+    height: 220px;
+    background: $admin-gray-100;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+
+    .cs-card:hover & { transform: scale(1.04); }
+  }
+
+  &__img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    background: $admin-gray-50;
+    color: $admin-gray-400;
+
+    svg {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .cs-spin {
+      width: 1.75rem;
+      height: 1.75rem;
+      circle { stroke: $admin-gray-200; }
+      path   { fill: $admin-gray-400; }
+    }
+
+    span {
+      font-size: 0.8125rem;
+      color: $admin-gray-400;
+    }
+  }
+
+  &__img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 55%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0.625rem 0.75rem 0.75rem;
+    pointer-events: none;
+  }
+
+  &__img-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $admin-white;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    align-self: flex-end;
+    line-height: 1.2;
+  }
+
+  // ── Visibility badge ──
+  &__vis-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.2rem 0.55rem;
+    border-radius: $admin-radius-full;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    align-self: flex-start;
+    pointer-events: none;
+
+    svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    &--on  { background: rgba($admin-success, 0.92); color: $admin-white; }
+    &--off { background: rgba($admin-gray-700, 0.82); color: $admin-white; }
+  }
+
+  // ── Picker toggle row ──
+  &__picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid $admin-gray-100;
+    background: $admin-gray-50;
+  }
+
+  &__pick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $admin-navy;
+    background: none;
+    border: 1.5px solid $admin-navy;
+    border-radius: $admin-radius;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    &:hover:not(:disabled) {
+      background: $admin-navy;
+      color: $admin-white;
+    }
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  &__img-count {
+    font-size: 0.75rem;
+    color: $admin-gray-400;
+  }
+
+  // ── Body ──
+  &__body {
+    padding: 1rem 1.125rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    .admin-form__group { margin-bottom: 0.75rem; }
+    .admin-form__label { font-size: 0.8125rem; }
+  }
+
+  // ── Footer ──
+  &__footer {
+    display: flex;
+    gap: 0.625rem;
+    padding: 0.75rem 1.125rem 1rem;
+    background: $admin-gray-50;
+    border-top: 1px solid $admin-gray-100;
+    flex-wrap: wrap;
+
+    .admin-btn { flex: 1; min-width: 0; justify-content: center; }
+  }
+
+  // ── Visibility toggle button ──
+  &__vis-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.5rem 0.875rem;
+    border-radius: $admin-radius;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid $admin-gray-300;
+    background: $admin-white;
+    color: $admin-gray-600;
+    transition: all 0.15s;
+
+    svg, .cs-spin { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+    &:hover:not(:disabled) {
+      background: $admin-gray-100;
+      border-color: $admin-gray-400;
+    }
+
+    &--visible {
+      border-color: rgba($admin-error, 0.4);
+      color: $admin-error;
+
+      &:hover:not(:disabled) {
+        background: rgba($admin-error, 0.06);
+        border-color: $admin-error;
+      }
+    }
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+// ── Image picker panel ────────────────────────────────────────────────────────
+.cs-picker {
+  padding: 0.875rem;
+  background: $admin-gray-50;
+  border-bottom: 1px solid $admin-gray-200;
+  animation: cs-fade-in 0.18s ease;
+
+  &__empty {
+    font-size: 0.8125rem;
+    color: $admin-gray-400;
+    text-align: center;
+    padding: 1rem;
+    background: $admin-gray-100;
+    border-radius: $admin-radius;
+    margin: 0;
+  }
+}
+
+// ── Image grid (inside picker) ────────────────────────────────────────────────
+.cs-img-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
+
+  &__item {
+    position: relative;
+    border-radius: $admin-radius;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    background: $admin-gray-200;
+    padding: 0;
+    aspect-ratio: 4 / 3;
+    transition: border-color 0.15s, transform 0.15s;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s;
+    }
+
+    &:hover img { transform: scale(1.08); }
+
+    &--active {
+      border-color: $admin-navy;
+      box-shadow: 0 0 0 2px rgba($admin-navy, 0.25);
+    }
+  }
+
+  &__check {
+    position: absolute;
+    inset: 0;
+    background: rgba($admin-navy, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      stroke: $admin-white;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+    }
+  }
+
+  &__label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.25rem 0.375rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: $admin-white;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+}

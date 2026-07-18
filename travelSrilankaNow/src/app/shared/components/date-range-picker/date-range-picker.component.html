@@ -21,13 +21,20 @@
   <!-- Panel -->
   <div class="drp-panel" *ngIf="isOpen" (click)="$event.stopPropagation()">
 
-    <!-- Phase hint -->
-    <div class="drp-phase-hint" *ngIf="mode === 'range'">
-      <span class="drp-phase-dot" [class.drp-phase-dot--active]="!selectingEnd"></span>
-      <span [class.drp-phase-label--active]="!selectingEnd">Check-in</span>
-      <span class="drp-phase-arrow">→</span>
-      <span class="drp-phase-dot" [class.drp-phase-dot--active]="selectingEnd"></span>
-      <span [class.drp-phase-label--active]="selectingEnd">Check-out</span>
+    <!-- From / To summary header -->
+    <div class="drp-range-summary" *ngIf="mode === 'range'">
+      <div class="drp-range-summary__item" [class.drp-range-summary__item--active]="!selectingEnd">
+        <span class="drp-range-summary__label">From</span>
+        <span class="drp-range-summary__date">{{ tempStart ? formatDisplay(tempStart) : 'Select date' }}</span>
+      </div>
+      <svg class="drp-range-summary__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+      <div class="drp-range-summary__item" [class.drp-range-summary__item--active]="selectingEnd">
+        <span class="drp-range-summary__label">To</span>
+        <span class="drp-range-summary__date">{{ tempEnd ? formatDisplay(tempEnd) : 'Select date' }}</span>
+      </div>
     </div>
 
     <!-- Month/Year picker overlay -->

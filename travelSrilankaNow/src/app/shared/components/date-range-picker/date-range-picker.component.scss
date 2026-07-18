@@ -59,29 +59,56 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-// ── Phase hint ───────────────────────────────────────────────────────────────
-.drp-phase-hint {
+// ── From / To summary ────────────────────────────────────────────────────────
+.drp-range-summary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1rem 0;
-  font-size: 0.78rem;
-  color: #9ca3af;
-  font-weight: 500;
-}
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f4fa;
+  background: #f8fafc;
 
-.drp-phase-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #d1d5db;
-  flex-shrink: 0;
-  transition: background 0.2s;
-  &--active { background: #1C4D8D; }
-}
+  &__item {
+    flex: 1;
+    text-align: center;
+    padding: 0.45rem 0.75rem;
+    border-radius: 10px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
 
-.drp-phase-arrow { color: #d1d5db; font-size: 0.7rem; }
-.drp-phase-label--active { color: #1C4D8D; font-weight: 700; }
+    &--active {
+      border-color: #1C4D8D;
+      box-shadow: 0 0 0 3px rgba(28, 77, 141, 0.08);
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.1rem;
+  }
+
+  &__date {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__arrow {
+    flex-shrink: 0;
+    color: #9ca3af;
+  }
+}
 
 // ── Month/Year Picker overlay ────────────────────────────────────────────────
 .drp-month-picker {

@@ -38,6 +38,7 @@ public class EventBookingService {
     private final BookingConditionEngine conditionEngine;
     private final BookingAuditService auditService;
     private final BkAvailabilityConfigRepository availabilityRepo;
+    private final NavBookingConfigService navBookingConfigService;
 
     @Transactional
     public EventBooking bookEvent(EventBookingDTO dto, String currentUsername) {
@@ -51,6 +52,16 @@ public class EventBookingService {
         }
 
         checkAvailability(EventBooking.BookingTypes.EVENT, dto.getEventId(), requestedDate);
+
+        // For RANGE mode, use checkInDate as the primary date
+        if (requestedDate == null && dto.getCheckInDate() != null) {
+            requestedDate = dto.getCheckInDate();
+        }
+
+        // Validate against nav-item booking rules (lead time, party size, blackouts, etc.)
+        navBookingConfigService.validateBooking(
+                dto.getNavRoutePath(), requestedDate, dto.getCheckOutDate(),
+                dto.getNumberOfPeople(), currentUsername != null);
 
         if (dto.getEventDateId() != null) {
             EventDate eventDate = eventDateRepository.findById(dto.getEventDateId())
@@ -76,6 +87,8 @@ public class EventBookingService {
         booking.setPaymentStatus(EventBooking.PaymentStatus.UNPAID);
         booking.setTermsAccepted(Boolean.TRUE.equals(dto.getTermsAccepted()));
         booking.setRequestedDate(requestedDate);
+        booking.setCheckInDate(dto.getCheckInDate());
+        booking.setCheckOutDate(dto.getCheckOutDate());
 
         // Append any free-text notes to specialRequests
         String notes = dto.getSpecialRequests() != null ? dto.getSpecialRequests() : "";
@@ -122,6 +135,17 @@ public class EventBookingService {
         }
 
         checkAvailability(EventBooking.BookingTypes.PLACE, placeId, requestedDate);
+
+        // Resolve end date for RANGE-mode validation
+        LocalDate endDate = null;
+        if (req.getCheckOutDate() != null && !req.getCheckOutDate().isBlank()) {
+            try { endDate = LocalDate.parse(req.getCheckOutDate()); } catch (Exception ignored) {}
+        }
+
+        // Validate against nav-item booking rules
+        navBookingConfigService.validateBooking(
+                req.getNavRoutePath(), requestedDate, endDate,
+                req.getPartySize(), currentUsername != null);
 
         EventBooking booking = new EventBooking();
         booking.setBookingType(EventBooking.BookingTypes.PLACE);
@@ -348,17 +372,27 @@ public class EventBookingService {
     }
 
     /**
-     * Returns ISO date strings (yyyy-MM-dd) that are fully booked for a given month.
-     * Used by the frontend calendar to visually block unavailable dates.
+     * Returns ISO date strings (yyyy-MM-dd) that are fully booked or blacked-out for a given month.
+     * Merges capacity-based blocked dates (BkAvailabilityConfig) with static admin blackout dates
+     * (NavBookingConfig.blackoutDates) so the frontend calendar shows the complete picture.
+     *
+     * @param routePath optional nav route path — used to include nav-level blackout dates
      */
-    public List<String> getBlockedDates(String bookingType, Long entityId, int year, int month) {
+    public List<String> getBlockedDates(String bookingType, Long entityId, int year, int month,
+                                        String routePath) {
+        // Static blackout dates from NavBookingConfig for this route
+        List<String> blackouts = routePath != null && !routePath.isBlank()
+                ? navBookingConfigService.getBlackoutDatesForMonth(routePath, year, month)
+                        .stream().map(LocalDate::toString).toList()
+                : List.of();
+
         Optional<BkAvailabilityConfig> cfgOpt = entityId != null
                 ? availabilityRepo.findByBookingTypeCodeAndEntityIdAndActiveTrue(bookingType, entityId)
                 : Optional.empty();
         if (cfgOpt.isEmpty()) {
             cfgOpt = availabilityRepo.findByBookingTypeCodeAndEntityIdIsNullAndActiveTrue(bookingType);
         }
-        if (cfgOpt.isEmpty()) return List.of();
+        if (cfgOpt.isEmpty()) return blackouts;
 
         BkAvailabilityConfig cfg = cfgOpt.get();
         YearMonth ym = YearMonth.of(year, month);
@@ -374,7 +408,7 @@ public class EventBookingService {
             rows = bookingRepository.countByTypeAndDateRange(bookingType, from, to, EventBooking.BookingStatus.cancelled);
         }
 
-        return rows.stream()
+        List<String> capacityBlocked = rows.stream()
                 .filter(row -> {
                     long count = ((Number) row[1]).longValue();
                     if (cfg.getMaxBookingsPerDate() != null) {
@@ -383,6 +417,12 @@ public class EventBookingService {
                     return !cfg.isAllowMultiplePerDate() && count > 0;
                 })
                 .map(row -> row[0].toString())
+                .collect(Collectors.toList());
+
+        // Merge capacity-blocked and blackout dates, deduplicate, sort
+        return java.util.stream.Stream.concat(capacityBlocked.stream(), blackouts.stream())
+                .distinct()
+                .sorted()
                 .collect(Collectors.toList());
     }
 

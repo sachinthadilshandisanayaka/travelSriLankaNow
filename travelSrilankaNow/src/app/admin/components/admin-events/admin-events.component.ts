@@ -43,6 +43,7 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
   totalElements = 0;
 
   isLoading = false;
+  showCategoryPanel = false;
   showModal = false;
   isEditMode = false;
   slugManuallyEdited = false;
@@ -144,6 +145,12 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
       next: (config) => { this.fieldDefinitions = config.fieldDefinitions || []; },
       error: () => {}
     });
+  }
+
+  getCategoryDisplayName(code: string): string {
+    if (!code) { return ''; }
+    const cat = this.categories.find(c => c.code === code);
+    return cat ? cat.displayName : code;
   }
 
   loadCategories(): void {

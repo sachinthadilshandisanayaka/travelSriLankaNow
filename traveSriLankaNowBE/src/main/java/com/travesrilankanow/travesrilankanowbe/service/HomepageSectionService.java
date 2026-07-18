@@ -66,8 +66,9 @@ public class HomepageSectionService {
 
     @Transactional
     public HomepageSection createSection(HomepageSection section) {
-        if (section.getSectionType() != HomepageSection.SectionType.CUSTOM_CONTENT
-                && homepageSectionRepository.existsBySectionType(section.getSectionType())) {
+        boolean multipleAllowed = section.getSectionType() == HomepageSection.SectionType.CUSTOM_CONTENT
+                || section.getSectionType() == HomepageSection.SectionType.IMAGE_GALLERY_SLIDER;
+        if (!multipleAllowed && homepageSectionRepository.existsBySectionType(section.getSectionType())) {
             throw new IllegalStateException(
                     "A '" + section.getSectionType() + "' section already exists. Edit the existing one instead.");
         }

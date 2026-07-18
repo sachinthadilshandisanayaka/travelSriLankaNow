@@ -7,26 +7,157 @@
   [showAnimation]="true">
 </app-page-header>
 
+<!-- ========================================================== -->
+<!-- PART 1A: Category Overview (shown on /events without filter) -->
+<!-- ========================================================== -->
+<section *ngIf="!isCategoryView && categoryData.length > 0" class="category-overview">
+  <div class="container">
+    <div class="category-overview__header">
+      <div class="category-overview__label">Browse by Category</div>
+      <h2 class="category-overview__title">Find Your Perfect Sri Lanka Experience</h2>
+      <p class="category-overview__subtitle">
+        Choose a tour style that matches your adventure — from single-day escapes to multi-day immersions.
+      </p>
+    </div>
+
+    <div class="category-grid">
+      <div
+        *ngFor="let cat of categoryData; let i = index"
+        class="cat-card card-stagger"
+        (click)="navigateToCategory(cat.code)"
+        tabindex="0"
+        (keydown.enter)="navigateToCategory(cat.code)"
+        role="button"
+      >
+        <!-- Background image or gradient fallback -->
+        <div class="cat-card__img-wrap">
+          <img *ngIf="cat.icon" [src]="cat.icon" [alt]="cat.displayName" class="cat-card__img" />
+          <div *ngIf="!cat.icon" class="cat-card__img-fallback"
+               [ngStyle]="{'background': 'linear-gradient(160deg, ' + getCategoryColor(cat, i) + ' 0%, ' + getCategoryColor(cat, i) + 'bb 100%)'}">
+          </div>
+          <!-- Dark overlay for readability -->
+          <div class="cat-card__overlay" [ngStyle]="{'background': 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)'}"></div>
+
+          <!-- Content on top of image -->
+          <div class="cat-card__content">
+            <div class="cat-card__icon-wrap">
+              <svg *ngIf="cat.code === 'TourWithAccommodation'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <svg *ngIf="cat.code === 'DayTours'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              <svg *ngIf="cat.code === 'TourWithOutAccommodation'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6-10l6 3m0 7l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m0 11V9"/>
+              </svg>
+              <svg *ngIf="cat.code !== 'TourWithAccommodation' && cat.code !== 'DayTours' && cat.code !== 'TourWithOutAccommodation'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+              </svg>
+            </div>
+
+            <div class="cat-card__text">
+              <h3 class="cat-card__title">{{ cat.displayName }}</h3>
+              <p class="cat-card__desc" *ngIf="cat.description">{{ cat.description }}</p>
+              <p class="cat-card__desc" *ngIf="!cat.description">
+                <span *ngIf="cat.code === 'TourWithAccommodation'">Multi-day packages with curated stays across Sri Lanka.</span>
+                <span *ngIf="cat.code === 'DayTours'">Experience the best of Sri Lanka in a single unforgettable day.</span>
+                <span *ngIf="cat.code === 'TourWithOutAccommodation'">Full-day excursions — iconic landmarks, no overnight stay.</span>
+                <span *ngIf="cat.code !== 'TourWithAccommodation' && cat.code !== 'DayTours' && cat.code !== 'TourWithOutAccommodation'">Explore curated experiences in this category.</span>
+              </p>
+              <div class="cat-card__cta">
+                <span>Explore Tours</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top accent strip using category color -->
+          <div class="cat-card__color-bar" [ngStyle]="{'background': getCategoryColor(cat, i)}"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="category-overview__divider">
+      <span>or browse all events below</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ========================================================== -->
+<!-- PART 1B: Category Detail Banner (shown on ?category=CODE)  -->
+<!-- ========================================================== -->
+<section *ngIf="isCategoryView" class="category-banner" [ngStyle]="{'border-bottom-color': getActiveCategoryColor()}">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="category-banner__breadcrumb">
+      <a class="category-banner__back" (click)="clearCategoryView()" tabindex="0" role="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        All Events
+      </a>
+      <svg class="category-banner__sep" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+      <span *ngIf="activeCategoryData">{{ activeCategoryData.displayName }}</span>
+      <span *ngIf="!activeCategoryData">{{ selectedCategory }}</span>
+    </nav>
+
+    <div class="category-banner__body">
+      <div class="category-banner__color-bar" [ngStyle]="{'background': getActiveCategoryColor()}"></div>
+      <div class="category-banner__info">
+        <h2 class="category-banner__title">
+          <span *ngIf="activeCategoryData">{{ activeCategoryData.displayName }}</span>
+          <span *ngIf="!activeCategoryData">{{ selectedCategory }}</span>
+        </h2>
+        <p class="category-banner__desc" *ngIf="activeCategoryData && activeCategoryData.description">
+          {{ activeCategoryData.description }}
+        </p>
+        <p class="category-banner__desc" *ngIf="activeCategoryData && !activeCategoryData.description">
+          <span *ngIf="activeCategoryData.code === 'TourWithAccommodation'">Multi-day packages with curated stays across Sri Lanka's most breathtaking destinations.</span>
+          <span *ngIf="activeCategoryData.code === 'DayTours'">Experience the best of Sri Lanka in a single unforgettable day with expert local guides.</span>
+          <span *ngIf="activeCategoryData.code === 'TourWithOutAccommodation'">Full-day excursions to iconic landmarks — return home the same evening.</span>
+        </p>
+        <div class="category-banner__count" *ngIf="!isLoading">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          {{ totalElements }} tour<span *ngIf="totalElements !== 1">s</span> available
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ========================================================== -->
+<!-- PART 2: Search / Filter / Events Listing                   -->
+<!-- ========================================================== -->
+
 <!-- Filter Section -->
 <section class="filter-section">
   <div class="container">
-    <!-- Mobile: Search toggle button + Grid toggle -->
+    <!-- Toolbar: search toggle (mobile) + Grid toggle -->
     <div class="filter-toolbar">
       <button class="search-toggle" (click)="toggleSearch()" [class.active]="isSearchOpen">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <span>Search & Filter</span>
+        <span>Search</span>
         <svg class="chevron" [class.open]="isSearchOpen" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
-
-      <!-- Active filter count badge -->
-      <span *ngIf="hasActiveFilters() && !isSearchOpen" class="filter-badge" (click)="clearAllFilters()">
-        Filters active &times;
-      </span>
 
       <!-- Grid View Toggle -->
       <div class="grid-toggle">
@@ -57,7 +188,7 @@
       </div>
     </div>
 
-    <!-- Expandable search panel (always visible on desktop, collapsible on mobile) -->
+    <!-- Expandable search panel -->
     <div class="filter-panel" [class.open]="isSearchOpen">
       <div class="filter-wrapper">
         <!-- Search Bar -->
@@ -75,12 +206,11 @@
           </svg>
         </div>
 
-        <!-- Filters Container -->
-        <div class="filters-container">
-          <!-- Category Filter -->
+        <!-- Category Filter — only show when NOT in category view -->
+        <div class="filters-container" *ngIf="!isCategoryView">
           <div class="filter-group">
             <label class="filter-label">Category</label>
-            <select class="filter-select" [value]="selectedCategory" (change)="filterByCategory($event.target.value)">
+            <select class="filter-select" [value]="selectedCategory" (change)="filterInPlace($event.target.value)">
               <option *ngFor="let category of categories" [value]="category.value">{{ category.label }}</option>
             </select>
           </div>
@@ -89,14 +219,14 @@
 
       <!-- Clear Filters -->
       <button *ngIf="hasActiveFilters()" class="btn-clear-filters" (click)="clearAllFilters()">
-        Clear all filters
+        Clear search
       </button>
     </div>
 
     <!-- Results Count -->
     <div class="results-info">
       <p>Showing <strong>{{ events.length }}</strong> of <strong>{{ totalElements }}</strong> events
-        <span *ngIf="totalPages > 1">(Page {{ currentPage + 1 }} of {{ totalPages }})</span>
+        <span *ngIf="totalPages > 1">&nbsp;(Page {{ currentPage + 1 }} of {{ totalPages }})</span>
       </p>
     </div>
   </div>
@@ -140,7 +270,7 @@
         <div class="event-image">
           <img [src]="event.imageUrl" [alt]="event.title" />
           <div class="event-badge-wrapper">
-            <span class="type-badge">{{ event.category }}</span>
+            <span class="type-badge">{{ getCategoryDisplayName(event.category) }}</span>
             <span class="price-badge">${{ event.price }}</span>
           </div>
         </div>
@@ -166,7 +296,6 @@
           </div>
 
           <p>{{ event.shortDescription }}</p>
-
         </div>
       </a>
     </div>
@@ -181,8 +310,16 @@
           </svg>
         </span>
         <h3>No events found</h3>
-        <p>Try adjusting your search or filter criteria</p>
-        <button (click)="clearAllFilters()" class="btn-reset">
+        <p>Try adjusting your search or browse a different category</p>
+        <button *ngIf="isCategoryView" (click)="clearCategoryView()" class="btn-reset">
+          <span>Browse All Events</span>
+          <span class="btn-shine"></span>
+          <span class="btn-corner btn-corner--tl"></span>
+          <span class="btn-corner btn-corner--tr"></span>
+          <span class="btn-corner btn-corner--bl"></span>
+          <span class="btn-corner btn-corner--br"></span>
+        </button>
+        <button *ngIf="!isCategoryView" (click)="clearAllFilters()" class="btn-reset">
           <span>Clear Filters</span>
           <span class="btn-shine"></span>
           <span class="btn-corner btn-corner--tl"></span>
@@ -195,20 +332,8 @@
 
     <!-- Pagination Controls -->
     <div *ngIf="!isLoading && !errorMessage && totalPages > 1" class="pagination">
-      <button
-        class="pagination-btn"
-        [disabled]="currentPage === 0"
-        (click)="goToPage(0)"
-      >
-        First
-      </button>
-      <button
-        class="pagination-btn"
-        [disabled]="currentPage === 0"
-        (click)="goToPage(currentPage - 1)"
-      >
-        Previous
-      </button>
+      <button class="pagination-btn" [disabled]="currentPage === 0" (click)="goToPage(0)">First</button>
+      <button class="pagination-btn" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)">Previous</button>
 
       <div class="page-numbers">
         <button
@@ -221,20 +346,8 @@
         </button>
       </div>
 
-      <button
-        class="pagination-btn"
-        [disabled]="currentPage === totalPages - 1"
-        (click)="goToPage(currentPage + 1)"
-      >
-        Next
-      </button>
-      <button
-        class="pagination-btn"
-        [disabled]="currentPage === totalPages - 1"
-        (click)="goToPage(totalPages - 1)"
-      >
-        Last
-      </button>
+      <button class="pagination-btn" [disabled]="currentPage === totalPages - 1" (click)="goToPage(currentPage + 1)">Next</button>
+      <button class="pagination-btn" [disabled]="currentPage === totalPages - 1" (click)="goToPage(totalPages - 1)">Last</button>
     </div>
   </div>
 </section>
