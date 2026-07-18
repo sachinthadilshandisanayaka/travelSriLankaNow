@@ -31,8 +31,11 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   pageSize: number = 10;
 
   // Categories and Regions loaded from MasterData
+  categoryData: MasterData[] = [];
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Locations' }];
   regions: { value: string; label: string }[] = [{ value: 'all', label: 'All Regions' }];
+
+  private colorPalette = ['#1C4D8D', '#0F7B6C', '#C05621', '#6B46C1', '#B7791F', '#2C7A7B'];
 
   private observer: IntersectionObserver | null = null;
   private searchSubject = new Subject<string>();
@@ -51,6 +54,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   private loadMasterData(): void {
     this.masterDataService.getLocationCategories().subscribe({
       next: (data: MasterData[]) => {
+        this.categoryData = data.filter((c: MasterData) => c.isActive);
         this.categories = [
           { value: 'all', label: 'All Locations' },
           ...data.map(item => ({
@@ -122,6 +126,19 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading = false;
       }
     });
+  }
+
+  navigateToCategory(code: string): void {
+    this.selectedCategory = code;
+    this.currentPage = 0;
+    this.loadData();
+    const target = document.querySelector('.filter-section') as HTMLElement;
+    if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }
+
+  getCategoryColor(category: MasterData, index: number): string {
+    if (category.color && category.color.trim()) { return category.color; }
+    return this.colorPalette[index % this.colorPalette.length];
   }
 
   filterByCategory(category: string): void {

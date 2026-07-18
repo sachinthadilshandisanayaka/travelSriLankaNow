@@ -22,6 +22,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
   totalElements = 0;
 
   isLoading = false;
+  showCategoryPanel = false;
   showModal = false;
   isEditMode = false;
   slugManuallyEdited = false;

@@ -1,5 +1,63 @@
 @import '../../styles/admin-shared';
 
+// ── Panel wrapper ──────────────────────────────────────────────────────────────
+.cat-panel {
+  border: 1.5px solid $admin-gray-200;
+  border-radius: $admin-radius-xl;
+  background: $admin-white;
+  box-shadow: $admin-shadow-md;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: $admin-gray-50;
+    border-bottom: 1.5px solid $admin-gray-200;
+    flex-wrap: wrap;
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      color: $admin-navy;
+    }
+  }
+
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.8125rem;
+    color: $admin-gray-500;
+    margin: 0;
+  }
+
+  &__grid {
+    padding: 1.25rem;
+  }
+}
+
 // ── Spin animation ─────────────────────────────────────────────────────────────
 @keyframes cs-spin { to { transform: rotate(360deg); } }
 @keyframes cs-fade-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
