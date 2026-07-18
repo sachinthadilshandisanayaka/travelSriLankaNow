@@ -66,6 +66,12 @@ public class HomepageSectionService {
 
     @Transactional
     public HomepageSection createSection(HomepageSection section) {
+        boolean multipleAllowed = section.getSectionType() == HomepageSection.SectionType.CUSTOM_CONTENT
+                || section.getSectionType() == HomepageSection.SectionType.IMAGE_GALLERY_SLIDER;
+        if (!multipleAllowed && homepageSectionRepository.existsBySectionType(section.getSectionType())) {
+            throw new IllegalStateException(
+                    "A '" + section.getSectionType() + "' section already exists. Edit the existing one instead.");
+        }
         if (section.getDisplayOrder() == null) section.setDisplayOrder(0);
         if (section.getIsActive() == null) section.setIsActive(true);
         return homepageSectionRepository.save(section);

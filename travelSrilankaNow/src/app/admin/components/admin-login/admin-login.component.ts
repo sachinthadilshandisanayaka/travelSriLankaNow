@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import { BrandingService, Branding } from '../../services/branding.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -12,17 +13,19 @@ export class AdminLoginComponent implements OnInit {
   password: string = '';
   errorMessage: string = '';
   isLoading: boolean = false;
+  branding!: Branding;
 
   constructor(
     private authService: AdminAuthService,
-    private router: Router
+    private router: Router,
+    private brandingService: BrandingService
   ) { }
 
   ngOnInit(): void {
-    // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/admin/dashboard']);
     }
+    this.brandingService.branding$.subscribe(b => this.branding = b);
   }
 
   onSubmit(): void {

@@ -1454,6 +1454,71 @@ $navbar-height: 80px;
   .btn-primary { display: inline-flex; }
 }
 
+// ===== Date Range Summary Card =====
+.booking-date-summary {
+  margin-top: $spacing-md;
+  background: rgba($primary-navy, 0.04);
+  border: 1.5px solid rgba($primary-navy, 0.12);
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $warm-gray;
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-dark;
+  }
+
+  &__divider {
+    color: $primary-navy;
+    opacity: 0.5;
+    flex-shrink: 0;
+
+    svg {
+      display: block;
+    }
+  }
+
+  &__nights {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: $font-size-sm;
+    color: $primary-blue;
+    border-top: 1px solid rgba($primary-navy, 0.08);
+    padding-top: $spacing-sm;
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    strong {
+      font-weight: $font-weight-bold;
+    }
+  }
+}
+
 // ===== Booking Calendar =====
 .booking-calendar-group {
   margin-bottom: $spacing-lg;

@@ -27,10 +27,18 @@ export class AdminMasterDataComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
-  // Modal state
+  // Add/Edit modal state
   showModal = false;
   isEditing = false;
   currentItem: MasterData = this.getEmptyItem();
+
+  // Delete confirmation modal state
+  showDeleteModal = false;
+  itemToDelete: MasterData | null = null;
+
+  // Per-item toggle loading state
+  togglingIds = new Set<number>();
+  successMessage = '';
 
   // Type display names
   typeDisplayNames: { [key: string]: string } = {
@@ -102,7 +110,8 @@ export class AdminMasterDataComponent implements OnInit {
       description: '',
       sortOrder: 0,
       isActive: true,
-      color: '#3B82F6'
+      color: '#3B82F6',
+      icon: ''
     };
   }
 
@@ -159,30 +168,65 @@ export class AdminMasterDataComponent implements OnInit {
 
   deleteItem(item: MasterData): void {
     if (!item.id) return;
-
-    if (confirm(`Are you sure you want to delete "${item.displayName}"?`)) {
-      this.adminApiService.deleteMasterData(item.id).subscribe({
-        next: () => {
-          this.loadData();
-          this.masterDataService.clearCache(item.type);
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || 'Failed to delete item';
-        }
-      });
-    }
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
   }
 
-  toggleActive(item: MasterData): void {
-    if (!item.id) return;
+  confirmDelete(): void {
+    if (!this.itemToDelete?.id) return;
+    const item = this.itemToDelete;
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
 
-    this.adminApiService.toggleMasterDataActive(item.id).subscribe({
+    this.adminApiService.deleteMasterData(item.id!).subscribe({
       next: () => {
         this.loadData();
         this.masterDataService.clearCache(item.type);
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to toggle status';
+        this.errorMessage = error.error?.message || 'Failed to delete item';
+      }
+    });
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
+  }
+
+  toggleActive(item: MasterData): void {
+    if (!item.id || this.togglingIds.has(item.id)) return;
+
+    const id = item.id;
+    this.togglingIds.add(id);
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    // Optimistic UI update
+    const previousState = item.isActive;
+    item.isActive = !item.isActive;
+
+    this.adminApiService.toggleMasterDataActive(id).subscribe({
+      next: () => {
+        this.togglingIds.delete(id);
+        this.successMessage = `"${item.displayName}" has been ${item.isActive ? 'activated' : 'deactivated'}.`;
+        this.masterDataService.clearCache(item.type);
+        setTimeout(() => { this.successMessage = ''; }, 3000);
+        // Silent background refresh to sync with server
+        this.adminApiService.getMasterData().subscribe({
+          next: (data) => {
+            this.masterDataList = data;
+            this.filterByType();
+          },
+          error: () => {}
+        });
+      },
+      error: (error) => {
+        // Revert optimistic update
+        item.isActive = previousState;
+        this.togglingIds.delete(id);
+        this.errorMessage = error.error?.message || 'Failed to toggle status. Please try again.';
+        console.error('Toggle error:', error);
       }
     });
   }
