@@ -7,8 +7,13 @@
     <div class="login-card">
       <!-- Logo Section -->
       <div class="logo-section">
-        <div class="logo-icon">🏝️</div>
-        <h1 class="brand-title">Travel Sri Lanka Now</h1>
+        <div class="logo-icon" *ngIf="branding?.logoUrl; else iconFallback">
+          <img [src]="branding.logoUrl" [alt]="branding.siteName" class="logo-img">
+        </div>
+        <ng-template #iconFallback>
+          <div class="logo-icon">🏝️</div>
+        </ng-template>
+        <h1 class="brand-title">{{ branding?.siteName || 'Admin Panel' }}</h1>
         <p class="brand-subtitle">Admin Panel</p>
       </div>
 

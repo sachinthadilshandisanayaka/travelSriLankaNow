@@ -4,6 +4,7 @@ import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { BookingCountService } from '../../services/booking-count.service';
 import { ContentStatsService } from '../../services/content-stats.service';
+import { BrandingService, Branding } from '../../services/branding.service';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -14,13 +15,16 @@ import { catchError } from 'rxjs/operators';
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
   displayName = '';
+  roleName = '';
   isSidebarOpen = false;
   showLogoutConfirm = false;
   pendingCount = 0;
   showPendingBanner = true;
+  branding!: Branding;
   private displayNameSub!: Subscription;
   private pendingSub!: Subscription;
   private statsSub!: Subscription;
+  private brandingSub!: Subscription;
   stats = {
     locations: { total: 0 },
     events: { total: 0 },
@@ -33,6 +37,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     private apiService: AdminApiService,
     private bookingCount: BookingCountService,
     private contentStats: ContentStatsService,
+    private brandingService: BrandingService,
     private router: Router
   ) {}
 
@@ -40,6 +45,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.displayNameSub = this.authService.displayName$.subscribe(name => {
       this.displayName = name;
     });
+    this.roleName = this.authService.getAdminRoleName() || this.authService.getRole() || 'Administrator';
+    this.brandingSub = this.brandingService.branding$.subscribe(b => this.branding = b);
 
     // Only subscribe to pending bookings if the user has permission
     if (this.hasPermission('BOOKINGS:VIEW')) {
@@ -55,6 +62,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     if (this.displayNameSub) this.displayNameSub.unsubscribe();
     if (this.pendingSub) this.pendingSub.unsubscribe();
     if (this.statsSub) this.statsSub.unsubscribe();
+    if (this.brandingSub) this.brandingSub.unsubscribe();
   }
 
   private loadStats(): void {

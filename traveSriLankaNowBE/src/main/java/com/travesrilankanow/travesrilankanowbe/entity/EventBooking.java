@@ -69,6 +69,14 @@ public class EventBooking {
     @Column(name = "requested_date")
     private LocalDate requestedDate;
 
+    /** Check-in date for RANGE mode bookings (e.g. multi-day tours, accommodation). */
+    @Column(name = "check_in_date")
+    private LocalDate checkInDate;
+
+    /** Check-out date for RANGE mode bookings. */
+    @Column(name = "check_out_date")
+    private LocalDate checkOutDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookingStatus status;

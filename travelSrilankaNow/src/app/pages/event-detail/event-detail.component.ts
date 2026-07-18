@@ -8,6 +8,8 @@ import { DataService } from '../../services/data.service';
 import { FieldDefinition } from '../../models/more-section.model';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
 import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.service';
+import { NavBookingConfigService } from '../../services/nav-booking-config.service';
+import { NavBookingConfig } from '../../models/nav-booking-config.model';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -27,6 +29,9 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   selectedCurrency = 'USD';
   selectedPricing: EventPricing | null = null;
 
+  // Nav booking config for this route
+  navBookingConfig: NavBookingConfig | null = null;
+
   // Booking modal state
   showBookingModal = false;
   bookingStep: 'form' | 'success' = 'form';
@@ -41,7 +46,9 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     numberOfPeople: 1,
     specialRequests: '',
     selectedDateId: null as number | null,
-    preferredDate: null as string | null
+    preferredDate: null as string | null,
+    checkInDate: null as string | null,
+    checkOutDate: null as string | null
   };
 
   // Calendar state
@@ -61,7 +68,8 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     private eventService: EventService,
     private dataService: DataService,
     private masterDataService: MasterDataService,
-    private customerAuthService: CustomerAuthService
+    private customerAuthService: CustomerAuthService,
+    private navBookingConfigService: NavBookingConfigService
   ) {}
 
   ngOnInit(): void {
@@ -92,6 +100,77 @@ export class EventDetailComponent implements OnInit, OnDestroy {
         this.booking.phone = u.phoneNumber || '';
       }
     });
+
+    this.navBookingConfigService.getByRoutePath('/events').subscribe(configs => {
+      this.navBookingConfig = configs.find(c => c.isActive) || configs[0] || null;
+    });
+  }
+
+  get dateMode(): string {
+    return this.navBookingConfig ? this.navBookingConfig.dateMode : 'SINGLE';
+  }
+
+  get minStayDays(): number {
+    return this.navBookingConfig && this.navBookingConfig.minStayDays ? this.navBookingConfig.minStayDays : 1;
+  }
+
+  get maxStayDays(): number | null {
+    return this.navBookingConfig ? this.navBookingConfig.maxStayDays : null;
+  }
+
+  get checkOutMin(): string {
+    if (!this.booking.checkInDate) return '';
+    const d = new Date(this.booking.checkInDate);
+    d.setDate(d.getDate() + this.minStayDays);
+    return d.toISOString().substring(0, 10);
+  }
+
+  get checkOutMax(): string {
+    if (!this.booking.checkInDate || !this.maxStayDays) return '';
+    const d = new Date(this.booking.checkInDate);
+    d.setDate(d.getDate() + this.maxStayDays);
+    return d.toISOString().substring(0, 10);
+  }
+
+  get todayStr(): string {
+    return new Date().toISOString().substring(0, 10);
+  }
+
+  get checkInMin(): string {
+    if (this.navBookingConfig && this.navBookingConfig.minLeadDays > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + this.navBookingConfig.minLeadDays);
+      return d.toISOString().substring(0, 10);
+    }
+    return this.todayStr;
+  }
+
+  onDateRangeApply(event: { start: string; end: string }): void {
+    this.booking.checkInDate = event.start;
+    this.booking.checkOutDate = event.end;
+  }
+
+  getNights(): number {
+    if (!this.booking.checkInDate || !this.booking.checkOutDate) { return 0; }
+    const a = new Date(this.booking.checkInDate).getTime();
+    const b = new Date(this.booking.checkOutDate).getTime();
+    return Math.max(0, Math.round((b - a) / 86400000));
+  }
+
+  formatDateDisplay(dateStr: string | null): string {
+    if (!dateStr) { return ''; }
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  onCheckInChange(): void {
+    // Reset check-out when check-in changes and current check-out is now invalid
+    if (this.booking.checkInDate && this.booking.checkOutDate) {
+      if (this.booking.checkOutDate <= this.booking.checkInDate ||
+          this.booking.checkOutDate < this.checkOutMin) {
+        this.booking.checkOutDate = null;
+      }
+    }
   }
 
   loadEventDetails(id: number): void {
@@ -237,6 +316,8 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.bookingError = '';
     this.booking.selectedDateId = null;
     this.booking.preferredDate = null;
+    this.booking.checkInDate = null;
+    this.booking.checkOutDate = null;
     this.showMonthPicker = false;
     document.body.style.overflow = '';
   }
@@ -357,6 +438,16 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       this.bookingError = 'Please fill in all required fields.';
       return;
     }
+    if (this.dateMode === 'RANGE') {
+      if (!this.booking.checkInDate || !this.booking.checkOutDate) {
+        this.bookingError = 'Please select both check-in and check-out dates.';
+        return;
+      }
+      if (this.booking.checkOutDate <= this.booking.checkInDate) {
+        this.bookingError = 'Check-out date must be after check-in date.';
+        return;
+      }
+    }
     if (!this.event) return;
     this.bookingLoading = true;
     this.bookingError = '';
@@ -368,10 +459,16 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       phone: this.booking.phone,
       numberOfPeople: this.booking.numberOfPeople,
       specialRequests: this.booking.specialRequests,
-      totalPrice: this.bookingTotalPrice
+      totalPrice: this.bookingTotalPrice,
+      navRoutePath: '/events'
     };
-    if (this.booking.selectedDateId) payload.eventDateId = this.booking.selectedDateId;
-    if (this.booking.preferredDate) payload.preferredDate = this.booking.preferredDate;
+    if (this.dateMode === 'RANGE') {
+      payload.checkInDate = this.booking.checkInDate;
+      payload.checkOutDate = this.booking.checkOutDate;
+    } else {
+      if (this.booking.selectedDateId) payload.eventDateId = this.booking.selectedDateId;
+      if (this.booking.preferredDate) payload.preferredDate = this.booking.preferredDate;
+    }
 
     this.http.post<any>(`${environment.apiUrl}/events/book`, payload).subscribe({
       next: (res) => {

@@ -66,6 +66,14 @@
 .logo-icon {
   font-size: 3rem;
   margin-bottom: $spacing-md;
+
+  .logo-img {
+    height: 64px;
+    max-width: 200px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
 }
 
 .brand-title {
