@@ -146,6 +146,12 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
     });
   }
 
+  getCategoryDisplayName(code: string): string {
+    if (!code) { return ''; }
+    const cat = this.categories.find(c => c.code === code);
+    return cat ? cat.displayName : code;
+  }
+
   loadCategories(): void {
     this.masterDataService.getEventCategories().subscribe({
       next: (data) => {

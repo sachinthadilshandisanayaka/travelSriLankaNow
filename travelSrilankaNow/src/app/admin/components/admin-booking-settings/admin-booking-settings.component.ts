@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import {
+  NavBookingConfig, BkBlackoutDate,
+  blankNavBookingConfig, DOW_LABELS, isDowAllowed, toggleDow
+} from '../../../models/nav-booking-config.model';
+import { AdminNavBookingConfigService } from '../../services/admin-nav-booking-config.service';
 
 export interface BkType {
   id?: number;
@@ -48,7 +53,7 @@ export interface BkAvailabilityConfig {
 export class AdminBookingSettingsComponent implements OnInit {
   private apiBase = `${environment.apiUrl}/admin/booking-settings`;
 
-  activeTab: 'types' | 'conditions' | 'terms' | 'availability' = 'conditions';
+  activeTab: 'types' | 'conditions' | 'terms' | 'availability' | 'nav-rules' = 'conditions';
 
   readonly PAGE_SIZE = 6;
 
@@ -101,18 +106,50 @@ export class AdminBookingSettingsComponent implements OnInit {
   availForm: BkAvailabilityConfig = this.blankAvail();
   availPage = 0;
 
+  // ── Nav Booking Rules ──
+  navConfigs: { id: number; routePath: string; labelKey: string; labelOverride?: string }[] = [];
+  navRules: NavBookingConfig[] = [];
+  navRulesLoading = false;
+  navRulesError = '';
+  navRulesSuccess = '';
+  showNavRuleForm = false;
+  editingNavRule: NavBookingConfig | null = null;
+  navRuleForm: NavBookingConfig = blankNavBookingConfig();
+  selectedNavConfigId = -1; // -1 = all nav items
+  // Blackout date management within a rule
+  showBlackoutForm = false;
+  blackoutConfigId: number | null = null;
+  blackoutDates: BkBlackoutDate[] = [];
+  newBlackoutDate = '';
+  newBlackoutReason = '';
+  readonly DOW_LABELS = DOW_LABELS;
+  readonly DATE_MODES = [
+    { value: 'SINGLE', label: 'Single Date',  desc: 'Customer picks one visit date (day tour, event)' },
+    { value: 'RANGE',  label: 'Date Range',   desc: 'Customer picks check-in + check-out (accommodation, multi-day tour)' },
+    { value: 'MULTI',  label: 'Multi-Date',   desc: 'Customer picks multiple individual dates (recurring sessions)' },
+    { value: 'NONE',   label: 'No Date',      desc: 'No date required (open voucher, gift package)' },
+  ];
+
   // ── Shared delete dialog ──
   showDeleteDialog = false;
   deleteDialogMessage = '';
   private pendingDeleteAction: (() => void) | null = null;
 
-  constructor(private http: HttpClient) {}
+  // ── Loading states ──
+  isSaving = false;
+  isDeleting = false;
+
+  constructor(
+    private http: HttpClient,
+    private navRuleService: AdminNavBookingConfigService
+  ) {}
 
   ngOnInit(): void {
     this.loadTypes();
     this.loadConditions();
     this.loadTerms();
     this.loadAvailability();
+    this.loadNavConfigs();
   }
 
   get activeTypeNames(): string[] {
@@ -181,17 +218,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveType(): void {
+    this.isSaving = true;
     const req = this.editingType
       ? this.http.put<BkType>(`${this.apiBase}/types/${this.typeForm.id}`, this.typeForm)
       : this.http.post<BkType>(`${this.apiBase}/types`, this.typeForm);
     req.subscribe({
       next: () => {
+        this.isSaving = false;
         this.typesSuccess = 'Booking type saved.';
         this.showTypeForm = false;
         this.loadTypes();
         setTimeout(() => this.typesSuccess = '', 3000);
       },
-      error: () => { this.typesError = 'Failed to save booking type.'; }
+      error: () => { this.isSaving = false; this.typesError = 'Failed to save booking type.'; }
     });
   }
 
@@ -238,17 +277,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveCondition(): void {
+    this.isSaving = true;
     const req = this.editingCondition
       ? this.http.put<BkCondition>(`${this.apiBase}/conditions/${this.conditionForm.id}`, this.conditionForm)
       : this.http.post<BkCondition>(`${this.apiBase}/conditions`, this.conditionForm);
     req.subscribe({
       next: () => {
+        this.isSaving = false;
         this.conditionsSuccess = 'Rule saved.';
         this.showConditionForm = false;
         this.loadConditions();
         setTimeout(() => this.conditionsSuccess = '', 3000);
       },
-      error: () => { this.conditionsError = 'Failed to save rule.'; }
+      error: () => { this.isSaving = false; this.conditionsError = 'Failed to save rule.'; }
     });
   }
 
@@ -304,14 +345,16 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveTerms(): void {
+    this.isSaving = true;
     this.http.post<BkTerms>(`${this.apiBase}/terms`, this.termsForm).subscribe({
       next: () => {
+        this.isSaving = false;
         this.termsSuccess = 'Terms saved.';
         this.showTermsForm = false;
         this.loadTerms();
         setTimeout(() => this.termsSuccess = '', 3000);
       },
-      error: () => { this.termsError = 'Failed to save terms.'; }
+      error: () => { this.isSaving = false; this.termsError = 'Failed to save terms.'; }
     });
   }
 
@@ -363,17 +406,19 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   saveAvail(): void {
+    this.isSaving = true;
     const req = this.availForm.id
       ? this.http.put<BkAvailabilityConfig>(`${this.apiBase}/availability/${this.availForm.id}`, this.availForm)
       : this.http.post<BkAvailabilityConfig>(`${this.apiBase}/availability`, this.availForm);
     req.subscribe({
       next: () => {
+        this.isSaving = false;
         this.availSuccess = 'Config saved.';
         this.showAvailForm = false;
         this.loadAvailability();
         setTimeout(() => this.availSuccess = '', 3000);
       },
-      error: () => { this.availError = 'Failed to save config.'; }
+      error: () => { this.isSaving = false; this.availError = 'Failed to save config.'; }
     });
   }
 
@@ -388,13 +433,143 @@ export class AdminBookingSettingsComponent implements OnInit {
   }
 
   confirmDelete(): void {
-    this.pendingDeleteAction?.();
+    this.isDeleting = true;
+    const action = this.pendingDeleteAction;
     this.pendingDeleteAction = null;
     this.showDeleteDialog = false;
+    if (action) {
+      // Wrap in setTimeout to let the dialog close and spinner render first
+      setTimeout(() => {
+        action();
+        this.isDeleting = false;
+      }, 0);
+    } else {
+      this.isDeleting = false;
+    }
   }
 
   private blankAvail(): BkAvailabilityConfig {
     const defaultType = this.activeTypeNames[0] ?? 'EVENT';
     return { bookingTypeCode: defaultType, entityId: null, allowMultiplePerDate: true, maxBookingsPerDate: null, active: true };
+  }
+
+  // ─────────────── NAV BOOKING RULES ───────────────
+
+  loadNavConfigs(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/admin/nav-config`).subscribe({
+      next: (d) => { this.navConfigs = d; },
+      error: () => {}
+    });
+  }
+
+  loadNavRules(navConfigId?: number): void {
+    this.navRulesLoading = true;
+    this.navRulesError = '';
+    const obs = navConfigId && navConfigId > 0
+      ? this.navRuleService.getByNavConfigId(navConfigId)
+      : this.navRuleService.getAll();
+    obs.subscribe({
+      next: (d) => { this.navRules = d; this.navRulesLoading = false; },
+      error: () => { this.navRulesError = 'Failed to load rules.'; this.navRulesLoading = false; }
+    });
+  }
+
+  onNavConfigFilterChange(): void {
+    this.loadNavRules(this.selectedNavConfigId > 0 ? this.selectedNavConfigId : undefined);
+  }
+
+  openNewNavRule(): void {
+    this.navRuleForm = blankNavBookingConfig(this.selectedNavConfigId > 0 ? this.selectedNavConfigId : 0);
+    this.editingNavRule = null;
+    this.showNavRuleForm = true;
+  }
+
+  editNavRule(rule: NavBookingConfig): void {
+    this.navRuleForm = { ...rule };
+    this.editingNavRule = rule;
+    this.showNavRuleForm = true;
+  }
+
+  saveNavRule(): void {
+    this.isSaving = true;
+    const obs = this.editingNavRule
+      ? this.navRuleService.update(this.navRuleForm.id!, this.navRuleForm)
+      : this.navRuleService.create(this.navRuleForm);
+    obs.subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.navRulesSuccess = 'Rule saved.';
+        this.showNavRuleForm = false;
+        this.loadNavRules(this.selectedNavConfigId ?? undefined);
+        setTimeout(() => this.navRulesSuccess = '', 3000);
+      },
+      error: (e) => { this.isSaving = false; this.navRulesError = e?.error?.message ?? 'Failed to save rule.'; }
+    });
+  }
+
+  toggleNavRuleActive(rule: NavBookingConfig): void {
+    this.navRuleService.toggleActive(rule.id!).subscribe({
+      next: (r) => { const i = this.navRules.findIndex(x => x.id === rule.id); if (i >= 0) this.navRules[i] = r; }
+    });
+  }
+
+  deleteNavRule(rule: NavBookingConfig): void {
+    const navLabel = rule.navConfig?.labelOverride || rule.navConfig?.routePath || '';
+    this.deleteDialogMessage = `Delete booking rule for "${rule.bookingTypeCode}" on "${navLabel}"?`;
+    this.pendingDeleteAction = () => {
+      this.navRuleService.delete(rule.id!).subscribe({
+        next: () => { this.navRules = this.navRules.filter(x => x.id !== rule.id); },
+        error: () => { this.navRulesError = 'Failed to delete rule.'; }
+      });
+    };
+    this.showDeleteDialog = true;
+  }
+
+  navConfigLabel(id: number): string {
+    const c = this.navConfigs.find(n => n.id === id);
+    return c ? (c.labelOverride || c.routePath) : String(id);
+  }
+
+  // Day-of-week helpers
+  isDowAllowed(dayIndex: number): boolean {
+    return isDowAllowed(this.navRuleForm.allowedDow, dayIndex);
+  }
+
+  toggleDow(dayIndex: number): void {
+    if (this.navRuleForm.allowedDow === null) {
+      // null = all days; first toggle selects all EXCEPT this day
+      this.navRuleForm.allowedDow = 127 ^ (1 << dayIndex); // 127 = all 7 bits
+    } else {
+      const next = toggleDow(this.navRuleForm.allowedDow, dayIndex);
+      // If all 7 bits set, reset to null (= unrestricted)
+      this.navRuleForm.allowedDow = next === 127 ? null : next;
+    }
+  }
+
+  // Blackout dates
+  openBlackoutManager(rule: NavBookingConfig): void {
+    this.blackoutConfigId = rule.id!;
+    this.blackoutDates = [];
+    this.newBlackoutDate = '';
+    this.newBlackoutReason = '';
+    this.showBlackoutForm = true;
+    this.navRuleService.getBlackoutDates(rule.id!).subscribe({
+      next: (d) => this.blackoutDates = d,
+      error: () => {}
+    });
+  }
+
+  addBlackoutDate(): void {
+    if (!this.blackoutConfigId || !this.newBlackoutDate) return;
+    this.navRuleService.addBlackoutDate(this.blackoutConfigId, this.newBlackoutDate, this.newBlackoutReason).subscribe({
+      next: (d) => { this.blackoutDates.push(d); this.newBlackoutDate = ''; this.newBlackoutReason = ''; },
+      error: (e) => { this.navRulesError = e?.error?.message ?? 'Failed to add date.'; }
+    });
+  }
+
+  removeBlackoutDate(b: BkBlackoutDate): void {
+    this.navRuleService.removeBlackoutDate(this.blackoutConfigId!, b.id!).subscribe({
+      next: () => { this.blackoutDates = this.blackoutDates.filter(x => x.id !== b.id); }
+    });
   }
 }

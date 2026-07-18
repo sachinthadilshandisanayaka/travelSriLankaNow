@@ -45,6 +45,17 @@ export class AdminAuthService implements OnDestroy {
     private http: HttpClient,
     private router: Router
   ) {
+    // Field initializers for isAuthenticatedSubject and displayNameSubject run BEFORE the
+    // constant fields (ACCESS_TOKEN_KEY, FIRST_NAME_KEY, USER_KEY …) because those constants
+    // are declared after the subjects in the class body. Re-initialize with correct values
+    // now that all field initializers have finished.
+    if (this.hasToken()) {
+      this.isAuthenticatedSubject.next(true);
+    }
+    const name = this.getFirstName() || this.getUsername() || this.getUsernameFromToken() || '';
+    if (name) {
+      this.displayNameSubject.next(name);
+    }
     this.startTokenExpiryMonitor();
   }
 
@@ -191,6 +202,17 @@ export class AdminAuthService implements OnDestroy {
     localStorage.setItem(this.FIRST_NAME_KEY, firstName);
     localStorage.setItem(this.USER_KEY, username);
     this.displayNameSubject.next(firstName || username);
+  }
+
+  getUsernameFromToken(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub || null;
+    } catch {
+      return null;
+    }
   }
 
   isTokenExpired(): boolean {

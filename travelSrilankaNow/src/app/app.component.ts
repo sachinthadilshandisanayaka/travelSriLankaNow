@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, switchMap } from 'rxjs/operators';
@@ -30,11 +30,13 @@ export class AppComponent implements OnInit {
   constructor(
     private router: Router,
     private titleService: Title,
-    private siteSettings: SiteSettingsService
-  ) {}
+    private siteSettings: SiteSettingsService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.isAdminRoute = this.router.url.startsWith('/admin');
+  }
 
   ngOnInit(): void {
-    this.isAdminRoute = this.router.url.startsWith('/admin');
 
     this.siteSettings.getSettingsAsMap().subscribe(settings => {
       this.applyTitle(this.router.url, settings);
@@ -54,14 +56,17 @@ export class AppComponent implements OnInit {
       if (event instanceof NavigationStart) {
         this.isAdminRoute = event.url.startsWith('/admin');
         this.isNavigating = true;
+        this.cdr.detectChanges();
       } else if (event instanceof NavigationEnd) {
         this.isAdminRoute = event.url.startsWith('/admin');
         this.isNavigating = false;
+        this.cdr.detectChanges();
         this.siteSettings.getSettingsAsMap().subscribe(settings => {
           this.applyTitle(event.url, settings);
         });
       } else if (event instanceof NavigationCancel || event instanceof NavigationError) {
         this.isNavigating = false;
+        this.cdr.detectChanges();
       }
     });
   }

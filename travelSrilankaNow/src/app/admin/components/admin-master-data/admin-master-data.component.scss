@@ -95,3 +95,24 @@
   background-color: rgba($admin-navy, 0.1);
   color: $admin-navy;
 }
+
+// Per-item toggle button loading state
+.admin-btn--toggling {
+  opacity: 0.7;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.admin-btn__spinner {
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-right: 0 !important;
+  animation: spin 0.8s linear infinite;
+
+  circle { stroke: $admin-gray-400; }
+  path { fill: $admin-navy; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
