@@ -78,7 +78,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   private loadMasterData(): void {
     this.masterDataService.getEventCategories().subscribe({
       next: (data: MasterData[]) => {
-        this.categoryData = data;
+        this.categoryData = data.filter((c: MasterData) => c.isActive);
         this.categories = [
           { value: 'all', label: 'All Events' },
           ...data.map(item => ({ value: item.code, label: item.displayName }))
