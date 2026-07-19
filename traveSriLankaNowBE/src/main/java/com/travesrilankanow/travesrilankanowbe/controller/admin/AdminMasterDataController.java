@@ -4,6 +4,8 @@ import com.travesrilankanow.travesrilankanowbe.entity.MasterData;
 import com.travesrilankanow.travesrilankanowbe.entity.MasterData.MasterDataType;
 import com.travesrilankanow.travesrilankanowbe.service.MasterDataService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +36,15 @@ public class AdminMasterDataController {
     @PreAuthorize("hasAuthority('MASTER_DATA:VIEW')")
     public ResponseEntity<List<MasterData>> getByType(@PathVariable MasterDataType type) {
         return ResponseEntity.ok(masterDataService.getByType(type));
+    }
+
+    @GetMapping("/type/{type}/paginated")
+    @PreAuthorize("hasAuthority('MASTER_DATA:VIEW')")
+    public ResponseEntity<Page<MasterData>> getByTypePaginated(
+            @PathVariable MasterDataType type,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        return ResponseEntity.ok(masterDataService.getByTypePaginated(type, search, pageable));
     }
 
     @GetMapping("/{id}")

@@ -184,6 +184,16 @@ export class AdminApiService {
     return this.http.get<any[]>(`${this.apiUrl}/master-data/type/${type}`);
   }
 
+  getMasterDataByTypePaginated(type: string, page: number = 0, size: number = 10,
+                                sort: string = 'sortOrder,asc', search?: string): Observable<PageResponse<any>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    if (sort) params = params.set('sort', sort);
+    if (search) params = params.set('search', search);
+    return this.http.get<PageResponse<any>>(`${this.apiUrl}/master-data/type/${type}/paginated`, { params });
+  }
+
   getMasterDataById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/master-data/${id}`);
   }

@@ -6,6 +6,8 @@ import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundExcepti
 import com.travesrilankanow.travesrilankanowbe.repository.MasterDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,14 @@ public class MasterDataService {
 
     public List<MasterData> getActiveByType(MasterDataType type) {
         return masterDataRepository.findByTypeAndIsActiveTrueOrderBySortOrderAsc(type);
+    }
+
+    public Page<MasterData> getByTypePaginated(MasterDataType type, String search, Pageable pageable) {
+        return masterDataRepository.findByTypeAndSearch(type, search, pageable);
+    }
+
+    public Page<MasterData> getActiveByTypePaginated(MasterDataType type, String search, Pageable pageable) {
+        return masterDataRepository.findByTypeAndIsActiveTrueAndSearch(type, search, pageable);
     }
 
     public MasterData getById(Long id) {
