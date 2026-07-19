@@ -15,6 +15,8 @@ import { LocationsComponent } from './pages/locations/locations.component';
 import { GalleryComponent } from './pages/gallery/gallery.component';
 import { EventsComponent } from './pages/events/events.component';
 import { EventDetailComponent } from './pages/event-detail/event-detail.component';
+import { PackagesComponent } from './pages/packages/packages.component';
+import { PackageDetailComponent } from './pages/package-detail/package-detail.component';
 import { PlacesComponent } from './pages/places/places.component';
 import { LandingSimpleComponent } from './pages/landing/landing-simple.component';
 import { LocationDetailComponent } from './pages/location-detail/location-detail.component';
@@ -44,6 +46,8 @@ import { SharedModule } from './shared/shared.module';
     GalleryComponent,
     EventsComponent,
     EventDetailComponent,
+    PackagesComponent,
+    PackageDetailComponent,
     PlacesComponent,
     LocationDetailComponent,
     PlaceDetailComponent,
