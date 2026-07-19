@@ -27,10 +27,6 @@ export class NavConfigService {
     return this.http.put<NavConfig>(`${this.adminUrl}/${id}`, navConfig);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.adminUrl}/${id}`);
-  }
-
   toggleVisibility(id: number): Observable<NavConfig> {
     return this.http.patch<NavConfig>(`${this.adminUrl}/${id}/toggle-visibility`, {});
   }

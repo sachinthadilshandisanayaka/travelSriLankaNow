@@ -151,18 +151,6 @@ export class AdminNavConfigComponent implements OnInit {
     });
   }
 
-  deleteNavLink(link: NavConfig): void {
-    if (link.isFixed) return;
-    if (!confirm(`Remove "${this.getDisplayName(link)}" from the navbar?`)) return;
-    this.navConfigService.delete(link.id!).subscribe({
-      next: () => {
-        this.navLinks = this.navLinks.filter(l => l.id !== link.id);
-        this.showSuccess('Navigation link removed.');
-      },
-      error: () => { this.errorMsg = 'Failed to remove navigation link.'; }
-    });
-  }
-
   private showSuccess(msg: string): void {
     this.successMsg = msg;
     this.errorMsg = '';

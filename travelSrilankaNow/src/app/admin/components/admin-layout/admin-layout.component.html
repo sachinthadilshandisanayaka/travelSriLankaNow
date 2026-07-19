@@ -109,7 +109,7 @@
       </div>
 
       <!-- ── Content ── -->
-      <div class="nav-section" *ngIf="hasAny('EVENTS:VIEW', 'PACKAGES:VIEW', 'LOCATIONS:VIEW', 'PLACES:VIEW', 'GALLERY:VIEW', 'MORE_SECTIONS:VIEW', 'SOCIAL_MEDIA:VIEW')">
+      <div class="nav-section" *ngIf="hasAny('EVENTS:VIEW', 'PACKAGES:VIEW', 'LOCATIONS:VIEW', 'PLACES:VIEW', 'GALLERY:VIEW', 'MORE_SECTIONS:VIEW', 'SOCIAL_MEDIA:VIEW', 'NAV_CONFIG:VIEW')">
         <span class="nav-section__title">Content</span>
 
         <a *ngIf="hasPermission('EVENTS:VIEW')"
@@ -176,10 +176,20 @@
           </svg>
           <span>Social Media</span>
         </a>
+
+        <a *ngIf="hasPermission('NAV_CONFIG:VIEW')"
+           routerLink="/admin/nav-config" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="15" y2="18"/>
+          </svg>
+          <span>Navigation Bar</span>
+        </a>
       </div>
 
       <!-- ── Website Layout ── -->
-      <div class="nav-section" *ngIf="hasAny('HERO_SLIDES:VIEW', 'PAGE_HEADERS:VIEW', 'HOMEPAGE_SECTIONS:VIEW', 'NAV_CONFIG:VIEW')">
+      <div class="nav-section" *ngIf="hasAny('HERO_SLIDES:VIEW', 'PAGE_HEADERS:VIEW', 'HOMEPAGE_SECTIONS:VIEW')">
         <span class="nav-section__title">Website Layout</span>
 
         <a *ngIf="hasPermission('HOMEPAGE_SECTIONS:VIEW')"
@@ -208,16 +218,6 @@
             <path d="M3 9h18M9 21V9"/>
           </svg>
           <span>Page Headers</span>
-        </a>
-
-        <a *ngIf="hasPermission('NAV_CONFIG:VIEW')"
-           routerLink="/admin/nav-config" routerLinkActive="nav-item--active" class="nav-item" (click)="closeSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="15" y2="18"/>
-          </svg>
-          <span>Navigation Bar</span>
         </a>
       </div>
 
