@@ -169,6 +169,7 @@ INSERT INTO permissions (function_code, action, description) VALUES
 ('DASHBOARD','VIEW','View dashboard overview'),
 ('LOCATIONS','VIEW','View locations'),('LOCATIONS','CREATE','Create locations'),('LOCATIONS','UPDATE','Edit locations'),('LOCATIONS','DELETE','Delete locations'),
 ('EVENTS','VIEW','View events'),('EVENTS','CREATE','Create events'),('EVENTS','UPDATE','Edit events'),('EVENTS','DELETE','Delete events'),
+('PACKAGES','VIEW','View packages'),('PACKAGES','CREATE','Create packages'),('PACKAGES','UPDATE','Edit packages'),('PACKAGES','DELETE','Delete packages'),
 ('PLACES','VIEW','View places'),('PLACES','CREATE','Create places'),('PLACES','UPDATE','Edit places'),('PLACES','DELETE','Delete places'),
 ('GALLERY','VIEW','View gallery'),('GALLERY','CREATE','Upload gallery items'),('GALLERY','UPDATE','Edit gallery items'),('GALLERY','DELETE','Delete gallery items'),
 ('HERO_SLIDES','VIEW','View hero slides'),('HERO_SLIDES','CREATE','Create hero slides'),('HERO_SLIDES','UPDATE','Edit / reorder hero slides'),('HERO_SLIDES','DELETE','Delete hero slides'),

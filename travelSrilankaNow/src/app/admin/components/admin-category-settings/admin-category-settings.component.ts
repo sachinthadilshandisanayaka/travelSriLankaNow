@@ -67,6 +67,7 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
   private defaultLabel(): string {
     const map: { [key: string]: string } = {
       'EVENT_CATEGORY': 'Events',
+      'PACKAGE_CATEGORY': 'Packages',
       'LOCATION_CATEGORY': 'Locations',
       'PLACE_TYPE': 'Places',
       'GALLERY_CATEGORY': 'Gallery'
@@ -115,6 +116,11 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
       case 'EVENT_CATEGORY':
         return this.adminApiService.getEvents(0, 12, 'displayOrder,asc', undefined, categoryCode).pipe(
           map((r: any) => (r.content || []).filter((e: any) => !!e.imageUrl).map((e: any) => ({ id: e.id, title: e.title, imageUrl: e.imageUrl }))),
+          catchError(() => of([]))
+        );
+      case 'PACKAGE_CATEGORY':
+        return this.adminApiService.getPackagesPaginated(0, 12, 'displayOrder,asc', undefined, categoryCode).pipe(
+          map((r: any) => (r.content || []).filter((p: any) => !!p.imageUrl).map((p: any) => ({ id: p.id, title: p.title, imageUrl: p.imageUrl }))),
           catchError(() => of([]))
         );
       case 'LOCATION_CATEGORY':
