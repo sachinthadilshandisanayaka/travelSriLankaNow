@@ -1,6 +1,6 @@
-import { Component, OnInit, OnChanges, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Component, OnInit, OnChanges, OnDestroy, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Observable, of, Subject } from 'rxjs';
+import { map, catchError, debounceTime, takeUntil } from 'rxjs/operators';
 import { AdminApiService } from '../../services/admin-api.service';
 
 interface CategoryItem {
@@ -33,13 +33,29 @@ interface CategoryState {
   templateUrl: './admin-category-settings.component.html',
   styleUrls: ['./admin-category-settings.component.scss']
 })
-export class AdminCategorySettingsComponent implements OnInit, OnChanges {
+export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() categoryType: string = 'EVENT_CATEGORY';
   @Input() contentLabel: string = '';
   @Output() closed = new EventEmitter<void>();
 
   categories: CategoryItem[] = [];
   states: { [id: number]: CategoryState } = {};
+
+  // Full unfiltered/unpaginated set of this type — used only to compute and
+  // toggle the master ON/OFF switch, independent of the current search/page
+  allCategories: CategoryItem[] = [];
+
+  // Search + pagination (current page grid)
+  searchTerm = '';
+  currentPage = 0;
+  pageSize = 9;
+  totalPages = 0;
+  totalElements = 0;
+
+  // Typeahead dropdown (suggestions drawn from the full allCategories set,
+  // independent of the debounced server-side search driving the grid)
+  showSuggestions = false;
+  activeSuggestionIndex = -1;
 
   savingIds = new Set<number>();
   togglingIds = new Set<number>();
@@ -48,15 +64,35 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
   successMessage = '';
   errorMessage = '';
 
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
+
   constructor(private adminApiService: AdminApiService) {}
 
   ngOnInit(): void {
     this.loadData();
+    this.loadAllCategories();
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.currentPage = 0;
+      this.loadData();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['categoryType'] && !changes['categoryType'].firstChange) {
+      this.searchTerm = '';
+      this.currentPage = 0;
       this.loadData();
+      this.loadAllCategories();
     }
   }
 
@@ -76,7 +112,85 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
   }
 
   get masterEnabled(): boolean {
-    return this.categories.some(c => c.isActive);
+    return this.allCategories.some(c => c.isActive);
+  }
+
+  onSearchChange(): void {
+    this.activeSuggestionIndex = -1;
+    this.showSuggestions = this.searchTerm.trim().length > 0;
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.currentPage = 0;
+    this.showSuggestions = false;
+    this.loadData();
+  }
+
+  get suggestions(): CategoryItem[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) { return []; }
+    return this.allCategories
+      .filter(c => c.displayName.toLowerCase().includes(term) || c.code.toLowerCase().includes(term))
+      .slice(0, 6);
+  }
+
+  onSearchFocus(): void {
+    if (this.searchTerm.trim()) { this.showSuggestions = true; }
+  }
+
+  onSearchBlur(): void {
+    // Delay so a click on a suggestion registers before the dropdown closes
+    setTimeout(() => { this.showSuggestions = false; }, 150);
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    const items = this.suggestions;
+    if (!this.showSuggestions || items.length === 0) { return; }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.activeSuggestionIndex = Math.min(this.activeSuggestionIndex + 1, items.length - 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeSuggestionIndex = Math.max(this.activeSuggestionIndex - 1, 0);
+    } else if (event.key === 'Enter' && this.activeSuggestionIndex >= 0) {
+      event.preventDefault();
+      this.selectSuggestion(items[this.activeSuggestionIndex]);
+    } else if (event.key === 'Escape') {
+      this.showSuggestions = false;
+    }
+  }
+
+  selectSuggestion(cat: CategoryItem): void {
+    this.searchTerm = cat.displayName;
+    this.showSuggestions = false;
+    this.activeSuggestionIndex = -1;
+    this.currentPage = 0;
+    this.loadData();
+  }
+
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.loadData();
+    }
+  }
+
+  previousPage(): void { this.goToPage(this.currentPage - 1); }
+  nextPage(): void { this.goToPage(this.currentPage + 1); }
+
+  refresh(): void {
+    this.loadData();
+    this.loadAllCategories();
+  }
+
+  private loadAllCategories(): void {
+    this.adminApiService.getMasterDataByType(this.categoryType).subscribe({
+      next: (data) => { this.allCategories = data; },
+      error: () => { /* master toggle just won't be available; grid load surfaces the real error */ }
+    });
   }
 
   loadData(): void {
@@ -86,11 +200,13 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
     this.categories = [];
     this.states = {};
 
-    this.adminApiService.getMasterData().subscribe({
-      next: (data) => {
-        this.categories = data
-          .filter((item: any) => item.type === this.categoryType)
-          .sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    this.adminApiService.getMasterDataByTypePaginated(
+      this.categoryType, this.currentPage, this.pageSize, 'sortOrder,asc', this.searchTerm || undefined
+    ).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response) => {
+        this.categories = response.content;
+        this.totalPages = response.totalPages;
+        this.totalElements = response.totalElements;
 
         this.states = {};
         this.categories.forEach(item => {
@@ -184,6 +300,8 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
           this.categories[idx] = saved;
           this.states[id].editing = { ...saved };
         }
+        const allIdx = this.allCategories.findIndex(c => c.id === id);
+        if (allIdx !== -1) { this.allCategories[allIdx] = saved; }
         this.savingIds.delete(id);
         this.successMessage = '"' + state.editing.displayName + '" saved successfully.';
         setTimeout(() => { this.successMessage = ''; }, 3000);
@@ -204,6 +322,8 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
     const prev = cat.isActive;
     cat.isActive = !cat.isActive;
     if (this.states[id]) { this.states[id].editing.isActive = cat.isActive; }
+    const allCat = this.allCategories.find(c => c.id === id);
+    if (allCat) { allCat.isActive = cat.isActive; }
 
     this.adminApiService.toggleMasterDataActive(id).subscribe({
       next: () => {
@@ -214,6 +334,7 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
       error: (err) => {
         cat.isActive = prev;
         if (this.states[id]) { this.states[id].editing.isActive = prev; }
+        if (allCat) { allCat.isActive = prev; }
         this.togglingIds.delete(id);
         this.errorMessage = (err.error && err.error.message) || 'Failed to update visibility.';
       }
@@ -221,9 +342,9 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
   }
 
   toggleMasterEnabled(): void {
-    if (this.togglingMaster || this.categories.length === 0) { return; }
+    if (this.togglingMaster || this.allCategories.length === 0) { return; }
     const targetState = !this.masterEnabled;
-    const toToggle = this.categories.filter(c => c.isActive !== targetState);
+    const toToggle = this.allCategories.filter(c => c.isActive !== targetState);
     if (toToggle.length === 0) { return; }
 
     this.togglingMaster = true;
@@ -231,6 +352,8 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
 
     toToggle.forEach(cat => {
       cat.isActive = targetState;
+      const pageCat = this.categories.find(c => c.id === cat.id);
+      if (pageCat) { pageCat.isActive = targetState; }
       if (this.states[cat.id]) { this.states[cat.id].editing.isActive = targetState; }
 
       this.adminApiService.toggleMasterDataActive(cat.id).subscribe({
@@ -244,6 +367,7 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges {
         },
         error: () => {
           cat.isActive = !targetState;
+          if (pageCat) { pageCat.isActive = !targetState; }
           if (this.states[cat.id]) { this.states[cat.id].editing.isActive = !targetState; }
           remaining--;
           if (remaining === 0) { this.togglingMaster = false; }
