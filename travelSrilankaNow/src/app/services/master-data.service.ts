@@ -20,6 +20,7 @@ export interface MasterData {
 
 export enum MasterDataType {
   EVENT_CATEGORY = 'EVENT_CATEGORY',
+  PACKAGE_CATEGORY = 'PACKAGE_CATEGORY',
   LOCATION_CATEGORY = 'LOCATION_CATEGORY',
   PLACE_TYPE = 'PLACE_TYPE',
   REGION = 'REGION',
@@ -67,6 +68,10 @@ export class MasterDataService {
   // Convenience methods for specific types
   getEventCategories(): Observable<MasterData[]> {
     return this.getByType(MasterDataType.EVENT_CATEGORY);
+  }
+
+  getPackageCategories(): Observable<MasterData[]> {
+    return this.getByType(MasterDataType.PACKAGE_CATEGORY);
   }
 
   getLocationCategories(): Observable<MasterData[]> {

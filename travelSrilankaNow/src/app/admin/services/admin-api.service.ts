@@ -87,6 +87,34 @@ export class AdminApiService {
     return this.http.delete<void>(`${this.apiUrl}/events/${id}`);
   }
 
+  // Packages
+  getPackagesPaginated(page: number = 0, size: number = 10, sort: string = 'title,asc',
+            search?: string, category?: string): Observable<PageResponse<any>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    if (sort) params = params.set('sort', sort);
+    if (search) params = params.set('search', search);
+    if (category) params = params.set('category', category);
+    return this.http.get<PageResponse<any>>(`${this.apiUrl}/packages/paginated`, { params });
+  }
+
+  getPackage(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/packages/${id}`);
+  }
+
+  createPackage(pkg: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/packages`, pkg);
+  }
+
+  updatePackage(id: number, pkg: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/packages/${id}`, pkg);
+  }
+
+  deletePackage(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/packages/${id}`);
+  }
+
   // Places
   getPlaces(page: number = 0, size: number = 10, sort: string = 'name,asc',
             search?: string, type?: string, priceRange?: string): Observable<PageResponse<any>> {
