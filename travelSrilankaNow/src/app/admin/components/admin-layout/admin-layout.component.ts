@@ -28,6 +28,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   stats = {
     locations: { total: 0 },
     events: { total: 0 },
+    packages: { total: 0 },
     places: { total: 0 },
     gallery: { total: 0 }
   };
@@ -75,6 +76,9 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       events: this.hasPermission('EVENTS:VIEW')
         ? this.apiService.getEvents(0, 1).pipe(catchError(() => empty))
         : empty,
+      packages: this.hasPermission('PACKAGES:VIEW')
+        ? this.apiService.getPackagesPaginated(0, 1).pipe(catchError(() => empty))
+        : empty,
       places: this.hasPermission('PLACES:VIEW')
         ? this.apiService.getPlaces(0, 1).pipe(catchError(() => empty))
         : empty,
@@ -85,6 +89,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.stats.locations.total = data.locations.totalElements;
         this.stats.events.total = data.events.totalElements;
+        this.stats.packages.total = data.packages.totalElements;
         this.stats.places.total = data.places.totalElements;
         this.stats.gallery.total = data.gallery.totalElements;
       },

@@ -8,6 +8,7 @@ import { AdminLayoutComponent } from './components/admin-layout/admin-layout.com
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { AdminLocationsComponent } from './components/admin-locations/admin-locations.component';
 import { AdminEventsComponent } from './components/admin-events/admin-events.component';
+import { AdminPackagesComponent } from './components/admin-packages/admin-packages.component';
 import { AdminPlacesComponent } from './components/admin-places/admin-places.component';
 import { AdminGalleryComponent } from './components/admin-gallery/admin-gallery.component';
 import { AdminMasterDataComponent } from './components/admin-master-data/admin-master-data.component';
@@ -106,6 +107,12 @@ const routes: Routes = [
         component: AdminEventsComponent,
         canActivate: [PermissionGuard],
         data: { permission: 'EVENTS:VIEW' }
+      },
+      {
+        path: 'packages',
+        component: AdminPackagesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'PACKAGES:VIEW' }
       },
       {
         path: 'places',
