@@ -4,10 +4,27 @@
       <h2 class="admin-page__title">Navigation Bar</h2>
       <p class="admin-page__subtitle">Control which links appear in the navbar and their display names.</p>
     </div>
+    <button class="admin-btn admin-btn--primary" (click)="toggleAddForm()">
+      {{ showAddForm ? 'Cancel' : '+ Add Nav Link' }}
+    </button>
   </div>
 
   <div *ngIf="successMsg" class="admin-alert admin-alert--success">{{ successMsg }}</div>
   <div *ngIf="errorMsg"   class="admin-alert admin-alert--error">{{ errorMsg }}</div>
+
+  <div *ngIf="showAddForm" class="nav-table-card" style="margin-bottom: 16px; padding: 16px;">
+    <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+      <div>
+        <label class="admin-label">Route path</label>
+        <input type="text" class="admin-input admin-input--sm" [(ngModel)]="newRoutePath" placeholder="/packages">
+      </div>
+      <div>
+        <label class="admin-label">Label</label>
+        <input type="text" class="admin-input admin-input--sm" [(ngModel)]="newLabel" placeholder="Packages">
+      </div>
+      <button class="admin-btn admin-btn--primary admin-btn--xs" (click)="addNavLink()" [disabled]="adding">Add</button>
+    </div>
+  </div>
 
   <div class="skeleton-list" *ngIf="loading">
     <div class="skeleton-row" *ngFor="let _ of [1,2,3,4,5]"></div>
@@ -80,6 +97,9 @@
             <span class="status-chip" [class.status-chip--active]="link.isVisible" [class.status-chip--inactive]="!link.isVisible">
               {{ link.isVisible ? 'Visible' : 'Hidden' }}
             </span>
+            <button *ngIf="!link.isFixed" class="admin-btn admin-btn--xs admin-btn--ghost" (click)="deleteNavLink(link)" title="Remove from navbar">
+              Delete
+            </button>
           </td>
         </tr>
       </tbody>

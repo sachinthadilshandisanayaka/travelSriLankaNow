@@ -19,8 +19,16 @@ export class NavConfigService {
     return this.http.get<NavConfig[]>(this.adminUrl);
   }
 
+  create(navConfig: Partial<NavConfig>): Observable<NavConfig> {
+    return this.http.post<NavConfig>(this.adminUrl, navConfig);
+  }
+
   update(id: number, navConfig: Partial<NavConfig>): Observable<NavConfig> {
     return this.http.put<NavConfig>(`${this.adminUrl}/${id}`, navConfig);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.adminUrl}/${id}`);
   }
 
   toggleVisibility(id: number): Observable<NavConfig> {
