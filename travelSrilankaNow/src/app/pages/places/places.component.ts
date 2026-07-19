@@ -35,6 +35,15 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   placeTypes: { value: string; label: string }[] = [{ value: 'all', label: 'All Places' }];
   priceRanges: { value: string; label: string }[] = [{ value: 'all', label: 'All Prices' }];
 
+  // Browse by Category — search + pagination over categoryData
+  categorySearchTerm: string = '';
+  categoryPage: number = 0;
+  categoryPageSize: number = 6;
+
+  // Typeahead dropdown for the category search box
+  showCategorySuggestions: boolean = false;
+  activeCategorySuggestionIndex: number = -1;
+
   private colorPalette = ['#1C4D8D', '#0F7B6C', '#C05621', '#6B46C1', '#B7791F', '#2C7A7B'];
 
   private observer: IntersectionObserver | null = null;
@@ -141,6 +150,73 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   getCategoryColor(category: MasterData, index: number): string {
     if (category.color && category.color.trim()) { return category.color; }
     return this.colorPalette[index % this.colorPalette.length];
+  }
+
+  get filteredCategoryData(): MasterData[] {
+    const term = this.categorySearchTerm.trim().toLowerCase();
+    if (!term) { return this.categoryData; }
+    return this.categoryData.filter(c =>
+      c.displayName.toLowerCase().includes(term) ||
+      (c.description || '').toLowerCase().includes(term)
+    );
+  }
+
+  get categoryTotalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredCategoryData.length / this.categoryPageSize));
+  }
+
+  get pagedCategoryData(): MasterData[] {
+    const start = this.categoryPage * this.categoryPageSize;
+    return this.filteredCategoryData.slice(start, start + this.categoryPageSize);
+  }
+
+  onCategorySearchChange(): void {
+    this.categoryPage = 0;
+    this.activeCategorySuggestionIndex = -1;
+    this.showCategorySuggestions = this.categorySearchTerm.trim().length > 0;
+  }
+
+  goToCategoryPage(page: number): void {
+    if (page >= 0 && page < this.categoryTotalPages) {
+      this.categoryPage = page;
+    }
+  }
+
+  get categorySuggestions(): MasterData[] {
+    return this.filteredCategoryData.slice(0, 6);
+  }
+
+  onCategorySearchFocus(): void {
+    if (this.categorySearchTerm.trim()) { this.showCategorySuggestions = true; }
+  }
+
+  onCategorySearchBlur(): void {
+    setTimeout(() => { this.showCategorySuggestions = false; }, 150);
+  }
+
+  onCategorySearchKeydown(event: KeyboardEvent): void {
+    const items = this.categorySuggestions;
+    if (!this.showCategorySuggestions || items.length === 0) { return; }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.activeCategorySuggestionIndex = Math.min(this.activeCategorySuggestionIndex + 1, items.length - 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeCategorySuggestionIndex = Math.max(this.activeCategorySuggestionIndex - 1, 0);
+    } else if (event.key === 'Enter' && this.activeCategorySuggestionIndex >= 0) {
+      event.preventDefault();
+      this.selectCategorySuggestion(items[this.activeCategorySuggestionIndex]);
+    } else if (event.key === 'Escape') {
+      this.showCategorySuggestions = false;
+    }
+  }
+
+  selectCategorySuggestion(cat: MasterData): void {
+    this.showCategorySuggestions = false;
+    this.activeCategorySuggestionIndex = -1;
+    this.categorySearchTerm = '';
+    this.navigateToCategory(cat.code);
   }
 
   filterByType(type: string): void {

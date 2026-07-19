@@ -173,11 +173,11 @@ const routes: Routes = [
         data: { permission: 'HOMEPAGE_SECTIONS:VIEW' }
       },
       {
-        // Display Order manages ordering of locations, places, events
+        // Display Order manages ordering of locations, places, events, gallery, categories
         path: 'order/:type',
         component: AdminItemOrderComponent,
         canActivate: [PermissionGuard],
-        data: { permission: ['LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW'] }
+        data: { permission: ['LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW', 'MASTER_DATA:VIEW'] }
       },
       {
         path: 'master-data',

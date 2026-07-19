@@ -226,6 +226,114 @@
   }
 }
 
+.category-overview__search {
+  position: relative;
+  max-width: 360px;
+  margin: 0 auto $spacing-xl;
+}
+.category-overview__search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: $medium-gray; pointer-events: none;
+}
+.category-overview__search-input {
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 2.5rem;
+  border: 1.5px solid $light-gray;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  color: $text-dark;
+  background: $white;
+  transition: border-color 0.2s;
+  &::placeholder { color: $medium-gray; }
+  &:focus { outline: none; border-color: $primary-blue; }
+}
+.category-overview__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: $white;
+  border: 1.5px solid $light-gray;
+  border-radius: $radius-lg;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+  text-align: left;
+}
+.category-overview__suggestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  font-size: $font-size-sm;
+
+  &:last-child { border-bottom: none; }
+  &:hover, &--active { background: $navy-bg-lightest; }
+}
+.category-overview__suggestion-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+.category-overview__suggestion-name {
+  flex: 1;
+  min-width: 0;
+  color: $text-dark;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.category-overview__suggestion-arrow {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: $medium-gray;
+}
+.category-overview__no-suggestions {
+  padding: 0.875rem;
+  font-size: $font-size-sm;
+  color: $medium-gray;
+  text-align: center;
+}
+.category-overview__no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: $spacing-xl;
+  color: $medium-gray;
+  font-size: $font-size-sm;
+}
+.category-overview__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-top: $spacing-xl;
+  font-size: $font-size-sm;
+  color: $warm-gray;
+  button {
+    padding: 0.5rem 1rem;
+    border: 1.5px solid $light-gray;
+    border-radius: $radius-md;
+    background: $white;
+    color: $text-dark;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover:not(:disabled) { border-color: $primary-blue; color: $primary-blue; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+}
+
 // ==================== Category Banner (Category View) ====================
 .category-banner {
   background: $white;
