@@ -41,7 +41,23 @@
         <svg *ngIf="type.icon === 'image'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
+        <!-- Tag Icon -->
+        <svg *ngIf="type.icon === 'tag'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        </svg>
         <span>{{ type.label }}</span>
+      </button>
+    </div>
+
+    <!-- Category Type Sub-Selector (categories only) -->
+    <div class="type-selector type-selector--sub" *ngIf="isCategoryMode">
+      <button
+        *ngFor="let cat of categoryTypes"
+        class="type-selector__tab type-selector__tab--sub"
+        [class.type-selector__tab--active]="categoryType === cat.value"
+        (click)="switchCategoryType(cat.value)"
+      >
+        <span>{{ cat.label }}</span>
       </button>
     </div>
 
@@ -62,9 +78,9 @@
     </div>
 
     <!-- Two Panel Layout -->
-    <div class="order-panels">
-      <!-- Left Panel: Available Items -->
-      <div class="order-panel">
+    <div class="order-panels" [class.order-panels--single]="isCategoryMode">
+      <!-- Left Panel: Available Items (hidden for categories — no featured/available split) -->
+      <div class="order-panel" *ngIf="!isCategoryMode">
         <div class="order-panel__header">
           <h3>Available {{ getTypeTitle() }}</h3>
           <p>Click + or drag items to add to display order</p>
@@ -142,11 +158,19 @@
       <div class="order-panel order-panel--ordered">
         <div class="order-panel__header">
           <h3>Display Order</h3>
-          <p>Drag to reorder or use arrows</p>
+          <p *ngIf="!isCategoryMode">Drag to reorder or use arrows</p>
+          <p *ngIf="isCategoryMode">Drag to reorder how these categories appear in "Browse by Category"</p>
+        </div>
+
+        <!-- Loading State (categories) -->
+        <div *ngIf="isCategoryMode && isLoading" class="order-panel__loading">
+          <div class="admin-loader__spinner"></div>
+          <span>Loading...</span>
         </div>
 
         <!-- Drop Zone -->
         <div
+          *ngIf="!(isCategoryMode && isLoading)"
           class="order-panel__dropzone"
           [class.order-panel__dropzone--active]="draggedItem && !isInOrderedList(draggedItem)"
           (dragover)="$event.preventDefault()"
@@ -165,7 +189,7 @@
             (dragend)="onDragEnd()"
           >
             <span class="ordered-item__position">{{ i + 1 }}</span>
-            <div class="ordered-item__image">
+            <div class="ordered-item__image" *ngIf="!isCategoryMode">
               <img [src]="item.imageUrl" [alt]="item.name" />
             </div>
             <div class="ordered-item__info">
@@ -183,7 +207,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <button class="action-btn action-btn--danger" (click)="removeFromOrder(i)" title="Remove">
+              <button *ngIf="!isCategoryMode" class="action-btn action-btn--danger" (click)="removeFromOrder(i)" title="Remove">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -192,11 +216,12 @@
           </div>
 
           <!-- Empty State -->
-          <div *ngIf="orderedItems.length === 0" class="order-panel__empty-drop">
+          <div *ngIf="orderedItems.length === 0 && !isLoading" class="order-panel__empty-drop">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
             </svg>
-            <p>Drag items here to set display order</p>
+            <p *ngIf="!isCategoryMode">Drag items here to set display order</p>
+            <p *ngIf="isCategoryMode">No categories found for this type</p>
           </div>
         </div>
 
