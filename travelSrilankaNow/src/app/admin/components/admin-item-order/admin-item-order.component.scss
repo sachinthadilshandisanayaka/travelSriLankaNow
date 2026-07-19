@@ -82,12 +82,31 @@
   }
 }
 
+// Category Type Sub-Selector
+.type-selector--sub {
+  margin-top: -1rem;
+  background: #f8fafc;
+}
+
+.type-selector__tab--sub {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  min-width: auto;
+}
+
 // Two Panel Layout
 .order-panels {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   margin-top: 1.5rem;
+
+  &--single {
+    grid-template-columns: 1fr;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;

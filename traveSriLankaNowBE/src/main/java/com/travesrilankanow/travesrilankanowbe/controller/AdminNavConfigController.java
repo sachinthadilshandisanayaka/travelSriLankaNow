@@ -28,10 +28,24 @@ public class AdminNavConfigController {
         return ResponseEntity.ok(navConfigService.getById(id));
     }
 
+    @PostMapping
+    @PreAuthorize("hasAuthority('NAV_CONFIG:UPDATE')")
+    public ResponseEntity<NavConfig> create(@RequestBody NavConfig navConfig) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
+                .body(navConfigService.create(navConfig));
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('NAV_CONFIG:UPDATE')")
     public ResponseEntity<NavConfig> update(@PathVariable Long id, @RequestBody NavConfig navConfig) {
         return ResponseEntity.ok(navConfigService.update(id, navConfig));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('NAV_CONFIG:UPDATE')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        navConfigService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/toggle-visibility")

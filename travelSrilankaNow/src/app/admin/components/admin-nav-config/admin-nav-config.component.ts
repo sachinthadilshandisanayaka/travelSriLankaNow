@@ -16,6 +16,11 @@ export class AdminNavConfigComponent implements OnInit {
   successMsg = '';
   errorMsg = '';
 
+  showAddForm = false;
+  newRoutePath = '';
+  newLabel = '';
+  adding = false;
+
   constructor(private navConfigService: NavConfigService) {}
 
   ngOnInit(): void {
@@ -105,6 +110,45 @@ export class AdminNavConfigComponent implements OnInit {
 
   getDisplayName(link: NavConfig): string {
     return link.labelOverride || link.labelKey;
+  }
+
+  toggleAddForm(): void {
+    this.showAddForm = !this.showAddForm;
+    this.newRoutePath = '';
+    this.newLabel = '';
+  }
+
+  addNavLink(): void {
+    const path = this.newRoutePath.trim();
+    const label = this.newLabel.trim();
+    if (!path || !label) {
+      this.errorMsg = 'Route and label are required.';
+      return;
+    }
+    const routePath = path.startsWith('/') ? path : `/${path}`;
+    const labelKey = 'nav.' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const maxOrder = this.navLinks.reduce((max, l) => Math.max(max, l.displayOrder), 0);
+
+    this.adding = true;
+    this.navConfigService.create({
+      routePath,
+      labelKey,
+      labelOverride: label,
+      displayOrder: maxOrder + 1,
+      isVisible: true,
+      isFixed: false
+    }).subscribe({
+      next: (saved) => {
+        this.navLinks = [...this.navLinks, saved].sort((a, b) => a.displayOrder - b.displayOrder);
+        this.adding = false;
+        this.showAddForm = false;
+        this.showSuccess(`"${label}" added to the navbar.`);
+      },
+      error: () => {
+        this.errorMsg = 'Failed to add navigation link.';
+        this.adding = false;
+      }
+    });
   }
 
   private showSuccess(msg: string): void {

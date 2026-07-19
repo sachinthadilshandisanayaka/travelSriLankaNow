@@ -147,6 +147,150 @@
   }
 }
 
+// ── Search + typeahead dropdown ─────────────────────────────────────────────────
+.cs-search {
+  position: relative;
+}
+.cs-search__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.cs-search__input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+}
+.cs-search__icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: $admin-gray-400;
+  pointer-events: none;
+}
+.cs-search__input {
+  width: 100%;
+  padding: 0.625rem 2.25rem 0.625rem 2.5rem;
+  border: 1.5px solid $admin-gray-200;
+  border-radius: $admin-radius-lg;
+  font-size: 0.875rem;
+  color: $admin-gray-900;
+  background: $admin-white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+
+  &::placeholder { color: $admin-gray-400; }
+  &:focus {
+    outline: none;
+    border-color: $admin-navy;
+    box-shadow: 0 0 0 3px rgba($admin-navy, 0.1);
+  }
+}
+.cs-search__clear {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: $admin-gray-400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $admin-radius-full;
+  transition: color 0.15s, background 0.15s;
+
+  svg { width: 14px; height: 14px; }
+  &:hover { color: $admin-gray-700; background: $admin-gray-100; }
+}
+.cs-search__count {
+  font-size: 0.8125rem;
+  color: $admin-gray-500;
+  white-space: nowrap;
+}
+
+.cs-search__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: $admin-white;
+  border: 1.5px solid $admin-gray-200;
+  border-radius: $admin-radius-lg;
+  box-shadow: $admin-shadow-md;
+  overflow: hidden;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.cs-search__suggestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $admin-gray-100;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:last-child { border-bottom: none; }
+  &:hover, &--active {
+    background: $admin-gray-50;
+  }
+}
+.cs-search__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: $admin-radius-full;
+  flex-shrink: 0;
+}
+.cs-search__suggestion-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cs-search__suggestion-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-gray-900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cs-search__suggestion-code {
+  font-size: 0.75rem;
+  color: $admin-gray-400;
+}
+.cs-search__suggestion-status {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: $admin-success;
+  &--off { color: $admin-gray-400; }
+}
+.cs-search__no-suggestions {
+  padding: 0.875rem;
+  font-size: 0.8125rem;
+  color: $admin-gray-500;
+  text-align: center;
+}
+
 // ── Spinner helper (used inline in buttons) ────────────────────────────────────
 .cs-spin {
   width: 1rem;
