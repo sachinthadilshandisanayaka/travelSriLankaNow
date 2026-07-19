@@ -20,9 +20,47 @@
       </p>
     </div>
 
+    <!-- Category Search -->
+    <div class="category-overview__search" *ngIf="categoryData.length > categoryPageSize">
+      <input
+        type="text"
+        placeholder="Search categories..."
+        autocomplete="off"
+        [(ngModel)]="categorySearchTerm"
+        (input)="onCategorySearchChange()"
+        (focus)="onCategorySearchFocus()"
+        (blur)="onCategorySearchBlur()"
+        (keydown)="onCategorySearchKeydown($event)"
+        class="category-overview__search-input" />
+      <svg class="category-overview__search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+
+      <!-- Typeahead dropdown -->
+      <div class="category-overview__dropdown" *ngIf="showCategorySuggestions && categorySuggestions.length > 0">
+        <button
+          *ngFor="let s of categorySuggestions; let i = index"
+          type="button"
+          class="category-overview__suggestion"
+          [class.category-overview__suggestion--active]="i === activeCategorySuggestionIndex"
+          (mousedown)="$event.preventDefault()"
+          (click)="selectCategorySuggestion(s)">
+          <span class="category-overview__suggestion-swatch" [ngStyle]="{'background': getCategoryColor(s, categoryData.indexOf(s))}"></span>
+          <span class="category-overview__suggestion-name">{{ s.displayName }}</span>
+          <svg class="category-overview__suggestion-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </button>
+      </div>
+      <div class="category-overview__dropdown" *ngIf="showCategorySuggestions && categorySearchTerm.trim() && categorySuggestions.length === 0">
+        <div class="category-overview__no-suggestions">No categories match "{{ categorySearchTerm }}"</div>
+      </div>
+    </div>
+
     <div class="category-grid">
       <div
-        *ngFor="let cat of categoryData; let i = index"
+        *ngFor="let cat of pagedCategoryData"
         class="cat-card card-stagger"
         (click)="navigateToCategory(cat.code)"
         tabindex="0"
@@ -33,7 +71,7 @@
         <div class="cat-card__img-wrap">
           <img *ngIf="cat.icon" [src]="cat.icon" [alt]="cat.displayName" class="cat-card__img" />
           <div *ngIf="!cat.icon" class="cat-card__img-fallback"
-               [ngStyle]="{'background': 'linear-gradient(160deg, ' + getCategoryColor(cat, i) + ' 0%, ' + getCategoryColor(cat, i) + 'bb 100%)'}">
+               [ngStyle]="{'background': 'linear-gradient(160deg, ' + getCategoryColor(cat, categoryData.indexOf(cat)) + ' 0%, ' + getCategoryColor(cat, categoryData.indexOf(cat)) + 'bb 100%)'}">
           </div>
           <!-- Dark overlay for readability -->
           <div class="cat-card__overlay" [ngStyle]="{'background': 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)'}"></div>
@@ -79,9 +117,21 @@
           </div>
 
           <!-- Top accent strip using category color -->
-          <div class="cat-card__color-bar" [ngStyle]="{'background': getCategoryColor(cat, i)}"></div>
+          <div class="cat-card__color-bar" [ngStyle]="{'background': getCategoryColor(cat, categoryData.indexOf(cat))}"></div>
         </div>
       </div>
+
+      <!-- No search results -->
+      <div *ngIf="pagedCategoryData.length === 0" class="category-overview__no-results">
+        <p>No categories match "{{ categorySearchTerm }}".</p>
+      </div>
+    </div>
+
+    <!-- Category Pagination -->
+    <div class="category-overview__pagination" *ngIf="categoryTotalPages > 1">
+      <button [disabled]="categoryPage === 0" (click)="goToCategoryPage(categoryPage - 1)">‹ Prev</button>
+      <span>Page {{ categoryPage + 1 }} of {{ categoryTotalPages }}</span>
+      <button [disabled]="categoryPage >= categoryTotalPages - 1" (click)="goToCategoryPage(categoryPage + 1)">Next ›</button>
     </div>
 
     <!-- Scroll hint -->
