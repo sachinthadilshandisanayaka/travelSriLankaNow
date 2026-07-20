@@ -4,6 +4,9 @@
       <h2 class="admin-page__title">Navigation Bar</h2>
       <p class="admin-page__subtitle">Control which links appear in the navbar and their display names.</p>
     </div>
+    <button class="admin-btn admin-btn--primary" (click)="toggleAddForm()">
+      + Add Nav Link
+    </button>
   </div>
 
   <div *ngIf="successMsg" class="admin-alert admin-alert--success">{{ successMsg }}</div>
@@ -21,8 +24,7 @@
           <th>Route</th>
           <th>Default Key</th>
           <th>Display Name Override</th>
-          <th>Visible</th>
-          <th>Actions</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -63,23 +65,21 @@
             </div>
           </td>
 
-          <!-- Visibility toggle -->
+          <!-- Active / Inactive -->
           <td>
-            <button class="toggle-btn"
-                    [class.toggle-btn--on]="link.isVisible"
-                    [disabled]="link.isFixed"
-                    (click)="toggleVisibility(link)"
-                    [title]="link.isFixed ? 'This item cannot be hidden' : (link.isVisible ? 'Click to hide' : 'Click to show')">
-              <span class="toggle-btn__dot"></span>
-            </button>
-            <span *ngIf="link.isFixed" class="nav-fixed-badge">fixed</span>
-          </td>
-
-          <!-- Status info -->
-          <td>
-            <span class="status-chip" [class.status-chip--active]="link.isVisible" [class.status-chip--inactive]="!link.isVisible">
-              {{ link.isVisible ? 'Visible' : 'Hidden' }}
-            </span>
+            <div class="nav-status">
+              <button class="toggle-btn"
+                      [class.toggle-btn--on]="link.isVisible"
+                      [disabled]="link.isFixed"
+                      (click)="toggleVisibility(link)"
+                      [title]="link.isFixed ? 'This item cannot be hidden' : (link.isVisible ? 'Click to set Inactive' : 'Click to set Active')">
+                <span class="toggle-btn__dot"></span>
+              </button>
+              <span class="status-chip" [class.status-chip--active]="link.isVisible" [class.status-chip--inactive]="!link.isVisible">
+                {{ link.isVisible ? 'Active' : 'Inactive' }}
+              </span>
+              <span *ngIf="link.isFixed" class="nav-fixed-badge">fixed</span>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -91,5 +91,49 @@
       <br>
       <strong>Fixed</strong> items (e.g. Home) cannot be hidden.
     </p>
+  </div>
+</div>
+
+<!-- Add Nav Link Modal -->
+<div *ngIf="showAddForm" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>Add Navigation Link</h2>
+      <button class="admin-modal__close" (click)="toggleAddForm()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form (ngSubmit)="addNavLink()">
+      <div class="admin-modal__body">
+        <div class="admin-form__grid">
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Label *</label>
+            <input type="text" class="admin-input" [(ngModel)]="newLabel" name="newLabel"
+                   placeholder="e.g. Special Offers" autofocus>
+            <p class="admin-form__hint">The text shown in the navbar.</p>
+          </div>
+
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Page it links to *</label>
+            <input type="text" class="admin-input" [(ngModel)]="newRoutePath" name="newRoutePath"
+                   placeholder="e.g. /my-bookings or /more/special-offers">
+            <p class="admin-form__hint">
+              The page path, starting with <code>/</code>. Use <code>/my-bookings</code> for the bookings page,
+              or <code>/more/&lt;slug&gt;</code> for a custom section created under More Sections.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="toggleAddForm()">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="adding || !newLabel.trim() || !newRoutePath.trim()">
+          {{ adding ? 'Adding…' : 'Add to Navbar' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

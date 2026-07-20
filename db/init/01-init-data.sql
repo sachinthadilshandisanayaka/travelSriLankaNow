@@ -35,7 +35,11 @@ CREATE TABLE IF NOT EXISTS site_settings (
 
 CREATE TABLE IF NOT EXISTS homepage_sections (
     id BIGSERIAL PRIMARY KEY,
-    section_type VARCHAR(255) NOT NULL UNIQUE,
+    section_type VARCHAR(255) NOT NULL
+        CHECK (section_type IN (
+            'HERO_SLIDER','FEATURED_LOCATIONS','UPCOMING_EVENTS','PLACES','SOCIAL_MEDIA',
+            'IMAGE_GALLERY_SLIDER','CUSTOM_CONTENT'
+        )),
     title VARCHAR(255) NOT NULL,
     subtitle VARCHAR(255),
     display_order INTEGER NOT NULL DEFAULT 0,
@@ -165,6 +169,7 @@ INSERT INTO permissions (function_code, action, description) VALUES
 ('DASHBOARD','VIEW','View dashboard overview'),
 ('LOCATIONS','VIEW','View locations'),('LOCATIONS','CREATE','Create locations'),('LOCATIONS','UPDATE','Edit locations'),('LOCATIONS','DELETE','Delete locations'),
 ('EVENTS','VIEW','View events'),('EVENTS','CREATE','Create events'),('EVENTS','UPDATE','Edit events'),('EVENTS','DELETE','Delete events'),
+('PACKAGES','VIEW','View packages'),('PACKAGES','CREATE','Create packages'),('PACKAGES','UPDATE','Edit packages'),('PACKAGES','DELETE','Delete packages'),
 ('PLACES','VIEW','View places'),('PLACES','CREATE','Create places'),('PLACES','UPDATE','Edit places'),('PLACES','DELETE','Delete places'),
 ('GALLERY','VIEW','View gallery'),('GALLERY','CREATE','Upload gallery items'),('GALLERY','UPDATE','Edit gallery items'),('GALLERY','DELETE','Delete gallery items'),
 ('HERO_SLIDES','VIEW','View hero slides'),('HERO_SLIDES','CREATE','Create hero slides'),('HERO_SLIDES','UPDATE','Edit / reorder hero slides'),('HERO_SLIDES','DELETE','Delete hero slides'),

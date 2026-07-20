@@ -11,7 +11,7 @@ export class PageHeaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() subtitle = '';
   @Input() title = '';
   @Input() description = '';
-  @Input() theme: 'locations' | 'events' | 'gallery' | 'places' | 'default' = 'default';
+  @Input() theme: 'locations' | 'events' | 'gallery' | 'places' | 'packages' | 'default' = 'default';
   @Input() showAnimation = true;
 
   @ViewChild('lottieContainer') lottieContainer!: ElementRef<HTMLDivElement>;
@@ -230,6 +230,33 @@ export class PageHeaderComponent implements OnInit, AfterViewInit, OnDestroy {
               <path d="M5,5 L5,20 Q5,25 10,25 L10,5" fill="none" stroke="#D4AF73" stroke-width="2"/>
               <line x1="7.5" y1="5" x2="7.5" y2="15" stroke="#D4AF73" stroke-width="1"/>
             </g>
+          </svg>
+        `;
+      case 'packages':
+        return `
+          <svg class="theme-decoration packages-deco" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Suitcase -->
+            <rect x="60" y="90" width="80" height="60" rx="6" fill="#1C4D8D"/>
+            <rect x="60" y="90" width="80" height="14" fill="#0F2854"/>
+            <!-- Handle -->
+            <path d="M85,90 L85,75 Q85,68 92,68 L108,68 Q115,68 115,75 L115,90" fill="none" stroke="#D4AF73" stroke-width="6"/>
+            <!-- Straps -->
+            <rect x="78" y="90" width="8" height="60" fill="#D4AF73"/>
+            <rect x="114" y="90" width="8" height="60" fill="#D4AF73"/>
+            <!-- Luggage tag -->
+            <g transform="translate(140, 108)">
+              <rect x="0" y="0" width="18" height="14" rx="2" fill="#D4AF73"/>
+              <circle cx="9" cy="7" r="2" fill="#0F2854"/>
+              <line x1="0" y1="-6" x2="4" y2="0" stroke="#D4AF73" stroke-width="2"/>
+            </g>
+            <!-- Stars -->
+            <g class="stars" fill="#D4AF73">
+              <polygon class="star s1" points="40,55 42,61 48,61 43,65 45,71 40,67 35,71 37,65 32,61 38,61"/>
+              <polygon class="star s2" points="160,50 162,56 168,56 163,60 165,66 160,62 155,66 157,60 152,56 158,56"/>
+              <polygon class="star s3" points="35,130 36.5,134 41,134 37.5,137 39,141 35,138 31,141 32.5,137 29,134 33.5,134"/>
+            </g>
+            <!-- Flight path -->
+            <path class="wave-path w1" d="M20,40 Q80,20 160,45" fill="none" stroke="#BDE8F5" stroke-width="2" stroke-dasharray="4 4"/>
           </svg>
         `;
       default:

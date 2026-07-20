@@ -305,6 +305,21 @@ $navbar-height: 80px;
     }
   }
 
+  // Packages - Suitcase animation
+  &.packages-deco {
+    .star {
+      animation: twinkle 2s ease-in-out infinite;
+
+      &.s1 { animation-delay: 0s; }
+      &.s2 { animation-delay: -0.7s; }
+      &.s3 { animation-delay: -1.4s; }
+    }
+
+    .wave-path {
+      animation: dash-fly 3s linear infinite;
+    }
+  }
+
   // Default - Palm tree animation
   &.default-deco {
     .sun-glow {
@@ -383,6 +398,11 @@ $navbar-height: 80px;
 @keyframes wave-move {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(-20px); }
+}
+
+@keyframes dash-fly {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -16; }
 }
 
 // Slide-in animations

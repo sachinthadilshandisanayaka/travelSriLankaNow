@@ -11,7 +11,7 @@ import { UploadResult } from '../advanced-image-upload/advanced-image-upload.com
   styleUrls: ['./page-header-backgrounds.component.scss']
 })
 export class PageHeaderBackgroundsComponent implements OnInit {
-  pageTypes: PageType[] = ['LOCATIONS', 'EVENTS', 'GALLERY', 'PLACES'];
+  pageTypes: PageType[] = ['LOCATIONS', 'EVENTS', 'GALLERY', 'PLACES', 'PACKAGES'];
   selectedPageType: PageType = 'LOCATIONS';
   backgrounds: PageHeaderBackground[] = [];
   activeBackground: PageHeaderBackground | null = null;

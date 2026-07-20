@@ -6,6 +6,8 @@ import { LocationDetailComponent } from './pages/location-detail/location-detail
 import { GalleryComponent } from './pages/gallery/gallery.component';
 import { EventsComponent } from './pages/events/events.component';
 import { EventDetailComponent } from './pages/event-detail/event-detail.component';
+import { PackagesComponent } from './pages/packages/packages.component';
+import { PackageDetailComponent } from './pages/package-detail/package-detail.component';
 import { PlacesComponent } from './pages/places/places.component';
 import { PlaceDetailComponent } from './pages/place-detail/place-detail.component';
 import { LandingSimpleComponent } from './pages/landing/landing-simple.component';
@@ -26,6 +28,8 @@ const routes: Routes = [
   { path: 'gallery', component: GalleryComponent, data: { animation: 'GalleryPage' } },
   { path: 'events', component: EventsComponent, data: { animation: 'EventsPage' } },
   { path: 'events/:slug', component: EventDetailComponent, data: { animation: 'EventDetailPage' } },
+  { path: 'packages', component: PackagesComponent, data: { animation: 'PackagesPage' } },
+  { path: 'packages/:slug', component: PackageDetailComponent, data: { animation: 'PackageDetailPage' } },
   { path: 'places', component: PlacesComponent, data: { animation: 'PlacesPage' } },
   { path: 'places/:slug', component: PlaceDetailComponent, data: { animation: 'PlaceDetailPage' } },
   { path: 'more/:slug', component: MoreSectionDetailComponent, data: { animation: 'MoreSectionPage' } },

@@ -13,7 +13,16 @@ interface OrderableItem {
   type?: string;
   featured: boolean;
   displayOrder?: number;
+  raw?: any;
 }
+
+const CATEGORY_TYPES: Array<{ value: string; label: string }> = [
+  { value: 'LOCATION_CATEGORY', label: 'Location Categories' },
+  { value: 'EVENT_CATEGORY', label: 'Event Categories' },
+  { value: 'PACKAGE_CATEGORY', label: 'Package Categories' },
+  { value: 'PLACE_TYPE', label: 'Place Types' },
+  { value: 'GALLERY_CATEGORY', label: 'Gallery Categories' }
+];
 
 @Component({
   selector: 'app-admin-item-order',
@@ -21,7 +30,13 @@ interface OrderableItem {
   styleUrls: ['./admin-item-order.component.scss']
 })
 export class AdminItemOrderComponent implements OnInit, OnDestroy {
-  itemType: 'locations' | 'events' | 'places' | 'gallery' = 'locations';
+  itemType: 'locations' | 'events' | 'places' | 'gallery' | 'categories' = 'locations';
+
+  // Categories sub-selector (categories have no "featured" concept, so they're
+  // reordered directly as a single list rather than an available/ordered split)
+  categoryTypes = CATEGORY_TYPES;
+  categoryType = CATEGORY_TYPES[0].value;
+  isCategoryMode = false;
 
   // Available items (left panel)
   availableItems: OrderableItem[] = [];
@@ -59,10 +74,15 @@ export class AdminItemOrderComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const type = params['type'];
-      if (['locations', 'events', 'places', 'gallery'].includes(type)) {
+      if (['locations', 'events', 'places', 'gallery', 'categories'].includes(type)) {
         this.itemType = type;
-        this.loadItems();
-        this.loadFeaturedItems();
+        this.isCategoryMode = type === 'categories';
+        if (this.isCategoryMode) {
+          this.loadCategories();
+        } else {
+          this.loadItems();
+          this.loadFeaturedItems();
+        }
       } else {
         this.router.navigate(['/admin/dashboard']);
       }
@@ -84,11 +104,12 @@ export class AdminItemOrderComponent implements OnInit, OnDestroy {
   }
 
   // Available item types for the selector
-  itemTypes: Array<{ value: 'locations' | 'events' | 'places' | 'gallery'; label: string; icon: string }> = [
+  itemTypes: Array<{ value: 'locations' | 'events' | 'places' | 'gallery' | 'categories'; label: string; icon: string }> = [
     { value: 'locations', label: 'Locations', icon: 'location' },
     { value: 'events', label: 'Events', icon: 'calendar' },
     { value: 'places', label: 'Places', icon: 'building' },
-    { value: 'gallery', label: 'Gallery', icon: 'image' }
+    { value: 'gallery', label: 'Gallery', icon: 'image' },
+    { value: 'categories', label: 'Categories', icon: 'tag' }
   ];
 
   getTypeTitle(): string {
@@ -96,15 +117,53 @@ export class AdminItemOrderComponent implements OnInit, OnDestroy {
       locations: 'Locations',
       events: 'Events',
       places: 'Places',
-      gallery: 'Gallery'
+      gallery: 'Gallery',
+      categories: 'Categories'
     };
     return titles[this.itemType] || 'Items';
   }
 
-  switchType(type: 'locations' | 'events' | 'places' | 'gallery'): void {
+  switchType(type: 'locations' | 'events' | 'places' | 'gallery' | 'categories'): void {
     if (type !== this.itemType) {
       this.router.navigate(['/admin/order', type]);
     }
+  }
+
+  switchCategoryType(type: string): void {
+    if (type !== this.categoryType) {
+      this.categoryType = type;
+      this.loadCategories();
+    }
+  }
+
+  loadCategories(): void {
+    this.isLoading = true;
+    this.adminApi.getMasterDataByType(this.categoryType).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data: any[]) => {
+        this.orderedItems = data
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+          .map(item => this.mapCategoryToOrderableItem(item));
+        this.initialFeaturedIds = this.orderedItems.map(item => item.id);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = 'Failed to load categories';
+        this.isLoading = false;
+        console.error(err);
+      }
+    });
+  }
+
+  mapCategoryToOrderableItem(item: any): OrderableItem {
+    return {
+      id: item.id,
+      name: item.displayName || item.code,
+      imageUrl: '',
+      category: item.type,
+      featured: true,
+      displayOrder: item.sortOrder || 0,
+      raw: item
+    };
   }
 
   loadItems(): void {
@@ -300,6 +359,17 @@ export class AdminItemOrderComponent implements OnInit, OnDestroy {
     this.successMessage = '';
 
     try {
+      if (this.isCategoryMode) {
+        const updatePromises = this.orderedItems.map((item, index) =>
+          this.adminApi.updateMasterData(item.id, { ...item.raw, sortOrder: index + 1 }).toPromise()
+        );
+        await Promise.all(updatePromises);
+        this.successMessage = 'Display order saved successfully!';
+        setTimeout(() => this.successMessage = '', 3000);
+        this.loadCategories();
+        return;
+      }
+
       // Find items that were removed from the ordered list
       const currentOrderedIds = this.orderedItems.map(item => item.id);
       const removedIds = this.initialFeaturedIds.filter(id => !currentOrderedIds.includes(id));

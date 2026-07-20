@@ -4,7 +4,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService, PageResponse, EntityFieldConfig } from '../../services/admin-api.service';
 import { ContentStatsService } from '../../services/content-stats.service';
-import { MasterDataService, MasterData } from '../../../services/master-data.service';
+import { MasterData } from '../../../services/master-data.service';
 import { FieldDefinition } from '../../../models/more-section.model';
 
 @Component({
@@ -63,7 +63,6 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: AdminApiService,
     private fb: FormBuilder,
-    private masterDataService: MasterDataService,
     private contentStats: ContentStatsService
   ) {
     this.placeForm = this.fb.group({
@@ -214,7 +213,9 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
   }
 
   loadMasterData(): void {
-    this.masterDataService.getPlaceTypes().subscribe({
+    // Admin's own unfiltered endpoints — filtering/assigning categories should
+    // never be limited to whatever happens to be publicly "active" right now.
+    this.apiService.getMasterDataByType('PLACE_TYPE').subscribe({
       next: (data) => {
         this.placeTypes = data;
       },
@@ -223,7 +224,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.masterDataService.getRegions().subscribe({
+    this.apiService.getMasterDataByType('REGION').subscribe({
       next: (data) => {
         this.regions = data;
       },
@@ -232,7 +233,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.masterDataService.getPriceRanges().subscribe({
+    this.apiService.getMasterDataByType('PRICE_RANGE').subscribe({
       next: (data) => {
         this.priceRanges = data;
       },

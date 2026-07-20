@@ -154,7 +154,9 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
   }
 
   loadCategories(): void {
-    this.masterDataService.getEventCategories().subscribe({
+    // Admin's own unfiltered endpoint — filtering/assigning categories should
+    // never be limited to whatever happens to be publicly "active" right now.
+    this.apiService.getMasterDataByType('EVENT_CATEGORY').subscribe({
       next: (data) => {
         this.categories = data;
         if (data.length > 0 && !this.eventForm.get('category')?.value) {

@@ -68,6 +68,7 @@ public class HomepageSection {
         PLACES,
         SOCIAL_MEDIA,
         IMAGE_GALLERY_SLIDER,
-        CUSTOM_CONTENT
+        CUSTOM_CONTENT,
+        PACKAGES
     }
 }
