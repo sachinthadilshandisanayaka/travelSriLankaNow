@@ -16,9 +16,11 @@
   "section.subtitle.locations": "ජනප්‍රිය ගමනාන්ත",
   "section.subtitle.events": "අත්දැකීම්",
   "section.subtitle.places": "නවාතැන් පහසුකම්",
+  "section.subtitle.packages": "පැකේජ",
   "section.viewAll.locations": "සියලු ස්ථාන බලන්න",
   "section.viewAll.events": "සියලු සිදුවීම් බලන්න",
   "section.viewAll.places": "සියලු නවාතැන් බලන්න",
+  "section.viewAll.packages": "සියලුම පැකේජ බලන්න",
 
   "common.bookTour": "සංචාරය වෙන්කරන්න",
   "common.loading": "පූරණය වෙමින්...",

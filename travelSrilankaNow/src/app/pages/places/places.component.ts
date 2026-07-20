@@ -65,6 +65,14 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.masterDataService.getPlaceTypes().subscribe({
       next: (data: MasterData[]) => {
         this.categoryData = data.filter((c: MasterData) => c.isActive);
+      },
+      error: (err) => console.error('Failed to load place types:', err)
+    });
+
+    // Filter dropdown always lists every type, active or not — independent
+    // of whether the "Browse by Category" tiles section is toggled on
+    this.masterDataService.getAllPlaceTypes().subscribe({
+      next: (data: MasterData[]) => {
         this.placeTypes = [
           { value: 'all', label: 'All Places' },
           ...data.map(item => ({

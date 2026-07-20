@@ -150,7 +150,8 @@ export class AdminHomepageSectionsComponent implements OnInit {
     PLACES: 'Where to Stay',
     SOCIAL_MEDIA: 'Social Media',
     IMAGE_GALLERY_SLIDER: 'Image Gallery Slider',
-    CUSTOM_CONTENT: 'Custom Content Section'
+    CUSTOM_CONTENT: 'Custom Content Section',
+    PACKAGES: 'Tour Packages'
   };
 
   sectionTypeIcons: Record<string, string> = {
@@ -160,7 +161,8 @@ export class AdminHomepageSectionsComponent implements OnInit {
     PLACES: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     SOCIAL_MEDIA: 'M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m0 0h4a1 1 0 011 1v1a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4',
     IMAGE_GALLERY_SLIDER: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
-    CUSTOM_CONTENT: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'
+    CUSTOM_CONTENT: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
+    PACKAGES: 'M20 7h-3V6a4 4 0 00-4-4h-2a4 4 0 00-4 4v1H4a1 1 0 00-1 1v11a2 2 0 002 2h14a2 2 0 002-2V8a1 1 0 00-1-1zM9 6a2 2 0 012-2h2a2 2 0 012 2v1H9V6zm11 13a.5.5 0 01-.5.5h-15a.5.5 0 01-.5-.5V9h4v2a1 1 0 002 0V9h2v2a1 1 0 002 0V9h4v10z'
   };
 
   // Gallery creation modal

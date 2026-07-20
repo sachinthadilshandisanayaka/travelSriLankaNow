@@ -64,6 +64,14 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.masterDataService.getLocationCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categoryData = data.filter((c: MasterData) => c.isActive);
+      },
+      error: (err) => console.error('Failed to load location categories:', err)
+    });
+
+    // Filter dropdown always lists every category, active or not — independent
+    // of whether the "Browse by Category" tiles section is toggled on
+    this.masterDataService.getAllLocationCategories().subscribe({
+      next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Locations' },
           ...data.map(item => ({

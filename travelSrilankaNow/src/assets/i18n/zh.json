@@ -16,9 +16,11 @@
   "section.subtitle.locations": "热门目的地",
   "section.subtitle.events": "精彩体验",
   "section.subtitle.places": "住宿推荐",
+  "section.subtitle.packages": "套餐",
   "section.viewAll.locations": "查看全部景点",
   "section.viewAll.events": "查看全部活动",
   "section.viewAll.places": "查看全部住宿",
+  "section.viewAll.packages": "查看全部套餐",
 
   "common.bookTour": "预订旅游",
   "common.loading": "加载中...",

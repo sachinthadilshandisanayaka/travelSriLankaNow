@@ -16,9 +16,11 @@
   "section.subtitle.locations": "Популярные направления",
   "section.subtitle.events": "Впечатления",
   "section.subtitle.places": "Размещение",
+  "section.subtitle.packages": "Пакеты",
   "section.viewAll.locations": "Все места",
   "section.viewAll.events": "Все события",
   "section.viewAll.places": "Все отели",
+  "section.viewAll.packages": "Все пакеты",
 
   "common.bookTour": "Забронировать тур",
   "common.loading": "Загрузка...",

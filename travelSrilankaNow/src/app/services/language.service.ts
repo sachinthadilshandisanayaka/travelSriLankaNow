@@ -33,14 +33,17 @@ const STORAGE_KEY = 'tsln_language';
 // first render — before the async HTTP request for the JSON file returns.
 const EN_TRANSLATIONS: { [key: string]: string } = {
   'nav.home': 'Home', 'nav.locations': 'Locations', 'nav.events': 'Events',
+  'nav.packages': 'Packages',
   'nav.gallery': 'Gallery', 'nav.places': 'Places', 'nav.more': 'More',
   'hero.explore': 'Explore Destinations', 'hero.events': 'View Events',
   'hero.title1': 'Journey Through', 'hero.title2': 'Ancient Sri Lanka',
   'hero.subtitle': 'Experience the majestic heritage and discover the rich culture of an ancient kingdom',
   'section.subtitle.locations': 'Popular Destinations',
   'section.subtitle.events': 'Experiences', 'section.subtitle.places': 'Accommodations',
+  'section.subtitle.packages': 'Packages',
   'section.viewAll.locations': 'View All Locations',
   'section.viewAll.events': 'View All Events', 'section.viewAll.places': 'View All Places',
+  'section.viewAll.packages': 'View All Packages',
   'common.bookTour': 'Book a Tour', 'common.loading': 'Loading...', 'common.error': 'Something went wrong',
   'loading.tagline': 'Discover the Wonder of Sri Lanka',
   'locations.title': 'Locations', 'locations.search': 'Search locations...',
