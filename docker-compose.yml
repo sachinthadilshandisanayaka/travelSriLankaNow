@@ -97,6 +97,8 @@ services:
     build:
       context: ./travelSrilankaNow
       dockerfile: Dockerfile
+    environment:
+      THEME_PRESET: ${THEME_PRESET:-navy}
     restart: unless-stopped
     depends_on:
       backend:

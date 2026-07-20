@@ -182,7 +182,7 @@ $transition-slower: 400ms ease;
   transition: box-shadow $transition-normal;
 
   &:hover {
-    box-shadow: 0 0 30px rgba($primary-blue, 0.15);
+    box-shadow: 0 0 30px var(--primary-blue-a15);
   }
 }
 
@@ -225,8 +225,8 @@ $transition-slower: 400ms ease;
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba($primary-navy, 0.2);
-  border-top-color: $primary-navy;
+  border: 3px solid var(--primary-navy-a20);
+  border-top-color: var(--primary-navy);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -301,7 +301,7 @@ $transition-slower: 400ms ease;
     left: 50%;
     width: 0;
     height: 0;
-    background: rgba($primary-navy, 0.1);
+    background: var(--primary-navy-a10);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: width 0.4s ease, height 0.4s ease;
@@ -314,7 +314,7 @@ $transition-slower: 400ms ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba($primary-navy, 0.15);
+    box-shadow: 0 4px 12px var(--primary-navy-a15);
   }
 
   &:active {
@@ -345,9 +345,9 @@ $transition-slower: 400ms ease;
     border: 1px solid $light-gray;
 
     &:focus {
-      border-color: $primary-blue;
-      box-shadow: 0 0 0 3px rgba($primary-blue, 0.1),
-                  0 4px 12px rgba($primary-navy, 0.08);
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px var(--primary-blue-a10),
+                  0 4px 12px var(--primary-navy-a08);
       transform: translateY(-1px);
     }
 
@@ -374,10 +374,10 @@ $transition-slower: 400ms ease;
 // Input focus glow animation
 @keyframes inputGlow {
   0%, 100% {
-    box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
+    box-shadow: 0 0 0 3px var(--primary-blue-a10);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba($primary-blue, 0.2);
+    box-shadow: 0 0 0 4px var(--primary-blue-a20);
   }
 }
 
@@ -425,7 +425,7 @@ $transition-slower: 400ms ease;
     left: 100%;
     width: 100%;
     height: 100%;
-    background: $primary-navy-dark;
+    background: var(--primary-navy-dark);
     transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: -1;
   }
