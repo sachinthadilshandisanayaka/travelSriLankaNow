@@ -28,6 +28,13 @@ public class MasterDataController {
         return ResponseEntity.ok(masterDataService.getActiveByType(type));
     }
 
+    // Unfiltered (active + inactive) — used for filter dropdowns that must always
+    // list every category regardless of whether "Browse by Category" is toggled on
+    @GetMapping("/type/{type}/all")
+    public ResponseEntity<List<MasterData>> getAllByType(@PathVariable MasterDataType type) {
+        return ResponseEntity.ok(masterDataService.getByType(type));
+    }
+
     @GetMapping("/type/{type}/paginated")
     public ResponseEntity<Page<MasterData>> getActiveByTypePaginated(
             @PathVariable MasterDataType type,

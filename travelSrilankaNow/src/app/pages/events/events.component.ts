@@ -88,11 +88,19 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.masterDataService.getEventCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categoryData = data.filter((c: MasterData) => c.isActive);
+        this.updateActiveCategoryData();
+      },
+      error: (err) => console.error('Failed to load event categories:', err)
+    });
+
+    // Filter dropdown always lists every category, active or not — independent
+    // of whether the "Browse by Category" tiles section is toggled on
+    this.masterDataService.getAllEventCategories().subscribe({
+      next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Events' },
           ...data.map(item => ({ value: item.code, label: item.displayName }))
         ];
-        this.updateActiveCategoryData();
       },
       error: (err) => console.error('Failed to load event categories:', err)
     });

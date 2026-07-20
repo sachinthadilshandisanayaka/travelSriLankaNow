@@ -3,12 +3,14 @@ import { Router } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { EventService } from '../../services/event.service';
 import { PlaceService } from '../../services/place.service';
+import { PackageService } from '../../services/package.service';
 import { HeroSlideService } from '../../services/hero-slide.service';
 import { HomepageSectionService } from '../../services/homepage-section.service';
 import { SocialMediaContentService } from '../../services/social-media-content.service';
 import { Location } from '../../models/location.model';
 import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
+import { TourPackage } from '../../models/package.model';
 import { HeroSlide } from '../../models/hero-slide.model';
 import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
@@ -30,6 +32,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   featuredLocations: Location[] = [];
   featuredEvents: EventModel[] = [];
   featuredPlaces: Place[] = [];
+  featuredPackages: TourPackage[] = [];
   socialMediaContent: SocialMediaContent[] = [];
 
   // Dynamic Sections
@@ -47,6 +50,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     private locationService: LocationService,
     private eventService: EventService,
     private placeService: PlaceService,
+    private packageService: PackageService,
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
     private socialMediaContentService: SocialMediaContentService,
@@ -118,6 +122,9 @@ export class LandingComponent implements OnInit, OnDestroy {
         case 'PLACES':
           this.loadPlaces(itemsCount);
           break;
+        case 'PACKAGES':
+          this.loadPackages(itemsCount);
+          break;
         case 'SOCIAL_MEDIA':
           this.loadSocialMedia();
           break;
@@ -133,6 +140,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.loadLocations(6);
     this.loadEvents(6);
     this.loadPlaces(6);
+    this.loadPackages(6);
   }
 
   private loadHeroSlides(): void {
@@ -185,6 +193,18 @@ export class LandingComponent implements OnInit, OnDestroy {
         this.placeService.getPlacesPaginated(0, count).subscribe({
           next: (response) => this.featuredPlaces = response.content || [],
           error: () => this.featuredPlaces = []
+        });
+      }
+    });
+  }
+
+  private loadPackages(count: number): void {
+    this.packageService.getFeaturedPackages().subscribe({
+      next: (items) => this.featuredPackages = items.slice(0, count),
+      error: () => {
+        this.packageService.getPackagesPaginated(0, count).subscribe({
+          next: (response) => this.featuredPackages = response.content || [],
+          error: () => this.featuredPackages = []
         });
       }
     });

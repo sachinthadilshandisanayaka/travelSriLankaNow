@@ -16,9 +16,11 @@
   "section.subtitle.locations": "Destinations populaires",
   "section.subtitle.events": "Expériences",
   "section.subtitle.places": "Hébergements",
+  "section.subtitle.packages": "Forfaits",
   "section.viewAll.locations": "Voir toutes les destinations",
   "section.viewAll.events": "Voir tous les événements",
   "section.viewAll.places": "Voir tous les hébergements",
+  "section.viewAll.packages": "Voir tous les forfaits",
 
   "common.bookTour": "Réserver un circuit",
   "common.loading": "Chargement...",
