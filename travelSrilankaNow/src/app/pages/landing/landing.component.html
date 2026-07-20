@@ -288,6 +288,58 @@
     </section>
   </ng-container>
 
+  <!-- ========== PACKAGES ========== -->
+  <ng-container *ngIf="section.sectionType === 'PACKAGES'">
+    <section class="section section-light animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <span class="subtitle">{{ 'section.subtitle.packages' | translate }}</span>
+          <h2>{{ section.title }}</h2>
+          <p class="lead">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="events-grid">
+          <a *ngFor="let pkg of featuredPackages; let i = index"
+             [routerLink]="['/packages', pkg.slug || pkg.id]"
+             class="event-card card-stagger">
+            <div class="event-image image-zoom">
+              <img [src]="pkg.imageUrl" [alt]="pkg.title" />
+              <div class="event-badge-wrapper">
+                <span class="type-badge">{{ pkg.category }}</span>
+                <span class="price-badge">${{ pkg.price }}</span>
+              </div>
+            </div>
+            <div class="event-content">
+              <h3>{{ pkg.title }}</h3>
+              <div class="event-meta">
+                <div class="meta-item">
+                  <span>⏱️</span>
+                  <span>{{ pkg.duration }}</span>
+                </div>
+                <div class="meta-item">
+                  <span>📍</span>
+                  <span>{{ pkg.location }}</span>
+                </div>
+              </div>
+              <p>{{ pkg.shortDescription }}</p>
+            </div>
+          </a>
+        </div>
+
+        <div *ngIf="getSectionConfig('PACKAGES').showViewAll" class="text-center mt-2xl animate-fadeIn delay-6">
+          <a routerLink="/packages" class="btn-primary">
+            <span>{{ 'section.viewAll.packages' | translate }}</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
   <!-- ========== IMAGE GALLERY (multi-style) ========== -->
   <ng-container *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
     <ng-container *ngIf="getGalleryConfig(section.id) as galleryConf">

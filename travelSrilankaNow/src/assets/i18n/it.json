@@ -16,9 +16,11 @@
   "section.subtitle.locations": "Destinazioni popolari",
   "section.subtitle.events": "Esperienze",
   "section.subtitle.places": "Alloggi",
+  "section.subtitle.packages": "Pacchetti",
   "section.viewAll.locations": "Vedi tutte le destinazioni",
   "section.viewAll.events": "Vedi tutti gli eventi",
   "section.viewAll.places": "Vedi tutti gli alloggi",
+  "section.viewAll.packages": "Vedi tutti i pacchetti",
 
   "common.bookTour": "Prenota un tour",
   "common.loading": "Caricamento...",
