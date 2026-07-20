@@ -20,16 +20,16 @@
   &.scrolled {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 1px 0 rgba($primary-navy-dark, 0.05),
-                0 4px 20px -4px rgba($primary-navy-dark, 0.1);
+    box-shadow: 0 1px 0 var(--primary-navy-dark-a05),
+                0 4px 20px -4px var(--primary-navy-dark-a10);
 
     .logo-text {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       text-shadow: none;
 
       // "SriLankaNow" part - navy blue for contrast on light background
       span {
-        color: $primary-navy;
+        color: var(--primary-navy);
         text-shadow: none;
       }
     }
@@ -39,33 +39,33 @@
       text-shadow: none;
 
       .nav-link__border {
-        background: $primary-navy;
+        background: var(--primary-navy);
       }
 
       .nav-link__shine {
         background: linear-gradient(
           90deg,
           transparent 0%,
-          rgba($primary-navy, 0.15) 50%,
+          var(--primary-navy-a15) 50%,
           transparent 100%
         );
       }
 
       &:hover {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
       }
 
       &.active {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
 
         .nav-link__border {
-          background: rgba($primary-navy-dark, 0.6);
+          background: rgba(var(--primary-navy-dark), 0.6);
         }
       }
     }
 
     .menu-toggle span {
-      background: $primary-navy-dark;
+      background: var(--primary-navy-dark);
     }
   }
 }
@@ -116,7 +116,7 @@
 
     // "SriLankaNow" part - dark navy blue matching buttons
     span {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-weight: $font-weight-semibold;
       text-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
     }
@@ -182,7 +182,7 @@
   // Border segments - each draws separately
   &__border {
     position: absolute;
-    background: $primary-sky;
+    background: var(--primary-sky);
     pointer-events: none;
 
     // Bottom border - expands from center
@@ -377,7 +377,7 @@
   }
 
   &.active {
-    background: rgba($primary-navy-dark, 0.9);
+    background: rgba(var(--primary-navy-dark), 0.9);
     border-color: transparent;
 
     span {
@@ -400,19 +400,19 @@
 
   // Scrolled state
   .navbar.scrolled & {
-    background: rgba($primary-navy-dark, 0.05);
-    border-color: rgba($primary-navy-dark, 0.1);
+    background: var(--primary-navy-dark-a05);
+    border-color: var(--primary-navy-dark-a10);
 
     span {
-      background: $primary-navy-dark;
+      background: var(--primary-navy-dark);
     }
 
     &:hover {
-      background: rgba($primary-navy-dark, 0.1);
+      background: var(--primary-navy-dark-a10);
     }
 
     &.active {
-      background: $primary-navy-dark;
+      background: var(--primary-navy-dark);
 
       span {
         background: $white;
@@ -431,7 +431,7 @@
     max-width: 400px;
     height: 100vh;
     height: 100dvh;
-    background: linear-gradient(180deg, $white 0%, $navy-bg-lightest 100%);
+    background: linear-gradient(180deg, $white 0%, var(--navy-bg-lightest) 100%);
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -439,7 +439,7 @@
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    box-shadow: -20px 0 60px rgba($primary-navy-dark, 0.15);
+    box-shadow: -20px 0 60px var(--primary-navy-dark-a15);
 
     @include respond-to('sm') {
       padding: 120px $spacing-xl $spacing-3xl;
@@ -475,18 +475,18 @@
       }
 
       &:hover {
-        background: rgba($primary-sky, 0.2);
-        color: $primary-navy-dark;
-        border-color: rgba($primary-sky, 0.3);
+        background: var(--primary-sky-a20);
+        color: var(--primary-navy-dark);
+        border-color: var(--primary-sky-a30);
         transform: translateX(8px);
       }
 
       &.active {
-        background: $gradient-primary;
+        background: var(--gradient-primary);
         color: $white;
         font-weight: $font-weight-semibold;
         border-color: transparent;
-        box-shadow: 0 4px 20px rgba($primary-navy-dark, 0.25);
+        box-shadow: 0 4px 20px rgba(var(--primary-navy-dark), 0.25);
       }
     }
   }
@@ -499,7 +499,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba($primary-navy-dark, 0.5);
+    background: var(--primary-navy-dark-a50);
     backdrop-filter: blur(4px);
     z-index: -1;
     animation: fadeIn 0.3s ease;
@@ -569,7 +569,7 @@
     transition: background 0.2s ease;
 
     &:hover {
-      background: rgba($primary-navy, 0.06);
+      background: rgba(var(--primary-navy), 0.06);
     }
   }
 
@@ -577,7 +577,7 @@
     display: block;
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
   }
 
   &__item-desc {
@@ -633,8 +633,8 @@
       border: 1px solid transparent;
 
       &:hover {
-        background: rgba($primary-sky, 0.2);
-        border-color: rgba($primary-sky, 0.3);
+        background: var(--primary-sky-a20);
+        border-color: var(--primary-sky-a30);
       }
     }
 
@@ -729,9 +729,9 @@
   transition: all 0.2s;
 
   &.scrolled {
-    background: rgba($primary-sky, 0.1);
-    border-color: $primary-sky;
-    color: $primary-navy-dark;
+    background: var(--primary-sky-a10);
+    border-color: var(--primary-sky);
+    color: var(--primary-navy-dark);
   }
   &:hover { transform: scale(1.05); }
 }
@@ -749,8 +749,8 @@
   &__header {
     padding: $spacing-md $spacing-lg;
     border-bottom: 1px solid $light-gray;
-    background: $navy-bg-lightest;
-    strong { display: block; font-size: $font-size-sm; font-weight: $font-weight-semibold; color: $primary-navy-dark; }
+    background: var(--navy-bg-lightest);
+    strong { display: block; font-size: $font-size-sm; font-weight: $font-weight-semibold; color: var(--primary-navy-dark); }
     span { font-size: 0.75rem; color: $warm-gray; }
   }
 
@@ -758,12 +758,12 @@
     display: flex; align-items: center; gap: $spacing-sm;
     padding: $spacing-md $spacing-lg;
     font-size: $font-size-sm;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     text-decoration: none;
     background: none; border: none;
     width: 100%; text-align: left; cursor: pointer;
     transition: background 0.15s;
-    &:hover { background: $navy-bg-lightest; }
+    &:hover { background: var(--navy-bg-lightest); }
     &--danger { color: $error; &:hover { background: rgba($error, 0.06); } }
   }
 }

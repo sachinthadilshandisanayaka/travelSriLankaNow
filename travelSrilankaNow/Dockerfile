@@ -28,6 +28,10 @@ COPY nginx.conf /etc/nginx/conf.d/
 # Copy built Angular app from build stage
 COPY --from=build /app/dist/travelSrilankaNow /usr/share/nginx/html
 
+# Copy theme startup script
+COPY generate-theme.sh /generate-theme.sh
+RUN chmod +x /generate-theme.sh
+
 # Expose port
 EXPOSE 80
 
@@ -35,5 +39,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Apply theme from THEME_PRESET env var, then start nginx
+CMD ["/generate-theme.sh"]

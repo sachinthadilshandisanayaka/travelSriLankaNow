@@ -116,14 +116,14 @@
     width: 50%;
     transition: all 300ms ease;
     pointer-events: none;
-    filter: drop-shadow(0 0 3px rgba($primary-sky, 0.5));
+    filter: drop-shadow(0 0 3px var(--primary-sky-a50));
 
     &--tl {
       top: 0;
       left: 0;
       height: 20%;
-      border-left: 2px solid $primary-sky;
-      border-top: 2px solid $primary-sky;
+      border-left: 2px solid var(--primary-sky);
+      border-top: 2px solid var(--primary-sky);
       border-top-left-radius: $radius-md;
     }
 
@@ -131,8 +131,8 @@
       top: 0;
       right: 0;
       height: 60%;
-      border-right: 2px solid $primary-sky;
-      border-top: 2px solid $primary-sky;
+      border-right: 2px solid var(--primary-sky);
+      border-top: 2px solid var(--primary-sky);
       border-top-right-radius: $radius-md;
     }
 
@@ -140,8 +140,8 @@
       bottom: 0;
       left: 0;
       height: 60%;
-      border-left: 2px solid $primary-sky;
-      border-bottom: 2px solid $primary-sky;
+      border-left: 2px solid var(--primary-sky);
+      border-bottom: 2px solid var(--primary-sky);
       border-bottom-left-radius: $radius-md;
     }
 
@@ -149,8 +149,8 @@
       bottom: 0;
       right: 0;
       height: 20%;
-      border-right: 2px solid $primary-sky;
-      border-bottom: 2px solid $primary-sky;
+      border-right: 2px solid var(--primary-sky);
+      border-bottom: 2px solid var(--primary-sky);
       border-bottom-right-radius: $radius-md;
     }
   }
@@ -209,17 +209,17 @@
 // Button Variants
 @mixin button-primary {
   @include button-base;
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   color: $white;
   box-shadow: $shadow-md;
 
   &:hover:not(:disabled) {
-    background: $gradient-primary-hover;
-    box-shadow: $shadow-lg, 0 4px 20px rgba($primary-navy-dark, 0.4);
+    background: var(--gradient-primary-hover);
+    box-shadow: $shadow-lg, 0 4px 20px var(--primary-navy-dark-a40);
   }
 
   &:active:not(:disabled) {
-    background: $primary-navy-dark;
+    background: var(--primary-navy-dark);
     box-shadow: $shadow-sm;
   }
 }
@@ -269,13 +269,13 @@
 @mixin button-view-details {
   @include button-base;
   width: 100%;
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   color: $white;
   box-shadow: $shadow-sm;
   padding: 0.875rem 1.5rem;
 
   &:hover:not(:disabled) {
-    background: $gradient-primary-hover;
+    background: var(--gradient-primary-hover);
     box-shadow: $shadow-md;
   }
 }
@@ -291,15 +291,15 @@
   text-transform: none;
 
   &:hover:not(:disabled):not(.active) {
-    background: $navy-bg-light;
-    color: $primary-navy;
-    border-color: $primary-blue;
+    background: var(--navy-bg-light);
+    color: var(--primary-navy);
+    border-color: var(--primary-blue);
   }
 
   &.active {
-    background: $primary-navy;
+    background: var(--primary-navy);
     color: $white;
-    border-color: $primary-navy;
+    border-color: var(--primary-navy);
   }
 }
 
@@ -315,15 +315,15 @@
   text-transform: none;
 
   &:hover:not(:disabled):not(.active) {
-    background: $navy-bg-light;
-    color: $primary-navy;
-    border-color: $primary-blue;
+    background: var(--navy-bg-light);
+    color: var(--primary-navy);
+    border-color: var(--primary-blue);
   }
 
   &.active {
-    background: $primary-navy;
+    background: var(--primary-navy);
     color: $white;
-    border-color: $primary-navy;
+    border-color: var(--primary-navy);
   }
 }
 
@@ -353,7 +353,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: $gradient-overlay;
+    background: var(--gradient-overlay);
     opacity: 0;
     transition: opacity $transition-base;
   }

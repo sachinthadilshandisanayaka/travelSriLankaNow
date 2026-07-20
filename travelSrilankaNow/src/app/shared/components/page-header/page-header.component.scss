@@ -11,7 +11,7 @@ $navbar-height: 80px;
   // Extend behind navbar with negative margin, compensate with extra padding
   margin-top: -$navbar-height;
   padding: calc(#{$spacing-4xl} + #{$navbar-height}) 0 $spacing-3xl;
-  background: linear-gradient(135deg, $primary-navy-dark 0%, $primary-navy 50%, $primary-blue 100%);
+  background: linear-gradient(135deg, var(--primary-navy-dark) 0%, var(--primary-navy) 50%, var(--primary-blue) 100%);
   overflow: hidden;
 
   // Compact header on mobile so users see content immediately

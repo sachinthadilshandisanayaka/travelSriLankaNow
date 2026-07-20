@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, $navy-bg-lightest 0%, rgba($primary-sky, 0.08) 100%);
+  background: linear-gradient(135deg, var(--navy-bg-lightest) 0%, var(--primary-sky-a08) 100%);
   padding: $spacing-lg $spacing-md;
 
   @media (max-width: 480px) {
@@ -37,15 +37,15 @@
     h2 {
       font-size: $font-size-2xl;
       font-weight: $font-weight-bold;
-      color: $primary-navy-dark;
-      span { color: $primary-sky; }
+      color: var(--primary-navy-dark);
+      span { color: var(--primary-sky); }
     }
   }
 
   &__title {
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     text-align: center;
     margin-bottom: $spacing-xs;
   }
@@ -62,7 +62,7 @@
     margin-top: $spacing-xl;
     font-size: $font-size-sm;
     color: $warm-gray;
-    a { color: $primary-sky; font-weight: $font-weight-medium; text-decoration: none;
+    a { color: var(--primary-sky); font-weight: $font-weight-medium; text-decoration: none;
       &:hover { text-decoration: underline; } }
   }
 }
@@ -95,7 +95,7 @@
       display: block;
       font-size: $font-size-sm;
       font-weight: $font-weight-medium;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       margin-bottom: $spacing-xs;
     }
     input {
@@ -104,12 +104,12 @@
       border: 1.5px solid $light-gray;
       border-radius: $radius-lg;
       font-size: $font-size-base;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       background: $white;
       transition: border-color 0.2s;
       box-sizing: border-box;
       -webkit-appearance: none;
-      &:focus { outline: none; border-color: $primary-sky; box-shadow: 0 0 0 3px rgba($primary-sky, 0.15); }
+      &:focus { outline: none; border-color: var(--primary-sky); box-shadow: 0 0 0 3px var(--primary-sky-a15); }
       &::placeholder { color: $warm-gray; }
 
       @media (max-width: 480px) {
@@ -123,7 +123,7 @@
 .auth-btn {
   width: 100%;
   padding: 0.875rem;
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   color: $white;
   border: none;
   border-radius: $radius-lg;
