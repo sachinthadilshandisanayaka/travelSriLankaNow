@@ -81,11 +81,11 @@
       </div>
       <select class="admin-search-bar__select" [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
         <option value="">All Types</option>
-        <option *ngFor="let pt of placeTypes" [value]="pt.code">{{ pt.name }}</option>
+        <option *ngFor="let pt of placeTypes" [value]="pt.code">{{ pt.displayName }}</option>
       </select>
       <select class="admin-search-bar__select" [(ngModel)]="filterPriceRange" (ngModelChange)="onFilterChange()">
         <option value="">All Prices</option>
-        <option *ngFor="let pr of priceRanges" [value]="pr.code">{{ pr.name }}</option>
+        <option *ngFor="let pr of priceRanges" [value]="pr.code">{{ pr.displayName }}</option>
       </select>
       <span class="admin-search-bar__count">{{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}</span>
     </div>
