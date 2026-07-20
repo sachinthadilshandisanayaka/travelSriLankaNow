@@ -32,7 +32,7 @@ export class GalleryComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPage: number = 0;
   totalPages: number = 0;
   totalElements: number = 0;
-  pageSize: number = 12;
+  pageSize: number = 24;
 
   // Categories and types loaded from MasterData
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All' }];

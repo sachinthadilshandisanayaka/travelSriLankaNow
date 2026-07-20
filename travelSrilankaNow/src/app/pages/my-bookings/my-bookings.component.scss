@@ -9,7 +9,7 @@ $mb-radius:  14px;
 // ── Page wrapper ──────────────────────────────────────────────────────────────
 .mb-page {
   min-height: 100vh;
-  background: $navy-bg-lightest;
+  background: var(--navy-bg-lightest);
   padding-bottom: 4rem;
 }
 

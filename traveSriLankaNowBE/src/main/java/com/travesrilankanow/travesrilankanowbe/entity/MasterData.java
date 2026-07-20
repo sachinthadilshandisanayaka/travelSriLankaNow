@@ -67,6 +67,7 @@ public class MasterData {
 
     public enum MasterDataType {
         EVENT_CATEGORY,
+        PACKAGE_CATEGORY,
         LOCATION_CATEGORY,
         PLACE_TYPE,
         REGION,

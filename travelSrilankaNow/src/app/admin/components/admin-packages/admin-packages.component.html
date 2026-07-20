@@ -1,0 +1,602 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Manage Packages</h1>
+        <p>Add, edit, or remove tour packages</p>
+      </div>
+      <div class="admin-header__actions">
+        <button type="button" class="admin-btn admin-btn--outline" [class.admin-btn--active]="showCategoryPanel" (click)="showCategoryPanel = !showCategoryPanel">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          <span>Browse by Category</span>
+        </button>
+        <button type="button" class="admin-btn admin-btn--outline" (click)="openFieldConfigModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Manage Fields
+          <span *ngIf="fieldDefinitions.length > 0" class="field-count-badge">{{ fieldDefinitions.length }}</span>
+        </button>
+        <button class="admin-btn admin-btn--primary" (click)="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Add New Package</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Browse by Category Panel -->
+    <app-admin-category-settings
+      *ngIf="showCategoryPanel"
+      [categoryType]="'PACKAGE_CATEGORY'"
+      (closed)="showCategoryPanel = false">
+    </app-admin-category-settings>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="admin-search-bar">
+      <div class="admin-search-bar__input-wrap">
+        <svg class="admin-search-bar__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input
+          class="admin-search-bar__input"
+          type="text"
+          placeholder="Search by title, location..."
+          [value]="searchTerm"
+          (input)="onSearchChange($any($event.target).value)">
+        <button *ngIf="searchTerm" class="admin-search-bar__clear" (click)="clearSearch()" title="Clear">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <select class="admin-search-bar__select" [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat.code">{{ cat.displayName }}</option>
+      </select>
+      <span class="admin-search-bar__count">{{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}</span>
+    </div>
+
+    <!-- Packages Table -->
+    <div *ngIf="!isLoading" class="admin-table">
+      <div class="admin-table__wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Price</th>
+              <th>Duration</th>
+              <th>Spots</th>
+              <th>Rating</th>
+              <th>Featured</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pkg of packages">
+              <td>
+                <img [src]="pkg.imageUrl" [alt]="pkg.title" class="admin-table__image">
+              </td>
+              <td>
+                <div class="admin-table__title admin-table__text--truncate" style="max-width:200px" [title]="pkg.title">{{ pkg.title }}</div>
+                <div class="admin-table__subtitle admin-table__text--truncate" style="max-width:200px" [title]="pkg.shortDescription">{{ pkg.shortDescription }}</div>
+              </td>
+              <td>
+                <span class="admin-badge admin-badge--purple" [title]="pkg.category">{{ getCategoryDisplayName(pkg.category) }}</span>
+              </td>
+              <td>
+                <span class="admin-table__text admin-table__text--truncate" [title]="pkg.location">{{ pkg.location }}</span>
+              </td>
+              <td>
+                <span class="admin-table__text admin-table__text--bold">${{ pkg.price }}</span>
+              </td>
+              <td>
+                <span class="admin-table__text">{{ pkg.duration }}</span>
+              </td>
+              <td>
+                <span class="admin-table__text">{{ pkg.availableSpots }}/{{ pkg.maxParticipants }}</span>
+              </td>
+              <td>
+                <div class="admin-rating">
+                  <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
+                  <span>{{ pkg.rating }}</span>
+                </div>
+              </td>
+              <td>
+                <span *ngIf="pkg.featured" class="admin-badge admin-badge--success">Yes</span>
+                <span *ngIf="!pkg.featured" class="admin-badge admin-badge--gray">No</span>
+              </td>
+              <td>
+                <div class="admin-table__actions">
+                  <button class="admin-btn admin-btn--ghost" (click)="openEditModal(pkg)" title="Edit">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <button class="admin-btn admin-btn--ghost-danger" (click)="confirmDelete(pkg.id)" title="Delete">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="packages.length === 0">
+              <td colspan="10">
+                <div class="admin-table__empty">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <h3>No packages found</h3>
+                  <p>Get started by adding a new package</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 0" class="admin-pagination">
+        <div class="admin-pagination__info">
+          Showing <strong>{{ currentPage * pageSize + 1 }}</strong> to
+          <strong>{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</strong> of
+          <strong>{{ totalElements }}</strong> results
+        </div>
+        <div class="admin-pagination__controls">
+          <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">
+            Previous
+          </button>
+          <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                  class="admin-pagination__btn"
+                  [class.admin-pagination__btn--active]="currentPage === i"
+                  (click)="goToPage(i)">
+            {{ i + 1 }}
+          </button>
+          <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div *ngIf="showModal" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>{{ isEditMode ? 'Edit Package' : 'Add New Package' }}</h2>
+      <button class="admin-modal__close" (click)="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="packageForm" (ngSubmit)="savePackage()">
+      <div class="admin-modal__body">
+        <div class="admin-form__grid">
+          <!-- Title -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Package Title *</label>
+            <input type="text" formControlName="title" class="admin-input" placeholder="e.g., Cultural Heritage Tour"
+                   (input)="onTitleChange($event.target.value)">
+          </div>
+
+          <!-- URL Slug -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">
+              URL Slug
+              <span class="admin-form__hint" style="margin-left:0.4rem;font-weight:400">optional · auto-generated from title if left blank</span>
+            </label>
+            <div class="slug-field">
+              <span class="slug-field__prefix">/packages/</span>
+              <input class="admin-input slug-field__input" formControlName="slug" placeholder="cultural-heritage-tour"
+                     (input)="onSlugInput($event.target.value)">
+            </div>
+            <span class="admin-form__hint">Lowercase letters, numbers and hyphens only. Must be unique.</span>
+          </div>
+
+          <!-- Category -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Category *</label>
+            <select formControlName="category" class="admin-select">
+              <option *ngFor="let cat of categories" [value]="cat.code">{{ cat.displayName }}</option>
+            </select>
+          </div>
+
+          <!-- Location -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Location</label>
+            <input type="text" formControlName="location" class="admin-input" placeholder="e.g., Kandy, Sri Lanka">
+          </div>
+
+          <!-- Price -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Price (USD)
+              <span class="admin-form__hint" style="margin-left:0.3rem;font-weight:400">optional · use Pricing Options below for advanced pricing</span>
+            </label>
+            <input type="number" formControlName="price" class="admin-input" min="0" step="0.01" placeholder="Leave blank if using Pricing Options">
+          </div>
+
+          <!-- Duration -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Duration *</label>
+            <input type="text" formControlName="duration" class="admin-input" placeholder="e.g., 3 days, 2 hours">
+          </div>
+
+          <!-- Max Participants -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Max Participants *</label>
+            <input type="number" formControlName="maxParticipants" class="admin-input" min="1" placeholder="20">
+          </div>
+
+          <!-- Available Spots -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Available Spots *</label>
+            <input type="number" formControlName="availableSpots" class="admin-input" min="0" placeholder="20">
+          </div>
+
+          <!-- Rating -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Rating (0-5) *</label>
+            <input type="number" formControlName="rating" class="admin-input" min="0" max="5" step="0.1" placeholder="4.5">
+          </div>
+
+          <!-- Featured -->
+          <div class="admin-form__group">
+            <label class="admin-checkbox">
+              <input type="checkbox" formControlName="featured">
+              <span>Featured on Homepage</span>
+            </label>
+          </div>
+
+          <!-- Order Number -->
+          <div class="admin-form__group">
+            <label class="admin-form__label">Order Number</label>
+            <input type="number" formControlName="orderNumber" class="admin-input" min="0" placeholder="0">
+            <p class="admin-form__hint">Lower numbers appear first</p>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="admin-form__group admin-form__group--full">
+            <app-entity-image-manager
+              [entityType]="'package'"
+              [primaryImageUrl]="packageForm.get('imageUrl')?.value"
+              [existingImages]="galleryImages"
+              [folder]="'packages'"
+              [label]="'Package Images'"
+              (primaryImageChanged)="onPrimaryImageChanged($event)"
+              (imagesChanged)="onGalleryImagesChanged($event)"
+            ></app-entity-image-manager>
+          </div>
+
+          <!-- Short Description -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Short Description *</label>
+            <input type="text" formControlName="shortDescription" class="admin-input" placeholder="Brief one-line description">
+          </div>
+
+          <!-- Full Description -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Full Description *</label>
+            <textarea formControlName="description" class="admin-textarea" rows="4" placeholder="Detailed description of the package"></textarea>
+          </div>
+
+          <!-- Included -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">What's Included (comma-separated)</label>
+            <input type="text" formControlName="included" class="admin-input" placeholder="Hotel pickup, Professional guide, Lunch, Entrance fees">
+            <p class="admin-form__hint">Separate items with commas</p>
+          </div>
+
+          <!-- Requirements -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Requirements (comma-separated)</label>
+            <input type="text" formControlName="requirements" class="admin-input" placeholder="Comfortable walking shoes, Sun protection, Valid ID">
+            <p class="admin-form__hint">Separate items with commas</p>
+          </div>
+        </div>
+
+        <!-- Package Locations -->
+        <div class="admin-modal__section">
+          <div class="admin-section-header">
+            <div>
+              <h4 class="admin-section-header__title">📍 Package Locations</h4>
+              <p class="admin-section-header__hint">Add one location or multiple stops for journey-style packages.</p>
+            </div>
+            <button type="button" class="admin-btn admin-btn--outline admin-btn--sm" (click)="addLocation()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Add Stop
+            </button>
+          </div>
+
+          <div class="location-list">
+            <div *ngIf="packageLocations.length === 0" class="location-list__empty">
+              No locations added — the "Location" field above will be used.
+            </div>
+
+            <div *ngFor="let loc of packageLocations; let i = index" class="location-row">
+              <div class="location-row__order">
+                <button type="button" class="admin-btn admin-btn--ghost admin-btn--xs" (click)="moveLocationUp(i)" [disabled]="i === 0" title="Move up">▲</button>
+                <span class="location-row__num">{{ i + 1 }}</span>
+                <button type="button" class="admin-btn admin-btn--ghost admin-btn--xs" (click)="moveLocationDown(i)" [disabled]="i === packageLocations.length - 1" title="Move down">▼</button>
+              </div>
+              <div class="location-row__fields">
+                <input type="text" class="admin-input" placeholder="Location name *" [(ngModel)]="loc.name" [ngModelOptions]="{standalone: true}">
+                <input type="text" class="admin-input" placeholder="Short description (optional)" [(ngModel)]="loc.description" [ngModelOptions]="{standalone: true}">
+                <input type="text" class="admin-input admin-input--sm" placeholder="Stay duration (e.g., 2 hours)" [(ngModel)]="loc.durationHere" [ngModelOptions]="{standalone: true}">
+              </div>
+              <button type="button" class="admin-btn admin-btn--ghost-danger admin-btn--xs" (click)="removeLocation(i)" title="Remove">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing Options -->
+        <div class="admin-modal__section">
+          <div class="admin-section-header">
+            <div>
+              <h4 class="admin-section-header__title">💰 Pricing Options</h4>
+              <p class="admin-section-header__hint">Define multi-currency, multi-type pricing. The primary price is highlighted to users.</p>
+            </div>
+            <button type="button" class="admin-btn admin-btn--outline admin-btn--sm" (click)="addPricing()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Add Pricing
+            </button>
+          </div>
+
+          <div class="pricing-list">
+            <div *ngIf="pricings.length === 0" class="pricing-list__empty">
+              No pricing options — the "Price (USD)" field above will be used.
+            </div>
+
+            <div *ngFor="let p of pricings; let i = index" class="pricing-row" [class.pricing-row--primary]="p.isPrimary">
+              <div class="pricing-row__fields">
+                <select class="admin-select admin-select--sm" [(ngModel)]="p.currencyCode" [ngModelOptions]="{standalone: true}">
+                  <option *ngFor="let c of currencies" [value]="c.code">{{ c.icon }} {{ c.code }} – {{ c.displayName }}</option>
+                  <option value="USD">$ USD</option>
+                </select>
+
+                <select class="admin-select admin-select--sm" [(ngModel)]="p.pricingType" [ngModelOptions]="{standalone: true}">
+                  <option *ngFor="let pt of pricingTypes" [value]="pt.value">{{ pt.label }}</option>
+                </select>
+
+                <input type="number" class="admin-input admin-input--sm" placeholder="Amount" min="0" step="0.01"
+                       [value]="p.amount" (input)="p.amount = +$any($event.target).value">
+
+                <ng-container *ngIf="p.pricingType === 'GROUP'">
+                  <input type="number" class="admin-input admin-input--sm" placeholder="Min people"
+                         min="1" [value]="p.groupSizeMin"
+                         (input)="p.groupSizeMin = +$any($event.target).value || null"
+                         title="Minimum group size">
+                  <input type="number" class="admin-input admin-input--sm" placeholder="Max people"
+                         min="1" [value]="p.groupSizeMax"
+                         (input)="p.groupSizeMax = +$any($event.target).value || null"
+                         title="Maximum group size (leave blank for no limit)">
+                </ng-container>
+
+                <input type="text" class="admin-input admin-input--sm" placeholder="Label (optional)" [(ngModel)]="p.label" [ngModelOptions]="{standalone: true}">
+              </div>
+              <div class="pricing-row__actions">
+                <label class="admin-checkbox admin-checkbox--sm" title="Set as primary price">
+                  <input type="radio" name="primaryPricing" [checked]="p.isPrimary" (change)="setPrimaryPricing(i)">
+                  <span>Primary</span>
+                </label>
+                <button type="button" class="admin-btn admin-btn--ghost-danger admin-btn--xs" (click)="removePricing(i)" title="Remove">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Additional Details -->
+        <div *ngIf="fieldDefinitions.length > 0" class="dynamic-fields">
+          <div class="dynamic-fields__header">
+            <h4>Additional Details</h4>
+          </div>
+          <div class="dynamic-fields__grid">
+            <div *ngFor="let field of fieldDefinitions" class="form-group">
+              <label>{{ field.label }}<span *ngIf="field.required" class="required">*</span></label>
+
+              <!-- text -->
+              <input *ngIf="field.type === 'text'" type="text" class="admin-input"
+                     [value]="additionalDetails[field.key] || ''"
+                     (input)="additionalDetails[field.key] = $any($event.target).value">
+
+              <!-- number -->
+              <input *ngIf="field.type === 'number'" type="number" class="admin-input"
+                     [value]="additionalDetails[field.key]"
+                     (input)="additionalDetails[field.key] = +$any($event.target).value">
+
+              <!-- date -->
+              <app-date-range-picker *ngIf="field.type === 'date'"
+                mode="single"
+                [startDate]="additionalDetails[field.key] || ''"
+                (apply)="additionalDetails[field.key] = $event.start">
+              </app-date-range-picker>
+
+              <!-- date_range -->
+              <div *ngIf="field.type === 'date_range'">
+                <app-date-range-picker
+                  mode="range"
+                  [startDate]="additionalDetails[field.key]?.from || ''"
+                  [endDate]="additionalDetails[field.key]?.to || ''"
+                  placeholder="Select date range"
+                  (apply)="additionalDetails[field.key] = {from: $event.start, to: $event.end}">
+                </app-date-range-picker>
+              </div>
+
+              <!-- number_range -->
+              <div *ngIf="field.type === 'number_range'" class="range-inputs">
+                <input type="number" class="admin-input" placeholder="Min"
+                       [value]="additionalDetails[field.key]?.min"
+                       (input)="additionalDetails[field.key] = {min: +$any($event.target).value, max: additionalDetails[field.key]?.max}">
+                <span class="range-separator">to</span>
+                <input type="number" class="admin-input" placeholder="Max"
+                       [value]="additionalDetails[field.key]?.max"
+                       (input)="additionalDetails[field.key] = {min: additionalDetails[field.key]?.min, max: +$any($event.target).value}">
+              </div>
+
+              <!-- link -->
+              <div *ngIf="field.type === 'link'" class="link-field-group">
+                <input type="text" class="admin-input" placeholder="Display name (optional)"
+                       [value]="getLinkDisplayName(field.key)"
+                       (input)="setLinkDisplayName(field.key, $any($event.target).value)">
+                <input type="url" class="admin-input" placeholder="https://example.com"
+                       [value]="getLinkUrl(field.key)"
+                       (input)="setLinkUrl(field.key, $any($event.target).value)">
+              </div>
+
+              <!-- select -->
+              <select *ngIf="field.type === 'select'" class="admin-select"
+                      [value]="additionalDetails[field.key] || ''"
+                      (change)="additionalDetails[field.key] = $any($event.target).value">
+                <option value="">-- Select --</option>
+                <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <!-- multi_select -->
+              <div *ngIf="field.type === 'multi_select'" class="multi-select-options">
+                <label *ngFor="let opt of field.options" class="multi-select-option">
+                  <input type="checkbox"
+                         [checked]="isOptionSelected(field.key, opt)"
+                         (change)="toggleMultiSelectOption(field.key, opt)">
+                  <span>{{ opt }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isEditMode && packageForm.get('id')?.value" class="admin-modal__section">
+        <app-admin-contact-details
+          [entityType]="'PACKAGE'"
+          [entityId]="packageForm.get('id')?.value">
+        </app-admin-contact-details>
+      </div>
+
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--secondary" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="packageForm.invalid || isLoading">
+          {{ isEditMode ? 'Update' : 'Create' }} Package
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm" class="admin-confirm">
+  <div class="admin-confirm__content">
+    <div class="admin-confirm__body">
+      <div class="admin-confirm__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 class="admin-confirm__title">Delete Package</h3>
+      <p class="admin-confirm__text">Are you sure you want to delete this package? This action cannot be undone.</p>
+      <div class="admin-confirm__actions">
+        <button class="admin-btn admin-btn--secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="admin-btn admin-btn--danger" (click)="deletePackage()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Field Config Modal -->
+<div *ngIf="showFieldConfigModal" class="admin-modal field-config-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>Manage Additional Fields for Packages</h2>
+      <button class="admin-modal__close" (click)="closeFieldConfigModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <p class="field-config-hint">Define custom fields that will appear in every package form. Changes apply to all packages.</p>
+
+      <div class="field-def-list">
+        <div *ngFor="let field of tempFieldDefinitions; let i = index" class="field-def-row">
+          <div class="field-def-row__main">
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Label</label>
+              <input class="admin-input admin-input--sm" [value]="field.label"
+                     (input)="field.label = $any($event.target).value; onFieldLabelChange(field)" placeholder="e.g., Difficulty Level">
+            </div>
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Key</label>
+              <input class="admin-input admin-input--sm" [value]="field.key" readonly placeholder="auto_generated">
+            </div>
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Type</label>
+              <select class="admin-select admin-select--sm" [(ngModel)]="field.type" (ngModelChange)="onFieldTypeChange(field)">
+                <option *ngFor="let ft of fieldTypes" [value]="ft.value">{{ ft.label }}</option>
+              </select>
+            </div>
+            <div class="field-def-row__input-group">
+              <label class="admin-form__label">Required</label>
+              <input type="checkbox" [checked]="field.required" (change)="field.required = $any($event.target).checked">
+            </div>
+            <button type="button" class="admin-btn admin-btn--ghost-danger field-def-row__remove" (click)="removeFieldDefinition(i)" title="Remove field">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+          <div *ngIf="field.type === 'select' || field.type === 'multi_select'" class="field-def-row__options">
+            <label class="admin-form__label">Options (comma-separated)</label>
+            <input class="admin-input admin-input--sm" [value]="getOptionsString(field)"
+                   (input)="setOptionsFromString(field, $any($event.target).value)" placeholder="Option 1, Option 2, Option 3">
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="admin-btn admin-btn--outline" (click)="addFieldDefinition()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Field
+      </button>
+    </div>
+    <div class="admin-modal__footer">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeFieldConfigModal()">Cancel</button>
+      <button type="button" class="admin-btn admin-btn--primary" (click)="saveFieldConfig()">Save Field Configuration</button>
+    </div>
+  </div>
+</div>

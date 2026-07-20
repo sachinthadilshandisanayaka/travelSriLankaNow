@@ -7,10 +7,10 @@
   &__title {
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     margin-bottom: $spacing-md;
     padding-bottom: $spacing-sm;
-    border-bottom: 2px solid $primary-sky;
+    border-bottom: 2px solid var(--primary-sky);
   }
 
   &__list {

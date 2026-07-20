@@ -11,7 +11,7 @@ $navbar-height: 80px;
   // Extend behind navbar with negative margin, compensate with extra padding
   margin-top: -$navbar-height;
   padding: calc(#{$spacing-4xl} + #{$navbar-height}) 0 $spacing-3xl;
-  background: linear-gradient(135deg, $primary-navy-dark 0%, $primary-navy 50%, $primary-blue 100%);
+  background: linear-gradient(135deg, var(--primary-navy-dark) 0%, var(--primary-navy) 50%, var(--primary-blue) 100%);
   overflow: hidden;
 
   // Compact header on mobile so users see content immediately
@@ -305,6 +305,21 @@ $navbar-height: 80px;
     }
   }
 
+  // Packages - Suitcase animation
+  &.packages-deco {
+    .star {
+      animation: twinkle 2s ease-in-out infinite;
+
+      &.s1 { animation-delay: 0s; }
+      &.s2 { animation-delay: -0.7s; }
+      &.s3 { animation-delay: -1.4s; }
+    }
+
+    .wave-path {
+      animation: dash-fly 3s linear infinite;
+    }
+  }
+
   // Default - Palm tree animation
   &.default-deco {
     .sun-glow {
@@ -383,6 +398,11 @@ $navbar-height: 80px;
 @keyframes wave-move {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(-20px); }
+}
+
+@keyframes dash-fly {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -16; }
 }
 
 // Slide-in animations

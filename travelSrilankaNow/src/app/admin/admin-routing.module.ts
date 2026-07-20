@@ -8,6 +8,7 @@ import { AdminLayoutComponent } from './components/admin-layout/admin-layout.com
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { AdminLocationsComponent } from './components/admin-locations/admin-locations.component';
 import { AdminEventsComponent } from './components/admin-events/admin-events.component';
+import { AdminPackagesComponent } from './components/admin-packages/admin-packages.component';
 import { AdminPlacesComponent } from './components/admin-places/admin-places.component';
 import { AdminGalleryComponent } from './components/admin-gallery/admin-gallery.component';
 import { AdminMasterDataComponent } from './components/admin-master-data/admin-master-data.component';
@@ -108,6 +109,12 @@ const routes: Routes = [
         data: { permission: 'EVENTS:VIEW' }
       },
       {
+        path: 'packages',
+        component: AdminPackagesComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'PACKAGES:VIEW' }
+      },
+      {
         path: 'places',
         component: AdminPlacesComponent,
         canActivate: [PermissionGuard],
@@ -166,11 +173,11 @@ const routes: Routes = [
         data: { permission: 'HOMEPAGE_SECTIONS:VIEW' }
       },
       {
-        // Display Order manages ordering of locations, places, events
+        // Display Order manages ordering of locations, places, events, gallery, categories
         path: 'order/:type',
         component: AdminItemOrderComponent,
         canActivate: [PermissionGuard],
-        data: { permission: ['LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW'] }
+        data: { permission: ['LOCATIONS:VIEW', 'EVENTS:VIEW', 'PLACES:VIEW', 'MASTER_DATA:VIEW'] }
       },
       {
         path: 'master-data',

@@ -1,0 +1,478 @@
+<div class="package-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading package details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>Error Loading Package</h2>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Package Details -->
+  <div *ngIf="pkg && !loading" class="package-detail">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-image">
+        <img [src]="pkg.imageUrl" [alt]="pkg.title" />
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="category-badge">
+            {{ getCategoryIcon(pkg.category) }} {{ pkg.category | titlecase }}
+          </span>
+          <h1>{{ pkg.title }}</h1>
+          <div class="hero-meta">
+            <span class="duration">⏱️ {{ pkg.duration }}</span>
+            <span class="rating">⭐ {{ pkg.rating }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="content-grid">
+        <!-- Left Column - Main Info -->
+        <div class="main-content">
+
+          <!-- Overview Section -->
+          <section class="detail-section">
+            <h2>Package Overview</h2>
+            <p class="description">{{ pkg.description }}</p>
+          </section>
+
+          <!-- Contact Details -->
+          <app-contact-details [entityType]="'PACKAGE'" [entityId]="pkg.id"></app-contact-details>
+
+          <!-- Journey Timeline (multi-location) -->
+          <section class="detail-section journey-section" *ngIf="pkg.packageLocations && pkg.packageLocations.length > 0">
+            <h2>
+              <span class="section-icon">🗺️</span>
+              {{ hasJourney ? 'Journey Itinerary' : 'Package Location' }}
+            </h2>
+            <div class="journey-timeline">
+              <div *ngFor="let stop of sortedLocations; let i = index; let last = last"
+                   class="journey-stop" [class.journey-stop--last]="last">
+                <div class="journey-stop__connector" *ngIf="!last">
+                  <div class="journey-stop__line"></div>
+                  <div class="journey-stop__travel" *ngIf="stop.durationHere">
+                    <span class="journey-stop__travel-time">⏱ {{ stop.durationHere }}</span>
+                  </div>
+                </div>
+                <div class="journey-stop__marker">
+                  <div class="journey-stop__number" [class.journey-stop__number--last]="last">
+                    <span *ngIf="!last">{{ i + 1 }}</span>
+                    <span *ngIf="last">🏁</span>
+                  </div>
+                </div>
+                <div class="journey-stop__content">
+                  <h3 class="journey-stop__name">{{ stop.name }}</h3>
+                  <p class="journey-stop__desc" *ngIf="stop.description">{{ stop.description }}</p>
+                  <span class="journey-stop__duration" *ngIf="stop.durationHere && !last">
+                    Stay: {{ stop.durationHere }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- What's Included Section -->
+          <section class="detail-section" *ngIf="pkg.included && pkg.included.length > 0">
+            <h2>What's Included</h2>
+            <ul class="included-list">
+              <li *ngFor="let item of pkg.included">
+                <span class="bullet">✓</span> {{ item }}
+              </li>
+            </ul>
+          </section>
+
+          <!-- Requirements Section -->
+          <section class="detail-section" *ngIf="pkg.requirements && pkg.requirements.length > 0">
+            <h2>Requirements</h2>
+            <ul class="requirements-list">
+              <li *ngFor="let req of pkg.requirements">
+                <span class="bullet">ℹ️</span> {{ req }}
+              </li>
+            </ul>
+          </section>
+
+          <!-- Additional Information -->
+          <section class="detail-section additional-details" *ngIf="pkg && hasDetails(pkg)">
+            <h2>Additional Information</h2>
+            <div class="additional-details__grid">
+              <ng-container *ngFor="let entry of pkg.additionalDetails | keyvalue">
+                <div class="additional-details__item" *ngIf="isNonEmpty(entry.value)">
+                  <span class="additional-details__label">{{ getFieldLabel(entry.key) }}</span>
+                  <a *ngIf="isLinkField(entry.key)" class="additional-details__link" [href]="getLinkHref(entry.value)" target="_blank" rel="noopener noreferrer">{{ getLinkText(entry.value) }}</a>
+                  <span *ngIf="!isLinkField(entry.key)" class="additional-details__value">{{ formatValue(entry.value) }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </section>
+
+          <!-- Photo Gallery -->
+          <section class="detail-section" *ngIf="pkg.images && pkg.images.length > 0">
+            <h2>Photo Gallery</h2>
+            <div class="gallery-section">
+              <div class="gallery-main" (click)="openLightbox(selectedImageIndex)" style="cursor: pointer;">
+                <img [src]="pkg.images[selectedImageIndex]" [alt]="pkg.title" loading="lazy" />
+              </div>
+              <div class="gallery-thumbnails">
+                <div *ngFor="let image of pkg.images; let i = index"
+                     class="thumbnail"
+                     [class.active]="i === selectedImageIndex"
+                     (click)="selectImage(i)">
+                  <img [src]="image" [alt]="pkg.title + ' - ' + (i + 1)" loading="lazy" />
+                </div>
+              </div>
+            </div>
+            <app-image-lightbox #lightbox [images]="pkg.images" [entityName]="pkg.title"></app-image-lightbox>
+          </section>
+
+          <!-- Package Dates Section -->
+          <section class="detail-section" *ngIf="pkg.dates && pkg.dates.length > 0">
+            <h2>Available Dates</h2>
+            <div class="dates-grid">
+              <div *ngFor="let date of pkg.dates" class="date-card">
+                <div class="date-info">
+                  <span class="date-value">{{ date.date | date: 'MMM dd, yyyy' }}</span>
+                  <span class="time-range">{{ date.startTime }} - {{ date.endTime }}</span>
+                </div>
+                <div class="spots-info">
+                  <span class="spots-available">{{ date.availableSpots }} spots available</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Right Column - Booking Info -->
+        <div class="sidebar">
+          <div class="booking-card">
+
+            <!-- Pricing Section: multi-currency + type -->
+            <ng-container *ngIf="pkg.pricings && pkg.pricings.length > 0; else legacyPrice">
+
+              <!-- Currency Tabs -->
+              <div class="pricing-currency-tabs" *ngIf="availableCurrencies.length > 1">
+                <button *ngFor="let code of availableCurrencies"
+                        class="currency-tab"
+                        [class.active]="selectedCurrency === code"
+                        (click)="selectCurrency(code)">
+                  {{ getCurrencySymbol(code) }} {{ code }}
+                </button>
+              </div>
+
+              <!-- Pricing Options -->
+              <div class="pricing-options">
+                <div *ngFor="let pricing of filteredPricings"
+                     class="pricing-option"
+                     [class.pricing-option--selected]="selectedPricing === pricing"
+                     [class.pricing-option--primary]="pricing.isPrimary"
+                     (click)="selectPricing(pricing)">
+                  <div class="pricing-option__left">
+                    <span class="pricing-option__type-icon">{{ getPricingTypeIcon(pricing.pricingType) }}</span>
+                    <div>
+                      <div class="pricing-option__label">
+                        {{ pricing.label || getPricingTypeLabel(pricing.pricingType) }}
+                      </div>
+                      <!-- Group size range -->
+                      <div class="pricing-option__sublabel" *ngIf="pricing.pricingType === 'GROUP'">
+                        <ng-container *ngIf="pricing.groupSizeMin && pricing.groupSizeMax">
+                          {{ pricing.groupSizeMin }}–{{ pricing.groupSizeMax }} people
+                        </ng-container>
+                        <ng-container *ngIf="pricing.groupSizeMin && !pricing.groupSizeMax">
+                          Min {{ pricing.groupSizeMin }} people
+                        </ng-container>
+                        <ng-container *ngIf="!pricing.groupSizeMin && pricing.groupSizeMax">
+                          Up to {{ pricing.groupSizeMax }} people
+                        </ng-container>
+                        <ng-container *ngIf="!pricing.groupSizeMin && !pricing.groupSizeMax && pricing.groupSize">
+                          Min {{ pricing.groupSize }} people
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pricing-option__price">
+                    <span class="pricing-option__symbol">{{ getCurrencySymbol(pricing.currencyCode) }}</span>
+                    <span class="pricing-option__amount">{{ pricing.amount | number:'1.0-2' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected price highlight -->
+              <div class="pricing-selected-summary" *ngIf="selectedPricing">
+                <span class="pricing-selected-summary__label">
+                  {{ getPricingTypeLabel(selectedPricing.pricingType) }}
+                </span>
+                <span class="pricing-selected-summary__price">
+                  {{ getCurrencySymbol(selectedPricing.currencyCode) }}{{ selectedPricing.amount | number:'1.0-2' }}
+                </span>
+              </div>
+
+            </ng-container>
+
+            <!-- Fallback: legacy single price -->
+            <ng-template #legacyPrice>
+              <div class="price-section">
+                <span class="price-label">Price per person</span>
+                <span class="price-value">${{ pkg.price }}</span>
+              </div>
+            </ng-template>
+
+            <!-- Availability -->
+            <div class="availability-section" [ngClass]="getAvailabilityStatus()">
+              <span class="availability-icon">🎟️</span>
+              <span class="availability-text">{{ getAvailabilityText() }}</span>
+            </div>
+
+            <!-- Package Info -->
+            <div class="package-info">
+              <div class="info-item">
+                <span class="info-label">Category</span>
+                <span class="info-value">{{ getCategoryIcon(pkg.category) }} {{ pkg.category | titlecase }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Duration</span>
+                <span class="info-value">⏱️ {{ pkg.duration }}</span>
+              </div>
+              <div class="info-item" *ngIf="pkg.location && (!pkg.packageLocations || pkg.packageLocations.length === 0)">
+                <span class="info-label">Location</span>
+                <span class="info-value">📍 {{ pkg.location }}</span>
+              </div>
+              <div class="info-item" *ngIf="pkg.packageLocations && pkg.packageLocations.length > 0">
+                <span class="info-label">{{ hasJourney ? 'Stops' : 'Location' }}</span>
+                <span class="info-value">📍 {{ hasJourney ? (pkg.packageLocations.length + ' destinations') : pkg.packageLocations[0].name }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Max Participants</span>
+                <span class="info-value">👥 {{ pkg.maxParticipants }} people</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Rating</span>
+                <span class="info-value">⭐ {{ pkg.rating }} / 5</span>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn-primary btn-block"
+                      [disabled]="pkg.availableSpots === 0"
+                      (click)="openBookingModal()">
+                <span>{{ pkg.availableSpots === 0 ? 'Sold Out' : 'Book Now' }}</span>
+                <span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span>
+                <span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span>
+                <span class="btn-corner btn-corner--br"></span>
+              </button>
+              <p class="booking-hint" *ngIf="!currentUser">
+                <a routerLink="/login" [queryParams]="{returnUrl: '/packages/' + pkg.id}">Sign in</a> to book this package
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="booking-modal-overlay" *ngIf="showBookingModal" (click)="closeBookingModal()">
+  <div class="booking-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="booking-modal__header">
+      <div>
+        <h3>{{ bookingStep === 'success' ? 'Booking Confirmed!' : 'Book This Package' }}</h3>
+        <p *ngIf="bookingStep === 'form'">{{ pkg?.title }}</p>
+      </div>
+      <button class="booking-modal__close" (click)="closeBookingModal()">✕</button>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="bookingStep === 'success'" class="booking-success">
+      <div class="booking-success__icon">🎉</div>
+      <h4>You're booked!</h4>
+      <p>Your booking reference is:</p>
+      <div class="booking-success__ref">{{ bookingReference }}</div>
+      <p class="booking-success__note">A confirmation will be sent to <strong>{{ booking.email }}</strong></p>
+      <button class="btn-primary" (click)="closeBookingModal()">Done</button>
+    </div>
+
+    <!-- Booking Form -->
+    <div *ngIf="bookingStep === 'form'" class="booking-modal__body">
+
+      <!-- Price Summary -->
+      <div class="booking-price-summary" *ngIf="selectedPricing || pkg?.price">
+        <span>{{ selectedPricing ? getPricingTypeLabel(selectedPricing.pricingType) : 'Price per person' }}</span>
+        <span class="booking-price-summary__total">
+          {{ getCurrencySymbol(selectedPricing?.currencyCode || 'USD') }}{{ bookingTotalPrice | number:'1.0-2' }}
+          <small *ngIf="selectedPricing?.pricingType === 'PER_PERSON'"> ({{ booking.numberOfPeople }} &times; {{ getCurrencySymbol(selectedPricing!.currencyCode) }}{{ selectedPricing!.amount | number:'1.0-2' }})</small>
+        </span>
+      </div>
+
+      <div class="booking-error" *ngIf="bookingError">{{ bookingError }}</div>
+
+      <div class="booking-form">
+        <div class="booking-form__row">
+          <div class="booking-form__group">
+            <label>Full Name *</label>
+            <input type="text" [(ngModel)]="booking.participantName" placeholder="Your full name">
+          </div>
+          <div class="booking-form__group">
+            <label>Phone *</label>
+            <input type="tel" [(ngModel)]="booking.phone" placeholder="+94 77 000 0000">
+          </div>
+        </div>
+        <div class="booking-form__group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="booking.email" placeholder="your@email.com">
+        </div>
+        <div class="booking-form__row">
+          <div class="booking-form__group">
+            <label>Number of People *</label>
+            <input type="number" [(ngModel)]="booking.numberOfPeople" min="1" [max]="pkg?.availableSpots">
+          </div>
+        </div>
+
+        <!-- Date Range Picker (RANGE mode) -->
+        <div class="booking-form__group" *ngIf="dateMode === 'RANGE'">
+          <label>Select Dates <span style="color:#e53e3e">*</span></label>
+          <app-date-range-picker
+            mode="range"
+            [startDate]="booking.checkInDate || ''"
+            [endDate]="booking.checkOutDate || ''"
+            [minDate]="checkInMin"
+            [minStay]="minStayDays"
+            [maxStay]="maxStayDays || 0"
+            [blockedDates]="blockedDates"
+            placeholder="Select check-in & check-out"
+            (apply)="onDateRangeApply($event)">
+          </app-date-range-picker>
+          <small *ngIf="navBookingConfig && navBookingConfig.minLeadDays > 0" style="color:#6b7280;font-size:12px;margin-top:4px;display:block">
+            Minimum {{ navBookingConfig.minLeadDays }} day(s) advance booking required
+          </small>
+          <small *ngIf="minStayDays > 1 || maxStayDays" style="color:#6b7280;font-size:12px;margin-top:2px;display:block">
+            <ng-container *ngIf="minStayDays > 1 && maxStayDays">{{ minStayDays }}–{{ maxStayDays }} nights stay</ng-container>
+            <ng-container *ngIf="minStayDays > 1 && !maxStayDays">Minimum {{ minStayDays }} nights</ng-container>
+            <ng-container *ngIf="minStayDays <= 1 && maxStayDays">Maximum {{ maxStayDays }} nights</ng-container>
+          </small>
+
+          <!-- Date Range Summary -->
+          <div *ngIf="booking.checkInDate && booking.checkOutDate" class="booking-date-summary">
+            <div class="booking-date-summary__row">
+              <div class="booking-date-summary__item">
+                <span class="booking-date-summary__label">Check-in</span>
+                <span class="booking-date-summary__value">{{ formatDateDisplay(booking.checkInDate) }}</span>
+              </div>
+              <div class="booking-date-summary__divider">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
+              <div class="booking-date-summary__item">
+                <span class="booking-date-summary__label">Check-out</span>
+                <span class="booking-date-summary__value">{{ formatDateDisplay(booking.checkOutDate) }}</span>
+              </div>
+            </div>
+            <div class="booking-date-summary__nights">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+              </svg>
+              <strong>{{ getNights() }}</strong>&nbsp;night<span *ngIf="getNights() !== 1">s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inline Date Calendar (SINGLE / free-form modes) -->
+        <div class="booking-form__group booking-calendar-group" *ngIf="dateMode !== 'RANGE' && dateMode !== 'NONE'">
+          <label>{{ hasPackageDates ? 'Select a Date' : 'Preferred Date (Optional)' }}</label>
+          <div class="booking-calendar">
+            <!-- Header — prev/next switch between month-nav and year-nav depending on picker state -->
+            <div class="booking-calendar__header">
+              <button type="button" class="booking-calendar__nav"
+                      (click)="showMonthPicker ? pickerPrevYear() : calendarPrevMonth()">&#8249;</button>
+
+              <button type="button" class="booking-calendar__month-toggle" (click)="toggleMonthPicker()">
+                <span>{{ showMonthPicker ? pickerYear : calendarMonthLabel }}</span>
+                <svg class="booking-calendar__chevron" [class.booking-calendar__chevron--up]="showMonthPicker"
+                     width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+
+              <button type="button" class="booking-calendar__nav"
+                      (click)="showMonthPicker ? pickerNextYear() : calendarNextMonth()">&#8250;</button>
+            </div>
+
+            <!-- Month Picker Panel -->
+            <div class="booking-calendar__month-picker" *ngIf="showMonthPicker">
+              <button *ngFor="let m of MONTHS; let i = index"
+                      type="button"
+                      class="booking-calendar__mp-item"
+                      [class.booking-calendar__mp-item--selected]="isPickerMonthSelected(i)"
+                      [class.booking-calendar__mp-item--past]="isPickerMonthPast(i)"
+                      (click)="selectPickerMonth(i)">
+                {{ m }}
+              </button>
+            </div>
+
+            <!-- Day Labels -->
+            <div class="booking-calendar__weekdays" *ngIf="!showMonthPicker">
+              <span *ngFor="let w of WEEKDAYS">{{ w }}</span>
+            </div>
+            <!-- Day Cells -->
+            <div class="booking-calendar__grid" *ngIf="!showMonthPicker">
+              <div *ngFor="let cell of calendarDays"
+                   class="booking-calendar__cell"
+                   [class.booking-calendar__cell--empty]="!cell.date"
+                   [class.booking-calendar__cell--past]="cell.isPast"
+                   [class.booking-calendar__cell--today]="cell.isToday"
+                   [class.booking-calendar__cell--blocked]="cell.isBlocked"
+                   [class.booking-calendar__cell--available]="cell.packageDate && !cell.isPast && !cell.isBlocked && cell.packageDate.availableSpots > 0"
+                   [class.booking-calendar__cell--full]="cell.packageDate && cell.packageDate.availableSpots === 0"
+                   [class.booking-calendar__cell--selected]="isCalendarDaySelected(cell)"
+                   (click)="selectCalendarDate(cell)">
+                <span class="booking-calendar__day-num" *ngIf="cell.date">{{ cell.date.getDate() }}</span>
+                <span class="booking-calendar__dot" *ngIf="cell.packageDate && !cell.isPast && !cell.isBlocked && cell.packageDate.availableSpots > 0"></span>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="booking-calendar__legend" *ngIf="hasPackageDates || blockedDates.length > 0">
+              <span class="legend-item legend-item--available" *ngIf="hasPackageDates">Available</span>
+              <span class="legend-item legend-item--full" *ngIf="hasPackageDates">Fully Booked</span>
+              <span class="legend-item legend-item--blocked" *ngIf="blockedDates.length > 0">Unavailable</span>
+              <span class="legend-item legend-item--selected">Selected</span>
+            </div>
+            <!-- Selected date info -->
+            <div class="booking-calendar__selected-info" *ngIf="booking.selectedDateId">
+              <ng-container *ngFor="let d of pkg!.dates">
+                <span *ngIf="d.id === booking.selectedDateId">
+                  ✅ {{ d.date | date:'EEEE, MMM dd, yyyy' }} · {{ d.startTime }}–{{ d.endTime }} · {{ d.availableSpots }} spots left
+                </span>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+        <div class="booking-form__group">
+          <label>Special Requests</label>
+          <textarea [(ngModel)]="booking.specialRequests" rows="3" placeholder="Dietary requirements, accessibility needs, etc."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-modal__footer" *ngIf="bookingStep === 'form'">
+      <button class="booking-cancel-btn" (click)="closeBookingModal()" [disabled]="bookingLoading">Cancel</button>
+      <button class="btn-primary" (click)="submitBooking()" [disabled]="bookingLoading">
+        <span *ngIf="!bookingLoading">Confirm Booking</span>
+        <span *ngIf="bookingLoading" class="booking-spinner"></span>
+      </button>
+    </div>
+
+  </div>
+</div>

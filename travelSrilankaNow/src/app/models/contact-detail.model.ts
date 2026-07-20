@@ -3,7 +3,7 @@ export type ContactType =
   | 'WECHAT' | 'LINE' | 'WEBSITE' | 'FACEBOOK' | 'INSTAGRAM'
   | 'YOUTUBE' | 'TWITTER' | 'TIKTOK' | 'LINKEDIN';
 
-export type EntityType = 'LOCATION' | 'EVENT' | 'PLACE' | 'MORE_SECTION_ITEM';
+export type EntityType = 'LOCATION' | 'EVENT' | 'PACKAGE' | 'PLACE' | 'MORE_SECTION_ITEM';
 
 export interface ContactDetail {
   id?: number;

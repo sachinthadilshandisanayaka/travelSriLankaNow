@@ -33,7 +33,7 @@
         </button>
       </div>
 
-      <button class="admin-btn admin-btn--ghost" type="button" (click)="loadData()" [disabled]="isLoading" title="Refresh">
+      <button class="admin-btn admin-btn--ghost" type="button" (click)="refresh()" [disabled]="isLoading" title="Refresh">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -71,6 +71,57 @@
     <span>This Browse by Category section is <strong>hidden</strong> from visitors. Toggle <strong>ON</strong> above to show it.</span>
   </div>
 
+  <!-- ── Search ── -->
+  <div class="cs-search" style="margin: 0 1.25rem 1rem" *ngIf="allCategories.length > 0 || searchTerm">
+    <div class="cs-search__row">
+      <div class="cs-search__input-wrap">
+        <svg class="cs-search__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"/>
+          <path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input
+          class="cs-search__input"
+          type="text"
+          placeholder="Search categories by name or code..."
+          autocomplete="off"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          (keydown)="onSearchKeydown($event)" />
+        <button *ngIf="searchTerm" class="cs-search__clear" type="button" (click)="clearSearch()" title="Clear search">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <!-- Typeahead dropdown -->
+        <div class="cs-search__dropdown" *ngIf="showSuggestions && suggestions.length > 0">
+          <button
+            *ngFor="let s of suggestions; let i = index"
+            type="button"
+            class="cs-search__suggestion"
+            [class.cs-search__suggestion--active]="i === activeSuggestionIndex"
+            (mousedown)="$event.preventDefault()"
+            (click)="selectSuggestion(s)">
+            <span class="cs-search__swatch" [ngStyle]="{'background': s.color || '#94A3B8'}"></span>
+            <span class="cs-search__suggestion-text">
+              <span class="cs-search__suggestion-name">{{ s.displayName }}</span>
+              <span class="cs-search__suggestion-code">{{ s.code }}</span>
+            </span>
+            <span class="cs-search__suggestion-status" [class.cs-search__suggestion-status--off]="!s.isActive">
+              {{ s.isActive ? 'Visible' : 'Hidden' }}
+            </span>
+          </button>
+        </div>
+        <div class="cs-search__dropdown" *ngIf="showSuggestions && searchTerm.trim() && suggestions.length === 0">
+          <div class="cs-search__no-suggestions">No categories match "{{ searchTerm }}"</div>
+        </div>
+      </div>
+      <span class="cs-search__count" *ngIf="!isLoading">{{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}</span>
+    </div>
+  </div>
+
   <!-- ── Loader ── -->
   <div *ngIf="isLoading" class="admin-loader" style="padding: 2rem">
     <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -83,12 +134,21 @@
   <div *ngIf="!isLoading" class="cs-grid cat-panel__grid">
 
     <!-- Empty state -->
-    <div *ngIf="categories.length === 0" class="cs-empty">
+    <div *ngIf="categories.length === 0 && !searchTerm" class="cs-empty">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
           d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
       </svg>
       <p>No categories found for {{ sectionLabel }}. Add categories via Master Data first.</p>
+    </div>
+
+    <!-- No search results -->
+    <div *ngIf="categories.length === 0 && searchTerm" class="cs-empty">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <p>No categories match "{{ searchTerm }}".</p>
     </div>
 
     <!-- One card per category -->
@@ -242,6 +302,19 @@
         </div>
 
       </ng-container>
+    </div>
+  </div>
+
+  <!-- ── Pagination ── -->
+  <div *ngIf="!isLoading && totalPages > 1" class="admin-pagination" style="margin: 0 1.25rem 1.25rem">
+    <div class="admin-pagination__controls">
+      <button class="admin-pagination__btn" (click)="previousPage()" [disabled]="currentPage === 0">Previous</button>
+      <button
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        class="admin-pagination__btn"
+        [class.admin-pagination__btn--active]="currentPage === i"
+        (click)="goToPage(i)">{{ i + 1 }}</button>
+      <button class="admin-pagination__btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">Next</button>
     </div>
   </div>
 
