@@ -4,5 +4,6 @@ public enum PageType {
     LOCATIONS,
     EVENTS,
     GALLERY,
-    PLACES
+    PLACES,
+    PACKAGES
 }

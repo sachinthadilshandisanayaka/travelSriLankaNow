@@ -1,4 +1,4 @@
-export type PageType = 'LOCATIONS' | 'EVENTS' | 'GALLERY' | 'PLACES';
+export type PageType = 'LOCATIONS' | 'EVENTS' | 'GALLERY' | 'PLACES' | 'PACKAGES';
 
 export interface PageHeaderBackground {
   id?: number;
