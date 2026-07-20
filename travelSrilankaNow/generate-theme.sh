@@ -1,6 +1,7 @@
 #!/bin/sh
-# Writes /usr/share/nginx/html/assets/theme.css based on the THEME_PRESET env var,
-# then hands off to nginx. This runs as Docker CMD before nginx starts.
+# Writes /usr/share/nginx/html/assets/theme.css based on THEME_PRESET, and
+# replaces favicon.ico / favicon-32.png from FAVICON_URL if set.
+# Runs as Docker CMD before nginx starts.
 
 THEME="${THEME_PRESET:-navy}"
 THEME_FILE="/usr/share/nginx/html/assets/theme.css"
@@ -141,4 +142,19 @@ EOF
 esac
 
 echo "[theme] Done."
+
+# ── Favicon ────────────────────────────────────────────────────────────────────
+# Browsers fetch favicon.ico before JavaScript runs, so we replace the static
+# file at container start using the FAVICON_URL env var.
+if [ -n "$FAVICON_URL" ]; then
+  HTML=/usr/share/nginx/html
+  echo "[favicon] Downloading from $FAVICON_URL"
+  wget -q -O "$HTML/favicon.ico"                    "$FAVICON_URL" && echo "[favicon] favicon.ico updated"
+  wget -q -O "$HTML/assets/images/favicon-32.png"   "$FAVICON_URL" && echo "[favicon] favicon-32.png updated"
+  wget -q -O "$HTML/assets/images/favicon-192.png"  "$FAVICON_URL" && echo "[favicon] favicon-192.png updated"
+  wget -q -O "$HTML/assets/images/apple-touch-icon.png" "$FAVICON_URL" && echo "[favicon] apple-touch-icon.png updated"
+else
+  echo "[favicon] FAVICON_URL not set, using build default."
+fi
+
 exec nginx -g "daemon off;"
