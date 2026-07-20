@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Theme System — TravelSriLankaNow</title>
+  <style>
+    :root {
+      --bg:       #F7F9FC;
+      --surface:  #FFFFFF;
+      --border:   #DDE6F0;
+      --text:     #1A2234;
+      --dim:      #637094;
+      --accent:   #FF8F00;
+      --code-bg:  #EDF2F9;
+      --code-txt: #1A4480;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:       #0D1117;
+        --surface:  #161C27;
+        --border:   #2A3346;
+        --text:     #DDE6F5;
+        --dim:      #8899BB;
+        --accent:   #FF8F00;
+        --code-bg:  #1C2436;
+        --code-txt: #7EC8E3;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* Header */
+    .doc-header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+    .doc-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .doc-title {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text);
+      text-wrap: balance;
+      margin-bottom: 10px;
+    }
+    .doc-subtitle {
+      color: var(--dim);
+      font-size: 15px;
+    }
+
+    /* Section */
+    .section { margin-bottom: 52px; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Flow diagram */
+    .flow { display: flex; flex-direction: column; }
+    .flow-step {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 16px;
+    }
+    .flow-spine { display: flex; flex-direction: column; align-items: center; }
+    .flow-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .flow-line {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      margin: 4px 0;
+      min-height: 24px;
+    }
+    .flow-body { padding-bottom: 28px; }
+    .flow-step:last-child .flow-body { padding-bottom: 0; }
+    .flow-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 4px;
+    }
+    .flow-heading {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .flow-desc {
+      font-size: 14px;
+      color: var(--dim);
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    /* Code */
+    pre, code {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+    }
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+    .code-file {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--dim);
+      padding: 8px 14px 6px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+    .code-block pre {
+      padding: 12px 14px;
+      color: var(--code-txt);
+      white-space: pre;
+      line-height: 1.65;
+    }
+    .hl { color: var(--accent); font-weight: 600; }
+    code {
+      background: var(--code-bg);
+      color: var(--code-txt);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12.5px;
+    }
+
+    /* Theme swatches */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 560px) { .theme-grid { grid-template-columns: 1fr; } }
+    .theme-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .theme-card__header {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-card--navy .theme-card__header { background: #0F2854; color: #fff; }
+    .theme-card--warm .theme-card__header { background: #C62828; color: #fff; }
+    .theme-card__badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .theme-swatches { display: flex; border-bottom: 1px solid var(--border); }
+    .swatch { flex: 1; height: 36px; }
+    .theme-card__env {
+      padding: 10px 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--code-bg);
+      color: var(--code-txt);
+    }
+
+    /* Command box */
+    .cmd-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: var(--code-txt);
+      overflow-x: auto;
+      white-space: nowrap;
+      margin-top: 12px;
+    }
+
+    /* Note */
+    .note {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      color: var(--dim);
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .note strong { color: var(--text); }
+
+    /* Tables */
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+    .doc-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table code { font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="doc-header">
+    <div class="doc-eyebrow">TravelSriLankaNow · Developer Reference</div>
+    <h1 class="doc-title">Theme System — How It Works</h1>
+    <p class="doc-subtitle">Zero-flash theme switching via Docker environment variable. No code changes required between deployments.</p>
+  </header>
+
+  <!-- Flow -->
+  <section class="section">
+    <div class="section-title">Full Flow</div>
+    <div class="flow">
+
+      <div class="flow-step">
+        <div class="flow-spine"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <div class="flow-label">Server</div>
+          <div class="flow-heading">Set <code>THEME_PRESET</code> in <code>.env</code></div>
+          <div class="flow-desc">The only file you touch. One line determines the entire visual theme of the deployment.</div>
+          <div class="code-block">
+            <div class="code-file">.env</div>
+            <pre>THEME_PRESET=<span class="hl">warm</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-spine"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <div class="flow-label">Docker</div>
+          <div class="flow-heading">docker-compose passes it into the container</div>
+          <div class="flow-desc">Docker Compose reads the <code>.env</code> file automatically and injects the value as an environment variable inside the running container.</div>
+          <div class="code-block">
+            <div class="code-file">docker-compose.yml</div>
+            <pre>frontend:
+  environment:
+    THEME_PRESET: <span class="hl">${THEME_PRESET:-navy}</span>   # navy if not set</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-spine"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <div class="flow-label">Container startup</div>
+          <div class="flow-heading">generate-theme.sh runs before nginx</div>
+          <div class="flow-desc">This script is the container's startup command. It reads <code>THEME_PRESET</code>, writes the correct CSS colour variables to <code>assets/theme.css</code>, then starts nginx. Everything happens before any request is served.</div>
+          <div class="code-block">
+            <div class="code-file">generate-theme.sh (Docker CMD)</div>
+            <pre>THEME="${THEME_PRESET:-navy}"
+
+case "$THEME" in
+  warm) cat > /usr/share/nginx/html/assets/theme.css &lt;&lt; 'EOF'
+    :root { --primary-navy: <span class="hl">#FF8F00</span>; --primary-navy-dark: <span class="hl">#C62828</span>; ... }
+  EOF ;;
+  *)    cat > /usr/share/nginx/html/assets/theme.css &lt;&lt; 'EOF'
+    :root { --primary-navy: <span class="hl">#1C4D8D</span>; --primary-navy-dark: <span class="hl">#0F2854</span>; ... }
+  EOF ;;
+esac
+
+exec nginx -g "daemon off;"</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-spine"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <div class="flow-label">Browser</div>
+          <div class="flow-heading">theme.css loads before Angular</div>
+          <div class="flow-desc"><code>index.html</code> links the theme stylesheet first, before the Angular bundle. The browser applies the CSS variables to <code>:root</code> before any component renders — no colour flash.</div>
+          <div class="code-block">
+            <div class="code-file">index.html (load order)</div>
+            <pre><span class="hl">&lt;link rel="stylesheet" href="assets/theme.css"&gt;</span>  ← loads first
+&lt;script src="main.js"&gt;&lt;/script&gt;               ← Angular starts after</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-spine"><div class="flow-dot">5</div></div>
+        <div class="flow-body">
+          <div class="flow-label">CSS</div>
+          <div class="flow-heading">Every component reads CSS variables at render time</div>
+          <div class="flow-desc">All SCSS files were compiled with <code>var(--primary-navy)</code> references — not hardcoded hex values. The browser resolves the correct colour from whatever theme was written in step 3.</div>
+          <div class="code-block">
+            <div class="code-file">compiled styles.css (baked at Angular build time)</div>
+            <pre>.navbar  { background: <span class="hl">var(--primary-navy)</span>; }
+.btn     { background: <span class="hl">var(--gradient-primary)</span>; }
+.section { background: <span class="hl">var(--navy-bg-lightest)</span>; }</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Themes -->
+  <section class="section">
+    <div class="section-title">Available Themes</div>
+    <div class="theme-grid">
+
+      <div class="theme-card theme-card--navy">
+        <div class="theme-card__header">
+          Navy
+          <span class="theme-card__badge">default</span>
+        </div>
+        <div class="theme-swatches">
+          <div class="swatch" style="background:#0F2854"></div>
+          <div class="swatch" style="background:#1C4D8D"></div>
+          <div class="swatch" style="background:#4988C4"></div>
+          <div class="swatch" style="background:#BDE8F5"></div>
+          <div class="swatch" style="background:#D4AF73"></div>
+        </div>
+        <div class="theme-card__env">THEME_PRESET=<strong>navy</strong></div>
+      </div>
+
+      <div class="theme-card theme-card--warm">
+        <div class="theme-card__header">
+          Warm
+          <span class="theme-card__badge">red · gold</span>
+        </div>
+        <div class="theme-swatches">
+          <div class="swatch" style="background:#C62828"></div>
+          <div class="swatch" style="background:#FF8F00"></div>
+          <div class="swatch" style="background:#FBC02D"></div>
+          <div class="swatch" style="background:#F5F5DC"></div>
+          <div class="swatch" style="background:#D4AF73"></div>
+        </div>
+        <div class="theme-card__env">THEME_PRESET=<strong>warm</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- How to switch -->
+  <section class="section">
+    <div class="section-title">Switching Themes</div>
+    <table class="doc-table">
+      <thead>
+        <tr><th>Step</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Edit <code>.env</code> on the server — set <code>THEME_PRESET</code> to the desired theme name</td></tr>
+        <tr><td>2</td><td>Rebuild and restart the frontend container</td></tr>
+        <tr><td>3</td><td>Site is immediately themed — no Angular rebuild required</td></tr>
+      </tbody>
+    </table>
+    <div class="cmd-box">docker compose up -d --build frontend</div>
+    <div class="note">
+      <strong>The Angular bundle never changes between themes.</strong> Only <code>theme.css</code> is rewritten at container startup. The JavaScript build is cached; only the nginx image layer is recreated.
+    </div>
+  </section>
+
+  <!-- Scope -->
+  <section class="section">
+    <div class="section-title">Scope</div>
+    <table class="doc-table">
+      <thead>
+        <tr><th>Changes with theme</th><th>Does NOT change</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Navbar, footer, buttons</td><td>Admin panel (has its own colour system)</td></tr>
+        <tr><td>Page headers, section backgrounds</td><td>Social media button colours (platform brand colours)</td></tr>
+        <tr><td>Floating action button</td><td>Error / success / warning semantic colours</td></tr>
+        <tr><td>Cards, filters, pagination</td><td>White, black, neutral greys</td></tr>
+        <tr><td>Gradient overlays on images</td><td>Typography (same font stack across themes)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Adding a new theme -->
+  <section class="section">
+    <div class="section-title">Adding a New Theme</div>
+    <p style="font-size:14px; color:var(--dim); margin-bottom:16px;">Open <code>travelSrilankaNow/generate-theme.sh</code> and add a new <code>case</code> block.</p>
+    <div class="code-block">
+      <div class="code-file">generate-theme.sh</div>
+      <pre>case "$THEME" in
+  warm) ... ;;
+  navy) ... ;;
+
+  <span class="hl">forest)   # ← new theme
+    cat > "$THEME_FILE" &lt;&lt; 'EOF'
+    :root {
+      --primary-navy-dark: #1B4332;
+      --primary-navy:      #2D6A4F;
+      --primary-blue:      #52B788;
+      --primary-sky:       #D8F3DC;
+      /* also add --primary-navy-a40, --primary-navy-a50, etc. */
+    }
+EOF
+    ;;</span>
+esac</pre>
+    </div>
+    <div class="note">
+      Also add the pre-computed <code>rgba()</code> alpha variants for the new colours (e.g. <code>--primary-navy-a40</code>), matching the pattern already in the file for navy and warm.
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
