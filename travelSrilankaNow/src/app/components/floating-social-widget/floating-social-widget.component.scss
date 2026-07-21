@@ -88,20 +88,20 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #1C4D8D;
+  background: var(--primary-navy);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(28, 77, 141, 0.4);
+  box-shadow: 0 4px 16px var(--primary-navy-a40);
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   flex-shrink: 0;
   z-index: 1;
 
   &:hover {
-    background: #0F2854;
-    box-shadow: 0 6px 20px rgba(28, 77, 141, 0.5);
+    background: var(--primary-navy-dark);
+    box-shadow: 0 6px 20px var(--primary-navy-a50);
     transform: scale(1.05);
   }
 
@@ -146,7 +146,7 @@
   }
 
   .fsw__toggle {
-    background: #0F2854;
+    background: var(--primary-navy-dark);
   }
 
   .fsw__toggle-icon--share {

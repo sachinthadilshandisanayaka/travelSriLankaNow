@@ -863,3 +863,125 @@
   font-size: 0.8125rem;
   color: #94a3b8;
 }
+
+// ── Hero Search Bar Settings ──────────────────────────────────────────────────
+.search-config-section {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    &:hover { background: #f9fafb; }
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: #111827;
+  }
+
+  &__chevron { transition: transform 0.2s; flex-shrink: 0; }
+
+  &__body {
+    padding: 1.25rem;
+    border-top: 1px solid #f3f4f6;
+  }
+}
+
+.search-config-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  background: #f3f4f6;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &--on { background: #d1fae5; color: #065f46; }
+}
+
+.search-config-loading { color: #6b7280; font-size: 0.875rem; padding: 0.5rem 0; }
+
+.search-config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 1rem;
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.search-config-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.search-config-input { max-width: 220px; }
+
+.search-config-section-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 1rem 0 0.625rem;
+}
+
+.search-config-tab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.search-config-tab-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+
+  &__header {
+    padding: 0.625rem 0.875rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  &__fields {
+    padding: 0.625rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.search-config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.search-config-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+}

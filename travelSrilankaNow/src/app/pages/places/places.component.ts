@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PlaceService, PageResponse } from '../../services/place.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
 import { Place } from '../../models/place.model';
@@ -51,13 +52,21 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private placeService: PlaceService,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loadMasterData();
     this.setupSearchDebounce();
-    this.loadData();
+
+    this.route.queryParamMap.subscribe(params => {
+      const type = params.get('type') || '';
+      this.selectedType = type || 'all';
+      this.currentPage = 0;
+      this.loadData();
+    });
   }
 
   private loadMasterData(): void {
@@ -148,9 +157,7 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   navigateToCategory(code: string): void {
-    this.selectedType = code;
-    this.currentPage = 0;
-    this.loadData();
+    this.router.navigate(['/places'], { queryParams: { type: code } });
     const target = document.querySelector('.filter-section') as HTMLElement;
     if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
@@ -228,9 +235,11 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterByType(type: string): void {
-    this.selectedType = type;
-    this.currentPage = 0;
-    this.loadData();
+    if (type === 'all') {
+      this.router.navigate(['/places']);
+    } else {
+      this.router.navigate(['/places'], { queryParams: { type } });
+    }
   }
 
   filterByPriceRange(priceRange: string): void {

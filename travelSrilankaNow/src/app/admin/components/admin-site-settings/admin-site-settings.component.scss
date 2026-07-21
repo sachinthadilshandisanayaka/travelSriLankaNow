@@ -256,3 +256,18 @@ code {
     object-fit: contain;
   }
 }
+
+.favicon-preview {
+  gap: 0.75rem;
+
+  .favicon-preview-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  .favicon-preview__label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+}

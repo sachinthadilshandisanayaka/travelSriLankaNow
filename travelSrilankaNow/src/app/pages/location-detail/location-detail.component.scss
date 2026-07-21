@@ -3,7 +3,7 @@
 
 .location-detail-container {
   min-height: 100vh;
-  background: $navy-bg-lightest;
+  background: var(--navy-bg-lightest);
 }
 
 // Loading State
@@ -19,7 +19,7 @@
     width: 50px;
     height: 50px;
     border: 4px solid $light-gray;
-    border-top-color: $primary-navy;
+    border-top-color: var(--primary-navy);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -74,7 +74,7 @@ $navbar-height: 80px;
     left: $spacing-2xl;
     z-index: 10;
     background: rgba(255, 255, 255, 0.95);
-    color: $primary-navy;
+    color: var(--primary-navy);
     border: none;
     padding: $spacing-md $spacing-lg;
     border-radius: $radius-lg;
@@ -191,11 +191,11 @@ $navbar-height: 80px;
     box-shadow: $shadow-md;
 
     h2 {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-size: $font-size-2xl;
       margin-bottom: $spacing-xl;
       font-weight: $font-weight-bold;
-      border-bottom: 3px solid $primary-sky;
+      border-bottom: 3px solid var(--primary-sky);
       padding-bottom: $spacing-md;
     }
 
@@ -221,7 +221,7 @@ $navbar-height: 80px;
     gap: $spacing-md;
 
     .bullet {
-      color: $primary-navy;
+      color: var(--primary-navy);
       font-weight: $font-weight-bold;
       font-size: $font-size-lg;
     }
@@ -239,8 +239,8 @@ $navbar-height: 80px;
   gap: $spacing-sm;
 
   .activity-card {
-    background: $navy-bg-lightest;
-    border: 1.5px solid $primary-sky;
+    background: var(--navy-bg-lightest);
+    border: 1.5px solid var(--primary-sky);
     border-radius: $radius-md;
     padding: $spacing-sm $spacing-md;
     display: inline-flex;
@@ -253,13 +253,13 @@ $navbar-height: 80px;
     }
 
     span:last-child {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-weight: $font-weight-medium;
       font-size: $font-size-sm;
     }
 
     &:hover {
-      border-color: $primary-navy;
+      border-color: var(--primary-navy);
       transform: translateY(-2px);
       box-shadow: $shadow-md;
     }
@@ -353,11 +353,11 @@ $navbar-height: 80px;
       }
 
       &.active {
-        border-color: $primary-navy;
+        border-color: var(--primary-navy);
       }
 
       &:hover {
-        border-color: $primary-blue;
+        border-color: var(--primary-blue);
         transform: scale(1.05);
       }
     }
@@ -376,11 +376,11 @@ $navbar-height: 80px;
     bottom: $spacing-2xl;
 
     h3 {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-size: $font-size-xl;
       margin-bottom: $spacing-xl;
       font-weight: $font-weight-bold;
-      border-bottom: 2px solid $primary-sky;
+      border-bottom: 2px solid var(--primary-sky);
       padding-bottom: $spacing-md;
     }
 
@@ -404,7 +404,7 @@ $navbar-height: 80px;
       }
 
       .info-value {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
         font-weight: $font-weight-semibold;
         font-size: $font-size-base;
       }

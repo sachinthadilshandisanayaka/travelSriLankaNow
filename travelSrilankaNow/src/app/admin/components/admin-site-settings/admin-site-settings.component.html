@@ -202,7 +202,7 @@
             <input type="text" formControlName="label" class="admin-input" placeholder="e.g., Email Address">
           </div>
 
-          <!-- Value: image-upload for logo_url, textarea for everything else -->
+          <!-- Value: image-upload for logo_url / favicon_url, textarea for everything else -->
           <div class="admin-form__group admin-form__group--full"
                *ngIf="settingForm.get('key')?.value === 'logo_url'">
             <label class="admin-form__label">Site Logo</label>
@@ -218,7 +218,22 @@
             <p class="admin-form__hint">Recommended: PNG with transparent background, height ~50px</p>
           </div>
           <div class="admin-form__group admin-form__group--full"
-               *ngIf="settingForm.get('key')?.value !== 'logo_url'">
+               *ngIf="settingForm.get('key')?.value === 'favicon_url'">
+            <label class="admin-form__label">Site Favicon</label>
+            <div class="logo-upload-preview favicon-preview" *ngIf="settingForm.get('value')?.value">
+              <img [src]="settingForm.get('value')?.value" alt="Current favicon" class="favicon-preview-img">
+              <span class="favicon-preview__label">Current favicon</span>
+            </div>
+            <app-image-upload
+              [currentImageUrl]="settingForm.get('value')?.value || ''"
+              [folder]="'site'"
+              [label]="'Favicon Image'"
+              (imageUploaded)="onLogoUploaded($event)">
+            </app-image-upload>
+            <p class="admin-form__hint">Recommended: square PNG or ICO, 32×32 or 64×64 px</p>
+          </div>
+          <div class="admin-form__group admin-form__group--full"
+               *ngIf="settingForm.get('key')?.value !== 'logo_url' && settingForm.get('key')?.value !== 'favicon_url'">
             <label class="admin-form__label">Value</label>
             <textarea formControlName="value" class="admin-textarea" rows="3" placeholder="Enter the setting value"></textarea>
           </div>

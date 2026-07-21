@@ -2,8 +2,8 @@
 @import '../../../styles/mixins';
 
 .footer {
-  background: linear-gradient(180deg, $white 0%, rgba($primary-sky, 0.15) 100%);
-  border-top: 2px solid rgba($primary-navy, 0.1);
+  background: linear-gradient(180deg, $white 0%, var(--primary-sky-a15) 100%);
+  border-top: 2px solid var(--primary-navy-a10);
   color: $warm-gray;
   padding: $spacing-3xl 0 $spacing-xl;
 
@@ -60,7 +60,7 @@
   font-family: $font-primary;
   font-size: $font-size-base;
   font-weight: $font-weight-bold;
-  color: $primary-navy-dark;
+  color: var(--primary-navy-dark);
   margin-top: $spacing-xs;
   letter-spacing: -0.01em;
 }
@@ -70,12 +70,12 @@
     font-family: $font-primary;
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     margin-bottom: $spacing-md;
     letter-spacing: -0.01em;
 
     span {
-      color: $primary-navy;
+      color: var(--primary-navy);
     }
   }
 
@@ -83,7 +83,7 @@
     font-size: $font-size-base;
     font-weight: $font-weight-semibold;
     margin-bottom: $spacing-md;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: $font-size-sm;
@@ -130,7 +130,7 @@
     line-height: 1.8;
 
     &:hover {
-      color: $primary-navy;
+      color: var(--primary-navy);
       transform: translateX(3px);
     }
   }
@@ -152,22 +152,22 @@
     font-size: $font-size-sm;
     transition: all $transition-base;
     padding: $spacing-sm $spacing-md;
-    border: 1px solid rgba($primary-navy, 0.2);
+    border: 1px solid var(--primary-navy-a20);
     border-radius: $radius-md;
     min-height: 44px;
     display: inline-flex;
     align-items: center;
 
     &:hover {
-      color: $primary-navy;
-      border-color: $primary-navy;
-      background: rgba($primary-sky, 0.3);
+      color: var(--primary-navy);
+      border-color: var(--primary-navy);
+      background: var(--primary-sky-a30);
     }
   }
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba($primary-navy, 0.1);
+  border-top: 1px solid var(--primary-navy-a10);
   padding-top: $spacing-lg;
   text-align: center;
 

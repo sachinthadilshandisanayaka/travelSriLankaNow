@@ -97,6 +97,9 @@ services:
     build:
       context: ./travelSrilankaNow
       dockerfile: Dockerfile
+    environment:
+      THEME_PRESET: ${THEME_PRESET:-navy}
+      FAVICON_URL: ${FAVICON_URL:-}
     restart: unless-stopped
     depends_on:
       backend:

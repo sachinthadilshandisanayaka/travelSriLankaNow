@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChildren, ViewChild, QueryList, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { EventService } from '../../services/event.service';
@@ -7,11 +7,14 @@ import { PackageService } from '../../services/package.service';
 import { HeroSlideService } from '../../services/hero-slide.service';
 import { HomepageSectionService } from '../../services/homepage-section.service';
 import { SocialMediaContentService } from '../../services/social-media-content.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
+import { NavConfigService } from '../../services/nav-config.service';
+import { MasterDataService, MasterData } from '../../services/master-data.service';
 import { Location } from '../../models/location.model';
 import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
 import { TourPackage } from '../../models/package.model';
-import { HeroSlide } from '../../models/hero-slide.model';
+import { HeroSlide, HeroSearchConfig } from '../../models/hero-slide.model';
 import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
 
@@ -20,13 +23,31 @@ import { SocialMediaContent } from '../../models/social-media-content.model';
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss']
 })
-export class LandingComponent implements OnInit, OnDestroy {
+export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   // Hero Slider
   heroSlides: HeroSlide[] = [];
   currentSlideIndex = 0;
   slideInterval: any = null;
   isTransitioning = false;
   slidesLoaded = false;
+
+  // Hero Search Bar
+  heroSearchConfig: HeroSearchConfig | null = null;
+  activeSearchTab: string = 'events';
+  searchCategory: string = '';
+  searchCategories: MasterData[] = [];
+  pillLeft = 0;
+  pillWidth = 0;
+  private tabNavLabels: Record<string, string> = {};
+  private readonly TAB_ROUTE_MAP: Record<string, string> = {
+    events:    '/events',
+    locations: '/locations',
+    gallery:   '/gallery',
+    places:    '/places',
+  };
+
+  @ViewChildren('hsbTabBtn') hsbTabBtns!: QueryList<ElementRef>;
+  @ViewChild('hsbTabsContainer') hsbTabsContainer!: ElementRef;
 
   // Data
   featuredLocations: Location[] = [];
@@ -54,11 +75,36 @@ export class LandingComponent implements OnInit, OnDestroy {
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
     private socialMediaContentService: SocialMediaContentService,
+    private siteSettings: SiteSettingsService,
+    private navConfigService: NavConfigService,
+    private masterDataService: MasterDataService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadHomepageSections();
+    this.loadHeroSearchConfig();
+    this.loadTabNavLabels();
+  }
+
+  ngAfterViewInit(): void {
+    this.hsbTabBtns.changes.subscribe(() => {
+      setTimeout(() => this.syncPill(), 0);
+    });
+  }
+
+  private syncPill(): void {
+    const buttons = this.hsbTabBtns?.toArray() ?? [];
+    const tabs = this.enabledSearchTabs;
+    const activeIdx = tabs.findIndex(t => t.key === this.activeSearchTab);
+    if (activeIdx < 0 || !buttons[activeIdx]) return;
+    const btn = buttons[activeIdx].nativeElement as HTMLElement;
+    const container = this.hsbTabsContainer?.nativeElement as HTMLElement;
+    if (!btn || !container) return;
+    const bRect = btn.getBoundingClientRect();
+    const cRect = container.getBoundingClientRect();
+    this.pillLeft = bRect.left - cRect.left + container.scrollLeft;
+    this.pillWidth = bRect.width;
   }
 
   ngOnDestroy(): void {
@@ -501,4 +547,95 @@ export class LandingComponent implements OnInit, OnDestroy {
   trackSlideById(_index: number, slide: HeroSlide): number {
     return slide.id || _index;
   }
+
+  // ── Hero Search Bar ───────────────────────────────────────────────────────
+
+  private loadHeroSearchConfig(): void {
+    this.siteSettings.getHeroSearchConfig().subscribe({
+      next: (config) => {
+        this.heroSearchConfig = config;
+        if (config?.enabled && config.tabs?.length) {
+          const firstEnabled = config.tabs.find(t => t.enabled && t.key in this.TAB_ROUTE_MAP);
+          if (firstEnabled) this.setSearchTab(firstEnabled.key);
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  get enabledSearchTabs() {
+    return this.heroSearchConfig?.tabs?.filter(t => t.enabled && t.key in this.TAB_ROUTE_MAP) || [];
+  }
+
+  get activeTabConfig() {
+    return this.heroSearchConfig?.tabs?.find(t => t.key === this.activeSearchTab) || null;
+  }
+
+  private loadTabNavLabels(): void {
+    this.navConfigService.getVisibleNavLinks().subscribe({
+      next: (navLinks) => {
+        const map: Record<string, string> = {};
+        for (const [tabKey, route] of Object.entries(this.TAB_ROUTE_MAP)) {
+          const match = navLinks.find(n => n.routePath === route);
+          if (match) {
+            const seg = route.replace(/^\//, '');
+            map[tabKey] = match.labelOverride || (seg.charAt(0).toUpperCase() + seg.slice(1));
+          }
+        }
+        this.tabNavLabels = map;
+      },
+      error: () => {}
+    });
+  }
+
+  getTabLabel(tab: { key: string; label: string }): string {
+    return this.tabNavLabels[tab.key] || tab.label;
+  }
+
+  getTabCategoryLabel(tabKey: string): string {
+    const tab = this.heroSearchConfig?.tabs?.find(t => t.key === tabKey);
+    const navLabel = this.tabNavLabels[tabKey];
+    if (navLabel) return 'All ' + navLabel;
+    return tab?.categoryLabel || 'All';
+  }
+
+  setSearchTab(key: string): void {
+    this.activeSearchTab = key;
+    this.searchCategory = '';
+    this.loadSearchCategories(key);
+    setTimeout(() => this.syncPill(), 0);
+  }
+
+  private loadSearchCategories(tabKey: string): void {
+    let obs$;
+    switch (tabKey) {
+      case 'events':    obs$ = this.masterDataService.getEventCategories();    break;
+      case 'locations': obs$ = this.masterDataService.getLocationCategories(); break;
+      case 'places':    obs$ = this.masterDataService.getPlaceTypes();         break;
+      default: this.searchCategories = []; return;
+    }
+    obs$.subscribe({
+      next: (cats) => this.searchCategories = cats.filter(c => c.isActive),
+      error: () => this.searchCategories = []
+    });
+  }
+
+  performSearch(): void {
+    const queryParams: any = {};
+    if (this.activeSearchTab === 'places') {
+      if (this.searchCategory) queryParams['type'] = this.searchCategory;
+    } else {
+      if (this.searchCategory) queryParams['category'] = this.searchCategory;
+    }
+
+    const routes: Record<string, string> = {
+      events:    '/events',
+      locations: '/locations',
+      gallery:   '/gallery',
+      places:    '/places'
+    };
+    this.router.navigate([routes[this.activeSearchTab] || '/'], { queryParams });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
 }

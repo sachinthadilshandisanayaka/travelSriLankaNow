@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LocationService, PageResponse } from '../../services/location.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
 import { Location } from '../../models/location.model';
@@ -51,13 +52,21 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private locationService: LocationService,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loadMasterData();
     this.setupSearchDebounce();
-    this.loadData();
+
+    this.route.queryParamMap.subscribe(params => {
+      const cat = params.get('category') || '';
+      this.selectedCategory = cat || 'all';
+      this.currentPage = 0;
+      this.loadData();
+    });
   }
 
   private loadMasterData(): void {
@@ -146,9 +155,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   navigateToCategory(code: string): void {
-    this.selectedCategory = code;
-    this.currentPage = 0;
-    this.loadData();
+    this.router.navigate(['/locations'], { queryParams: { category: code } });
     const target = document.querySelector('.filter-section') as HTMLElement;
     if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
@@ -226,9 +233,11 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterByCategory(category: string): void {
-    this.selectedCategory = category;
-    this.currentPage = 0;
-    this.loadData();
+    if (category === 'all') {
+      this.router.navigate(['/locations']);
+    } else {
+      this.router.navigate(['/locations'], { queryParams: { category } });
+    }
   }
 
   filterByRegion(region: string): void {

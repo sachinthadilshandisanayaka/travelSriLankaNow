@@ -3,7 +3,7 @@
 
 .event-detail-container {
   min-height: 100vh;
-  background: $navy-bg-lightest;
+  background: var(--navy-bg-lightest);
 }
 
 // Loading State
@@ -19,7 +19,7 @@
     width: 50px;
     height: 50px;
     border: 4px solid $light-gray;
-    border-top-color: $primary-navy;
+    border-top-color: var(--primary-navy);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -74,7 +74,7 @@ $navbar-height: 80px;
     left: $spacing-2xl;
     z-index: 10;
     background: rgba(255, 255, 255, 0.95);
-    color: $primary-navy;
+    color: var(--primary-navy);
     border: none;
     padding: $spacing-md $spacing-lg;
     border-radius: $radius-lg;
@@ -190,11 +190,11 @@ $navbar-height: 80px;
     box-shadow: $shadow-md;
 
     h2 {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-size: $font-size-2xl;
       margin-bottom: $spacing-xl;
       font-weight: $font-weight-bold;
-      border-bottom: 3px solid $primary-sky;
+      border-bottom: 3px solid var(--primary-sky);
       padding-bottom: $spacing-md;
     }
 
@@ -220,7 +220,7 @@ $navbar-height: 80px;
     gap: $spacing-md;
 
     .bullet {
-      color: $primary-navy;
+      color: var(--primary-navy);
       font-weight: $font-weight-bold;
       font-size: $font-size-lg;
     }
@@ -238,8 +238,8 @@ $navbar-height: 80px;
   gap: $spacing-sm;
 
   .activity-card {
-    background: $navy-bg-lightest;
-    border: 1.5px solid $primary-sky;
+    background: var(--navy-bg-lightest);
+    border: 1.5px solid var(--primary-sky);
     border-radius: $radius-md;
     padding: $spacing-sm $spacing-md;
     display: inline-flex;
@@ -252,13 +252,13 @@ $navbar-height: 80px;
     }
 
     span:last-child {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-weight: $font-weight-medium;
       font-size: $font-size-sm;
     }
 
     &:hover {
-      border-color: $primary-navy;
+      border-color: var(--primary-navy);
       transform: translateY(-2px);
       box-shadow: $shadow-md;
     }
@@ -301,11 +301,11 @@ $navbar-height: 80px;
       }
 
       &.active {
-        border-color: $primary-navy;
+        border-color: var(--primary-navy);
       }
 
       &:hover {
-        border-color: $primary-blue;
+        border-color: var(--primary-blue);
         transform: scale(1.05);
       }
     }
@@ -323,11 +323,11 @@ $navbar-height: 80px;
     top: $spacing-2xl;
 
     h3 {
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       font-size: $font-size-xl;
       margin-bottom: $spacing-xl;
       font-weight: $font-weight-bold;
-      border-bottom: 2px solid $primary-sky;
+      border-bottom: 2px solid var(--primary-sky);
       padding-bottom: $spacing-md;
     }
 
@@ -351,7 +351,7 @@ $navbar-height: 80px;
       }
 
       .info-value {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
         font-weight: $font-weight-semibold;
         font-size: $font-size-base;
       }
@@ -395,7 +395,7 @@ $navbar-height: 80px;
   .price-section {
     text-align: center;
     padding: $spacing-xl;
-    background: $gradient-primary;
+    background: var(--gradient-primary);
     border-radius: $radius-lg;
     margin-bottom: $spacing-xl;
 
@@ -468,7 +468,7 @@ $navbar-height: 80px;
       }
 
       .info-value {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
         font-weight: $font-weight-semibold;
         font-size: $font-size-sm;
       }
@@ -509,7 +509,7 @@ $navbar-height: 80px;
     gap: $spacing-md;
 
     .bullet {
-      color: $primary-navy;
+      color: var(--primary-navy);
       font-weight: $font-weight-bold;
       font-size: $font-size-lg;
     }
@@ -612,7 +612,7 @@ $navbar-height: 80px;
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
-    background: $gradient-primary;
+    background: var(--gradient-primary);
     color: $white;
     display: flex;
     align-items: center;
@@ -643,7 +643,7 @@ $navbar-height: 80px;
   &__line {
     width: 2px;
     flex: 1;
-    background: linear-gradient(180deg, $primary-sky 0%, rgba($primary-sky, 0.3) 100%);
+    background: linear-gradient(180deg, var(--primary-sky) 0%, var(--primary-sky-a30) 100%);
     min-height: 2rem;
   }
 
@@ -652,8 +652,8 @@ $navbar-height: 80px;
     align-items: center;
     justify-content: center;
     padding: 2px $spacing-xs;
-    background: $navy-bg-lightest;
-    border: 1px solid $primary-sky;
+    background: var(--navy-bg-lightest);
+    border: 1px solid var(--primary-sky);
     border-radius: $radius-full;
     white-space: nowrap;
   }
@@ -667,14 +667,14 @@ $navbar-height: 80px;
 
   &__content {
     flex: 1;
-    background: $navy-bg-lightest;
+    background: var(--navy-bg-lightest);
     border-radius: $radius-lg;
     padding: $spacing-lg $spacing-xl;
-    border: 1.5px solid rgba($primary-sky, 0.5);
+    border: 1.5px solid var(--primary-sky-a50);
     transition: all $transition-base;
 
     &:hover {
-      border-color: $primary-sky;
+      border-color: var(--primary-sky);
       box-shadow: $shadow-sm;
     }
   }
@@ -682,7 +682,7 @@ $navbar-height: 80px;
   &__name {
     font-size: $font-size-lg;
     font-weight: $font-weight-semibold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     margin: 0 0 $spacing-xs;
   }
 
@@ -696,8 +696,8 @@ $navbar-height: 80px;
   &__duration {
     display: inline-block;
     font-size: $font-size-xs;
-    color: $primary-navy;
-    background: rgba($primary-sky, 0.2);
+    color: var(--primary-navy);
+    background: var(--primary-sky-a20);
     border-radius: $radius-full;
     padding: 2px $spacing-sm;
     font-weight: $font-weight-semibold;
@@ -727,13 +727,13 @@ $navbar-height: 80px;
   text-align: center;
 
   &:hover {
-    border-color: $primary-sky;
-    color: $primary-navy;
+    border-color: var(--primary-sky);
+    color: var(--primary-navy);
   }
 
   &.active {
-    border-color: $primary-navy;
-    background: $primary-navy;
+    border-color: var(--primary-navy);
+    background: var(--primary-navy);
     color: $white;
     box-shadow: $shadow-sm;
   }
@@ -759,19 +759,19 @@ $navbar-height: 80px;
   background: $white;
 
   &:hover {
-    border-color: $primary-sky;
+    border-color: var(--primary-sky);
     box-shadow: $shadow-sm;
     transform: translateX(2px);
   }
 
   &--selected {
-    border-color: $primary-navy;
+    border-color: var(--primary-navy);
     background: rgba(15, 40, 84, 0.04);
-    box-shadow: 0 0 0 1px $primary-navy;
+    box-shadow: 0 0 0 1px var(--primary-navy);
   }
 
   &--primary {
-    border-color: $primary-sky;
+    border-color: var(--primary-sky);
   }
 
   &__left {
@@ -788,7 +788,7 @@ $navbar-height: 80px;
   &__label {
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
   }
 
   &__sublabel {
@@ -812,7 +812,7 @@ $navbar-height: 80px;
   &__amount {
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
   }
 }
 
@@ -822,7 +822,7 @@ $navbar-height: 80px;
   align-items: center;
   justify-content: space-between;
   padding: $spacing-md $spacing-lg;
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   border-radius: $radius-lg;
   margin-bottom: $spacing-xl;
 
@@ -845,8 +845,8 @@ $navbar-height: 80px;
   gap: $spacing-md;
 
   .date-card {
-    background: $navy-bg-lightest;
-    border: 2px solid $primary-sky;
+    background: var(--navy-bg-lightest);
+    border: 2px solid var(--primary-sky);
     border-radius: $radius-lg;
     padding: $spacing-lg;
     display: flex;
@@ -855,7 +855,7 @@ $navbar-height: 80px;
     transition: all $transition-base;
 
     &:hover {
-      border-color: $primary-navy;
+      border-color: var(--primary-navy);
       transform: translateY(-2px);
       box-shadow: $shadow-md;
     }
@@ -866,7 +866,7 @@ $navbar-height: 80px;
       gap: $spacing-xs;
 
       .date-value {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
         font-size: $font-size-lg;
         font-weight: $font-weight-bold;
       }
@@ -879,7 +879,7 @@ $navbar-height: 80px;
 
     .spots-info {
       .spots-available {
-        background: $primary-navy;
+        background: var(--primary-navy);
         color: $white;
         padding: $spacing-xs $spacing-md;
         border-radius: $radius-full;
@@ -1164,7 +1164,7 @@ $navbar-height: 80px;
   margin-bottom: 0;
 
   a {
-    color: $primary-sky;
+    color: var(--primary-sky);
     font-weight: $font-weight-medium;
     text-decoration: none;
     &:hover { text-decoration: underline; }
@@ -1255,7 +1255,7 @@ $navbar-height: 80px;
     h3 {
       font-size: $font-size-xl;
       font-weight: $font-weight-bold;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       margin: 0 0 $spacing-xs;
     }
 
@@ -1277,7 +1277,7 @@ $navbar-height: 80px;
     border-radius: $radius-md;
     flex-shrink: 0;
     transition: background 0.15s;
-    &:hover { background: $navy-bg-lightest; color: $primary-navy; }
+    &:hover { background: var(--navy-bg-lightest); color: var(--primary-navy); }
   }
 
   &__body {
@@ -1315,7 +1315,7 @@ $navbar-height: 80px;
   align-items: center;
   justify-content: space-between;
   padding: $spacing-md $spacing-lg;
-  background: $navy-bg-lightest;
+  background: var(--navy-bg-lightest);
   border-radius: $radius-lg;
   margin-bottom: $spacing-xl;
   font-size: $font-size-sm;
@@ -1324,7 +1324,7 @@ $navbar-height: 80px;
   &__total {
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
 
     small {
       font-size: $font-size-xs;
@@ -1353,7 +1353,7 @@ $navbar-height: 80px;
       display: block;
       font-size: $font-size-sm;
       font-weight: $font-weight-medium;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       margin-bottom: $spacing-xs;
     }
 
@@ -1363,14 +1363,14 @@ $navbar-height: 80px;
       border: 1.5px solid $light-gray;
       border-radius: $radius-lg;
       font-size: $font-size-base;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       background: $white;
       box-sizing: border-box;
       transition: border-color 0.2s;
       font-family: inherit;
       -webkit-appearance: none;
 
-      &:focus { outline: none; border-color: $primary-sky; box-shadow: 0 0 0 3px rgba($primary-sky, 0.12); }
+      &:focus { outline: none; border-color: var(--primary-sky); box-shadow: 0 0 0 3px var(--primary-sky-a12); }
       &::placeholder { color: $warm-gray; }
     }
 
@@ -1398,7 +1398,7 @@ $navbar-height: 80px;
   cursor: pointer;
   transition: all 0.15s;
 
-  &:hover:not(:disabled) { border-color: $primary-navy; color: $primary-navy; }
+  &:hover:not(:disabled) { border-color: var(--primary-navy); color: var(--primary-navy); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 
   @media (max-width: $breakpoint-md) { order: 2; }
@@ -1423,7 +1423,7 @@ $navbar-height: 80px;
   h4 {
     font-size: $font-size-2xl;
     font-weight: $font-weight-bold;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     margin-bottom: $spacing-sm;
   }
 
@@ -1436,13 +1436,13 @@ $navbar-height: 80px;
   &__ref {
     font-size: $font-size-2xl;
     font-weight: $font-weight-bold;
-    color: $primary-navy;
+    color: var(--primary-navy);
     letter-spacing: 0.08em;
-    background: $navy-bg-lightest;
+    background: var(--navy-bg-lightest);
     border-radius: $radius-lg;
     padding: $spacing-md $spacing-xl;
     margin: $spacing-md 0 $spacing-xl;
-    border: 2px dashed $primary-sky;
+    border: 2px dashed var(--primary-sky);
   }
 
   &__note {
@@ -1457,8 +1457,8 @@ $navbar-height: 80px;
 // ===== Date Range Summary Card =====
 .booking-date-summary {
   margin-top: $spacing-md;
-  background: rgba($primary-navy, 0.04);
-  border: 1.5px solid rgba($primary-navy, 0.12);
+  background: rgba(var(--primary-navy), 0.04);
+  border: 1.5px solid var(--primary-navy-a12);
   border-radius: $radius-lg;
   padding: $spacing-md $spacing-lg;
 
@@ -1491,7 +1491,7 @@ $navbar-height: 80px;
   }
 
   &__divider {
-    color: $primary-navy;
+    color: var(--primary-navy);
     opacity: 0.5;
     flex-shrink: 0;
 
@@ -1505,8 +1505,8 @@ $navbar-height: 80px;
     align-items: center;
     gap: 5px;
     font-size: $font-size-sm;
-    color: $primary-blue;
-    border-top: 1px solid rgba($primary-navy, 0.08);
+    color: var(--primary-blue);
+    border-top: 1px solid var(--primary-navy-a08);
     padding-top: $spacing-sm;
 
     svg {
@@ -1535,7 +1535,7 @@ $navbar-height: 80px;
     align-items: center;
     justify-content: space-between;
     padding: $spacing-sm $spacing-md;
-    background: $primary-navy-dark;
+    background: var(--primary-navy-dark);
     color: $white;
   }
 
@@ -1598,8 +1598,8 @@ $navbar-height: 80px;
     padding: 9px 4px;
     border: 1.5px solid transparent;
     border-radius: $radius-md;
-    background: rgba($primary-navy-dark, 0.04);
-    color: $primary-navy-dark;
+    background: rgba(var(--primary-navy-dark), 0.04);
+    color: var(--primary-navy-dark);
     font-size: 0.78rem;
     font-weight: $font-weight-medium;
     cursor: pointer;
@@ -1607,13 +1607,13 @@ $navbar-height: 80px;
     transition: all 0.15s;
 
     &:hover:not(&--past) {
-      background: rgba($primary-navy, 0.1);
-      border-color: rgba($primary-navy, 0.25);
+      background: var(--primary-navy-a10);
+      border-color: rgba(var(--primary-navy), 0.25);
     }
 
     &--selected {
-      background: $primary-navy !important;
-      border-color: $primary-navy !important;
+      background: var(--primary-navy) !important;
+      border-color: var(--primary-navy) !important;
       color: $white !important;
       font-weight: $font-weight-semibold;
     }
@@ -1628,7 +1628,7 @@ $navbar-height: 80px;
   &__weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: rgba($primary-navy-dark, 0.06);
+    background: rgba(var(--primary-navy-dark), 0.06);
     border-bottom: 1px solid $light-gray;
 
     span {
@@ -1647,7 +1647,7 @@ $navbar-height: 80px;
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
     padding: $spacing-xs;
-    background: $navy-bg-lightest;
+    background: var(--navy-bg-lightest);
   }
 
   &__cell {
@@ -1672,7 +1672,7 @@ $navbar-height: 80px;
 
     &--today &__day-num {
       font-weight: $font-weight-bold;
-      color: $primary-sky;
+      color: var(--primary-sky);
     }
 
     &--available {
@@ -1701,10 +1701,10 @@ $navbar-height: 80px;
     }
 
     &--selected {
-      background: $primary-navy !important;
+      background: var(--primary-navy) !important;
       color: $white !important;
       transform: scale(1.08);
-      box-shadow: 0 2px 8px rgba($primary-navy, 0.35);
+      box-shadow: 0 2px 8px rgba(var(--primary-navy), 0.35);
     }
   }
 
@@ -1736,10 +1736,10 @@ $navbar-height: 80px;
 
   &__selected-info {
     padding: $spacing-sm $spacing-md;
-    background: rgba($primary-sky, 0.08);
-    border-top: 1px solid rgba($primary-sky, 0.2);
+    background: var(--primary-sky-a08);
+    border-top: 1px solid var(--primary-sky-a20);
     font-size: $font-size-xs;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     font-weight: $font-weight-medium;
   }
 }
@@ -1761,7 +1761,7 @@ $navbar-height: 80px;
   &--available::before { background: rgba(#22c55e, 0.5); border: 1px solid #22c55e; }
   &--full::before      { background: rgba(#ef4444, 0.5); border: 1px solid #ef4444; }
   &--blocked::before   { background: rgba(#ef4444, 0.15); border: 1px solid #ef4444; }
-  &--selected::before  { background: $primary-navy; }
+  &--selected::before  { background: var(--primary-navy); }
 }
 
 // ===== Small Phone (< 375px) =====

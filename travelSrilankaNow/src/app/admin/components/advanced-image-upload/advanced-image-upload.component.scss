@@ -49,12 +49,12 @@
       animation: spin 1.2s linear infinite;
 
       &:nth-child(1) {
-        border-top-color: $primary-navy;
+        border-top-color: var(--primary-navy);
         animation-delay: 0s;
       }
 
       &:nth-child(2) {
-        border-right-color: $primary-sky;
+        border-right-color: var(--primary-sky);
         animation-delay: 0.15s;
         width: 70%;
         height: 70%;
@@ -76,14 +76,14 @@
   .loading-text {
     font-size: 1.25rem;
     font-weight: 700;
-    color: $primary-navy-dark;
+    color: var(--primary-navy-dark);
     margin: 0 0 8px;
   }
 
   .loading-progress {
     font-size: 2rem;
     font-weight: 800;
-    color: $primary-navy;
+    color: var(--primary-navy);
     margin: 0 0 16px;
   }
 
@@ -96,7 +96,7 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, $primary-navy, $primary-sky, $success);
+      background: linear-gradient(90deg, var(--primary-navy), var(--primary-sky), $success);
       background-size: 200% 100%;
       animation: gradientShift 2s ease infinite;
       transition: width 0.3s ease;
@@ -136,7 +136,7 @@
   display: block;
   font-size: 1rem;
   font-weight: 700;
-  color: $primary-navy-dark;
+  color: var(--primary-navy-dark);
   margin-bottom: 12px;
 
   .optional {
@@ -156,7 +156,7 @@
   position: relative;
   border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(145deg, $navy-bg-lightest, #f0f7ff);
+  background: linear-gradient(145deg, var(--navy-bg-lightest), #f0f7ff);
   border: 3px solid $light-gray;
   transition: all 0.3s;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -166,8 +166,8 @@
   }
 
   &:hover {
-    border-color: $primary-navy;
-    box-shadow: 0 8px 24px rgba($primary-navy, 0.12);
+    border-color: var(--primary-navy);
+    box-shadow: 0 8px 24px var(--primary-navy-a12);
 
     .image-overlay {
       opacity: 1;
@@ -221,8 +221,8 @@
         }
 
         &.edit-btn {
-          background: $primary-sky;
-          color: $primary-navy-dark;
+          background: var(--primary-sky);
+          color: var(--primary-navy-dark);
 
           &:hover {
             background: $white;
@@ -282,16 +282,16 @@
     transition: all 0.2s ease;
 
     &:hover {
-      background: $navy-bg-lightest;
+      background: var(--navy-bg-lightest);
 
       .change-text {
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
       }
     }
 
     .change-text {
       font-size: 0.9rem;
-      color: $primary-navy;
+      color: var(--primary-navy);
       font-weight: 500;
       display: flex;
       align-items: center;
@@ -374,22 +374,22 @@
   justify-content: center;
 
   &:hover {
-    border-color: $primary-navy;
-    background: linear-gradient(145deg, $navy-bg-lightest, #f0f7ff);
+    border-color: var(--primary-navy);
+    background: linear-gradient(145deg, var(--navy-bg-lightest), #f0f7ff);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba($primary-navy, 0.08);
+    box-shadow: 0 8px 24px var(--primary-navy-a08);
   }
 
   &.drag-over {
-    border-color: $primary-navy;
-    background: rgba($primary-sky, 0.15);
+    border-color: var(--primary-navy);
+    background: var(--primary-sky-a15);
     border-style: solid;
     transform: scale(1.01);
-    box-shadow: 0 12px 32px rgba($primary-navy, 0.12);
+    box-shadow: 0 12px 32px var(--primary-navy-a12);
 
     .upload-icon {
       transform: scale(1.15);
-      color: $primary-navy;
+      color: var(--primary-navy);
     }
   }
 
@@ -409,10 +409,10 @@
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
-    color: $primary-navy;
+    color: var(--primary-navy);
     opacity: 0.7;
     transition: all 0.3s;
-    background: rgba($primary-sky, 0.15);
+    background: var(--primary-sky-a15);
     border-radius: 50%;
     padding: 18px;
     box-sizing: content-box;
@@ -430,7 +430,7 @@
       display: block;
       font-size: 1.25rem;
       font-weight: 700;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
       margin-bottom: 6px;
     }
 
@@ -452,14 +452,14 @@
   .aspect-hint {
     margin-top: 16px;
     padding: 10px 20px;
-    background: linear-gradient(135deg, rgba($primary-navy, 0.08), rgba($primary-sky, 0.15));
+    background: linear-gradient(135deg, var(--primary-navy-a08), var(--primary-sky-a15));
     border-radius: 25px;
     display: inline-block;
-    border: 1px solid rgba($primary-navy, 0.1);
+    border: 1px solid var(--primary-navy-a10);
 
     span {
       font-size: 0.85rem;
-      color: $primary-navy;
+      color: var(--primary-navy);
       font-weight: 600;
     }
   }
@@ -480,14 +480,14 @@
     .progress-title {
       font-weight: 700;
       font-size: 1.1rem;
-      color: $primary-navy-dark;
+      color: var(--primary-navy-dark);
     }
 
     .progress-percent {
       font-size: 1.1rem;
       font-weight: 700;
-      color: $primary-navy;
-      background: rgba($primary-navy, 0.1);
+      color: var(--primary-navy);
+      background: var(--primary-navy-a10);
       padding: 6px 14px;
       border-radius: 20px;
     }
@@ -561,7 +561,7 @@
         display: block;
         font-size: 0.95rem;
         font-weight: 600;
-        color: $primary-navy-dark;
+        color: var(--primary-navy-dark);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -589,7 +589,7 @@
 
         .progress-fill {
           height: 100%;
-          background: linear-gradient(90deg, $primary-navy, $primary-sky);
+          background: linear-gradient(90deg, var(--primary-navy), var(--primary-sky));
           transition: width 0.3s;
         }
       }
@@ -664,7 +664,7 @@
     border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 1;
-    background: $navy-bg-lightest;
+    background: var(--navy-bg-lightest);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.3s;
 
@@ -707,7 +707,7 @@
 
         &.edit {
           background: rgba(255, 255, 255, 0.95);
-          color: $primary-navy;
+          color: var(--primary-navy);
 
           &:hover {
             background: $white;
