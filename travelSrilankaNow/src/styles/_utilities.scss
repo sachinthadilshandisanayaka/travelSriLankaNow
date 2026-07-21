@@ -175,19 +175,19 @@
 .shadow-none { box-shadow: none; }
 
 // Background Colors - Navy Blue Theme
-.bg-primary { background-color: $primary-navy-dark; }
-.bg-secondary { background-color: $primary-navy; }
-.bg-accent { background-color: $primary-blue; }
-.bg-sky { background-color: $primary-sky; }
+.bg-primary { background-color: var(--primary-navy-dark); }
+.bg-secondary { background-color: var(--primary-navy); }
+.bg-accent { background-color: var(--primary-blue); }
+.bg-sky { background-color: var(--primary-sky); }
 .bg-white { background-color: $white; }
-.bg-light { background-color: $navy-bg-lightest; }
-.bg-light-soft { background-color: $navy-bg-light; }
-.bg-light-navy { background-color: $navy-bg-soft; }
-.bg-dark { background-color: $primary-navy-dark; color: $white; }
-.bg-gradient-primary { background: $gradient-primary; }
-.bg-gradient-light { background: $gradient-light; }
-.bg-gradient-soft { background: linear-gradient(180deg, $navy-bg-lightest 0%, $navy-bg-light 100%); }
-.bg-gradient-sky { background: linear-gradient(180deg, rgba($primary-sky, 0.1) 0%, rgba($primary-sky, 0.3) 100%); }
+.bg-light { background-color: var(--navy-bg-lightest); }
+.bg-light-soft { background-color: var(--navy-bg-light); }
+.bg-light-navy { background-color: var(--navy-bg-soft); }
+.bg-dark { background-color: var(--primary-navy-dark); color: $white; }
+.bg-gradient-primary { background: var(--gradient-primary); }
+.bg-gradient-light { background: var(--gradient-light); }
+.bg-gradient-soft { background: linear-gradient(180deg, var(--navy-bg-lightest) 0%, var(--navy-bg-light) 100%); }
+.bg-gradient-sky { background: linear-gradient(180deg, var(--primary-sky-a10) 0%, var(--primary-sky-a30) 100%); }
 
 // Opacity
 .opacity-0 { opacity: 0; }
@@ -217,27 +217,27 @@
 }
 
 .section-light {
-  background-color: $navy-bg-lightest;
+  background-color: var(--navy-bg-lightest);
 }
 
 .section-soft {
-  background-color: $navy-bg-light;
+  background-color: var(--navy-bg-light);
 }
 
 .section-navy-light {
-  background-color: $navy-bg-soft;
+  background-color: var(--navy-bg-soft);
 }
 
 .section-sky {
-  background: linear-gradient(180deg, rgba($primary-sky, 0.15) 0%, rgba($primary-sky, 0.05) 100%);
+  background: linear-gradient(180deg, var(--primary-sky-a15) 0%, var(--primary-sky-a05) 100%);
 }
 
 .section-dark {
-  background-color: $primary-navy-dark;
+  background-color: var(--primary-navy-dark);
   color: $white;
 }
 
 .section-navy {
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   color: $white;
 }

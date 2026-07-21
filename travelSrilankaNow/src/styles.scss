@@ -30,8 +30,8 @@ body {
   font-weight: $font-weight-normal;
   line-height: $line-height-normal;
   color: $text-dark;
-  background-color: $navy-bg-lightest;
-  background-image: linear-gradient(180deg, $navy-bg-lightest 0%, $navy-bg-light 100%);
+  background-color: var(--navy-bg-lightest);
+  background-image: linear-gradient(180deg, var(--navy-bg-lightest) 0%, var(--navy-bg-light) 100%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -60,7 +60,7 @@ img {
 
 // Selection color
 ::selection {
-  background-color: $primary-navy;
+  background-color: var(--primary-navy);
   color: $white;
 }
 
@@ -71,21 +71,21 @@ img {
 }
 
 ::-webkit-scrollbar-track {
-  background: $navy-bg-light;
+  background: var(--navy-bg-light);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $primary-blue;
+  background: var(--primary-blue);
   border-radius: $radius-full;
 
   &:hover {
-    background: $primary-navy;
+    background: var(--primary-navy);
   }
 }
 
 // Focus styles for accessibility
 *:focus-visible {
-  outline: 2px solid $primary-blue;
+  outline: 2px solid var(--primary-blue);
   outline-offset: 3px;
 }
 

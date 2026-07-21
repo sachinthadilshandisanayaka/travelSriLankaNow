@@ -5,7 +5,6 @@
       <div class="logo-brand">
         <img *ngIf="logoUrl" [src]="logoUrl" [alt]="siteName || 'Logo'" class="logo-img">
         <span *ngIf="siteName" class="logo-site-name">{{ siteName }}</span>
-        <h2 *ngIf="!logoUrl && !siteName" class="logo-text">Travel<span>SriLankaNow</span></h2>
       </div>
     </a>
 

@@ -123,16 +123,16 @@ p {
 }
 
 .text-gradient {
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 // Text Colors
-.text-primary { color: $primary-blue; }
+.text-primary { color: var(--primary-blue); }
 .text-secondary { color: $accent-peach; }
-.text-teal { color: $primary-blue; }
+.text-teal { color: var(--primary-blue); }
 .text-dark { color: $text-dark; }
 .text-gray { color: $warm-gray; }
 .text-light { color: $medium-gray; }
@@ -152,12 +152,12 @@ p {
 
 // Links
 a {
-  color: $primary-blue;
+  color: var(--primary-blue);
   text-decoration: none;
   transition: color $transition-fast;
 
   &:hover {
-    color: darken($primary-blue, 10%);
+    color: var(--primary-blue-d10);
   }
 }
 

@@ -1,21 +1,18 @@
 @import '../../../styles/variables';
 @import '../../../styles/mixins';
 
-$mb-navy:    #1C4D8D;
-$mb-navy-dk: #0F2854;
-$mb-sky:     #BDE8F5;
 $mb-radius:  14px;
 
 // ── Page wrapper ──────────────────────────────────────────────────────────────
 .mb-page {
   min-height: 100vh;
-  background: $navy-bg-lightest;
+  background: var(--navy-bg-lightest);
   padding-bottom: 4rem;
 }
 
 // ── Hero header ───────────────────────────────────────────────────────────────
 .mb-hero {
-  background: linear-gradient(135deg, $mb-navy-dk 0%, $mb-navy 100%);
+  background: linear-gradient(135deg, var(--primary-navy-dark) 0%, var(--primary-navy) 100%);
   padding: 5rem 1.5rem 2.5rem;
 
   &__content {
@@ -96,7 +93,7 @@ $mb-radius:  14px;
   &:hover:not(&--active) { background: #f3f4f6; color: #374151; }
 
   &--active {
-    background: $mb-navy;
+    background: var(--primary-navy);
     color: #fff;
     font-weight: 600;
 
@@ -131,7 +128,7 @@ $mb-radius:  14px;
   width: 40px;
   height: 40px;
   border: 3px solid #e5e7eb;
-  border-top-color: $mb-navy;
+  border-top-color: var(--primary-navy);
   border-radius: 50%;
   animation: mbSpin 0.8s linear infinite;
   margin: 0 auto;
@@ -188,14 +185,14 @@ $mb-radius:  14px;
 .mb-cta-btn {
   display: inline-block;
   padding: 0.7rem 2rem;
-  background: $mb-navy;
+  background: var(--primary-navy);
   color: #fff;
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
   transition: background 0.15s;
-  &:hover { background: $mb-navy-dk; }
+  &:hover { background: var(--primary-navy-dark); }
 }
 
 // ── Card list ─────────────────────────────────────────────────────────────────
@@ -264,7 +261,7 @@ $mb-radius:  14px;
     h3 {
       font-size: 1.05rem;
       font-weight: 700;
-      color: $mb-navy;
+      color: var(--primary-navy);
       margin: 0;
       flex: 1;
     }
@@ -339,7 +336,7 @@ $mb-radius:  14px;
     &--price {
       font-size: 1rem;
       font-weight: 700;
-      color: $mb-navy;
+      color: var(--primary-navy);
     }
   }
 }
@@ -398,11 +395,11 @@ $mb-radius:  14px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  border: 1.5px solid $mb-navy;
+  border: 1.5px solid var(--primary-navy);
   background: transparent;
-  color: $mb-navy;
+  color: var(--primary-navy);
   transition: all 0.15s;
-  &:hover { background: $mb-navy; color: #fff; }
+  &:hover { background: var(--primary-navy); color: #fff; }
 }
 
 .mb-btn-cancel {
@@ -509,7 +506,7 @@ $mb-radius:  14px;
     color: #1f2937;
     outline: none;
     transition: border-color 0.15s;
-    &:focus { border-color: $mb-navy; }
+    &:focus { border-color: var(--primary-navy); }
   }
 
   &__error {

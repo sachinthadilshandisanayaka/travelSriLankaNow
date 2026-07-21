@@ -40,6 +40,88 @@
       </svg>
     </div>
 
+    <!-- ── Hero Search Bar Settings ──────────────────────────────────────────────── -->
+    <div class="search-config-section">
+      <div class="search-config-section__header" (click)="searchConfigOpen = !searchConfigOpen">
+        <div class="search-config-section__title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span>Hero Search Bar</span>
+          <span class="search-config-badge" [class.search-config-badge--on]="searchConfig.enabled">
+            {{ searchConfig.enabled ? 'ON' : 'OFF' }}
+          </span>
+        </div>
+        <svg class="search-config-section__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"
+             [style.transform]="searchConfigOpen ? 'rotate(180deg)' : ''">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </div>
+
+      <div class="search-config-section__body" *ngIf="searchConfigOpen">
+        <div *ngIf="searchConfigLoading" class="search-config-loading">Loading settings…</div>
+        <div *ngIf="!searchConfigLoading">
+          <!-- Enable toggle -->
+          <div class="search-config-row">
+            <label class="search-config-label">Show search bar on hero section</label>
+            <label class="gallery-toggle">
+              <input type="checkbox" [(ngModel)]="searchConfig.enabled">
+              <span class="gallery-toggle__track"><span class="gallery-toggle__thumb"></span></span>
+              <span class="gallery-toggle__label">{{ searchConfig.enabled ? 'Enabled' : 'Disabled' }}</span>
+            </label>
+          </div>
+
+          <!-- Search button text -->
+          <div class="search-config-row">
+            <label class="search-config-label">Search button text</label>
+            <input type="text" class="admin-input search-config-input" [(ngModel)]="searchConfig.searchButtonText" placeholder="Search">
+          </div>
+
+          <!-- Tab configuration -->
+          <div class="search-config-tabs">
+            <p class="search-config-section-label">Search Tabs</p>
+            <div class="search-config-tab-grid">
+              <div *ngFor="let tab of searchConfig.tabs" class="search-config-tab-card">
+                <div class="search-config-tab-card__header">
+                  <label class="admin-checkbox">
+                    <input type="checkbox" [(ngModel)]="tab.enabled">
+                    <span>{{ tab.key | titlecase }}</span>
+                  </label>
+                </div>
+                <div class="search-config-tab-card__fields" *ngIf="tab.enabled">
+                  <div class="search-config-field">
+                    <label class="admin-form__label" style="font-size:0.75rem">Tab Label</label>
+                    <input type="text" class="admin-input" [(ngModel)]="tab.label" [placeholder]="tab.key | titlecase">
+                  </div>
+                  <div class="search-config-field">
+                    <label class="admin-form__label" style="font-size:0.75rem">Category Placeholder</label>
+                    <input type="text" class="admin-input" [(ngModel)]="tab.categoryLabel" placeholder="All Categories">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save row -->
+          <div class="search-config-save-row">
+            <span class="gallery-save-success" *ngIf="searchConfigSuccess">{{ searchConfigSuccess }}</span>
+            <span class="gallery-save-error"   *ngIf="searchConfigError">{{ searchConfigError }}</span>
+            <button type="button" class="admin-btn admin-btn--primary" (click)="saveSearchConfig()" [disabled]="searchConfigSaving">
+              <svg *ngIf="!searchConfigSaving" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+              </svg>
+              <svg *ngIf="searchConfigSaving" class="admin-btn__spinner" fill="none" viewBox="0 0 24 24" width="16" height="16">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              {{ searchConfigSaving ? 'Saving…' : 'Save Search Bar Settings' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Hero Slides Content -->
     <div *ngIf="!isLoading">
       <!-- Empty State -->

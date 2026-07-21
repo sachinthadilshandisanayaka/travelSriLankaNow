@@ -6,9 +6,7 @@
           <img *ngIf="logoUrl" [src]="logoUrl" [alt]="siteName" class="footer-logo">
           <span class="footer-site-name">{{ siteName }}</span>
         </a>
-        <p class="footer-description">
-          {{ footerDescription || ('footer.description' | translate) }}
-        </p>
+        <p class="footer-description" *ngIf="footerDescription">{{ footerDescription }}</p>
       </div>
 
       <div class="footer-section">
