@@ -75,6 +75,71 @@ case "$THEME" in
 EOF
     ;;
 
+  gold)
+    cat > "$THEME_FILE" << 'EOF'
+/* Theme: gold */
+:root {
+  --primary-navy-dark: #FF9B00;
+  --primary-navy:      #FFC900;
+  --primary-blue:      #FFE100;
+  --primary-sky:       #EBE389;
+  --accent-gold:       #D4AF73;
+
+  --navy-bg-lightest: #FFFEF5;
+  --navy-bg-light:    #FFFCE8;
+  --navy-bg-soft:     #FFF9D6;
+
+  --primary-sky-a05:       rgba(235,227,137,0.05);
+  --primary-sky-a08:       rgba(235,227,137,0.08);
+  --primary-sky-a10:       rgba(235,227,137,0.10);
+  --primary-sky-a12:       rgba(235,227,137,0.12);
+  --primary-sky-a15:       rgba(235,227,137,0.15);
+  --primary-sky-a20:       rgba(235,227,137,0.20);
+  --primary-sky-a30:       rgba(235,227,137,0.30);
+  --primary-sky-a40:       rgba(235,227,137,0.40);
+  --primary-sky-a50:       rgba(235,227,137,0.50);
+
+  --primary-navy-dark-a05: rgba(255,155,0,0.05);
+  --primary-navy-dark-a08: rgba(255,155,0,0.08);
+  --primary-navy-dark-a10: rgba(255,155,0,0.10);
+  --primary-navy-dark-a12: rgba(255,155,0,0.12);
+  --primary-navy-dark-a15: rgba(255,155,0,0.15);
+  --primary-navy-dark-a20: rgba(255,155,0,0.20);
+  --primary-navy-dark-a30: rgba(255,155,0,0.30);
+  --primary-navy-dark-a40: rgba(255,155,0,0.40);
+  --primary-navy-dark-a50: rgba(255,155,0,0.50);
+
+  --primary-navy-a05:  rgba(255,201,0,0.05);
+  --primary-navy-a08:  rgba(255,201,0,0.08);
+  --primary-navy-a10:  rgba(255,201,0,0.10);
+  --primary-navy-a12:  rgba(255,201,0,0.12);
+  --primary-navy-a15:  rgba(255,201,0,0.15);
+  --primary-navy-a20:  rgba(255,201,0,0.20);
+  --primary-navy-a30:  rgba(255,201,0,0.30);
+  --primary-navy-a40:  rgba(255,201,0,0.40);
+  --primary-navy-a50:  rgba(255,201,0,0.50);
+
+  --primary-blue-a05:  rgba(255,225,0,0.05);
+  --primary-blue-a08:  rgba(255,225,0,0.08);
+  --primary-blue-a10:  rgba(255,225,0,0.10);
+  --primary-blue-a12:  rgba(255,225,0,0.12);
+  --primary-blue-a15:  rgba(255,225,0,0.15);
+  --primary-blue-a20:  rgba(255,225,0,0.20);
+  --primary-blue-a30:  rgba(255,225,0,0.30);
+  --primary-blue-a40:  rgba(255,225,0,0.40);
+  --primary-blue-a50:  rgba(255,225,0,0.50);
+
+  --primary-blue-d10:  #E6CB00;
+
+  --gradient-primary:       linear-gradient(135deg,#FF9B00 0%,#FFC900 100%);
+  --gradient-primary-hover: linear-gradient(135deg,#FFC900 0%,#FFE100 100%);
+  --gradient-light:         linear-gradient(135deg,#FFE100 0%,#EBE389 100%);
+  --gradient-overlay:       linear-gradient(180deg,rgba(255,155,0,0.5) 0%,rgba(255,155,0,0.2) 100%);
+  --gradient-calm:          linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(235,227,137,0.3) 100%);
+}
+EOF
+    ;;
+
   *)  # navy (default)
     cat > "$THEME_FILE" << 'EOF'
 /* Theme: navy */
