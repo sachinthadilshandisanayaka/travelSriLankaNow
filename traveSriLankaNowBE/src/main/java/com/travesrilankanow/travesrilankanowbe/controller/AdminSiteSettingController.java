@@ -28,6 +28,12 @@ public class AdminSiteSettingController {
         return ResponseEntity.ok(siteSettingService.getSettingById(id));
     }
 
+    @GetMapping("/key/{key}")
+    @PreAuthorize("hasAuthority('SITE_SETTINGS:VIEW')")
+    public ResponseEntity<SiteSetting> getSettingByKey(@PathVariable String key) {
+        return ResponseEntity.ok(siteSettingService.getSettingByKey(key));
+    }
+
     @PostMapping
     @PreAuthorize("hasAuthority('SITE_SETTINGS:CREATE')")
     public ResponseEntity<SiteSetting> createSetting(@RequestBody SiteSetting setting) {

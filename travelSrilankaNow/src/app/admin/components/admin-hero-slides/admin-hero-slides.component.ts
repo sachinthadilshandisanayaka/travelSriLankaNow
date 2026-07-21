@@ -46,10 +46,10 @@ export class AdminHeroSlidesComponent implements OnInit {
     enabled: false,
     searchButtonText: 'Search',
     tabs: [
-      { key: 'packages',  label: 'Tours',         enabled: true, categoryLabel: 'All Tour Types' },
-      { key: 'events',    label: 'Events',        enabled: true, categoryLabel: 'All Categories' },
-      { key: 'locations', label: 'Destinations',  enabled: true, categoryLabel: 'All Regions'    },
-      { key: 'places',    label: 'Places',        enabled: true, categoryLabel: 'All Types'      }
+      { key: 'events',    label: 'Events',    enabled: true,  categoryLabel: 'All Categories' },
+      { key: 'locations', label: 'Locations', enabled: true,  categoryLabel: 'All Regions'    },
+      { key: 'gallery',   label: 'Gallery',   enabled: false, categoryLabel: ''               },
+      { key: 'places',    label: 'Places',    enabled: true,  categoryLabel: 'All Types'      }
     ]
   };
   searchConfigLoading = false;
