@@ -218,6 +218,11 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     return [...new Set(this.event.pricings.map(p => p.currencyCode))];
   }
 
+  /** Whether to show the multi-currency pricing UI vs. the legacy single price */
+  get hasVisiblePricing(): boolean {
+    return !!this.event?.pricings?.length && this.event.pricings.some(p => p.amount > 0);
+  }
+
   /** Pricings filtered to selected currency */
   get filteredPricings(): EventPricing[] {
     if (!this.event?.pricings?.length) return [];
