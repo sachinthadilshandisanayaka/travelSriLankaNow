@@ -1,6 +1,7 @@
 export interface Location {
   id: number;
   name: string;
+  slug?: string;
   description: string;
   shortDescription: string;
   imageUrl: string;

@@ -5,7 +5,7 @@
   <ng-container *ngIf="section.sectionType === 'HERO_SLIDER'">
     <!-- Hero Section with Dynamic Slider -->
     <section class="hero-slider"
-             [class.hero-slider--has-search]="heroSearchConfig?.enabled && enabledSearchTabs.length > 0"
+             [class.hero-slider--has-search]="heroSearchConfig?.enabled"
              *ngIf="slidesLoaded">
       <!-- Fallback for no slides -->
       <div *ngIf="heroSlides.length === 0" class="hero hero-fallback">
@@ -146,63 +146,113 @@
       </defs>
     </svg>
     <!-- ── Hero Search Bar (inside hero so it's visible on first load) ──────── -->
-    <div class="hsb-wrapper" *ngIf="heroSearchConfig?.enabled && enabledSearchTabs.length > 0">
+    <div class="hsb-wrapper" *ngIf="heroSearchConfig?.enabled">
+      <div class="hsb-shell">
       <div class="hero-search-bar">
-        <!-- Tab Type Selector — glass top -->
-        <div class="hsb-tabs" #hsbTabsContainer>
-          <span class="hsb-pill"
-                [style.left.px]="pillLeft"
-                [style.width.px]="pillWidth"></span>
-          <button *ngFor="let tab of enabledSearchTabs"
-                  #hsbTabBtn
-                  class="hsb-tab"
-                  [class.hsb-tab--active]="activeSearchTab === tab.key"
-                  (click)="setSearchTab(tab.key)">
-            <svg *ngIf="tab.key === 'packages'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-            </svg>
-            <svg *ngIf="tab.key === 'events'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <svg *ngIf="tab.key === 'locations'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-            </svg>
-            <svg *ngIf="tab.key === 'places'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            {{ getTabLabel(tab) }}
-          </button>
-        </div>
-
-        <!-- Search Fields — solid bottom -->
-        <div class="hsb-fields">
-          <div class="hsb-field">
-            <div class="hsb-field__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        <ng-container *ngIf="enabledSearchTabs.length > 0; else hsbGlobalSearch">
+          <!-- Tab Type Selector — glass top -->
+          <div class="hsb-tabs" #hsbTabsContainer>
+            <span class="hsb-pill"
+                  [style.left.px]="pillLeft"
+                  [style.width.px]="pillWidth"></span>
+            <button *ngFor="let tab of enabledSearchTabs"
+                    #hsbTabBtn
+                    class="hsb-tab"
+                    [class.hsb-tab--active]="activeSearchTab === tab.key"
+                    (click)="setSearchTab(tab.key)">
+              <svg *ngIf="tab.key === 'packages'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
               </svg>
-            </div>
-            <div class="hsb-field__content">
-              <span class="hsb-field__label">Category</span>
-              <select class="hsb-select" [(ngModel)]="searchCategory">
-                <option value="">{{ getTabCategoryLabel(activeSearchTab) }}</option>
-                <option *ngFor="let cat of searchCategories" [value]="cat.code">
-                  {{ cat.displayName }}
-                </option>
-              </select>
-            </div>
+              <svg *ngIf="tab.key === 'events'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <svg *ngIf="tab.key === 'locations'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <svg *ngIf="tab.key === 'places'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              {{ getTabLabel(tab) }}
+            </button>
           </div>
 
-          <div class="hsb-divider"></div>
+          <!-- Search Fields — solid bottom -->
+          <div class="hsb-fields">
+            <div class="hsb-field">
+              <div class="hsb-field__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                  <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+              </div>
+              <div class="hsb-field__content">
+                <span class="hsb-field__label">Category</span>
+                <select class="hsb-select" [(ngModel)]="searchCategory">
+                  <option value="">{{ getTabCategoryLabel(activeSearchTab) }}</option>
+                  <option *ngFor="let cat of searchCategories" [value]="cat.code">
+                    {{ cat.displayName }}
+                  </option>
+                </select>
+              </div>
+            </div>
 
-          <button class="hsb-search-btn" (click)="performSearch()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            {{ heroSearchConfig?.searchButtonText || 'Search' }}
-          </button>
+            <div class="hsb-divider"></div>
+
+            <button class="hsb-search-btn" (click)="performSearch()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              {{ heroSearchConfig?.searchButtonText || 'Search' }}
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- ── No tabs enabled — free-text typeahead across all content types ── -->
+        <ng-template #hsbGlobalSearch>
+          <div class="hsb-global-search">
+            <div class="hsb-global-search__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+            </div>
+            <input type="text"
+                   class="hsb-global-search__input"
+                   placeholder="Search tours, locations, events..."
+                   autocomplete="off"
+                   [(ngModel)]="globalSearchQuery"
+                   (input)="onGlobalSearchInput()"
+                   (focus)="onGlobalSearchFocus()"
+                   (blur)="onGlobalSearchBlur()"
+                   (keydown)="onGlobalSearchKeydown($event)" />
+            <button class="hsb-global-search__btn"
+                    [disabled]="!globalSearchResults.length"
+                    (click)="selectGlobalResult(globalSearchResults[0])">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+            </button>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Rendered outside .hero-search-bar (which has overflow:hidden for its
+           rounded glass edges) so the dropdown isn't clipped -->
+      <div class="hsb-global-search__dropdown"
+           *ngIf="enabledSearchTabs.length === 0 && showGlobalSuggestions && globalSearchQuery.trim().length >= 2"
+           (scroll)="onGlobalDropdownScroll($event)">
+        <button *ngFor="let result of visibleGlobalResults; let i = index"
+                class="hsb-global-search__suggestion"
+                [class.hsb-global-search__suggestion--active]="i === activeGlobalSuggestionIndex"
+                (mousedown)="$event.preventDefault()"
+                (click)="selectGlobalResult(result)">
+          <span class="hsb-global-search__suggestion-badge">{{ result.subtitle }}</span>
+          <span class="hsb-global-search__suggestion-title">{{ result.title }}</span>
+        </button>
+        <div class="hsb-global-search__loading" *ngIf="globalSearchLoading">Searching…</div>
+        <div class="hsb-global-search__empty" *ngIf="!globalSearchLoading && !globalSearchResults.length">
+          No results for &quot;{{ globalSearchQuery }}&quot;
         </div>
+      </div>
       </div>
     </div>
     </section>
