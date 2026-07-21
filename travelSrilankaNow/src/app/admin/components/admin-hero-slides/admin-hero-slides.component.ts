@@ -41,6 +41,23 @@ export class AdminHeroSlidesComponent implements OnInit {
     { label: '15 seconds', value: 15000 }
   ];
 
+  // ── Search Bar Settings ────────────────────────────────────────────────────
+  searchConfig: any = {
+    enabled: false,
+    searchButtonText: 'Search',
+    tabs: [
+      { key: 'packages',  label: 'Tours',         enabled: true, categoryLabel: 'All Tour Types' },
+      { key: 'events',    label: 'Events',        enabled: true, categoryLabel: 'All Categories' },
+      { key: 'locations', label: 'Destinations',  enabled: true, categoryLabel: 'All Regions'    },
+      { key: 'places',    label: 'Places',        enabled: true, categoryLabel: 'All Types'      }
+    ]
+  };
+  searchConfigLoading = false;
+  searchConfigSaving  = false;
+  searchConfigSuccess = '';
+  searchConfigError   = '';
+  searchConfigOpen    = false;
+
   // ── Gallery management ────────────────────────────────────────────────────
   gallery: HeroSlideGallery = { enabled: false, items: [] };
   isGalleryLoading = false;
@@ -82,6 +99,7 @@ export class AdminHeroSlidesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadHeroSlides();
+    this.loadSearchConfig();
   }
 
   loadHeroSlides(): void {
@@ -579,6 +597,51 @@ export class AdminHeroSlidesComponent implements OnInit {
 
   getContentTypeLabel(key: string): string {
     return this.contentTypes.find(ct => ct.key === key)?.displayName ?? key;
+  }
+
+  // ── Search Bar Settings ───────────────────────────────────────────────────
+
+  loadSearchConfig(): void {
+    this.searchConfigLoading = true;
+    this.apiService.getHeroSearchConfig().subscribe({
+      next: (setting: any) => {
+        if (setting?.value) {
+          try {
+            const parsed = JSON.parse(setting.value);
+            // Merge so any missing tabs get defaults
+            const defaults = this.searchConfig.tabs;
+            this.searchConfig = {
+              ...this.searchConfig,
+              ...parsed,
+              tabs: defaults.map((def: any) => {
+                const found = (parsed.tabs || []).find((t: any) => t.key === def.key);
+                return found ? { ...def, ...found } : def;
+              })
+            };
+          } catch { /* keep defaults */ }
+        }
+        this.searchConfigLoading = false;
+      },
+      error: () => { this.searchConfigLoading = false; }
+    });
+  }
+
+  saveSearchConfig(): void {
+    this.searchConfigSaving = true;
+    this.searchConfigSuccess = '';
+    this.searchConfigError   = '';
+    this.apiService.saveHeroSearchConfig(this.searchConfig).subscribe({
+      next: () => {
+        this.searchConfigSaving = false;
+        this.searchConfigSuccess = 'Search bar settings saved!';
+        setTimeout(() => this.searchConfigSuccess = '', 3000);
+      },
+      error: () => {
+        this.searchConfigSaving = false;
+        this.searchConfigError = 'Failed to save search bar settings';
+        setTimeout(() => this.searchConfigError = '', 3000);
+      }
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────

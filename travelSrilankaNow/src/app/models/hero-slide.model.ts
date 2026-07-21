@@ -69,3 +69,16 @@ export interface HeroSlide {
   updatedAt?: string;
   galleryImages?: GalleryImage[];
 }
+
+export interface HeroSearchTab {
+  key: 'packages' | 'events' | 'locations' | 'places';
+  label: string;
+  enabled: boolean;
+  categoryLabel?: string;
+}
+
+export interface HeroSearchConfig {
+  enabled: boolean;
+  searchButtonText?: string;
+  tabs: HeroSearchTab[];
+}

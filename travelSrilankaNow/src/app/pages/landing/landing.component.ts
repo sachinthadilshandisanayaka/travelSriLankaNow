@@ -7,11 +7,13 @@ import { PackageService } from '../../services/package.service';
 import { HeroSlideService } from '../../services/hero-slide.service';
 import { HomepageSectionService } from '../../services/homepage-section.service';
 import { SocialMediaContentService } from '../../services/social-media-content.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
+import { MasterDataService, MasterData } from '../../services/master-data.service';
 import { Location } from '../../models/location.model';
 import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
 import { TourPackage } from '../../models/package.model';
-import { HeroSlide } from '../../models/hero-slide.model';
+import { HeroSlide, HeroSearchConfig } from '../../models/hero-slide.model';
 import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
 
@@ -27,6 +29,12 @@ export class LandingComponent implements OnInit, OnDestroy {
   slideInterval: any = null;
   isTransitioning = false;
   slidesLoaded = false;
+
+  // Hero Search Bar
+  heroSearchConfig: HeroSearchConfig | null = null;
+  activeSearchTab: string = 'packages';
+  searchCategory: string = '';
+  searchCategories: MasterData[] = [];
 
   // Data
   featuredLocations: Location[] = [];
@@ -54,11 +62,14 @@ export class LandingComponent implements OnInit, OnDestroy {
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
     private socialMediaContentService: SocialMediaContentService,
+    private siteSettings: SiteSettingsService,
+    private masterDataService: MasterDataService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadHomepageSections();
+    this.loadHeroSearchConfig();
   }
 
   ngOnDestroy(): void {
@@ -501,4 +512,67 @@ export class LandingComponent implements OnInit, OnDestroy {
   trackSlideById(_index: number, slide: HeroSlide): number {
     return slide.id || _index;
   }
+
+  // ── Hero Search Bar ───────────────────────────────────────────────────────
+
+  private loadHeroSearchConfig(): void {
+    this.siteSettings.getHeroSearchConfig().subscribe({
+      next: (config) => {
+        this.heroSearchConfig = config;
+        if (config?.enabled && config.tabs?.length) {
+          const firstEnabled = config.tabs.find(t => t.enabled);
+          if (firstEnabled) this.setSearchTab(firstEnabled.key);
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  get enabledSearchTabs() {
+    return this.heroSearchConfig?.tabs?.filter(t => t.enabled) || [];
+  }
+
+  get activeTabConfig() {
+    return this.heroSearchConfig?.tabs?.find(t => t.key === this.activeSearchTab) || null;
+  }
+
+  setSearchTab(key: string): void {
+    this.activeSearchTab = key;
+    this.searchCategory = '';
+    this.loadSearchCategories(key);
+  }
+
+  private loadSearchCategories(tabKey: string): void {
+    let obs$;
+    switch (tabKey) {
+      case 'packages':  obs$ = this.masterDataService.getPackageCategories();  break;
+      case 'events':    obs$ = this.masterDataService.getEventCategories();     break;
+      case 'locations': obs$ = this.masterDataService.getLocationCategories();  break;
+      case 'places':    obs$ = this.masterDataService.getPlaceTypes();          break;
+      default: this.searchCategories = []; return;
+    }
+    obs$.subscribe({
+      next: (cats) => this.searchCategories = cats.filter(c => c.isActive),
+      error: () => this.searchCategories = []
+    });
+  }
+
+  performSearch(): void {
+    const queryParams: any = {};
+    if (this.activeSearchTab === 'places') {
+      if (this.searchCategory) queryParams['type'] = this.searchCategory;
+    } else {
+      if (this.searchCategory) queryParams['category'] = this.searchCategory;
+    }
+
+    const routes: Record<string, string> = {
+      packages:  '/packages',
+      events:    '/events',
+      locations: '/locations',
+      places:    '/places'
+    };
+    this.router.navigate([routes[this.activeSearchTab] || '/'], { queryParams });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
 }
