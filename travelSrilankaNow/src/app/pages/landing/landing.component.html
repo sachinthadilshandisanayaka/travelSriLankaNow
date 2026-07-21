@@ -540,12 +540,14 @@
           <div class="custom-split__text-panel">
             <h2 *ngIf="customConf.title"
                 class="custom-split__title"
+                [ngClass]="customConf.titleAnimation ? ['cc-anim', 'cc-anim--' + customConf.titleAnimation] : []"
                 [style.color]="customConf.titleColor || '#1e293b'"
                 [style.fontSize]="customConf.titleSize || ''">
               {{ customConf.title }}
             </h2>
             <p *ngIf="customConf.description"
                class="custom-split__desc"
+               [ngClass]="customConf.descriptionAnimation ? ['cc-anim', 'cc-anim--' + customConf.descriptionAnimation, 'cc-anim--delay'] : []"
                [style.color]="customConf.descriptionColor || '#64748b'">
               {{ customConf.description }}
             </p>
@@ -583,12 +585,14 @@
           <ng-container *ngIf="customConf.title || customConf.description || customConf.buttonText">
             <h2 *ngIf="customConf.title"
                 class="custom-content-section__title"
+                [ngClass]="customConf.titleAnimation ? ['cc-anim', 'cc-anim--' + customConf.titleAnimation] : []"
                 [style.color]="customConf.titleColor"
                 [style.fontSize]="customConf.titleSize || ''">
               {{ customConf.title }}
             </h2>
             <p *ngIf="customConf.description"
                class="custom-content-section__desc"
+               [ngClass]="customConf.descriptionAnimation ? ['cc-anim', 'cc-anim--' + customConf.descriptionAnimation, 'cc-anim--delay'] : []"
                [style.color]="customConf.descriptionColor">
               {{ customConf.description }}
             </p>
