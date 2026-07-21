@@ -155,7 +155,7 @@
           <div class="booking-card">
 
             <!-- Pricing Section: multi-currency + type -->
-            <ng-container *ngIf="pkg.pricings && pkg.pricings.length > 0; else legacyPrice">
+            <ng-container *ngIf="hasVisiblePricing; else legacyPrice">
 
               <!-- Currency Tabs -->
               <div class="pricing-currency-tabs" *ngIf="availableCurrencies.length > 1">
@@ -216,9 +216,9 @@
 
             </ng-container>
 
-            <!-- Fallback: legacy single price -->
+            <!-- Fallback: legacy single price (only shown when price > 0) -->
             <ng-template #legacyPrice>
-              <div class="price-section">
+              <div *ngIf="pkg.price && pkg.price > 0" class="price-section">
                 <span class="price-label">Price per person</span>
                 <span class="price-value">${{ pkg.price }}</span>
               </div>

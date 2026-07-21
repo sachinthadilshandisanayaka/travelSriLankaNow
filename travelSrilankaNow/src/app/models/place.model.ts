@@ -1,6 +1,7 @@
 export interface Place {
   id: number;
   name: string;
+  slug?: string;
   type: 'hotel' | 'restaurant' | 'cafe' | 'guesthouse' | 'resort';
   description: string;
   shortDescription: string;
