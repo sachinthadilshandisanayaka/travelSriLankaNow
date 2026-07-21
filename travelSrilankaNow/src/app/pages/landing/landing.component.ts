@@ -44,6 +44,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     locations: '/locations',
     gallery:   '/gallery',
     places:    '/places',
+    packages:  '/packages',
   };
 
   @ViewChildren('hsbTabBtn') hsbTabBtns!: QueryList<ElementRef>;
@@ -612,6 +613,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'events':    obs$ = this.masterDataService.getEventCategories();    break;
       case 'locations': obs$ = this.masterDataService.getLocationCategories(); break;
       case 'places':    obs$ = this.masterDataService.getPlaceTypes();         break;
+      case 'packages':  obs$ = this.masterDataService.getPackageCategories();  break;
       default: this.searchCategories = []; return;
     }
     obs$.subscribe({
@@ -632,7 +634,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       events:    '/events',
       locations: '/locations',
       gallery:   '/gallery',
-      places:    '/places'
+      places:    '/places',
+      packages:  '/packages'
     };
     this.router.navigate([routes[this.activeSearchTab] || '/'], { queryParams });
   }
