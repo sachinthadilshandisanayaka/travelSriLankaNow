@@ -155,7 +155,7 @@
           <div class="booking-card">
 
             <!-- Pricing Section: multi-currency + type -->
-            <ng-container *ngIf="event.pricings && event.pricings.length > 0 && event.pricings.some(p => p.amount > 0); else legacyPrice">
+            <ng-container *ngIf="hasVisiblePricing; else legacyPrice">
 
               <!-- Currency Tabs -->
               <div class="pricing-currency-tabs" *ngIf="availableCurrencies.length > 1">
