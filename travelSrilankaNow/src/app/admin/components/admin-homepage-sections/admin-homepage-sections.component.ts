@@ -135,6 +135,17 @@ export class AdminHomepageSectionsComponent implements OnInit {
     { label: 'Tile (repeat)', value: 'tile' },
   ];
 
+  readonly ANIMATION_OPTIONS = [
+    { value: '',             label: 'None' },
+    { value: 'fade-in',     label: 'Fade In' },
+    { value: 'fade-up',     label: 'Fade Up' },
+    { value: 'fade-down',   label: 'Fade Down' },
+    { value: 'slide-left',  label: 'Slide Left' },
+    { value: 'slide-right', label: 'Slide Right' },
+    { value: 'zoom-in',     label: 'Zoom In' },
+    { value: 'bounce-in',   label: 'Bounce In' },
+  ];
+
   readonly TITLE_SIZE_OPTIONS = [
     { label: 'Small (1.25 rem)', value: '1.25rem' },
     { label: 'Medium (1.75 rem)', value: '1.75rem' },

@@ -1348,6 +1348,77 @@
   margin-top: 1.75rem;
 }
 
+// ── Custom Content Text Animations ───────────────────────────────────────────
+
+@keyframes ccFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ccFadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ccFadeDown {
+  from { opacity: 0; transform: translateY(-40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ccSlideLeft {
+  from { opacity: 0; transform: translateX(-64px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes ccSlideRight {
+  from { opacity: 0; transform: translateX(64px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes ccZoomIn {
+  from { opacity: 0; transform: scale(0.72); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ccBounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  55%  { opacity: 1; transform: scale(1.06); }
+  75%  { transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+// Base: element stays hidden and paused until IntersectionObserver fires .cc-anim--play
+.cc-anim {
+  // description gets a natural stagger
+  &.cc-anim--delay { animation-delay: 0.18s; }
+
+  &.cc-anim--fade-in,
+  &.cc-anim--fade-up,
+  &.cc-anim--fade-down,
+  &.cc-anim--slide-left,
+  &.cc-anim--slide-right,
+  &.cc-anim--zoom-in,
+  &.cc-anim--bounce-in {
+    opacity: 0;
+    animation-duration: 0.72s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-play-state: paused;
+  }
+
+  &.cc-anim--bounce-in { animation-timing-function: ease; }
+
+  &.cc-anim--play {
+    animation-play-state: running;
+  }
+
+  &.cc-anim--fade-in    { animation-name: ccFadeIn; }
+  &.cc-anim--fade-up    { animation-name: ccFadeUp; }
+  &.cc-anim--fade-down  { animation-name: ccFadeDown; }
+  &.cc-anim--slide-left { animation-name: ccSlideLeft; }
+  &.cc-anim--slide-right{ animation-name: ccSlideRight; }
+  &.cc-anim--zoom-in    { animation-name: ccZoomIn; }
+  &.cc-anim--bounce-in  { animation-name: ccBounceIn; }
+
+  @media (prefers-reduced-motion: reduce) {
+    &, &.cc-anim--play { opacity: 1 !important; animation: none !important; }
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // Gallery shared hover overlay (used by masonry, bento, grid-tilt)
 // ══════════════════════════════════════════════════════════════════════════════

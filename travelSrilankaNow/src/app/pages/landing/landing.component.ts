@@ -65,6 +65,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   useFallbackLayout = false;
 
   private visibilityObserver: IntersectionObserver | null = null;
+  private customAnimObserver: IntersectionObserver | null = null;
   private onPageVisible = () => this.syncVideoPlayback();
 
   constructor(
@@ -110,6 +111,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.stopSlideTimer();
     if (this.visibilityObserver) { this.visibilityObserver.disconnect(); this.visibilityObserver = null; }
+    if (this.customAnimObserver) { this.customAnimObserver.disconnect(); this.customAnimObserver = null; }
     document.removeEventListener('visibilitychange', this.onPageVisible);
   }
 
@@ -139,6 +141,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Load data for active sections
         this.loadSectionData();
+        setTimeout(() => this.setupCustomContentAnimations(), 150);
       },
       error: () => {
         // Fallback: load all data with defaults
@@ -387,6 +390,30 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getCustomConfig(sectionId: number | undefined): CustomContentConfig {
     return this.customSectionConfigs.get(sectionId!) || { template: 'minimal' };
+  }
+
+  private setupCustomContentAnimations(): void {
+    if (this.customAnimObserver) {
+      this.customAnimObserver.disconnect();
+    }
+    const targets = document.querySelectorAll<HTMLElement>('.cc-anim');
+    if (!targets.length) { return; }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      targets.forEach(el => el.classList.add('cc-anim--play'));
+      return;
+    }
+
+    this.customAnimObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('cc-anim--play');
+          this.customAnimObserver?.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    targets.forEach(el => this.customAnimObserver!.observe(el));
   }
 
   /** Returns inline styles for the __inner content wrapper: text-align + block alignment */

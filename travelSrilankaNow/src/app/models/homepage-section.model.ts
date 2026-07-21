@@ -65,6 +65,9 @@ export interface CustomContentConfig {
   splitImage?: string;           // image shown in the image column
   splitImagePosition?: 'left' | 'right';  // which side the image is on
   splitImageAlt?: string;
+  // Text animations
+  titleAnimation?: string;        // '' | 'fade-in' | 'fade-up' | 'fade-down' | 'slide-left' | 'slide-right' | 'zoom-in' | 'bounce-in'
+  descriptionAnimation?: string;  // same options
   // Legacy rich-text fallback (kept for backward compatibility)
   content?: string;
   textColor?: string;

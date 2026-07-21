@@ -321,7 +321,7 @@
           <img [src]="event.imageUrl" [alt]="event.title" />
           <div class="event-badge-wrapper">
             <span class="type-badge">{{ getCategoryDisplayName(event.category) }}</span>
-            <span class="price-badge">${{ event.price }}</span>
+            <span *ngIf="event.price && event.price > 0" class="price-badge">${{ event.price }}</span>
           </div>
         </div>
 
