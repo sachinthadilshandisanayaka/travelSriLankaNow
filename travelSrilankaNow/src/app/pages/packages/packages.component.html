@@ -321,7 +321,7 @@
           <img [src]="pkg.imageUrl" [alt]="pkg.title" />
           <div class="package-badge-wrapper">
             <span class="type-badge">{{ getCategoryDisplayName(pkg.category) }}</span>
-            <span class="price-badge">${{ pkg.price }}</span>
+            <span *ngIf="pkg.price && pkg.price > 0" class="price-badge">${{ pkg.price }}</span>
           </div>
         </div>
 
