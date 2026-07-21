@@ -536,6 +536,12 @@
               </button>
             </div>
           </div>
+          <div class="content-style-cell">
+            <label class="admin-form__label">Entrance Animation</label>
+            <select class="admin-input" [(ngModel)]="customConfig.titleAnimation">
+              <option *ngFor="let a of ANIMATION_OPTIONS" [value]="a.value">{{ a.label }}</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -569,6 +575,12 @@
                 Right
               </button>
             </div>
+          </div>
+          <div class="content-style-cell">
+            <label class="admin-form__label">Entrance Animation</label>
+            <select class="admin-input" [(ngModel)]="customConfig.descriptionAnimation">
+              <option *ngFor="let a of ANIMATION_OPTIONS" [value]="a.value">{{ a.label }}</option>
+            </select>
           </div>
         </div>
       </div>
