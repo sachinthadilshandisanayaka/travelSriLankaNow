@@ -707,7 +707,7 @@
     svg { color: #6B6762; }
 
     &:hover {
-      color: #0F2854;
+      color: var(--primary-navy-dark);
       background: rgba(30, 58, 95, 0.1);
       border-color: rgba(30, 58, 95, 0.4);
     }

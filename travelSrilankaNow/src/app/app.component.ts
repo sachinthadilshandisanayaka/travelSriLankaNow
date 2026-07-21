@@ -88,8 +88,8 @@ export class AppComponent implements OnInit {
   }
 
   private applyTitle(url: string, settings: SiteSettingsMap): void {
-    const siteName = settings['site_name'] || 'Travel Sri Lanka Now';
-    const tagline  = settings['site_tagline'] || 'Explore Beautiful Sri Lanka';
+    const siteName = settings['site_name'] || '';
+    const tagline  = settings['site_tagline'] || '';
 
     const segment = url.split('/').filter(Boolean)[0] || '';
     const pageName = PAGE_TITLES[segment] ?? '';

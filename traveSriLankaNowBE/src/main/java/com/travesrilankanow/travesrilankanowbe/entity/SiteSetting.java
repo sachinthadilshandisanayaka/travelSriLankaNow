@@ -62,6 +62,7 @@ public class SiteSetting {
         CONTACT_ADDRESS,
         SOCIAL_MEDIA,
         BUSINESS_HOURS,
-        GENERAL
+        GENERAL,
+        HERO
     }
 }

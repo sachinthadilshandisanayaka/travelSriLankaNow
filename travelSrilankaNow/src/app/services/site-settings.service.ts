@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, shareReplay, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { HeroSearchConfig } from '../models/hero-slide.model';
 
 export interface SiteSetting {
   id: number;
@@ -82,6 +83,16 @@ export class SiteSettingsService {
         phone: settings['contact_phone'] || '',
         address: settings['contact_address'] || ''
       }))
+    );
+  }
+
+  getHeroSearchConfig(): Observable<HeroSearchConfig | null> {
+    return this.getSettingByKey('hero_search_bar').pipe(
+      map(setting => {
+        if (!setting?.value) return null;
+        try { return JSON.parse(setting.value) as HeroSearchConfig; }
+        catch { return null; }
+      })
     );
   }
 

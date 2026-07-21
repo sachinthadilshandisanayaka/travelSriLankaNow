@@ -23,7 +23,7 @@ export class FooterComponent implements OnInit {
   contactAddress = '';
 
   // Dynamic brand fields from Site Settings
-  siteName = 'TravelSriLankaNow';
+  siteName = '';
   footerDescription = '';
   logoUrl = '';
 
