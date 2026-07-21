@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { FieldDefinition } from '../../models/more-section.model';
 import { ContentTypeInfo, ContentItem, HeroSlideGallery } from '../../models/hero-slide.model';
@@ -241,6 +242,23 @@ export class AdminApiService {
 
   upsertSiteSetting(setting: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/site-settings/upsert`, setting);
+  }
+
+  getHeroSearchConfig(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/site-settings/key/hero_search_bar`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  saveHeroSearchConfig(config: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/site-settings/upsert`, {
+      category: 'HERO',
+      key: 'hero_search_bar',
+      label: 'Hero Search Bar Configuration',
+      value: JSON.stringify(config),
+      isActive: true,
+      sortOrder: 0
+    });
   }
 
   // Hero Slides
