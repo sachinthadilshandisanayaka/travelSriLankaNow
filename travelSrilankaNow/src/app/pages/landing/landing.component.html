@@ -477,13 +477,13 @@
               <a *ngIf="customConf.buttonUrl; else splitNoLink"
                  [routerLink]="customConf.buttonUrl"
                  class="custom-content-section__btn"
-                 [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                 [style.backgroundColor]="customConf.buttonColor || 'var(--primary-navy)'"
                  [style.color]="customConf.buttonTextColor || '#ffffff'">
                 {{ customConf.buttonText }}
               </a>
               <ng-template #splitNoLink>
                 <button type="button" class="custom-content-section__btn"
-                        [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                        [style.backgroundColor]="customConf.buttonColor || 'var(--primary-navy)'"
                         [style.color]="customConf.buttonTextColor || '#ffffff'">
                   {{ customConf.buttonText }}
                 </button>
@@ -520,13 +520,13 @@
               <a *ngIf="customConf.buttonUrl; else noLinkBtn"
                  [routerLink]="customConf.buttonUrl"
                  class="custom-content-section__btn"
-                 [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                 [style.backgroundColor]="customConf.buttonColor || 'var(--primary-navy)'"
                  [style.color]="customConf.buttonTextColor || '#ffffff'">
                 {{ customConf.buttonText }}
               </a>
               <ng-template #noLinkBtn>
                 <button type="button" class="custom-content-section__btn"
-                        [style.backgroundColor]="customConf.buttonColor || '#1C4D8D'"
+                        [style.backgroundColor]="customConf.buttonColor || 'var(--primary-navy)'"
                         [style.color]="customConf.buttonTextColor || '#ffffff'">
                   {{ customConf.buttonText }}
                 </button>

@@ -22,19 +22,19 @@ $navbar-height: 80px;
 
   // Theme variations (used when no background image)
   &.theme-locations {
-    background: linear-gradient(135deg, #0F2854 0%, #1C4D8D 60%, #4988C4 100%);
+    background: var(--gradient-primary);
   }
 
   &.theme-events {
-    background: linear-gradient(135deg, #1C4D8D 0%, #4988C4 50%, #BDE8F5 100%);
+    background: var(--gradient-light);
   }
 
   &.theme-gallery {
-    background: linear-gradient(135deg, #0F2854 0%, #1C4D8D 70%, #D4AF73 100%);
+    background: linear-gradient(135deg, var(--primary-navy-dark) 0%, var(--primary-navy) 70%, var(--accent-gold) 100%);
   }
 
   &.theme-places {
-    background: linear-gradient(135deg, #1C4D8D 0%, #0F2854 50%, #D4AF73 100%);
+    background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-navy-dark) 50%, var(--accent-gold) 100%);
   }
 
   // Dynamic background image support

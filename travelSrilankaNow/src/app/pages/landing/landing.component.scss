@@ -1211,7 +1211,7 @@
     border: none;
     cursor: pointer;
     transition: opacity 0.2s, transform 0.15s;
-    background: #1C4D8D;
+    background: var(--primary-navy);
     color: #ffffff;
 
     &:hover {
@@ -1231,7 +1231,7 @@
   }
 
   &--minimal {
-    background: #f8fafc;
+    background: var(--navy-bg-lightest);
     color: #1e293b;
   }
 
@@ -1366,7 +1366,7 @@
   opacity: 0;
   transform: scale(0.8);
   transition: opacity 0.2s ease, transform 0.2s ease;
-  color: #1C4D8D;
+  color: var(--primary-navy);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   pointer-events: none;
   z-index: 10;

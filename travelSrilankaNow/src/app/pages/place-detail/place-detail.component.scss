@@ -1031,8 +1031,8 @@ $navbar-height: 80px;
   font-family: inherit;
 
   &--active {
-    color: #1C4D8D;
-    border-bottom-color: #1C4D8D;
+    color: var(--primary-navy);
+    border-bottom-color: var(--primary-navy);
   }
 
   &:hover:not(&--active) { color: #374151; }
@@ -1044,11 +1044,11 @@ $navbar-height: 80px;
   margin: 0.25rem 0 1rem;
 
   a {
-    color: #1C4D8D;
+    color: var(--primary-navy);
     font-weight: 600;
     cursor: pointer;
     text-decoration: underline;
-    &:hover { color: #0F2854; }
+    &:hover { color: var(--primary-navy-dark); }
   }
 }
 
