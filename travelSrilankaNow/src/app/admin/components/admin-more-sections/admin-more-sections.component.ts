@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdminApiService } from '../../services/admin-api.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { AdminApiService, PageResponse } from '../../services/admin-api.service';
 import { FieldDefinition } from '../../../models/more-section.model';
 
 // Register Quill image resize module dynamically to avoid webpack 'imports' error
@@ -68,6 +70,18 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   selectedSection: any = null;
   items: any[] = [];
   isLoadingItems = false;
+  Math = Math;
+
+  // Items search, filter & pagination
+  itemSearchTerm = '';
+  itemActiveFilter = '';
+  itemContentTypeFilter = '';
+  itemCurrentPage = 0;
+  itemPageSize = 20;
+  itemTotalPages = 0;
+  itemTotalElements = 0;
+  private itemSearchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   // Item modal
   showItemModal = false;
@@ -536,6 +550,8 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
       clearTimeout(this.autoSaveTimer);
     }
     document.body.style.overflow = '';
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getItemCount(section: any): number {
@@ -551,6 +567,8 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadSections();
+    this.itemSearchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => { this.itemCurrentPage = 0; this.loadItems(); });
   }
 
   private restoreSectionFromRoute(): void {
@@ -654,6 +672,7 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   // Items management
   selectSection(section: any): void {
     this.selectedSection = section;
+    this.resetItemFilters();
     this.router.navigate([], { relativeTo: this.route, queryParams: { section: section.id }, replaceUrl: false });
     this.loadItems();
   }
@@ -661,15 +680,48 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
   backToSections(): void {
     this.selectedSection = null;
     this.items = [];
+    this.resetItemFilters();
     this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: false });
+  }
+
+  private resetItemFilters(): void {
+    this.itemSearchTerm = '';
+    this.itemActiveFilter = '';
+    this.itemContentTypeFilter = '';
+    this.itemCurrentPage = 0;
+  }
+
+  onItemSearchChange(term: string): void {
+    this.itemSearchTerm = term;
+    this.itemSearchSubject.next(term);
+  }
+
+  onItemFilterChange(): void {
+    this.itemCurrentPage = 0;
+    this.loadItems();
+  }
+
+  clearItemSearch(): void {
+    this.itemSearchTerm = '';
+    this.itemActiveFilter = '';
+    this.itemContentTypeFilter = '';
+    this.itemCurrentPage = 0;
+    this.loadItems();
   }
 
   loadItems(): void {
     if (!this.selectedSection) return;
     this.isLoadingItems = true;
-    this.adminApi.getMoreSectionItems(this.selectedSection.id).subscribe({
-      next: (items) => {
-        this.items = items;
+    this.adminApi.getMoreSectionItems(
+      this.selectedSection.id, this.itemCurrentPage, this.itemPageSize,
+      this.itemSearchTerm || undefined,
+      this.itemActiveFilter === '' ? undefined : this.itemActiveFilter === 'true',
+      this.itemContentTypeFilter || undefined
+    ).subscribe({
+      next: (response: PageResponse<any>) => {
+        this.items = response.content;
+        this.itemTotalPages = response.totalPages;
+        this.itemTotalElements = response.totalElements;
         this.isLoadingItems = false;
       },
       error: () => {
@@ -677,6 +729,25 @@ export class AdminMoreSectionsComponent implements OnInit, OnDestroy {
         this.isLoadingItems = false;
       }
     });
+  }
+
+  goToItemPage(page: number): void {
+    this.itemCurrentPage = page;
+    this.loadItems();
+  }
+
+  nextItemPage(): void {
+    if (this.itemCurrentPage < this.itemTotalPages - 1) {
+      this.itemCurrentPage++;
+      this.loadItems();
+    }
+  }
+
+  previousItemPage(): void {
+    if (this.itemCurrentPage > 0) {
+      this.itemCurrentPage--;
+      this.loadItems();
+    }
   }
 
   openAddItem(): void {

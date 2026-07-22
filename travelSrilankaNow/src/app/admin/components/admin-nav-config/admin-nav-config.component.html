@@ -12,6 +12,40 @@
   <div *ngIf="successMsg" class="admin-alert admin-alert--success">{{ successMsg }}</div>
   <div *ngIf="errorMsg"   class="admin-alert admin-alert--error">{{ errorMsg }}</div>
 
+  <!-- Navbar Style -->
+  <div class="admin-card navbar-style-card">
+    <div class="navbar-style-card__header">
+      <h3>Navbar Style</h3>
+      <p>Choose the visual style of the navigation bar on the public site.</p>
+    </div>
+    <div class="navbar-style-picker" *ngIf="!styleLoading">
+      <button class="style-option" [class.style-option--active]="navbarStyle === 'classic'" (click)="saveNavbarStyle('classic')">
+        <div class="style-option__preview style-option__preview--classic">
+          <div class="sp-bar"></div>
+          <div class="sp-links">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <span class="style-option__name">Classic</span>
+        <span class="style-option__desc">Transparent over hero, frosted glass on scroll</span>
+        <span class="style-option__badge" *ngIf="navbarStyle === 'classic'">Active</span>
+      </button>
+      <button class="style-option" [class.style-option--active]="navbarStyle === 'liquid'" (click)="saveNavbarStyle('liquid')">
+        <div class="style-option__preview style-option__preview--liquid">
+          <div class="sp-bar"></div>
+          <div class="sp-links">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <span class="style-option__name">Liquid Tile</span>
+        <span class="style-option__desc">Each nav item has its own glass tile with liquid hover effect</span>
+        <span class="style-option__badge" *ngIf="navbarStyle === 'liquid'">Active</span>
+      </button>
+    </div>
+    <p *ngIf="styleLoading" style="color:var(--text-muted);font-size:0.875rem">Loading style…</p>
+    <p *ngIf="styleSaving"  style="color:var(--text-muted);font-size:0.875rem;margin-top:0.5rem">Saving…</p>
+  </div>
+
   <div class="skeleton-list" *ngIf="loading">
     <div class="skeleton-row" *ngFor="let _ of [1,2,3,4,5]"></div>
   </div>

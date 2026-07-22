@@ -76,8 +76,9 @@ pipeline {
                     env.SITE_TAGLINE      = cfg.SITE_TAGLINE ?: 'Explore Beautiful Sri Lanka'
                     env.SITE_DESCRIPTION  = cfg.SITE_DESCRIPTION ?: 'Discover the best travel destinations in Sri Lanka.'
 
-                    // Theme — read by generate-theme.sh inside the frontend container at startup
+                    // Theme & favicon — read by generate-theme.sh inside the frontend container at startup
                     env.THEME_PRESET      = cfg.THEME_PRESET ?: 'navy'
+                    env.FAVICON_URL       = cfg.FAVICON_URL  ?: ''
 
                     echo """
 ╔══════════════════════════════════════════════════╗
@@ -126,6 +127,7 @@ pipeline {
                         sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'echo \"ALLOWED_ORIGINS=${env.ALLOWED_ORIGINS}\" >> /root/travelSriLankaNow/.env'"
                         sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'echo \"MINIO_PUBLIC_URL=${env.MINIO_PUBLIC_URL}\" >> /root/travelSriLankaNow/.env'"
                         sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'echo \"THEME_PRESET=${env.THEME_PRESET}\" >> /root/travelSriLankaNow/.env'"
+                        sh "ssh ${env.SSH_OPTS} ${env.CLIENT_SERVER} 'echo \"FAVICON_URL=${env.FAVICON_URL}\" >> /root/travelSriLankaNow/.env'"
 
                         // Push this project's nginx config (NGINX_CONF in config.env selects the file)
                         sh """

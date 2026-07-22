@@ -61,6 +61,10 @@ public class HeroSlide {
     @Column(nullable = false)
     private Integer displayDuration = 5000; // Duration in milliseconds (default 5 seconds)
 
+    // "standard" (default) or "rolling_gallery"
+    @Column(columnDefinition = "varchar(30) default 'standard'")
+    private String sliderType = "standard";
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

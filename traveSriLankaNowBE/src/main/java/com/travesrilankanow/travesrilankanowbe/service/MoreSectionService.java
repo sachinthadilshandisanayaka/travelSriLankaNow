@@ -44,6 +44,12 @@ public class MoreSectionService {
         return section;
     }
 
+    public Page<MoreSectionItem> getActiveItemsBySectionSlug(String slug, String search, Pageable pageable) {
+        MoreSection section = moreSectionRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("More section not found with slug: " + slug));
+        return moreSectionItemRepository.searchActiveBySectionId(section.getId(), search, pageable);
+    }
+
     @Transactional
     public MoreSection createSection(MoreSection section) {
         if (section.getDisplayOrder() == null || section.getDisplayOrder() == 0) {
@@ -97,6 +103,10 @@ public class MoreSectionService {
 
     public Page<MoreSectionItem> getItemsBySectionPaginated(Long sectionId, Pageable pageable) {
         return moreSectionItemRepository.findBySectionIdOrderByDisplayOrderAsc(sectionId, pageable);
+    }
+
+    public Page<MoreSectionItem> getItemsBySectionSearch(Long sectionId, String search, Boolean active, String contentType, Pageable pageable) {
+        return moreSectionItemRepository.searchBySectionId(sectionId, search, active, contentType, pageable);
     }
 
     public MoreSectionItem getItemById(Long itemId) {

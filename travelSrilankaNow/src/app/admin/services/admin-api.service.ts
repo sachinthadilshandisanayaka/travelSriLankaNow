@@ -438,8 +438,15 @@ export class AdminApiService {
   }
 
   // More Section Items
-  getMoreSectionItems(sectionId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/more-sections/${sectionId}/items`);
+  getMoreSectionItems(sectionId: number, page: number = 0, size: number = 20,
+                      search?: string, active?: boolean, contentType?: string): Observable<PageResponse<any>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    if (search) params = params.set('search', search);
+    if (active !== undefined && active !== null) params = params.set('active', String(active));
+    if (contentType) params = params.set('contentType', contentType);
+    return this.http.get<PageResponse<any>>(`${this.apiUrl}/more-sections/${sectionId}/items/paginated`, { params });
   }
 
   createMoreSectionItem(sectionId: number, item: any): Observable<any> {

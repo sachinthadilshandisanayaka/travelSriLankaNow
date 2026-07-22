@@ -43,25 +43,63 @@
           <div *ngFor="let slide of heroSlides; let i = index; trackBy: trackSlideById"
                class="carousel-slide"
                [class.carousel-slide--active]="i === currentSlideIndex"
+               [class.carousel-slide--rolling]="slide.sliderType === 'rolling_gallery'"
                [class.carousel-slide--prev]="i === (currentSlideIndex === 0 ? heroSlides.length - 1 : currentSlideIndex - 1)"
                [class.carousel-slide--next]="i === (currentSlideIndex === heroSlides.length - 1 ? 0 : currentSlideIndex + 1)">
-            <!-- Background Media (image or video) -->
-            <div class="slide-background">
-              <ng-container *ngIf="slide.mediaType === 'video' && slide.videoUrl; else slideImage">
-                <video class="slide-video"
-                       appVideoAutoplay [videoSrc]="slide.videoUrl"
-                       muted loop playsinline webkit-playsinline
-                       preload="auto"
-                       [attr.aria-label]="slide.title">
-                </video>
-              </ng-container>
-              <ng-template #slideImage>
-                <img [src]="slide.imageUrl" [alt]="slide.title" />
-              </ng-template>
-              <div class="slide-overlay"></div>
-            </div>
 
-            <!-- Content -->
+            <!-- ═══ ROLLING GALLERY LAYOUT ═══ -->
+            <ng-container *ngIf="slide.sliderType === 'rolling_gallery'; else standardSlide">
+              <div class="rg-slide">
+                <div class="rg-slide__left"
+                     [class.rg-slide__left--visible]="i === currentSlideIndex">
+                  <h1 class="rg-slide__title" [ngStyle]="getTextStyle(slide.titleStyle)">{{ slide.title }}</h1>
+                  <p *ngIf="slide.subtitle" class="rg-slide__subtitle" [ngStyle]="getTextStyle(slide.subtitleStyle)">{{ slide.subtitle }}</p>
+                  <div *ngIf="slide.buttonText" class="rg-slide__cta">
+                    <a [routerLink]="slide.buttonLink || '/locations'" class="btn-primary btn-slide">
+                      <span>{{ slide.buttonText }}</span>
+                      <span class="btn-shine"></span>
+                      <span class="btn-corner btn-corner--tl"></span>
+                      <span class="btn-corner btn-corner--tr"></span>
+                      <span class="btn-corner btn-corner--bl"></span>
+                      <span class="btn-corner btn-corner--br"></span>
+                    </a>
+                  </div>
+                </div>
+                <div class="rg-slide__panels"
+                     [class.rg-slide__panels--visible]="i === currentSlideIndex">
+                  <div *ngFor="let img of slide.galleryImages; let pi = index"
+                       class="rg-panel"
+                       [class]="'rg-panel--' + pi"
+                       [style.background-image]="'url(' + img.imageUrl + ')'">
+                    <div class="rg-panel__label" *ngIf="img.label">
+                      <span>{{ img.label }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- ═══ STANDARD SLIDE LAYOUT ═══ -->
+            <ng-template #standardSlide>
+              <!-- Background Media (image or video) -->
+              <div class="slide-background">
+                <ng-container *ngIf="slide.mediaType === 'video' && slide.videoUrl; else slideImage">
+                  <video class="slide-video"
+                         appVideoAutoplay [videoSrc]="slide.videoUrl"
+                         muted loop playsinline webkit-playsinline
+                         preload="auto"
+                         [attr.aria-label]="slide.title">
+                  </video>
+                </ng-container>
+                <ng-template #slideImage>
+                  <img [src]="slide.imageUrl" [alt]="slide.title" />
+                </ng-template>
+                <div class="slide-overlay"></div>
+              </div>
+            </ng-template>
+
+            <!-- Content (standard slides only) -->
+            <ng-container *ngIf="slide.sliderType !== 'rolling_gallery'">
             <div class="slide-content"
                  [class.slide-content--visible]="i === currentSlideIndex"
                  [class.slide-content--left]="slide.contentAlign === 'left'"
@@ -106,6 +144,7 @@
 
               </div>
             </div>
+            </ng-container>
           </div>
         </div>
 
@@ -709,6 +748,201 @@
                 <line x1="10" y1="14" x2="21" y2="3"/>
               </svg>
             </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+
+  <!-- ========== CUSTOMER FEEDBACK ========== -->
+  <ng-container *ngIf="section.sectionType === 'CUSTOMER_FEEDBACK'">
+    <ng-container *ngIf="getFeedbackConf(section.id) as feedbackConf">
+      <section class="feedback-section"
+               [class.feedback-section--dark]="feedbackConf.cardStyle === 'dark'"
+               [class.feedback-section--glass]="feedbackConf.cardStyle === 'glass'">
+        <div class="container">
+          <div class="section-header animate-fadeInUp">
+            <h2>{{ section.title }}</h2>
+            <p *ngIf="section.subtitle" class="lead">{{ section.subtitle }}</p>
+          </div>
+
+          <!-- Carousel style -->
+          <div *ngIf="!feedbackConf.displayStyle || feedbackConf.displayStyle === 'carousel'"
+               class="feedback-carousel">
+            <div class="feedback-track">
+              <div *ngFor="let fb of feedbackConf.feedbacks; let fi = index"
+                   class="feedback-card"
+                   [class.feedback-card--dark]="feedbackConf.cardStyle === 'dark'"
+                   [class.feedback-card--glass]="feedbackConf.cardStyle === 'glass'">
+                <div class="feedback-card__stars">
+                  <span *ngFor="let s of getStarArray(); let si = index"
+                        class="feedback-star"
+                        [class.feedback-star--filled]="si < fb.rating">★</span>
+                </div>
+                <p class="feedback-card__text">{{ fb.text }}</p>
+                <div class="feedback-card__divider"></div>
+                <div class="feedback-card__author">
+                  <div class="feedback-card__avatar">
+                    <img *ngIf="fb.imageUrl" [src]="fb.imageUrl" [alt]="fb.name" loading="lazy">
+                    <div *ngIf="!fb.imageUrl" class="feedback-card__avatar-placeholder">{{ fb.name[0] }}</div>
+                  </div>
+                  <div class="feedback-card__author-info">
+                    <strong>{{ fb.name }}</strong>
+                    <span *ngIf="fb.role || fb.company">
+                      {{ fb.role }}<ng-container *ngIf="fb.role && fb.company"> at </ng-container>{{ fb.company }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid style -->
+          <div *ngIf="feedbackConf.displayStyle === 'grid'" class="feedback-grid">
+            <div *ngFor="let fb of feedbackConf.feedbacks"
+                 class="feedback-card"
+                 [class.feedback-card--dark]="feedbackConf.cardStyle === 'dark'"
+                 [class.feedback-card--glass]="feedbackConf.cardStyle === 'glass'">
+              <div class="feedback-card__stars">
+                <span *ngFor="let s of getStarArray(); let si = index"
+                      class="feedback-star"
+                      [class.feedback-star--filled]="si < fb.rating">★</span>
+              </div>
+              <p class="feedback-card__text">{{ fb.text }}</p>
+              <div class="feedback-card__divider"></div>
+              <div class="feedback-card__author">
+                <div class="feedback-card__avatar">
+                  <img *ngIf="fb.imageUrl" [src]="fb.imageUrl" [alt]="fb.name" loading="lazy">
+                  <div *ngIf="!fb.imageUrl" class="feedback-card__avatar-placeholder">{{ fb.name[0] }}</div>
+                </div>
+                <div class="feedback-card__author-info">
+                  <strong>{{ fb.name }}</strong>
+                  <span *ngIf="fb.role || fb.company">
+                    {{ fb.role }}<ng-container *ngIf="fb.role && fb.company"> at </ng-container>{{ fb.company }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+
+  <!-- ========== SCROLL CARDS ========== -->
+  <ng-container *ngIf="section.sectionType === 'SCROLL_CARDS'">
+    <ng-container *ngIf="getScrollCardsConf(section.id) as scConf">
+
+      <!-- Split layout: sticky scroll-driven stacked card reveal -->
+      <ng-container *ngIf="!scConf.layoutStyle || scConf.layoutStyle === 'split'">
+        <div class="sc-scroll-wrapper">
+          <div class="sc-scroll-sticky">
+            <div class="container">
+              <div class="scroll-cards-split">
+                <div class="scroll-cards-split__text">
+                  <span *ngIf="scConf.label" class="scroll-cards-label">{{ scConf.label }}</span>
+                  <h2 class="scroll-cards-title">{{ section.title }}</h2>
+                  <p *ngIf="section.subtitle" class="scroll-cards-subtitle">{{ section.subtitle }}</p>
+                  <a *ngIf="scConf.ctaText && scConf.ctaUrl"
+                     [href]="scConf.ctaUrl"
+                     class="btn-primary scroll-cards-cta">
+                    <span>{{ scConf.ctaText }}</span><span class="btn-shine"></span>
+                    <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+                    <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+                  </a>
+                </div>
+                <div class="scroll-cards-split__cards">
+                  <div class="scroll-cards-stack">
+                    <div *ngFor="let card of scConf.cards; let ci = index"
+                         class="scroll-card scroll-card--stacked"
+                         [attr.data-index]="ci"
+                         [style.z-index]="scConf.cards.length - ci"
+                         [style.background-color]="card.backgroundColor || null">
+                      <div class="scroll-card__header">
+                        <span class="scroll-card__icon" *ngIf="card.icon">{{ card.icon }}</span>
+                        <span class="scroll-card__num">{{ card.number || (ci + 1).toString().padStart(2, '0') }}</span>
+                      </div>
+                      <h3 class="scroll-card__title">{{ card.title }}</h3>
+                      <p class="scroll-card__desc">{{ card.description }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <section class="scroll-cards-section scroll-cards-section--centered"
+               *ngIf="scConf.layoutStyle === 'centered'">
+        <div class="container">
+
+          <!-- Centered layout: title top, cards below -->
+          <ng-container *ngIf="scConf.layoutStyle === 'centered'">
+            <div class="section-header animate-fadeInUp">
+              <span *ngIf="scConf.label" class="subtitle">{{ scConf.label }}</span>
+              <h2>{{ section.title }}</h2>
+              <p *ngIf="section.subtitle" class="lead">{{ section.subtitle }}</p>
+            </div>
+            <div class="scroll-cards-centered-grid">
+              <div *ngFor="let card of scConf.cards; let ci = index"
+                   class="scroll-card scroll-card--centered-item"
+                   [attr.data-index]="ci"
+                   [style.background-color]="card.backgroundColor || null">
+                <div class="scroll-card__header">
+                  <span class="scroll-card__icon" *ngIf="card.icon">{{ card.icon }}</span>
+                  <span class="scroll-card__num">{{ card.number || (ci + 1).toString().padStart(2, '0') }}</span>
+                </div>
+                <h3 class="scroll-card__title">{{ card.title }}</h3>
+                <p class="scroll-card__desc">{{ card.description }}</p>
+              </div>
+            </div>
+            <div *ngIf="scConf.ctaText && scConf.ctaUrl" class="text-center" style="margin-top:2rem">
+              <a [href]="scConf.ctaUrl" class="btn-primary">
+                <span>{{ scConf.ctaText }}</span><span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+              </a>
+            </div>
+          </ng-container>
+
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+
+  <!-- ========== FEATURED MORE SECTION ========== -->
+  <ng-container *ngIf="section.sectionType === 'MORE_SECTION' && getMoreSectionItems(section.id).length > 0">
+    <section class="section animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <h2>{{ section.title }}</h2>
+          <p class="lead" *ngIf="section.subtitle">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="location-grid" [class.location-grid--list]="getMoreSectionConfig(section.id)?.displayStyle === 'list'">
+          <a *ngFor="let item of getMoreSectionItems(section.id)"
+             [routerLink]="['/more', getMoreSectionConfig(section.id)?.moreSectionSlug, item.slug || item.id]"
+             class="location-card card-stagger">
+            <div class="location-image image-zoom" *ngIf="item.imageUrl">
+              <img [src]="item.imageUrl" [alt]="item.title" />
+            </div>
+            <div class="location-content">
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.shortDescription }}</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="text-center mt-2xl animate-fadeIn delay-6">
+          <a [routerLink]="['/more', getMoreSectionConfig(section.id)?.moreSectionSlug]" class="btn-primary">
+            <span>View All</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
           </a>
         </div>
       </div>
