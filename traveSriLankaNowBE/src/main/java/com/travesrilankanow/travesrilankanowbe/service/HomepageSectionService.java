@@ -69,7 +69,8 @@ public class HomepageSectionService {
         boolean multipleAllowed = section.getSectionType() == HomepageSection.SectionType.CUSTOM_CONTENT
                 || section.getSectionType() == HomepageSection.SectionType.IMAGE_GALLERY_SLIDER
                 || section.getSectionType() == HomepageSection.SectionType.CUSTOMER_FEEDBACK
-                || section.getSectionType() == HomepageSection.SectionType.SCROLL_CARDS;
+                || section.getSectionType() == HomepageSection.SectionType.SCROLL_CARDS
+                || section.getSectionType() == HomepageSection.SectionType.MORE_SECTION;
         if (!multipleAllowed && homepageSectionRepository.existsBySectionType(section.getSectionType())) {
             throw new IllegalStateException(
                     "A '" + section.getSectionType() + "' section already exists. Edit the existing one instead.");
