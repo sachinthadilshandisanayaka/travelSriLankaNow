@@ -873,15 +873,49 @@
     }
   }
 
+  // Hamburger — match the glass-pill treatment used by the other nav
+  // controls instead of falling back to the plain squared-off base style
+  .menu-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 100px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &.active {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
   .logo-site-name { color: rgba(255, 255, 255, 0.92); }
 
-  @media (max-width: 768px) {
+  // Matches the base drawer's breakpoint ($breakpoint-lg, 1024px) - below
+  // this, .nav-links must go back to being the fixed-position slide-in
+  // drawer defined in the "Mobile Navigation Drawer" block above. Without
+  // re-asserting position/geometry here, the unconditional desktop pill
+  // styles above (position: relative, border-radius: 100px, width: auto)
+  // win on specificity and collapse the drawer into a tiny inline pill.
+  @media (max-width: 1023px) {
     .liq-indicator { display: none; }
     .nav-links {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 400px;
+      height: 100vh;
+      height: 100dvh;
       background: rgba(8, 16, 40, 0.96);
       backdrop-filter: blur(24px);
       border-radius: 16px;
-      padding: 0.5rem;
+      padding: 100px $spacing-lg $spacing-2xl;
+      gap: 0;
+
+      &.active { right: 0; }
     }
     .nav-link { border-radius: 12px; }
   }
