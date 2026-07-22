@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
-import { GallerySliderConfig, GallerySliderImage, CustomContentConfig } from '../../../models/homepage-section.model';
+import { GallerySliderConfig, GallerySliderImage, CustomContentConfig, CustomerFeedbackConfig, FeedbackItem, ScrollCardsConfig, ScrollCardItem, MoreSectionBlockConfig } from '../../../models/homepage-section.model';
 import { forkJoin } from 'rxjs';
 
 interface HomepageSection {
@@ -162,7 +162,10 @@ export class AdminHomepageSectionsComponent implements OnInit {
     SOCIAL_MEDIA: 'Social Media',
     IMAGE_GALLERY_SLIDER: 'Image Gallery Slider',
     CUSTOM_CONTENT: 'Custom Content Section',
-    PACKAGES: 'Tour Packages'
+    PACKAGES: 'Tour Packages',
+    CUSTOMER_FEEDBACK: 'Customer Feedback',
+    SCROLL_CARDS: 'Scroll Cards',
+    MORE_SECTION: 'Featured More Section'
   };
 
   sectionTypeIcons: Record<string, string> = {
@@ -173,7 +176,10 @@ export class AdminHomepageSectionsComponent implements OnInit {
     SOCIAL_MEDIA: 'M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m0 0h4a1 1 0 011 1v1a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4',
     IMAGE_GALLERY_SLIDER: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
     CUSTOM_CONTENT: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
-    PACKAGES: 'M20 7h-3V6a4 4 0 00-4-4h-2a4 4 0 00-4 4v1H4a1 1 0 00-1 1v11a2 2 0 002 2h14a2 2 0 002-2V8a1 1 0 00-1-1zM9 6a2 2 0 012-2h2a2 2 0 012 2v1H9V6zm11 13a.5.5 0 01-.5.5h-15a.5.5 0 01-.5-.5V9h4v2a1 1 0 002 0V9h2v2a1 1 0 002 0V9h4v10z'
+    PACKAGES: 'M20 7h-3V6a4 4 0 00-4-4h-2a4 4 0 00-4 4v1H4a1 1 0 00-1 1v11a2 2 0 002 2h14a2 2 0 002-2V8a1 1 0 00-1-1zM9 6a2 2 0 012-2h2a2 2 0 012 2v1H9V6zm11 13a.5.5 0 01-.5.5h-15a.5.5 0 01-.5-.5V9h4v2a1 1 0 002 0V9h2v2a1 1 0 002 0V9h4v10z',
+    CUSTOMER_FEEDBACK: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+    SCROLL_CARDS: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+    MORE_SECTION: 'M19 11H5m14-4H5m14 8H5m14 4H5'
   };
 
   // Gallery creation modal
@@ -181,6 +187,64 @@ export class AdminHomepageSectionsComponent implements OnInit {
   galleryCreateTitle = '';
   galleryCreateSubtitle = '';
   galleryCreating = false;
+
+  // Additional Content picker
+  showAdditionalContentPicker = false;
+
+  readonly ADDITIONAL_CONTENT_TYPES = [
+    {
+      type: 'CUSTOMER_FEEDBACK',
+      name: 'Customer Feedback',
+      description: 'Horizontal testimonial carousel with star ratings, reviewer name, role, and photo.',
+      icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
+    },
+    {
+      type: 'SCROLL_CARDS',
+      name: 'Scroll Cards',
+      description: 'Stacked cards that fan out as the user scrolls — ideal for process steps, features, or highlights.',
+      icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+    },
+    {
+      type: 'MORE_SECTION',
+      name: 'Feature a More Section',
+      description: 'Showcase items from an existing More Section (e.g. Articles) as a card grid, with a "View All" link.',
+      icon: 'M19 11H5m14-4H5m14 8H5m14 4H5'
+    }
+  ];
+
+  // More Section feature block modal
+  showMoreSectionModal = false;
+  editingMoreSection: HomepageSection | null = null;
+  moreSectionsList: any[] = [];
+  isLoadingMoreSections = false;
+  moreSectionConfig: MoreSectionBlockConfig = { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' };
+  moreSectionTitle = '';
+  moreSectionSubtitle = '';
+  moreSectionIsActive = true;
+
+  // Customer Feedback modal
+  showFeedbackModal = false;
+  editingFeedbackSection: HomepageSection | null = null;
+  feedbackConfig: CustomerFeedbackConfig = { feedbacks: [] };
+  feedbackSectionTitle = '';
+  feedbackSectionSubtitle = '';
+  feedbackSectionActive = true;
+  showFeedbackItemForm = false;
+  editingFeedbackItem: FeedbackItem | null = null;
+  feedbackItemForm: FeedbackItem = { id: '', name: '', rating: 5, text: '' };
+  feedbackCreating = false;
+
+  // Scroll Cards modal
+  showScrollCardsModal = false;
+  editingScrollCardsSection: HomepageSection | null = null;
+  scrollCardsConfig: ScrollCardsConfig = { cards: [] };
+  scrollCardsSectionTitle = '';
+  scrollCardsSectionSubtitle = '';
+  scrollCardsSectionActive = true;
+  showScrollCardItemForm = false;
+  editingScrollCardItem: ScrollCardItem | null = null;
+  scrollCardItemForm: ScrollCardItem = { id: '', title: '', description: '' };
+  scrollCardsCreating = false;
 
   // Drag and Drop
   draggedIndex: number | null = null;
@@ -244,7 +308,7 @@ export class AdminHomepageSectionsComponent implements OnInit {
   }
 
   isDeletable(section: HomepageSection): boolean {
-    return section.sectionType === 'CUSTOM_CONTENT' || section.sectionType === 'IMAGE_GALLERY_SLIDER';
+    return ['CUSTOM_CONTENT', 'IMAGE_GALLERY_SLIDER', 'CUSTOMER_FEEDBACK', 'SCROLL_CARDS', 'MORE_SECTION'].includes(section.sectionType);
   }
 
   // ---- Gallery Section Creation ----
@@ -294,6 +358,306 @@ export class AdminHomepageSectionsComponent implements OnInit {
     });
   }
 
+  // ---- Additional Content Picker ----
+  openAdditionalContentPicker(): void {
+    this.showAdditionalContentPicker = true;
+  }
+
+  closeAdditionalContentPicker(): void {
+    this.showAdditionalContentPicker = false;
+  }
+
+  selectAdditionalContentType(type: string): void {
+    this.closeAdditionalContentPicker();
+    if (type === 'CUSTOMER_FEEDBACK') {
+      this.openFeedbackModal();
+    } else if (type === 'SCROLL_CARDS') {
+      this.openScrollCardsModal();
+    } else if (type === 'MORE_SECTION') {
+      this.openMoreSectionModal();
+    }
+  }
+
+  // ---- Feature a More Section ----
+  parseMoreSectionConfig(configStr?: string): MoreSectionBlockConfig {
+    if (!configStr) return { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' };
+    try { return JSON.parse(configStr); } catch { return { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' }; }
+  }
+
+  openMoreSectionModal(section?: HomepageSection): void {
+    this.editingMoreSection = section || null;
+    if (section) {
+      this.moreSectionConfig = { ...this.parseMoreSectionConfig(section.config) };
+      this.moreSectionTitle = section.title;
+      this.moreSectionSubtitle = section.subtitle || '';
+      this.moreSectionIsActive = section.isActive;
+    } else {
+      this.moreSectionConfig = { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' };
+      this.moreSectionTitle = '';
+      this.moreSectionSubtitle = '';
+      this.moreSectionIsActive = true;
+    }
+    this.showMoreSectionModal = true;
+    this.loadMoreSectionsList();
+  }
+
+  closeMoreSectionModal(): void {
+    this.showMoreSectionModal = false;
+    this.editingMoreSection = null;
+  }
+
+  loadMoreSectionsList(): void {
+    this.isLoadingMoreSections = true;
+    this.apiService.getMoreSections(0, 100).subscribe({
+      next: (response) => {
+        this.moreSectionsList = response.content;
+        this.isLoadingMoreSections = false;
+      },
+      error: () => {
+        this.isLoadingMoreSections = false;
+        this.errorMessage = 'Failed to load More Sections';
+        this.hideMessageAfterDelay();
+      }
+    });
+  }
+
+  onMoreSectionPicked(): void {
+    const picked = this.moreSectionsList.find(s => s.slug === this.moreSectionConfig.moreSectionSlug);
+    if (picked && !this.editingMoreSection) {
+      this.moreSectionTitle = picked.name;
+      this.moreSectionSubtitle = picked.description || '';
+    }
+  }
+
+  saveMoreSectionSection(): void {
+    if (!this.moreSectionConfig.moreSectionSlug || !this.moreSectionTitle.trim()) return;
+    this.isSaving = true;
+    const configStr = JSON.stringify(this.moreSectionConfig);
+    const maxOrder = this.sections.length ? Math.max(...this.sections.map(s => s.displayOrder || 0)) + 1 : 1;
+
+    if (this.editingMoreSection?.id) {
+      const updateData: HomepageSection = {
+        ...this.editingMoreSection,
+        title: this.moreSectionTitle,
+        subtitle: this.moreSectionSubtitle,
+        isActive: this.moreSectionIsActive,
+        config: configStr
+      };
+      this.apiService.updateHomepageSection(this.editingMoreSection.id, updateData).subscribe({
+        next: () => { this.successMessage = 'Section updated!'; this.closeMoreSectionModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to update'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    } else {
+      const newSection: any = {
+        sectionType: 'MORE_SECTION',
+        title: this.moreSectionTitle,
+        subtitle: this.moreSectionSubtitle,
+        isActive: this.moreSectionIsActive,
+        displayOrder: maxOrder,
+        config: configStr
+      };
+      this.apiService.createHomepageSection(newSection).subscribe({
+        next: () => { this.successMessage = 'Section created!'; this.closeMoreSectionModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to create'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    }
+  }
+
+  // ---- Customer Feedback ----
+  parseFeedbackConfig(configStr?: string): CustomerFeedbackConfig {
+    if (!configStr) return { feedbacks: [] };
+    try { return JSON.parse(configStr); } catch { return { feedbacks: [] }; }
+  }
+
+  openFeedbackModal(section?: HomepageSection): void {
+    this.editingFeedbackSection = section || null;
+    if (section) {
+      this.feedbackConfig = { ...this.parseFeedbackConfig(section.config) };
+      this.feedbackSectionTitle = section.title;
+      this.feedbackSectionSubtitle = section.subtitle || '';
+      this.feedbackSectionActive = section.isActive;
+    } else {
+      this.feedbackConfig = { displayStyle: 'carousel', cardStyle: 'light', autoScroll: false, feedbacks: [] };
+      this.feedbackSectionTitle = 'Customer Feedback';
+      this.feedbackSectionSubtitle = 'What our clients are saying';
+      this.feedbackSectionActive = true;
+    }
+    this.showFeedbackItemForm = false;
+    this.showFeedbackModal = true;
+  }
+
+  closeFeedbackModal(): void {
+    this.showFeedbackModal = false;
+    this.editingFeedbackSection = null;
+    this.showFeedbackItemForm = false;
+  }
+
+  openAddFeedbackItem(): void {
+    this.editingFeedbackItem = null;
+    this.feedbackItemForm = { id: this.generateId(), name: '', role: '', company: '', rating: 5, text: '', imageUrl: '' };
+    this.showFeedbackItemForm = true;
+  }
+
+  editFeedbackItem(item: FeedbackItem): void {
+    this.editingFeedbackItem = item;
+    this.feedbackItemForm = { ...item };
+    this.showFeedbackItemForm = true;
+  }
+
+  saveFeedbackItem(): void {
+    if (!this.feedbackItemForm.name.trim() || !this.feedbackItemForm.text.trim()) return;
+    const items = [...(this.feedbackConfig.feedbacks || [])];
+    if (this.editingFeedbackItem) {
+      const idx = items.findIndex(i => i.id === this.editingFeedbackItem!.id);
+      if (idx !== -1) items[idx] = { ...this.feedbackItemForm };
+    } else {
+      items.push({ ...this.feedbackItemForm });
+    }
+    this.feedbackConfig = { ...this.feedbackConfig, feedbacks: items };
+    this.showFeedbackItemForm = false;
+  }
+
+  deleteFeedbackItem(id: string): void {
+    this.feedbackConfig = { ...this.feedbackConfig, feedbacks: this.feedbackConfig.feedbacks.filter(i => i.id !== id) };
+  }
+
+  onFeedbackImageUploaded(url: string): void {
+    this.feedbackItemForm = { ...this.feedbackItemForm, imageUrl: url };
+  }
+
+  saveFeedbackSection(): void {
+    this.isSaving = true;
+    const configStr = JSON.stringify(this.feedbackConfig);
+    const maxOrder = this.sections.length ? Math.max(...this.sections.map(s => s.displayOrder || 0)) + 1 : 1;
+
+    if (this.editingFeedbackSection?.id) {
+      const updateData: HomepageSection = {
+        ...this.editingFeedbackSection,
+        title: this.feedbackSectionTitle,
+        subtitle: this.feedbackSectionSubtitle,
+        isActive: this.feedbackSectionActive,
+        config: configStr
+      };
+      this.apiService.updateHomepageSection(this.editingFeedbackSection.id, updateData).subscribe({
+        next: () => { this.successMessage = 'Feedback section updated!'; this.closeFeedbackModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to update'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    } else {
+      const newSection: any = {
+        sectionType: 'CUSTOMER_FEEDBACK',
+        title: this.feedbackSectionTitle,
+        subtitle: this.feedbackSectionSubtitle,
+        isActive: this.feedbackSectionActive,
+        displayOrder: maxOrder,
+        config: configStr
+      };
+      this.apiService.createHomepageSection(newSection).subscribe({
+        next: () => { this.successMessage = 'Feedback section created!'; this.closeFeedbackModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to create'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    }
+  }
+
+  // ---- Scroll Cards ----
+  parseScrollCardsConfig(configStr?: string): ScrollCardsConfig {
+    if (!configStr) return { cards: [] };
+    try { return JSON.parse(configStr); } catch { return { cards: [] }; }
+  }
+
+  openScrollCardsModal(section?: HomepageSection): void {
+    this.editingScrollCardsSection = section || null;
+    if (section) {
+      this.scrollCardsConfig = { ...this.parseScrollCardsConfig(section.config) };
+      this.scrollCardsSectionTitle = section.title;
+      this.scrollCardsSectionSubtitle = section.subtitle || '';
+      this.scrollCardsSectionActive = section.isActive;
+    } else {
+      this.scrollCardsConfig = { label: '', title: '', subtitle: '', ctaText: '', ctaUrl: '', layoutStyle: 'split', cards: [] };
+      this.scrollCardsSectionTitle = 'Scroll Cards';
+      this.scrollCardsSectionSubtitle = '';
+      this.scrollCardsSectionActive = true;
+    }
+    this.showScrollCardItemForm = false;
+    this.showScrollCardsModal = true;
+  }
+
+  closeScrollCardsModal(): void {
+    this.showScrollCardsModal = false;
+    this.editingScrollCardsSection = null;
+    this.showScrollCardItemForm = false;
+  }
+
+  openAddScrollCardItem(): void {
+    this.editingScrollCardItem = null;
+    const num = ((this.scrollCardsConfig.cards?.length || 0) + 1).toString().padStart(2, '0');
+    this.scrollCardItemForm = { id: this.generateId(), number: num, icon: '', title: '', description: '', backgroundColor: '' };
+    this.showScrollCardItemForm = true;
+  }
+
+  editScrollCardItem(item: ScrollCardItem): void {
+    this.editingScrollCardItem = item;
+    this.scrollCardItemForm = { ...item };
+    this.showScrollCardItemForm = true;
+  }
+
+  saveScrollCardItem(): void {
+    if (!this.scrollCardItemForm.title.trim() || !this.scrollCardItemForm.description.trim()) return;
+    const items = [...(this.scrollCardsConfig.cards || [])];
+    if (this.editingScrollCardItem) {
+      const idx = items.findIndex(i => i.id === this.editingScrollCardItem!.id);
+      if (idx !== -1) items[idx] = { ...this.scrollCardItemForm };
+    } else {
+      items.push({ ...this.scrollCardItemForm });
+    }
+    this.scrollCardsConfig = { ...this.scrollCardsConfig, cards: items };
+    this.showScrollCardItemForm = false;
+  }
+
+  deleteScrollCardItem(id: string): void {
+    this.scrollCardsConfig = { ...this.scrollCardsConfig, cards: this.scrollCardsConfig.cards.filter(i => i.id !== id) };
+  }
+
+  saveScrollCardsSection(): void {
+    this.isSaving = true;
+    const configStr = JSON.stringify(this.scrollCardsConfig);
+    const maxOrder = this.sections.length ? Math.max(...this.sections.map(s => s.displayOrder || 0)) + 1 : 1;
+
+    if (this.editingScrollCardsSection?.id) {
+      const updateData: HomepageSection = {
+        ...this.editingScrollCardsSection,
+        title: this.scrollCardsSectionTitle,
+        subtitle: this.scrollCardsSectionSubtitle,
+        isActive: this.scrollCardsSectionActive,
+        config: configStr
+      };
+      this.apiService.updateHomepageSection(this.editingScrollCardsSection.id, updateData).subscribe({
+        next: () => { this.successMessage = 'Scroll cards section updated!'; this.closeScrollCardsModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to update'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    } else {
+      const newSection: any = {
+        sectionType: 'SCROLL_CARDS',
+        title: this.scrollCardsSectionTitle,
+        subtitle: this.scrollCardsSectionSubtitle,
+        isActive: this.scrollCardsSectionActive,
+        displayOrder: maxOrder,
+        config: configStr
+      };
+      this.apiService.createHomepageSection(newSection).subscribe({
+        next: () => { this.successMessage = 'Scroll cards section created!'; this.closeScrollCardsModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to create'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    }
+  }
+
+  private generateId(): string {
+    return Math.random().toString(36).substring(2, 11);
+  }
+
+  getStarArray(rating: number): number[] {
+    return [1, 2, 3, 4, 5];
+  }
+
   // ---- Standard Edit Modal ----
   openEditModal(section: HomepageSection): void {
     if (section.sectionType === 'IMAGE_GALLERY_SLIDER') {
@@ -302,6 +666,18 @@ export class AdminHomepageSectionsComponent implements OnInit {
     }
     if (section.sectionType === 'CUSTOM_CONTENT') {
       this.openCustomModal(section);
+      return;
+    }
+    if (section.sectionType === 'CUSTOMER_FEEDBACK') {
+      this.openFeedbackModal(section);
+      return;
+    }
+    if (section.sectionType === 'SCROLL_CARDS') {
+      this.openScrollCardsModal(section);
+      return;
+    }
+    if (section.sectionType === 'MORE_SECTION') {
+      this.openMoreSectionModal(section);
       return;
     }
 

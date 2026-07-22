@@ -4,6 +4,8 @@ import com.travesrilankanow.travesrilankanowbe.entity.MoreSection;
 import com.travesrilankanow.travesrilankanowbe.entity.MoreSectionItem;
 import com.travesrilankanow.travesrilankanowbe.service.MoreSectionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,5 +31,12 @@ public class MoreSectionController {
     @GetMapping("/items/{itemSlug}")
     public ResponseEntity<MoreSectionItem> getItemBySlug(@PathVariable String itemSlug) {
         return ResponseEntity.ok(moreSectionService.getItemBySlug(itemSlug));
+    }
+
+    @GetMapping("/{slug}/items")
+    public ResponseEntity<Page<MoreSectionItem>> getItemsBySlug(
+            @PathVariable String slug, Pageable pageable,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(moreSectionService.getActiveItemsBySectionSlug(slug, search, pageable));
     }
 }

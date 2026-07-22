@@ -57,6 +57,7 @@ export interface HeroSlide {
   imageUrl: string;
   mediaType?: 'image' | 'video';
   videoUrl?: string;
+  sliderType?: 'standard' | 'rolling_gallery';
   titleStyle?: SlideTextStyle;
   subtitleStyle?: SlideTextStyle;
   contentAlign?: 'left' | 'center' | 'right';

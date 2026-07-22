@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NavConfig } from '../../../models/nav-config.model';
 import { NavConfigService } from '../../../services/nav-config.service';
+import { AdminApiService } from '../../services/admin-api.service';
+import { SiteSettingsService } from '../../../services/site-settings.service';
 
 @Component({
   selector: 'app-admin-nav-config',
@@ -16,15 +18,48 @@ export class AdminNavConfigComponent implements OnInit {
   successMsg = '';
   errorMsg = '';
 
+  navbarStyle: 'classic' | 'liquid' = 'classic';
+  styleLoading = false;
+  styleSaving = false;
+
   showAddForm = false;
   newRoutePath = '';
   newLabel = '';
   adding = false;
 
-  constructor(private navConfigService: NavConfigService) {}
+  constructor(
+    private navConfigService: NavConfigService,
+    private adminApiService: AdminApiService,
+    private siteSettingsService: SiteSettingsService
+  ) {}
 
   ngOnInit(): void {
     this.load();
+    this.loadNavbarStyle();
+  }
+
+  loadNavbarStyle(): void {
+    this.styleLoading = true;
+    this.siteSettingsService.getSettingByKey('navbar_style').subscribe({
+      next: (s) => { if (s?.value) this.navbarStyle = s.value as 'classic' | 'liquid'; this.styleLoading = false; },
+      error: () => { this.styleLoading = false; }
+    });
+  }
+
+  saveNavbarStyle(style: 'classic' | 'liquid'): void {
+    this.navbarStyle = style;
+    this.styleSaving = true;
+    this.adminApiService.upsertSiteSetting({
+      key: 'navbar_style',
+      value: style,
+      category: 'GENERAL',
+      label: 'Navbar Style',
+      sortOrder: 100,
+      isActive: true
+    }).subscribe({
+      next: () => { this.styleSaving = false; this.showSuccess('Navbar style saved.'); },
+      error: () => { this.styleSaving = false; this.errorMsg = 'Failed to save navbar style.'; }
+    });
   }
 
   load(): void {

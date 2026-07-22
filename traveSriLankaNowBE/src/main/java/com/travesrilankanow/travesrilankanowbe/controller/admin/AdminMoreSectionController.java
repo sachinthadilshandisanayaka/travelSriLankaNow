@@ -65,8 +65,12 @@ public class AdminMoreSectionController {
 
     @GetMapping("/{sectionId}/items/paginated")
     @PreAuthorize("hasAuthority('MORE_SECTIONS:VIEW')")
-    public ResponseEntity<Page<MoreSectionItem>> getItemsBySectionPaginated(@PathVariable Long sectionId, Pageable pageable) {
-        return ResponseEntity.ok(moreSectionService.getItemsBySectionPaginated(sectionId, pageable));
+    public ResponseEntity<Page<MoreSectionItem>> getItemsBySectionPaginated(
+            @PathVariable Long sectionId, Pageable pageable,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(moreSectionService.getItemsBySectionSearch(sectionId, search, active, contentType, pageable));
     }
 
     @PostMapping("/{sectionId}/items")

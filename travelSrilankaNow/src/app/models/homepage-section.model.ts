@@ -1,6 +1,6 @@
 export interface HomepageSection {
   id?: number;
-  sectionType: 'HERO_SLIDER' | 'FEATURED_LOCATIONS' | 'UPCOMING_EVENTS' | 'PLACES' | 'SOCIAL_MEDIA' | 'IMAGE_GALLERY_SLIDER' | 'CUSTOM_CONTENT' | 'PACKAGES';
+  sectionType: 'HERO_SLIDER' | 'FEATURED_LOCATIONS' | 'UPCOMING_EVENTS' | 'PLACES' | 'SOCIAL_MEDIA' | 'IMAGE_GALLERY_SLIDER' | 'CUSTOM_CONTENT' | 'PACKAGES' | 'CUSTOMER_FEEDBACK' | 'SCROLL_CARDS' | 'MORE_SECTION';
   title: string;
   subtitle?: string;
   displayOrder: number;
@@ -72,4 +72,50 @@ export interface CustomContentConfig {
   content?: string;
   textColor?: string;
   textAlign?: string;
+}
+
+// ── Customer Feedback ──────────────────────────────────────────────────────
+export interface FeedbackItem {
+  id: string;
+  name: string;
+  role?: string;
+  company?: string;
+  rating: number;
+  text: string;
+  imageUrl?: string;
+}
+
+export interface CustomerFeedbackConfig {
+  displayStyle?: 'carousel' | 'grid';
+  cardStyle?: 'light' | 'dark' | 'glass';
+  autoScroll?: boolean;
+  scrollSpeed?: number;
+  feedbacks: FeedbackItem[];
+}
+
+// ── Scroll Cards ───────────────────────────────────────────────────────────
+export interface ScrollCardItem {
+  id: string;
+  number?: string;
+  icon?: string;
+  title: string;
+  description: string;
+  backgroundColor?: string;
+}
+
+export interface ScrollCardsConfig {
+  label?: string;
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  layoutStyle?: 'split' | 'centered';
+  cards: ScrollCardItem[];
+}
+
+// ── More Section feature block ────────────────────────────────────────────
+export interface MoreSectionBlockConfig {
+  moreSectionSlug: string;
+  itemCount: number;
+  displayStyle: 'grid' | 'list';
 }
