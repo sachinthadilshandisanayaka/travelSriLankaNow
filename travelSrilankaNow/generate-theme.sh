@@ -43,6 +43,8 @@ case "$THEME" in
   --primary-navy-dark-a30: rgba(198,40,40,0.30);
   --primary-navy-dark-a40: rgba(198,40,40,0.40);
   --primary-navy-dark-a50: rgba(198,40,40,0.50);
+  --primary-navy-dark-a55: rgba(198,40,40,0.55);
+  --primary-navy-dark-a60: rgba(198,40,40,0.60);
 
   --primary-navy-a05:  rgba(255,143,0,0.05);
   --primary-navy-a08:  rgba(255,143,0,0.08);
@@ -108,6 +110,8 @@ EOF
   --primary-navy-dark-a30: rgba(255,155,0,0.30);
   --primary-navy-dark-a40: rgba(255,155,0,0.40);
   --primary-navy-dark-a50: rgba(255,155,0,0.50);
+  --primary-navy-dark-a55: rgba(255,155,0,0.55);
+  --primary-navy-dark-a60: rgba(255,155,0,0.60);
 
   --primary-navy-a05:  rgba(255,201,0,0.05);
   --primary-navy-a08:  rgba(255,201,0,0.08);
@@ -173,6 +177,8 @@ EOF
   --primary-navy-dark-a30: rgba(15,40,84,0.30);
   --primary-navy-dark-a40: rgba(15,40,84,0.40);
   --primary-navy-dark-a50: rgba(15,40,84,0.50);
+  --primary-navy-dark-a55: rgba(15,40,84,0.55);
+  --primary-navy-dark-a60: rgba(15,40,84,0.60);
 
   --primary-navy-a05:  rgba(28,77,141,0.05);
   --primary-navy-a08:  rgba(28,77,141,0.08);
