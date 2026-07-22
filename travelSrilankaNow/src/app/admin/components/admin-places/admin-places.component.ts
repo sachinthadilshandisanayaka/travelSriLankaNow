@@ -213,11 +213,9 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
   }
 
   loadMasterData(): void {
-    // Admin's own unfiltered endpoints — filtering/assigning categories should
-    // never be limited to whatever happens to be publicly "active" right now.
     this.apiService.getMasterDataByType('PLACE_TYPE').subscribe({
       next: (data) => {
-        this.placeTypes = data;
+        this.placeTypes = data.filter((t: MasterData) => t.isActive);
       },
       error: (error) => {
         console.error('Failed to load place types:', error);
@@ -226,7 +224,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
 
     this.apiService.getMasterDataByType('REGION').subscribe({
       next: (data) => {
-        this.regions = data;
+        this.regions = data.filter((r: MasterData) => r.isActive);
       },
       error: (error) => {
         console.error('Failed to load regions:', error);
@@ -235,7 +233,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
 
     this.apiService.getMasterDataByType('PRICE_RANGE').subscribe({
       next: (data) => {
-        this.priceRanges = data;
+        this.priceRanges = data.filter((p: MasterData) => p.isActive);
       },
       error: (error) => {
         console.error('Failed to load price ranges:', error);
