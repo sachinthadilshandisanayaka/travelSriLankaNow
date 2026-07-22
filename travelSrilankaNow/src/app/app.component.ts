@@ -1,5 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, switchMap } from 'rxjs/operators';
@@ -33,7 +32,6 @@ export class AppComponent implements OnInit {
     private titleService: Title,
     private siteSettings: SiteSettingsService,
     private cdr: ChangeDetectorRef,
-    @Inject(DOCUMENT) private document: Document
   ) {
     this.isAdminRoute = this.router.url.startsWith('/admin');
   }
@@ -42,7 +40,6 @@ export class AppComponent implements OnInit {
 
     this.siteSettings.getSettingsAsMap().subscribe(settings => {
       this.applyTitle(this.router.url, settings);
-      this.applyFavicon(settings['favicon_url']);
     });
 
     this.router.events.pipe(
@@ -71,19 +68,6 @@ export class AppComponent implements OnInit {
         this.isNavigating = false;
         this.cdr.detectChanges();
       }
-    });
-  }
-
-  private applyFavicon(faviconUrl: string): void {
-    if (!faviconUrl) return;
-    const selectors = [
-      'link[rel="icon"]',
-      'link[rel="shortcut icon"]',
-      'link[rel="apple-touch-icon"]'
-    ];
-    selectors.forEach(sel => {
-      const el = this.document.querySelector(sel) as HTMLLinkElement | null;
-      if (el) { el.href = faviconUrl + '?v=' + Date.now(); }
     });
   }
 

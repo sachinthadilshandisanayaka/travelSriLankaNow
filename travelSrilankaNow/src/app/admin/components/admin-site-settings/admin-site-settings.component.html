@@ -230,7 +230,7 @@
               [label]="'Favicon Image'"
               (imageUploaded)="onLogoUploaded($event)">
             </app-image-upload>
-            <p class="admin-form__hint">Recommended: square PNG or ICO, 32×32 or 64×64 px</p>
+            <p class="admin-form__hint">Recommended: square PNG or ICO, 32×32 or 64×64 px. Upload here to get the URL, then set it as <code>FAVICON_URL</code> in the client's <code>config.env</code> and redeploy for the change to take effect.</p>
           </div>
           <div class="admin-form__group admin-form__group--full"
                *ngIf="settingForm.get('key')?.value !== 'logo_url' && settingForm.get('key')?.value !== 'favicon_url'">
