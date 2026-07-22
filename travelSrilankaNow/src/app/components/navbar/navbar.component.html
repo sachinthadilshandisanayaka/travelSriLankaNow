@@ -1,4 +1,4 @@
-<nav class="navbar" [class.scrolled]="isScrolled">
+<nav class="navbar" [class.scrolled]="isScrolled" [class.navbar--liquid]="navbarStyle === 'liquid'">
   <div class="container navbar-content">
     <!-- Logo: image + site name stacked, or text fallback -->
     <a routerLink="/" class="logo" (click)="closeMenu()">
@@ -9,6 +9,7 @@
     </a>
 
     <div class="nav-links" [class.active]="isMenuOpen">
+      <span class="liq-indicator" #liqIndicator></span>
       <a *ngFor="let link of navLinks"
          [routerLink]="link.routePath"
          routerLinkActive="active"

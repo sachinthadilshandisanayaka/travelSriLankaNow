@@ -87,6 +87,7 @@ export class AdminHeroSlidesComponent implements OnInit {
       id: [null],
       title: ['', Validators.required],
       subtitle: [''],
+      sliderType: ['standard'],
       mediaType: ['image'],
       imageUrl: [''],
       videoUrl: [''],
@@ -269,6 +270,7 @@ export class AdminHeroSlidesComponent implements OnInit {
     this.subtitleStyleOpen = false;
     this.gallery = { enabled: false, items: [] };
     this.heroSlideForm.reset({
+      sliderType: 'standard',
       mediaType: 'image',
       displayOrder: 0,
       active: true,

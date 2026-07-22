@@ -16,6 +16,10 @@
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           Add Custom Section
         </button>
+        <button class="admin-btn admin-btn--primary" (click)="openAdditionalContentPicker()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"></path></svg>
+          Additional Content
+        </button>
         <button *ngIf="hasOrderChanged" class="admin-btn admin-btn--primary" (click)="saveOrder()" [disabled]="isSaving">
           <svg *ngIf="!isSaving" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           <span *ngIf="!isSaving">Save Order</span>
@@ -82,6 +86,14 @@
           </div>
           <div class="section-card__config" *ngIf="section.sectionType === 'CUSTOM_CONTENT'">
             <span class="section-card__config-item">Template: {{ parseCustomConfig(section.config).template || 'minimal' }}</span>
+          </div>
+          <div class="section-card__config" *ngIf="section.sectionType === 'CUSTOMER_FEEDBACK'">
+            <span class="section-card__config-item">{{ parseFeedbackConfig(section.config).feedbacks?.length || 0 }} reviews</span>
+            <span class="section-card__config-item section-card__config-hint">Click ✏️ to manage feedback</span>
+          </div>
+          <div class="section-card__config" *ngIf="section.sectionType === 'SCROLL_CARDS'">
+            <span class="section-card__config-item">{{ parseScrollCardsConfig(section.config).cards?.length || 0 }} cards</span>
+            <span class="section-card__config-item section-card__config-hint">Click ✏️ to manage cards</span>
           </div>
           <div class="section-card__config" *ngIf="parseConfig(section.config) as config">
             <span *ngIf="config.itemsCount" class="section-card__config-item">{{ config.itemsCount }} items</span>
@@ -676,3 +688,384 @@
   type="danger"
   (confirmed)="confirmDeleteSection()">
 </app-confirm-dialog>
+
+<!-- ======== Additional Content Type Picker ======== -->
+<div *ngIf="showAdditionalContentPicker" class="admin-modal" (click)="closeAdditionalContentPicker()">
+  <div class="admin-modal__content additional-picker" (click)="$event.stopPropagation()">
+    <div class="admin-modal__header">
+      <h2>Additional Homepage Content</h2>
+      <p class="admin-modal__subheader">Choose a section type to add to your homepage</p>
+      <button class="admin-modal__close" (click)="closeAdditionalContentPicker()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="admin-modal__body">
+      <div class="additional-picker__grid">
+        <button *ngFor="let ct of ADDITIONAL_CONTENT_TYPES"
+                class="additional-picker__card"
+                (click)="selectAdditionalContentType(ct.type)">
+          <div class="additional-picker__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="ct.icon"></path>
+            </svg>
+          </div>
+          <div class="additional-picker__text">
+            <h3>{{ ct.name }}</h3>
+            <p>{{ ct.description }}</p>
+          </div>
+          <svg class="additional-picker__arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== Customer Feedback Modal ======== -->
+<div *ngIf="showFeedbackModal" class="admin-modal" (click)="closeFeedbackModal()">
+  <div class="admin-modal__content admin-modal__content--wide" (click)="$event.stopPropagation()">
+    <div class="admin-modal__header">
+      <h2>{{ editingFeedbackSection ? 'Edit' : 'Create' }} Customer Feedback Section</h2>
+      <button class="admin-modal__close" (click)="closeFeedbackModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body">
+      <!-- Section meta -->
+      <div class="feedback-meta">
+        <div class="admin-form__grid">
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Section Title *</label>
+            <input type="text" class="admin-input" [(ngModel)]="feedbackSectionTitle" placeholder="e.g., What Our Clients Are Saying">
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Subtitle</label>
+            <input type="text" class="admin-input" [(ngModel)]="feedbackSectionSubtitle" placeholder="Optional subtitle">
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Display Style</label>
+            <select class="admin-input" [(ngModel)]="feedbackConfig.displayStyle">
+              <option value="carousel">Carousel (horizontal scroll)</option>
+              <option value="grid">Grid</option>
+            </select>
+          </div>
+          <div class="admin-form__group">
+            <label class="admin-form__label">Card Style</label>
+            <select class="admin-input" [(ngModel)]="feedbackConfig.cardStyle">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="glass">Glass</option>
+            </select>
+          </div>
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-checkbox">
+              <input type="checkbox" [(ngModel)]="feedbackSectionActive">
+              <span>Active — Show on homepage</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="feedback-items-section">
+        <div class="feedback-items-header">
+          <h3>Reviews ({{ feedbackConfig.feedbacks?.length || 0 }})</h3>
+          <button class="admin-btn admin-btn--secondary" (click)="openAddFeedbackItem()" *ngIf="!showFeedbackItemForm">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Review
+          </button>
+        </div>
+
+        <!-- Add/Edit feedback item form -->
+        <div *ngIf="showFeedbackItemForm" class="feedback-item-form">
+          <h4>{{ editingFeedbackItem ? 'Edit Review' : 'Add New Review' }}</h4>
+          <div class="admin-form__grid">
+            <div class="admin-form__group">
+              <label class="admin-form__label">Reviewer Name *</label>
+              <input type="text" class="admin-input" [(ngModel)]="feedbackItemForm.name" placeholder="e.g., John Smith">
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Role / Title</label>
+              <input type="text" class="admin-input" [(ngModel)]="feedbackItemForm.role" placeholder="e.g., CEO">
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Company</label>
+              <input type="text" class="admin-input" [(ngModel)]="feedbackItemForm.company" placeholder="e.g., Acme Corp">
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Rating</label>
+              <div class="star-rating-picker">
+                <button *ngFor="let s of getStarArray(5); let si = index"
+                        type="button"
+                        class="star-btn"
+                        [class.star-btn--filled]="si < feedbackItemForm.rating"
+                        (click)="feedbackItemForm.rating = si + 1">★</button>
+                <span class="star-label">{{ feedbackItemForm.rating }}/5</span>
+              </div>
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Review Text *</label>
+              <textarea class="admin-input admin-textarea" [(ngModel)]="feedbackItemForm.text" rows="3" placeholder="Enter the review text..."></textarea>
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Profile Photo URL</label>
+              <input type="text" class="admin-input" [(ngModel)]="feedbackItemForm.imageUrl" placeholder="https://... or upload below">
+              <app-image-upload
+                [label]="'Upload Photo'"
+                [folder]="'travel-srilanka-proj001/feedback'"
+                [currentImageUrl]="feedbackItemForm.imageUrl || ''"
+                (imageUploaded)="onFeedbackImageUploaded($event)">
+              </app-image-upload>
+            </div>
+          </div>
+          <div class="feedback-item-form__actions">
+            <button class="admin-btn admin-btn--secondary" (click)="showFeedbackItemForm = false">Cancel</button>
+            <button class="admin-btn admin-btn--primary"
+                    [disabled]="!feedbackItemForm.name.trim() || !feedbackItemForm.text.trim()"
+                    (click)="saveFeedbackItem()">
+              {{ editingFeedbackItem ? 'Save Changes' : 'Add Review' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Feedback items list -->
+        <div class="feedback-items-list" *ngIf="feedbackConfig.feedbacks?.length">
+          <div *ngFor="let item of feedbackConfig.feedbacks" class="feedback-item-row">
+            <div class="feedback-item-row__avatar">
+              <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name">
+              <div *ngIf="!item.imageUrl" class="feedback-item-row__avatar-placeholder">{{ item.name[0] }}</div>
+            </div>
+            <div class="feedback-item-row__info">
+              <strong>{{ item.name }}</strong>
+              <span *ngIf="item.role">{{ item.role }}<ng-container *ngIf="item.company"> @ {{ item.company }}</ng-container></span>
+              <div class="feedback-item-row__stars">
+                <span *ngFor="let s of getStarArray(5); let si = index" [class.star--filled]="si < item.rating">★</span>
+              </div>
+              <p class="feedback-item-row__text">{{ item.text | slice:0:80 }}{{ item.text.length > 80 ? '...' : '' }}</p>
+            </div>
+            <div class="feedback-item-row__actions">
+              <button class="admin-btn admin-btn--ghost" (click)="editFeedbackItem(item)" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost-danger" (click)="deleteFeedbackItem(item.id)" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!feedbackConfig.feedbacks?.length && !showFeedbackItemForm" class="feedback-empty">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="40" height="40">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+          <p>No reviews yet. Click <strong>Add Review</strong> to get started.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeFeedbackModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary"
+              [disabled]="!feedbackSectionTitle.trim() || isSaving"
+              (click)="saveFeedbackSection()">
+        {{ isSaving ? 'Saving...' : (editingFeedbackSection ? 'Save Changes' : 'Create Section') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== Scroll Cards Modal ======== -->
+<div *ngIf="showScrollCardsModal" class="admin-modal" (click)="closeScrollCardsModal()">
+  <div class="admin-modal__content admin-modal__content--wide" (click)="$event.stopPropagation()">
+    <div class="admin-modal__header">
+      <h2>{{ editingScrollCardsSection ? 'Edit' : 'Create' }} Scroll Cards Section</h2>
+      <button class="admin-modal__close" (click)="closeScrollCardsModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body">
+      <div class="admin-form__grid">
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Section Display Title *</label>
+          <input type="text" class="admin-input" [(ngModel)]="scrollCardsSectionTitle" placeholder="e.g., How It Works">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Small Label (above title)</label>
+          <input type="text" class="admin-input" [(ngModel)]="scrollCardsConfig.label" placeholder="e.g., Our Process">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Subtitle / Description</label>
+          <input type="text" class="admin-input" [(ngModel)]="scrollCardsSectionSubtitle" placeholder="Optional subtitle">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">CTA Button Text</label>
+          <input type="text" class="admin-input" [(ngModel)]="scrollCardsConfig.ctaText" placeholder="e.g., Get Started">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">CTA Button URL</label>
+          <input type="text" class="admin-input" [(ngModel)]="scrollCardsConfig.ctaUrl" placeholder="/contact">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Layout Style</label>
+          <select class="admin-input" [(ngModel)]="scrollCardsConfig.layoutStyle">
+            <option value="split">Split (text left, cards right)</option>
+            <option value="centered">Centered (title top, cards below)</option>
+          </select>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="scrollCardsSectionActive">
+            <span>Active — Show on homepage</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Cards list -->
+      <div class="scroll-cards-section">
+        <div class="feedback-items-header">
+          <h3>Cards ({{ scrollCardsConfig.cards?.length || 0 }})</h3>
+          <button class="admin-btn admin-btn--secondary" (click)="openAddScrollCardItem()" *ngIf="!showScrollCardItemForm">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Card
+          </button>
+        </div>
+
+        <!-- Add/Edit card form -->
+        <div *ngIf="showScrollCardItemForm" class="feedback-item-form">
+          <h4>{{ editingScrollCardItem ? 'Edit Card' : 'Add New Card' }}</h4>
+          <div class="admin-form__grid">
+            <div class="admin-form__group">
+              <label class="admin-form__label">Number Label</label>
+              <input type="text" class="admin-input" [(ngModel)]="scrollCardItemForm.number" placeholder="e.g., 01">
+            </div>
+            <div class="admin-form__group">
+              <label class="admin-form__label">Icon (emoji or symbol)</label>
+              <input type="text" class="admin-input" [(ngModel)]="scrollCardItemForm.icon" placeholder="e.g., 🔍 or ✏️">
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Card Title *</label>
+              <input type="text" class="admin-input" [(ngModel)]="scrollCardItemForm.title" placeholder="e.g., Discovery & Strategy">
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Description *</label>
+              <textarea class="admin-input admin-textarea" [(ngModel)]="scrollCardItemForm.description" rows="2" placeholder="Brief description of this step..."></textarea>
+            </div>
+            <div class="admin-form__group admin-form__group--full">
+              <label class="admin-form__label">Card Background Color</label>
+              <div class="color-input-row">
+                <input type="color" class="color-swatch" [(ngModel)]="scrollCardItemForm.backgroundColor">
+                <input type="text" class="admin-input admin-input--sm" [(ngModel)]="scrollCardItemForm.backgroundColor" placeholder="#ffffff">
+                <button class="admin-btn admin-btn--ghost" (click)="scrollCardItemForm.backgroundColor = ''">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div class="feedback-item-form__actions">
+            <button class="admin-btn admin-btn--secondary" (click)="showScrollCardItemForm = false">Cancel</button>
+            <button class="admin-btn admin-btn--primary"
+                    [disabled]="!scrollCardItemForm.title.trim() || !scrollCardItemForm.description.trim()"
+                    (click)="saveScrollCardItem()">
+              {{ editingScrollCardItem ? 'Save Changes' : 'Add Card' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Cards list -->
+        <div class="scroll-card-items-list" *ngIf="scrollCardsConfig.cards?.length">
+          <div *ngFor="let card of scrollCardsConfig.cards; let ci = index" class="scroll-card-item-row"
+               [style.border-left-color]="card.backgroundColor || 'var(--primary-navy)'">
+            <div class="scroll-card-item-row__num">{{ card.number || (ci + 1) }}</div>
+            <div class="scroll-card-item-row__icon" *ngIf="card.icon">{{ card.icon }}</div>
+            <div class="scroll-card-item-row__info">
+              <strong>{{ card.title }}</strong>
+              <p>{{ card.description | slice:0:80 }}{{ card.description.length > 80 ? '...' : '' }}</p>
+            </div>
+            <div class="feedback-item-row__actions">
+              <button class="admin-btn admin-btn--ghost" (click)="editScrollCardItem(card)" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </button>
+              <button class="admin-btn admin-btn--ghost-danger" (click)="deleteScrollCardItem(card.id)" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!scrollCardsConfig.cards?.length && !showScrollCardItemForm" class="feedback-empty">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="40" height="40">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <p>No cards yet. Click <strong>Add Card</strong> to get started.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeScrollCardsModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary"
+              [disabled]="!scrollCardsSectionTitle.trim() || isSaving"
+              (click)="saveScrollCardsSection()">
+        {{ isSaving ? 'Saving...' : (editingScrollCardsSection ? 'Save Changes' : 'Create Section') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Feature a More Section Modal -->
+<div *ngIf="showMoreSectionModal" class="admin-modal" (click)="closeMoreSectionModal()">
+  <div class="admin-modal__content" (click)="$event.stopPropagation()">
+    <div class="admin-modal__header">
+      <h2>{{ editingMoreSection ? 'Edit' : 'Create' }} Featured More Section</h2>
+      <button class="admin-modal__close" (click)="closeMoreSectionModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body">
+      <div class="admin-form__grid">
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">More Section *</label>
+          <select class="admin-input" [(ngModel)]="moreSectionConfig.moreSectionSlug" (ngModelChange)="onMoreSectionPicked()" [disabled]="isLoadingMoreSections">
+            <option value="" disabled>{{ isLoadingMoreSections ? 'Loading...' : 'Select a section' }}</option>
+            <option *ngFor="let s of moreSectionsList" [value]="s.slug">{{ s.name }}</option>
+          </select>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Section Display Title *</label>
+          <input type="text" class="admin-input" [(ngModel)]="moreSectionTitle" placeholder="e.g., Latest Articles">
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Subtitle</label>
+          <input type="text" class="admin-input" [(ngModel)]="moreSectionSubtitle" placeholder="Optional subtitle">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Number of Items</label>
+          <input type="number" class="admin-input" [(ngModel)]="moreSectionConfig.itemCount" min="1" max="20">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Display Style</label>
+          <select class="admin-input" [(ngModel)]="moreSectionConfig.displayStyle">
+            <option value="grid">Grid</option>
+            <option value="list">List</option>
+          </select>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="moreSectionIsActive">
+            <span>Active — Show on homepage</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeMoreSectionModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary"
+              [disabled]="!moreSectionConfig.moreSectionSlug || !moreSectionTitle.trim() || isSaving"
+              (click)="saveMoreSectionSection()">
+        {{ isSaving ? 'Saving...' : (editingMoreSection ? 'Save Changes' : 'Create Section') }}
+      </button>
+    </div>
+  </div>
+</div>
