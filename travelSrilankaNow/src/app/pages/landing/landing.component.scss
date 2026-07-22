@@ -2217,6 +2217,7 @@
   background: $navy-bg-lightest;
   display: flex;
   align-items: center;
+  padding-top: 20vh; // position content between centre and bottom (~60% from top)
 }
 
 // ── Split layout ─────────────────────────────────────────────────────────────

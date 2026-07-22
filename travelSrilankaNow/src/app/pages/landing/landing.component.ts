@@ -847,9 +847,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       if (!n) return;
 
       // Set wrapper tall enough to drive the animation
-      wrapper.style.height = `calc(100vh + ${n * 85}vh)`;
-
-      const CARD_STEP = 290; // px gap between spread card positions
+      wrapper.style.height = `calc(100vh + ${n * 30}vh)`;
 
       const handler = () => {
         const rect = wrapper.getBoundingClientRect();
@@ -859,14 +857,24 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         const scrolled = -rect.top;
         const progress = Math.min(1, Math.max(0, scrolled / scrollDistance));
 
+        // Measure live card height so CARD_STEP always fits the actual rendered card
+        const CARD_STEP = (cards[0]?.offsetHeight || 240) + 24;
+
+        // Only n-1 cards move; the bottom card stays as the base.
+        // Using (n-1) segments means: card i finishes → card i+1 starts immediately.
+        // No dead zone, true "one leaves, next begins" chaining.
+        const movingCount = n - 1;
+
         cards.forEach((card, ci) => {
-          const segStart = ci / n;
-          const segEnd = (ci + 1) / n;
+          if (ci === n - 1 || movingCount === 0) {
+            card.style.transform = 'translateY(0px)';
+            return;
+          }
+          const segStart = ci / movingCount;
+          const segEnd = (ci + 1) / movingCount;
           const raw = (progress - segStart) / (segEnd - segStart);
           const t = Math.min(1, Math.max(0, raw));
-          // Ease out cubic
           const eased = 1 - Math.pow(1 - t, 3);
-          // Card 0 peels first (furthest up), card n-1 stays at 0
           const targetY = -(n - 1 - ci) * CARD_STEP * eased;
           card.style.transform = `translateY(${targetY}px)`;
         });
