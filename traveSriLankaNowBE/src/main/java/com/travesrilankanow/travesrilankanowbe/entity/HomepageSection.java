@@ -27,6 +27,7 @@ public class HomepageSection {
     @Column(nullable = false)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String subtitle;
 
     @Column(nullable = false, columnDefinition = "integer default 0")
