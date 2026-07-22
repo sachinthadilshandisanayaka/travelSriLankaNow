@@ -8,6 +8,7 @@ import { PlaceService } from '../../services/place.service';
 import { PackageService } from '../../services/package.service';
 import { HeroSlideService } from '../../services/hero-slide.service';
 import { HomepageSectionService } from '../../services/homepage-section.service';
+import { MoreSectionService } from '../../services/more-section.service';
 import { SocialMediaContentService } from '../../services/social-media-content.service';
 import { SiteSettingsService } from '../../services/site-settings.service';
 import { NavConfigService } from '../../services/nav-config.service';
@@ -17,8 +18,9 @@ import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
 import { TourPackage } from '../../models/package.model';
 import { HeroSlide, HeroSearchConfig } from '../../models/hero-slide.model';
-import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
+import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig, CustomerFeedbackConfig, ScrollCardsConfig, MoreSectionBlockConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
+import { MoreSectionItem } from '../../models/more-section.model';
 
 interface GlobalSearchResult {
   type: 'package' | 'event' | 'location' | 'place';
@@ -82,11 +84,16 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   sectionConfigs: Map<string, HomepageSectionConfig> = new Map();
   gallerySectionConfig: Map<number, GallerySliderConfig> = new Map();
   customSectionConfigs: Map<number, CustomContentConfig> = new Map();
+  feedbackSectionConfigs: Map<number, CustomerFeedbackConfig> = new Map();
+  scrollCardsSectionConfigs: Map<number, ScrollCardsConfig> = new Map();
+  moreSectionBlockConfigs: Map<number, MoreSectionBlockConfig> = new Map();
+  moreSectionItemsMap: Map<number, MoreSectionItem[]> = new Map();
   sectionsLoaded = false;
   useFallbackLayout = false;
 
   private visibilityObserver: IntersectionObserver | null = null;
   private customAnimObserver: IntersectionObserver | null = null;
+  private scrollCardsListeners: Array<() => void> = [];
   private onPageVisible = () => this.syncVideoPlayback();
 
   constructor(
@@ -96,6 +103,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     private packageService: PackageService,
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
+    private moreSectionService: MoreSectionService,
     private socialMediaContentService: SocialMediaContentService,
     private siteSettings: SiteSettingsService,
     private navConfigService: NavConfigService,
@@ -134,6 +142,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.stopSlideTimer();
     if (this.visibilityObserver) { this.visibilityObserver.disconnect(); this.visibilityObserver = null; }
     if (this.customAnimObserver) { this.customAnimObserver.disconnect(); this.customAnimObserver = null; }
+    this.scrollCardsListeners.forEach(fn => window.removeEventListener('scroll', fn));
+    this.scrollCardsListeners = [];
     document.removeEventListener('visibilitychange', this.onPageVisible);
     this.globalSearchSub?.unsubscribe();
   }
@@ -153,6 +163,12 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.gallerySectionConfig.set(section.id!, parsed);
               } else if (section.sectionType === 'CUSTOM_CONTENT') {
                 this.customSectionConfigs.set(section.id!, parsed);
+              } else if (section.sectionType === 'CUSTOMER_FEEDBACK') {
+                this.feedbackSectionConfigs.set(section.id!, parsed);
+              } else if (section.sectionType === 'SCROLL_CARDS') {
+                this.scrollCardsSectionConfigs.set(section.id!, parsed);
+              } else if (section.sectionType === 'MORE_SECTION') {
+                this.moreSectionBlockConfigs.set(section.id!, parsed);
               } else {
                 this.sectionConfigs.set(section.sectionType, parsed);
               }
@@ -164,7 +180,11 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Load data for active sections
         this.loadSectionData();
-        setTimeout(() => this.setupCustomContentAnimations(), 150);
+        setTimeout(() => {
+          this.setupCustomContentAnimations();
+          this.setupScrollCardsAnimations();
+          this.setupFeedbackCarouselDrag();
+        }, 200);
       },
       error: () => {
         // Fallback: load all data with defaults
@@ -200,12 +220,34 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         case 'SOCIAL_MEDIA':
           this.loadSocialMedia();
           break;
+        case 'MORE_SECTION':
+          this.loadMoreSectionItems(section);
+          break;
         case 'IMAGE_GALLERY_SLIDER':
         case 'CUSTOM_CONTENT':
+        case 'CUSTOMER_FEEDBACK':
+        case 'SCROLL_CARDS':
           // no data loading needed; config holds everything
           break;
       }
     });
+  }
+
+  private loadMoreSectionItems(section: HomepageSection): void {
+    const config = this.moreSectionBlockConfigs.get(section.id!);
+    if (!config?.moreSectionSlug) return;
+    this.moreSectionService.getSectionItems(config.moreSectionSlug, 0, config.itemCount || 6).subscribe({
+      next: (response) => this.moreSectionItemsMap.set(section.id!, response.content),
+      error: () => this.moreSectionItemsMap.set(section.id!, [])
+    });
+  }
+
+  getMoreSectionConfig(sectionId: number | undefined): MoreSectionBlockConfig | undefined {
+    return this.moreSectionBlockConfigs.get(sectionId!);
+  }
+
+  getMoreSectionItems(sectionId: number | undefined): MoreSectionItem[] {
+    return this.moreSectionItemsMap.get(sectionId!) || [];
   }
 
   private loadFallbackData(): void {
@@ -794,6 +836,130 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.globalSearchQuery = '';
     this.globalSearchResults = [];
     this.router.navigate([result.route]);
+  }
+
+  // ── Scroll Cards animation ───────────────────────────────────────────────
+  private setupScrollCardsAnimations(): void {
+    // Clean up old scroll listeners
+    this.scrollCardsListeners.forEach(fn => window.removeEventListener('scroll', fn));
+    this.scrollCardsListeners = [];
+
+    // Centered grid cards: staggered fade-in via IntersectionObserver
+    if (typeof IntersectionObserver !== 'undefined') {
+      const centeredCards = document.querySelectorAll<HTMLElement>('.scroll-card--centered-item');
+      if (centeredCards.length) {
+        const centeredObs = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const idx = parseInt((entry.target as HTMLElement).dataset['index'] || '0');
+              setTimeout(() => entry.target.classList.add('sc--revealed'), idx * 120);
+              centeredObs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        centeredCards.forEach(el => centeredObs.observe(el));
+      }
+    } else {
+      document.querySelectorAll<HTMLElement>('.scroll-card--centered-item').forEach(el => el.classList.add('sc--revealed'));
+    }
+
+    // Split layout: scroll-driven sticky reveal — cards peel off one by one upward
+    const wrappers = document.querySelectorAll<HTMLElement>('.sc-scroll-wrapper');
+    wrappers.forEach(wrapper => {
+      const stack = wrapper.querySelector<HTMLElement>('.scroll-cards-stack');
+      if (!stack) return;
+
+      const cards = Array.from(stack.querySelectorAll<HTMLElement>('.scroll-card--stacked'));
+      const n = cards.length;
+      if (!n) return;
+
+      const movingCount = n - 1;
+      if (movingCount <= 0) return;
+
+      // ── Core idea ────────────────────────────────────────────────────────────
+      // All cards start stacked at y=0.  As the user scrolls:
+      //   • Card N starts moving once Card N-1 has risen exactly one card-height
+      //     (clearing the space so Card N is revealed below it).
+      //   • All cards travel the same EXIT_DIST at the same eased rate.
+      //   • When Card N+2 begins moving, Card N disappears (opacity 0).
+      // ─────────────────────────────────────────────────────────────────────────
+      const winH = window.innerHeight;
+      const CARD_H  = cards[0]?.offsetHeight || 260;
+      const EXIT_DIST = Math.round(winH * 0.75); // enough to clear section top
+      const STAGGER   = CARD_H;                   // px of scroll before next card starts
+
+      // Total scroll the animation needs:  (n-1 staggers) + one full card exit
+      const totalScroll = (movingCount - 1) * STAGGER + EXIT_DIST;
+      wrapper.style.height = `${totalScroll + winH}px`;
+
+      const handler = () => {
+        const rect    = wrapper.getBoundingClientRect();
+        const scrolled = Math.max(0, Math.min(totalScroll, -rect.top));
+
+        cards.forEach((card, ci) => {
+          if (ci === n - 1) {
+            card.style.transform = 'translateY(0px)';
+            card.style.opacity   = '1';
+            return;
+          }
+
+          // How far this card has scrolled relative to its own start
+          const cardScrolled = Math.max(0, scrolled - ci * STAGGER);
+          const t     = Math.min(1, cardScrolled / EXIT_DIST);
+          const eased = 1 - Math.pow(1 - t, 3);
+          card.style.transform = `translateY(${-EXIT_DIST * eased}px)`;
+
+          // Disappear the moment card ci+2 begins moving (if ci+2 is a moving card)
+          if (ci + 2 < n - 1) {
+            card.style.opacity = scrolled >= (ci + 2) * STAGGER ? '0' : '1';
+          } else {
+            card.style.opacity = '1';
+          }
+        });
+      };
+
+      window.addEventListener('scroll', handler, { passive: true });
+      this.scrollCardsListeners.push(handler);
+      handler(); // sync on first render
+    });
+  }
+
+  // ── Feedback carousel drag-to-scroll ─────────────────────────────────────
+  private setupFeedbackCarouselDrag(): void {
+    const carousels = document.querySelectorAll<HTMLElement>('.feedback-carousel');
+    carousels.forEach(el => {
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+
+      el.addEventListener('mousedown', (e: MouseEvent) => {
+        isDown = true;
+        el.style.cursor = 'grabbing';
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+      });
+      el.addEventListener('mouseleave', () => { isDown = false; el.style.cursor = 'grab'; });
+      el.addEventListener('mouseup', () => { isDown = false; el.style.cursor = 'grab'; });
+      el.addEventListener('mousemove', (e: MouseEvent) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 2;
+        el.scrollLeft = scrollLeft - walk;
+      });
+    });
+  }
+
+  // ── Customer Feedback helpers ────────────────────────────────────────────
+  getFeedbackConf(sectionId?: number): CustomerFeedbackConfig {
+    return this.feedbackSectionConfigs.get(sectionId!) || { feedbacks: [] };
+  }
+
+  getStarArray(): number[] { return [1, 2, 3, 4, 5]; }
+
+  // ── Scroll Cards helpers ─────────────────────────────────────────────────
+  getScrollCardsConf(sectionId?: number): ScrollCardsConfig {
+    return this.scrollCardsSectionConfigs.get(sectionId!) || { cards: [] };
   }
 
   // ─────────────────────────────────────────────────────────────────────────

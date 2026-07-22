@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, HostListener, Renderer2, Inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, HostListener, Renderer2, Inject, ViewChild, ElementRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { MoreSectionService } from '../../services/more-section.service';
 import { NavConfigService } from '../../services/nav-config.service';
 import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.service';
@@ -23,7 +24,7 @@ const FALLBACK_NAV: NavConfig[] = [
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent implements OnInit, OnDestroy {
+export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   isMenuOpen = false;
   isScrolled = false;
   isMoreOpen = false;
@@ -31,11 +32,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   currentUser: CustomerUser | null = null;
   logoUrl = '';
   siteName = '';
+  navbarStyle: 'classic' | 'liquid' = 'classic';
 
   navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
 
+  @ViewChild('liqIndicator') liqIndicator?: ElementRef<HTMLSpanElement>;
+
   private userSub?: Subscription;
+  private navSub?: Subscription;
 
   constructor(
     private moreSectionService: MoreSectionService,
@@ -61,10 +66,56 @@ export class NavbarComponent implements OnInit, OnDestroy {
       next: (setting) => { if (setting?.value) this.siteName = setting.value; },
       error: () => {}
     });
+    this.siteSettingsService.getSettingByKey('navbar_style').subscribe({
+      next: (setting) => {
+        if (setting?.value) this.navbarStyle = setting.value as 'classic' | 'liquid';
+        setTimeout(() => this.updateLiquidIndicator(false), 80);
+      },
+      error: () => {}
+    });
+
+    this.navSub = this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe(() => setTimeout(() => this.updateLiquidIndicator(), 60));
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.updateLiquidIndicator(false), 120);
   }
 
   ngOnDestroy(): void {
     this.userSub?.unsubscribe();
+    this.navSub?.unsubscribe();
+  }
+
+  private updateLiquidIndicator(animate = true): void {
+    if (!this.liqIndicator) return;
+    const el = this.liqIndicator.nativeElement;
+    const container = el.closest('.nav-links') as HTMLElement | null;
+    if (!container) return;
+
+    const active = container.querySelector<HTMLElement>('a.nav-link.active');
+    if (!active) {
+      el.classList.remove('liq-indicator--visible');
+      return;
+    }
+
+    const cRect = container.getBoundingClientRect();
+    const aRect = active.getBoundingClientRect();
+    const left = aRect.left - cRect.left;
+    const width = aRect.width;
+
+    if (!animate) {
+      el.style.transition = 'none';
+      el.style.left = `${left}px`;
+      el.style.width = `${width}px`;
+      requestAnimationFrame(() => { el.style.transition = ''; });
+    } else {
+      el.style.left = `${left}px`;
+      el.style.width = `${width}px`;
+    }
+
+    el.classList.add('liq-indicator--visible');
   }
 
   private loadNavConfig(): void {
