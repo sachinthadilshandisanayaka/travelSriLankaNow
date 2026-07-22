@@ -912,6 +912,43 @@
     </ng-container>
   </ng-container>
 
+  <!-- ========== FEATURED MORE SECTION ========== -->
+  <ng-container *ngIf="section.sectionType === 'MORE_SECTION' && getMoreSectionItems(section.id).length > 0">
+    <section class="section animate-fadeIn">
+      <div class="container">
+        <div class="section-header animate-fadeInUp">
+          <h2>{{ section.title }}</h2>
+          <p class="lead" *ngIf="section.subtitle">{{ section.subtitle }}</p>
+        </div>
+
+        <div class="location-grid" [class.location-grid--list]="getMoreSectionConfig(section.id)?.displayStyle === 'list'">
+          <a *ngFor="let item of getMoreSectionItems(section.id)"
+             [routerLink]="['/more', getMoreSectionConfig(section.id)?.moreSectionSlug, item.slug || item.id]"
+             class="location-card card-stagger">
+            <div class="location-image image-zoom" *ngIf="item.imageUrl">
+              <img [src]="item.imageUrl" [alt]="item.title" />
+            </div>
+            <div class="location-content">
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.shortDescription }}</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="text-center mt-2xl animate-fadeIn delay-6">
+          <a [routerLink]="['/more', getMoreSectionConfig(section.id)?.moreSectionSlug]" class="btn-primary">
+            <span>View All</span>
+            <span class="btn-shine"></span>
+            <span class="btn-corner btn-corner--tl"></span>
+            <span class="btn-corner btn-corner--tr"></span>
+            <span class="btn-corner btn-corner--bl"></span>
+            <span class="btn-corner btn-corner--br"></span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
 </ng-container>
 
 <!-- ========== FALLBACK LAYOUT ========== -->

@@ -1,6 +1,6 @@
 export interface HomepageSection {
   id?: number;
-  sectionType: 'HERO_SLIDER' | 'FEATURED_LOCATIONS' | 'UPCOMING_EVENTS' | 'PLACES' | 'SOCIAL_MEDIA' | 'IMAGE_GALLERY_SLIDER' | 'CUSTOM_CONTENT' | 'PACKAGES' | 'CUSTOMER_FEEDBACK' | 'SCROLL_CARDS';
+  sectionType: 'HERO_SLIDER' | 'FEATURED_LOCATIONS' | 'UPCOMING_EVENTS' | 'PLACES' | 'SOCIAL_MEDIA' | 'IMAGE_GALLERY_SLIDER' | 'CUSTOM_CONTENT' | 'PACKAGES' | 'CUSTOMER_FEEDBACK' | 'SCROLL_CARDS' | 'MORE_SECTION';
   title: string;
   subtitle?: string;
   displayOrder: number;
@@ -111,4 +111,11 @@ export interface ScrollCardsConfig {
   ctaUrl?: string;
   layoutStyle?: 'split' | 'centered';
   cards: ScrollCardItem[];
+}
+
+// ── More Section feature block ────────────────────────────────────────────
+export interface MoreSectionBlockConfig {
+  moreSectionSlug: string;
+  itemCount: number;
+  displayStyle: 'grid' | 'list';
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
-import { GallerySliderConfig, GallerySliderImage, CustomContentConfig, CustomerFeedbackConfig, FeedbackItem, ScrollCardsConfig, ScrollCardItem } from '../../../models/homepage-section.model';
+import { GallerySliderConfig, GallerySliderImage, CustomContentConfig, CustomerFeedbackConfig, FeedbackItem, ScrollCardsConfig, ScrollCardItem, MoreSectionBlockConfig } from '../../../models/homepage-section.model';
 import { forkJoin } from 'rxjs';
 
 interface HomepageSection {
@@ -164,7 +164,8 @@ export class AdminHomepageSectionsComponent implements OnInit {
     CUSTOM_CONTENT: 'Custom Content Section',
     PACKAGES: 'Tour Packages',
     CUSTOMER_FEEDBACK: 'Customer Feedback',
-    SCROLL_CARDS: 'Scroll Cards'
+    SCROLL_CARDS: 'Scroll Cards',
+    MORE_SECTION: 'Featured More Section'
   };
 
   sectionTypeIcons: Record<string, string> = {
@@ -177,7 +178,8 @@ export class AdminHomepageSectionsComponent implements OnInit {
     CUSTOM_CONTENT: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
     PACKAGES: 'M20 7h-3V6a4 4 0 00-4-4h-2a4 4 0 00-4 4v1H4a1 1 0 00-1 1v11a2 2 0 002 2h14a2 2 0 002-2V8a1 1 0 00-1-1zM9 6a2 2 0 012-2h2a2 2 0 012 2v1H9V6zm11 13a.5.5 0 01-.5.5h-15a.5.5 0 01-.5-.5V9h4v2a1 1 0 002 0V9h2v2a1 1 0 002 0V9h4v10z',
     CUSTOMER_FEEDBACK: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
-    SCROLL_CARDS: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+    SCROLL_CARDS: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+    MORE_SECTION: 'M19 11H5m14-4H5m14 8H5m14 4H5'
   };
 
   // Gallery creation modal
@@ -201,8 +203,24 @@ export class AdminHomepageSectionsComponent implements OnInit {
       name: 'Scroll Cards',
       description: 'Stacked cards that fan out as the user scrolls — ideal for process steps, features, or highlights.',
       icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+    },
+    {
+      type: 'MORE_SECTION',
+      name: 'Feature a More Section',
+      description: 'Showcase items from an existing More Section (e.g. Articles) as a card grid, with a "View All" link.',
+      icon: 'M19 11H5m14-4H5m14 8H5m14 4H5'
     }
   ];
+
+  // More Section feature block modal
+  showMoreSectionModal = false;
+  editingMoreSection: HomepageSection | null = null;
+  moreSectionsList: any[] = [];
+  isLoadingMoreSections = false;
+  moreSectionConfig: MoreSectionBlockConfig = { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' };
+  moreSectionTitle = '';
+  moreSectionSubtitle = '';
+  moreSectionIsActive = true;
 
   // Customer Feedback modal
   showFeedbackModal = false;
@@ -290,7 +308,7 @@ export class AdminHomepageSectionsComponent implements OnInit {
   }
 
   isDeletable(section: HomepageSection): boolean {
-    return ['CUSTOM_CONTENT', 'IMAGE_GALLERY_SLIDER', 'CUSTOMER_FEEDBACK', 'SCROLL_CARDS'].includes(section.sectionType);
+    return ['CUSTOM_CONTENT', 'IMAGE_GALLERY_SLIDER', 'CUSTOMER_FEEDBACK', 'SCROLL_CARDS', 'MORE_SECTION'].includes(section.sectionType);
   }
 
   // ---- Gallery Section Creation ----
@@ -355,6 +373,93 @@ export class AdminHomepageSectionsComponent implements OnInit {
       this.openFeedbackModal();
     } else if (type === 'SCROLL_CARDS') {
       this.openScrollCardsModal();
+    } else if (type === 'MORE_SECTION') {
+      this.openMoreSectionModal();
+    }
+  }
+
+  // ---- Feature a More Section ----
+  parseMoreSectionConfig(configStr?: string): MoreSectionBlockConfig {
+    if (!configStr) return { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' };
+    try { return JSON.parse(configStr); } catch { return { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' }; }
+  }
+
+  openMoreSectionModal(section?: HomepageSection): void {
+    this.editingMoreSection = section || null;
+    if (section) {
+      this.moreSectionConfig = { ...this.parseMoreSectionConfig(section.config) };
+      this.moreSectionTitle = section.title;
+      this.moreSectionSubtitle = section.subtitle || '';
+      this.moreSectionIsActive = section.isActive;
+    } else {
+      this.moreSectionConfig = { moreSectionSlug: '', itemCount: 6, displayStyle: 'grid' };
+      this.moreSectionTitle = '';
+      this.moreSectionSubtitle = '';
+      this.moreSectionIsActive = true;
+    }
+    this.showMoreSectionModal = true;
+    this.loadMoreSectionsList();
+  }
+
+  closeMoreSectionModal(): void {
+    this.showMoreSectionModal = false;
+    this.editingMoreSection = null;
+  }
+
+  loadMoreSectionsList(): void {
+    this.isLoadingMoreSections = true;
+    this.apiService.getMoreSections(0, 100).subscribe({
+      next: (response) => {
+        this.moreSectionsList = response.content;
+        this.isLoadingMoreSections = false;
+      },
+      error: () => {
+        this.isLoadingMoreSections = false;
+        this.errorMessage = 'Failed to load More Sections';
+        this.hideMessageAfterDelay();
+      }
+    });
+  }
+
+  onMoreSectionPicked(): void {
+    const picked = this.moreSectionsList.find(s => s.slug === this.moreSectionConfig.moreSectionSlug);
+    if (picked && !this.editingMoreSection) {
+      this.moreSectionTitle = picked.name;
+      this.moreSectionSubtitle = picked.description || '';
+    }
+  }
+
+  saveMoreSectionSection(): void {
+    if (!this.moreSectionConfig.moreSectionSlug || !this.moreSectionTitle.trim()) return;
+    this.isSaving = true;
+    const configStr = JSON.stringify(this.moreSectionConfig);
+    const maxOrder = this.sections.length ? Math.max(...this.sections.map(s => s.displayOrder || 0)) + 1 : 1;
+
+    if (this.editingMoreSection?.id) {
+      const updateData: HomepageSection = {
+        ...this.editingMoreSection,
+        title: this.moreSectionTitle,
+        subtitle: this.moreSectionSubtitle,
+        isActive: this.moreSectionIsActive,
+        config: configStr
+      };
+      this.apiService.updateHomepageSection(this.editingMoreSection.id, updateData).subscribe({
+        next: () => { this.successMessage = 'Section updated!'; this.closeMoreSectionModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to update'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
+    } else {
+      const newSection: any = {
+        sectionType: 'MORE_SECTION',
+        title: this.moreSectionTitle,
+        subtitle: this.moreSectionSubtitle,
+        isActive: this.moreSectionIsActive,
+        displayOrder: maxOrder,
+        config: configStr
+      };
+      this.apiService.createHomepageSection(newSection).subscribe({
+        next: () => { this.successMessage = 'Section created!'; this.closeMoreSectionModal(); this.loadSections(); this.isSaving = false; this.hideMessageAfterDelay(); },
+        error: () => { this.errorMessage = 'Failed to create'; this.isSaving = false; this.hideMessageAfterDelay(); }
+      });
     }
   }
 
@@ -569,6 +674,10 @@ export class AdminHomepageSectionsComponent implements OnInit {
     }
     if (section.sectionType === 'SCROLL_CARDS') {
       this.openScrollCardsModal(section);
+      return;
+    }
+    if (section.sectionType === 'MORE_SECTION') {
+      this.openMoreSectionModal(section);
       return;
     }
 

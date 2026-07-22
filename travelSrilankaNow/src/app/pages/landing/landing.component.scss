@@ -2296,12 +2296,12 @@
     line-height: 1.6; margin: 0;
   }
 
-  // Stacked variant — all at same position, JS drives translateY
+  // Stacked variant — all at same position, JS drives translateY + opacity
   &--stacked {
     position: absolute !important;
     top: 0; left: 0; right: 0;
     transition: box-shadow 0.3s ease;
-    will-change: transform;
+    will-change: transform, opacity;
 
     &:hover {
       box-shadow: 0 6px 28px rgba($primary-navy-dark, 0.14);

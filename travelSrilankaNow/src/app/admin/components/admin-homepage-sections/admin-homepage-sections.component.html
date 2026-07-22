@@ -1011,3 +1011,61 @@
     </div>
   </div>
 </div>
+
+<!-- Feature a More Section Modal -->
+<div *ngIf="showMoreSectionModal" class="admin-modal" (click)="closeMoreSectionModal()">
+  <div class="admin-modal__content" (click)="$event.stopPropagation()">
+    <div class="admin-modal__header">
+      <h2>{{ editingMoreSection ? 'Edit' : 'Create' }} Featured More Section</h2>
+      <button class="admin-modal__close" (click)="closeMoreSectionModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div class="admin-modal__body">
+      <div class="admin-form__grid">
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">More Section *</label>
+          <select class="admin-input" [(ngModel)]="moreSectionConfig.moreSectionSlug" (ngModelChange)="onMoreSectionPicked()" [disabled]="isLoadingMoreSections">
+            <option value="" disabled>{{ isLoadingMoreSections ? 'Loading...' : 'Select a section' }}</option>
+            <option *ngFor="let s of moreSectionsList" [value]="s.slug">{{ s.name }}</option>
+          </select>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Section Display Title *</label>
+          <input type="text" class="admin-input" [(ngModel)]="moreSectionTitle" placeholder="e.g., Latest Articles">
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-form__label">Subtitle</label>
+          <input type="text" class="admin-input" [(ngModel)]="moreSectionSubtitle" placeholder="Optional subtitle">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Number of Items</label>
+          <input type="number" class="admin-input" [(ngModel)]="moreSectionConfig.itemCount" min="1" max="20">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Display Style</label>
+          <select class="admin-input" [(ngModel)]="moreSectionConfig.displayStyle">
+            <option value="grid">Grid</option>
+            <option value="list">List</option>
+          </select>
+        </div>
+        <div class="admin-form__group admin-form__group--full">
+          <label class="admin-checkbox">
+            <input type="checkbox" [(ngModel)]="moreSectionIsActive">
+            <span>Active — Show on homepage</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-modal__footer">
+      <button class="admin-btn admin-btn--secondary" (click)="closeMoreSectionModal()">Cancel</button>
+      <button class="admin-btn admin-btn--primary"
+              [disabled]="!moreSectionConfig.moreSectionSlug || !moreSectionTitle.trim() || isSaving"
+              (click)="saveMoreSectionSection()">
+        {{ isSaving ? 'Saving...' : (editingMoreSection ? 'Save Changes' : 'Create Section') }}
+      </button>
+    </div>
+  </div>
+</div>

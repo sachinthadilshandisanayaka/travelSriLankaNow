@@ -116,6 +116,37 @@
         </div>
       </header>
 
+      <!-- Search & Filter Bar -->
+      <div class="admin-search-bar">
+        <div class="admin-search-bar__input-wrap">
+          <svg class="admin-search-bar__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+          <input
+            class="admin-search-bar__input"
+            type="text"
+            placeholder="Search by title, description..."
+            [value]="itemSearchTerm"
+            (input)="onItemSearchChange($any($event.target).value)">
+          <button *ngIf="itemSearchTerm" class="admin-search-bar__clear" (click)="clearItemSearch()" title="Clear">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <select class="admin-search-bar__select" [(ngModel)]="itemActiveFilter" (ngModelChange)="onItemFilterChange()">
+          <option value="">All Statuses</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+        <select class="admin-search-bar__select" [(ngModel)]="itemContentTypeFilter" (ngModelChange)="onItemFilterChange()">
+          <option value="">All Types</option>
+          <option value="simple">Simple</option>
+          <option value="article">Article</option>
+        </select>
+        <span class="admin-search-bar__count">{{ itemTotalElements }} result{{ itemTotalElements !== 1 ? 's' : '' }}</span>
+      </div>
+
       <div class="admin-loader" *ngIf="isLoadingItems">
         <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -183,6 +214,29 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="itemTotalPages > 0" class="admin-pagination">
+        <div class="admin-pagination__info">
+          Showing <strong>{{ itemCurrentPage * itemPageSize + 1 }}</strong> to
+          <strong>{{ Math.min((itemCurrentPage + 1) * itemPageSize, itemTotalElements) }}</strong> of
+          <strong>{{ itemTotalElements }}</strong> results
+        </div>
+        <div class="admin-pagination__controls">
+          <button class="admin-pagination__btn" (click)="previousItemPage()" [disabled]="itemCurrentPage === 0">
+            Previous
+          </button>
+          <button *ngFor="let page of [].constructor(itemTotalPages); let i = index"
+                  class="admin-pagination__btn"
+                  [class.admin-pagination__btn--active]="itemCurrentPage === i"
+                  (click)="goToItemPage(i)">
+            {{ i + 1 }}
+          </button>
+          <button class="admin-pagination__btn" (click)="nextItemPage()" [disabled]="itemCurrentPage >= itemTotalPages - 1">
+            Next
+          </button>
         </div>
       </div>
     </ng-container>

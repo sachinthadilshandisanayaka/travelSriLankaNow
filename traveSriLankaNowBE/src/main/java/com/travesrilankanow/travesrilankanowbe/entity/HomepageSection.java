@@ -71,6 +71,7 @@ public class HomepageSection {
         CUSTOM_CONTENT,
         PACKAGES,
         CUSTOMER_FEEDBACK,
-        SCROLL_CARDS
+        SCROLL_CARDS,
+        MORE_SECTION
     }
 }

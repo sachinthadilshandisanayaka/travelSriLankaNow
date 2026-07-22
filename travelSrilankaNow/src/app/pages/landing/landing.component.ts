@@ -8,6 +8,7 @@ import { PlaceService } from '../../services/place.service';
 import { PackageService } from '../../services/package.service';
 import { HeroSlideService } from '../../services/hero-slide.service';
 import { HomepageSectionService } from '../../services/homepage-section.service';
+import { MoreSectionService } from '../../services/more-section.service';
 import { SocialMediaContentService } from '../../services/social-media-content.service';
 import { SiteSettingsService } from '../../services/site-settings.service';
 import { NavConfigService } from '../../services/nav-config.service';
@@ -17,8 +18,9 @@ import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
 import { TourPackage } from '../../models/package.model';
 import { HeroSlide, HeroSearchConfig } from '../../models/hero-slide.model';
-import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig, CustomerFeedbackConfig, ScrollCardsConfig } from '../../models/homepage-section.model';
+import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig, CustomerFeedbackConfig, ScrollCardsConfig, MoreSectionBlockConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
+import { MoreSectionItem } from '../../models/more-section.model';
 
 interface GlobalSearchResult {
   type: 'package' | 'event' | 'location' | 'place';
@@ -84,6 +86,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   customSectionConfigs: Map<number, CustomContentConfig> = new Map();
   feedbackSectionConfigs: Map<number, CustomerFeedbackConfig> = new Map();
   scrollCardsSectionConfigs: Map<number, ScrollCardsConfig> = new Map();
+  moreSectionBlockConfigs: Map<number, MoreSectionBlockConfig> = new Map();
+  moreSectionItemsMap: Map<number, MoreSectionItem[]> = new Map();
   sectionsLoaded = false;
   useFallbackLayout = false;
 
@@ -99,6 +103,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     private packageService: PackageService,
     private heroSlideService: HeroSlideService,
     private homepageSectionService: HomepageSectionService,
+    private moreSectionService: MoreSectionService,
     private socialMediaContentService: SocialMediaContentService,
     private siteSettings: SiteSettingsService,
     private navConfigService: NavConfigService,
@@ -162,6 +167,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.feedbackSectionConfigs.set(section.id!, parsed);
               } else if (section.sectionType === 'SCROLL_CARDS') {
                 this.scrollCardsSectionConfigs.set(section.id!, parsed);
+              } else if (section.sectionType === 'MORE_SECTION') {
+                this.moreSectionBlockConfigs.set(section.id!, parsed);
               } else {
                 this.sectionConfigs.set(section.sectionType, parsed);
               }
@@ -213,6 +220,9 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         case 'SOCIAL_MEDIA':
           this.loadSocialMedia();
           break;
+        case 'MORE_SECTION':
+          this.loadMoreSectionItems(section);
+          break;
         case 'IMAGE_GALLERY_SLIDER':
         case 'CUSTOM_CONTENT':
         case 'CUSTOMER_FEEDBACK':
@@ -221,6 +231,23 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
       }
     });
+  }
+
+  private loadMoreSectionItems(section: HomepageSection): void {
+    const config = this.moreSectionBlockConfigs.get(section.id!);
+    if (!config?.moreSectionSlug) return;
+    this.moreSectionService.getSectionItems(config.moreSectionSlug, 0, config.itemCount || 6).subscribe({
+      next: (response) => this.moreSectionItemsMap.set(section.id!, response.content),
+      error: () => this.moreSectionItemsMap.set(section.id!, [])
+    });
+  }
+
+  getMoreSectionConfig(sectionId: number | undefined): MoreSectionBlockConfig | undefined {
+    return this.moreSectionBlockConfigs.get(sectionId!);
+  }
+
+  getMoreSectionItems(sectionId: number | undefined): MoreSectionItem[] {
+    return this.moreSectionItemsMap.get(sectionId!) || [];
   }
 
   private loadFallbackData(): void {
@@ -846,37 +873,48 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       const n = cards.length;
       if (!n) return;
 
-      // Set wrapper tall enough to drive the animation
-      wrapper.style.height = `calc(100vh + ${n * 30}vh)`;
+      const movingCount = n - 1;
+      if (movingCount <= 0) return;
+
+      // ── Core idea ────────────────────────────────────────────────────────────
+      // All cards start stacked at y=0.  As the user scrolls:
+      //   • Card N starts moving once Card N-1 has risen exactly one card-height
+      //     (clearing the space so Card N is revealed below it).
+      //   • All cards travel the same EXIT_DIST at the same eased rate.
+      //   • When Card N+2 begins moving, Card N disappears (opacity 0).
+      // ─────────────────────────────────────────────────────────────────────────
+      const winH = window.innerHeight;
+      const CARD_H  = cards[0]?.offsetHeight || 260;
+      const EXIT_DIST = Math.round(winH * 0.75); // enough to clear section top
+      const STAGGER   = CARD_H;                   // px of scroll before next card starts
+
+      // Total scroll the animation needs:  (n-1 staggers) + one full card exit
+      const totalScroll = (movingCount - 1) * STAGGER + EXIT_DIST;
+      wrapper.style.height = `${totalScroll + winH}px`;
 
       const handler = () => {
-        const rect = wrapper.getBoundingClientRect();
-        const wrapperH = wrapper.offsetHeight;
-        const winH = window.innerHeight;
-        const scrollDistance = wrapperH - winH;
-        const scrolled = -rect.top;
-        const progress = Math.min(1, Math.max(0, scrolled / scrollDistance));
-
-        // Measure live card height so CARD_STEP always fits the actual rendered card
-        const CARD_STEP = (cards[0]?.offsetHeight || 240) + 24;
-
-        // Only n-1 cards move; the bottom card stays as the base.
-        // Using (n-1) segments means: card i finishes → card i+1 starts immediately.
-        // No dead zone, true "one leaves, next begins" chaining.
-        const movingCount = n - 1;
+        const rect    = wrapper.getBoundingClientRect();
+        const scrolled = Math.max(0, Math.min(totalScroll, -rect.top));
 
         cards.forEach((card, ci) => {
-          if (ci === n - 1 || movingCount === 0) {
+          if (ci === n - 1) {
             card.style.transform = 'translateY(0px)';
+            card.style.opacity   = '1';
             return;
           }
-          const segStart = ci / movingCount;
-          const segEnd = (ci + 1) / movingCount;
-          const raw = (progress - segStart) / (segEnd - segStart);
-          const t = Math.min(1, Math.max(0, raw));
+
+          // How far this card has scrolled relative to its own start
+          const cardScrolled = Math.max(0, scrolled - ci * STAGGER);
+          const t     = Math.min(1, cardScrolled / EXIT_DIST);
           const eased = 1 - Math.pow(1 - t, 3);
-          const targetY = -(n - 1 - ci) * CARD_STEP * eased;
-          card.style.transform = `translateY(${targetY}px)`;
+          card.style.transform = `translateY(${-EXIT_DIST * eased}px)`;
+
+          // Disappear the moment card ci+2 begins moving (if ci+2 is a moving card)
+          if (ci + 2 < n - 1) {
+            card.style.opacity = scrolled >= (ci + 2) * STAGGER ? '0' : '1';
+          } else {
+            card.style.opacity = '1';
+          }
         });
       };
 
