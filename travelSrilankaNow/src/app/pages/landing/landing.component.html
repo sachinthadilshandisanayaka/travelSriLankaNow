@@ -833,42 +833,50 @@
   <!-- ========== SCROLL CARDS ========== -->
   <ng-container *ngIf="section.sectionType === 'SCROLL_CARDS'">
     <ng-container *ngIf="getScrollCardsConf(section.id) as scConf">
-      <section class="scroll-cards-section"
-               [class.scroll-cards-section--centered]="scConf.layoutStyle === 'centered'">
-        <div class="container">
 
-          <!-- Split layout: text left, cards right -->
-          <ng-container *ngIf="!scConf.layoutStyle || scConf.layoutStyle === 'split'">
-            <div class="scroll-cards-split">
-              <div class="scroll-cards-split__text">
-                <span *ngIf="scConf.label" class="scroll-cards-label">{{ scConf.label }}</span>
-                <h2 class="scroll-cards-title">{{ section.title }}</h2>
-                <p *ngIf="section.subtitle" class="scroll-cards-subtitle">{{ section.subtitle }}</p>
-                <a *ngIf="scConf.ctaText && scConf.ctaUrl"
-                   [href]="scConf.ctaUrl"
-                   class="btn-primary scroll-cards-cta">
-                  <span>{{ scConf.ctaText }}</span><span class="btn-shine"></span>
-                  <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
-                  <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
-                </a>
-              </div>
-              <div class="scroll-cards-split__cards">
-                <div class="scroll-cards-stack">
-                  <div *ngFor="let card of scConf.cards; let ci = index"
-                       class="scroll-card scroll-card--stacked"
-                       [attr.data-index]="ci"
-                       [style.background-color]="card.backgroundColor || null">
-                    <div class="scroll-card__header">
-                      <span class="scroll-card__icon" *ngIf="card.icon">{{ card.icon }}</span>
-                      <span class="scroll-card__num">{{ card.number || (ci + 1).toString().padStart(2, '0') }}</span>
+      <!-- Split layout: sticky scroll-driven stacked card reveal -->
+      <ng-container *ngIf="!scConf.layoutStyle || scConf.layoutStyle === 'split'">
+        <div class="sc-scroll-wrapper">
+          <div class="sc-scroll-sticky">
+            <div class="container">
+              <div class="scroll-cards-split">
+                <div class="scroll-cards-split__text">
+                  <span *ngIf="scConf.label" class="scroll-cards-label">{{ scConf.label }}</span>
+                  <h2 class="scroll-cards-title">{{ section.title }}</h2>
+                  <p *ngIf="section.subtitle" class="scroll-cards-subtitle">{{ section.subtitle }}</p>
+                  <a *ngIf="scConf.ctaText && scConf.ctaUrl"
+                     [href]="scConf.ctaUrl"
+                     class="btn-primary scroll-cards-cta">
+                    <span>{{ scConf.ctaText }}</span><span class="btn-shine"></span>
+                    <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+                    <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+                  </a>
+                </div>
+                <div class="scroll-cards-split__cards">
+                  <div class="scroll-cards-stack">
+                    <div *ngFor="let card of scConf.cards; let ci = index"
+                         class="scroll-card scroll-card--stacked"
+                         [attr.data-index]="ci"
+                         [style.z-index]="scConf.cards.length - ci"
+                         [style.background-color]="card.backgroundColor || null">
+                      <div class="scroll-card__header">
+                        <span class="scroll-card__icon" *ngIf="card.icon">{{ card.icon }}</span>
+                        <span class="scroll-card__num">{{ card.number || (ci + 1).toString().padStart(2, '0') }}</span>
+                      </div>
+                      <h3 class="scroll-card__title">{{ card.title }}</h3>
+                      <p class="scroll-card__desc">{{ card.description }}</p>
                     </div>
-                    <h3 class="scroll-card__title">{{ card.title }}</h3>
-                    <p class="scroll-card__desc">{{ card.description }}</p>
                   </div>
                 </div>
               </div>
             </div>
-          </ng-container>
+          </div>
+        </div>
+      </ng-container>
+
+      <section class="scroll-cards-section scroll-cards-section--centered"
+               *ngIf="scConf.layoutStyle === 'centered'">
+        <div class="container">
 
           <!-- Centered layout: title top, cards below -->
           <ng-container *ngIf="scConf.layoutStyle === 'centered'">

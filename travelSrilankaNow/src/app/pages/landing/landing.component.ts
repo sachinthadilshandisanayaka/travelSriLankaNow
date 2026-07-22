@@ -89,7 +89,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private visibilityObserver: IntersectionObserver | null = null;
   private customAnimObserver: IntersectionObserver | null = null;
-  private scrollCardsObserver: IntersectionObserver | null = null;
+  private scrollCardsListeners: Array<() => void> = [];
   private onPageVisible = () => this.syncVideoPlayback();
 
   constructor(
@@ -137,7 +137,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.stopSlideTimer();
     if (this.visibilityObserver) { this.visibilityObserver.disconnect(); this.visibilityObserver = null; }
     if (this.customAnimObserver) { this.customAnimObserver.disconnect(); this.customAnimObserver = null; }
-    if (this.scrollCardsObserver) { this.scrollCardsObserver.disconnect(); this.scrollCardsObserver = null; }
+    this.scrollCardsListeners.forEach(fn => window.removeEventListener('scroll', fn));
+    this.scrollCardsListeners = [];
     document.removeEventListener('visibilitychange', this.onPageVisible);
     this.globalSearchSub?.unsubscribe();
   }
@@ -812,45 +813,69 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Scroll Cards animation ───────────────────────────────────────────────
   private setupScrollCardsAnimations(): void {
-    if (this.scrollCardsObserver) { this.scrollCardsObserver.disconnect(); }
+    // Clean up old scroll listeners
+    this.scrollCardsListeners.forEach(fn => window.removeEventListener('scroll', fn));
+    this.scrollCardsListeners = [];
 
-    if (typeof IntersectionObserver === 'undefined') {
-      document.querySelectorAll<HTMLElement>('.scroll-card').forEach(el => el.classList.add('sc--revealed'));
-      return;
+    // Centered grid cards: staggered fade-in via IntersectionObserver
+    if (typeof IntersectionObserver !== 'undefined') {
+      const centeredCards = document.querySelectorAll<HTMLElement>('.scroll-card--centered-item');
+      if (centeredCards.length) {
+        const centeredObs = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const idx = parseInt((entry.target as HTMLElement).dataset['index'] || '0');
+              setTimeout(() => entry.target.classList.add('sc--revealed'), idx * 120);
+              centeredObs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        centeredCards.forEach(el => centeredObs.observe(el));
+      }
+    } else {
+      document.querySelectorAll<HTMLElement>('.scroll-card--centered-item').forEach(el => el.classList.add('sc--revealed'));
     }
 
-    // For stacked cards: reveal the stack when it enters viewport
-    const stacks = document.querySelectorAll<HTMLElement>('.scroll-cards-stack');
-    if (stacks.length) {
-      this.scrollCardsObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const stack = entry.target as HTMLElement;
-            const cards = stack.querySelectorAll<HTMLElement>('.scroll-card--stacked');
-            cards.forEach((card, idx) => {
-              setTimeout(() => card.classList.add('sc--revealed'), idx * 150);
-            });
-            this.scrollCardsObserver?.unobserve(stack);
-          }
+    // Split layout: scroll-driven sticky reveal — cards peel off one by one upward
+    const wrappers = document.querySelectorAll<HTMLElement>('.sc-scroll-wrapper');
+    wrappers.forEach(wrapper => {
+      const stack = wrapper.querySelector<HTMLElement>('.scroll-cards-stack');
+      if (!stack) return;
+
+      const cards = Array.from(stack.querySelectorAll<HTMLElement>('.scroll-card--stacked'));
+      const n = cards.length;
+      if (!n) return;
+
+      // Set wrapper tall enough to drive the animation
+      wrapper.style.height = `calc(100vh + ${n * 85}vh)`;
+
+      const CARD_STEP = 290; // px gap between spread card positions
+
+      const handler = () => {
+        const rect = wrapper.getBoundingClientRect();
+        const wrapperH = wrapper.offsetHeight;
+        const winH = window.innerHeight;
+        const scrollDistance = wrapperH - winH;
+        const scrolled = -rect.top;
+        const progress = Math.min(1, Math.max(0, scrolled / scrollDistance));
+
+        cards.forEach((card, ci) => {
+          const segStart = ci / n;
+          const segEnd = (ci + 1) / n;
+          const raw = (progress - segStart) / (segEnd - segStart);
+          const t = Math.min(1, Math.max(0, raw));
+          // Ease out cubic
+          const eased = 1 - Math.pow(1 - t, 3);
+          // Card 0 peels first (furthest up), card n-1 stays at 0
+          const targetY = -(n - 1 - ci) * CARD_STEP * eased;
+          card.style.transform = `translateY(${targetY}px)`;
         });
-      }, { threshold: 0.15 });
-      stacks.forEach(s => this.scrollCardsObserver!.observe(s));
-    }
+      };
 
-    // For centered grid cards: staggered reveal
-    const centeredCards = document.querySelectorAll<HTMLElement>('.scroll-card--centered-item');
-    if (centeredCards.length) {
-      const centeredObs = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const idx = parseInt((entry.target as HTMLElement).dataset['index'] || '0');
-            setTimeout(() => entry.target.classList.add('sc--revealed'), idx * 120);
-            centeredObs.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      centeredCards.forEach(el => centeredObs.observe(el));
-    }
+      window.addEventListener('scroll', handler, { passive: true });
+      this.scrollCardsListeners.push(handler);
+      handler(); // sync on first render
+    });
   }
 
   // ── Feedback carousel drag-to-scroll ─────────────────────────────────────

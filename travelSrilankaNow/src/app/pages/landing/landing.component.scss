@@ -2196,10 +2196,27 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // SCROLL CARDS SECTION
 // ══════════════════════════════════════════════════════════════════════════════
+// ── Centered section wrapper ──────────────────────────────────────────────────
 .scroll-cards-section {
   padding: $spacing-3xl 0;
   background: $navy-bg-lightest;
   overflow: hidden;
+}
+
+// ── Sticky scroll wrapper (split layout) ─────────────────────────────────────
+.sc-scroll-wrapper {
+  position: relative;
+  // height set dynamically by JS based on card count
+}
+
+.sc-scroll-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: $navy-bg-lightest;
+  display: flex;
+  align-items: center;
 }
 
 // ── Split layout ─────────────────────────────────────────────────────────────
@@ -2208,6 +2225,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   align-items: center;
+  width: 100%;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -2244,7 +2262,7 @@
 // ── Stacked cards ────────────────────────────────────────────────────────────
 .scroll-cards-stack {
   position: relative;
-  min-height: 280px;
+  height: 260px; // fixed height — cards are absolute inside
 }
 
 .scroll-card {
@@ -2277,28 +2295,15 @@
     line-height: 1.6; margin: 0;
   }
 
-  // Stacked variant — initial state overlapping
+  // Stacked variant — all at same position, JS drives translateY
   &--stacked {
-    position: relative;
-    margin-bottom: -40px;
-    transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1),
-                box-shadow 0.4s ease,
-                opacity 0.4s ease;
-    opacity: 0.9;
+    position: absolute !important;
+    top: 0; left: 0; right: 0;
+    transition: box-shadow 0.3s ease;
+    will-change: transform;
 
-    &:last-child { margin-bottom: 0; }
-
-    // Scale down cards that are lower in the stack
-    &:nth-child(1) { z-index: 30; transform: translateY(0) scale(1); opacity: 1; }
-    &:nth-child(2) { z-index: 20; transform: translateY(20px) scale(0.97); opacity: 0.92; }
-    &:nth-child(3) { z-index: 10; transform: translateY(40px) scale(0.94); opacity: 0.84; }
-    &:nth-child(n+4) { z-index: 5; transform: translateY(60px) scale(0.91); opacity: 0.76; }
-
-    &.sc--revealed {
-      transform: translateY(0) scale(1) !important;
-      opacity: 1 !important;
-      margin-bottom: 1rem;
-      box-shadow: 0 6px 28px rgba($primary-navy-dark, 0.12);
+    &:hover {
+      box-shadow: 0 6px 28px rgba($primary-navy-dark, 0.14);
     }
   }
 
@@ -2323,11 +2328,7 @@
   margin-top: 2.5rem;
 }
 
-// Scroll animation setup — IntersectionObserver adds .sc--revealed
-.scroll-cards-stack:not(.sc-stack--animated) .scroll-card--stacked { }
-
 @media (prefers-reduced-motion: reduce) {
-  .scroll-card--stacked,
   .scroll-card--centered-item {
     opacity: 1 !important;
     transform: none !important;
