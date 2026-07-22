@@ -23,6 +23,7 @@ export interface EventPricing {
 export interface Event {
   id: number;
   title: string;
+  slug?: string;
   description: string;
   shortDescription: string;
   imageUrl: string;
