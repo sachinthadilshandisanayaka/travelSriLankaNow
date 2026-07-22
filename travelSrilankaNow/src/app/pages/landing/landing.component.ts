@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChildren, ViewChild, QueryList, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, Subscription, Observable, merge, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, catchError, timeout, tap } from 'rxjs/operators';
 import { LocationService } from '../../services/location.service';
 import { EventService } from '../../services/event.service';
 import { PlaceService } from '../../services/place.service';
@@ -17,6 +19,13 @@ import { TourPackage } from '../../models/package.model';
 import { HeroSlide, HeroSearchConfig } from '../../models/hero-slide.model';
 import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
+
+interface GlobalSearchResult {
+  type: 'package' | 'event' | 'location' | 'place';
+  title: string;
+  subtitle: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-landing',
@@ -44,7 +53,19 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     locations: '/locations',
     gallery:   '/gallery',
     places:    '/places',
+    packages:  '/packages',
   };
+
+  // ── Global (no-tabs) search — free-text typeahead across all content types ──
+  globalSearchQuery = '';
+  globalSearchResults: GlobalSearchResult[] = [];
+  globalSearchLoading = false;
+  showGlobalSuggestions = false;
+  activeGlobalSuggestionIndex = -1;
+  private readonly GLOBAL_RESULTS_PAGE_SIZE = 6;
+  visibleGlobalResultsCount = this.GLOBAL_RESULTS_PAGE_SIZE;
+  private globalSearchSubject = new Subject<string>();
+  private globalSearchSub?: Subscription;
 
   @ViewChildren('hsbTabBtn') hsbTabBtns!: QueryList<ElementRef>;
   @ViewChild('hsbTabsContainer') hsbTabsContainer!: ElementRef;
@@ -86,6 +107,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadHomepageSections();
     this.loadHeroSearchConfig();
     this.loadTabNavLabels();
+    this.initGlobalSearch();
   }
 
   ngAfterViewInit(): void {
@@ -113,6 +135,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.visibilityObserver) { this.visibilityObserver.disconnect(); this.visibilityObserver = null; }
     if (this.customAnimObserver) { this.customAnimObserver.disconnect(); this.customAnimObserver = null; }
     document.removeEventListener('visibilitychange', this.onPageVisible);
+    this.globalSearchSub?.unsubscribe();
   }
 
   private loadHomepageSections(): void {
@@ -639,6 +662,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'events':    obs$ = this.masterDataService.getEventCategories();    break;
       case 'locations': obs$ = this.masterDataService.getLocationCategories(); break;
       case 'places':    obs$ = this.masterDataService.getPlaceTypes();         break;
+      case 'packages':  obs$ = this.masterDataService.getPackageCategories();  break;
       default: this.searchCategories = []; return;
     }
     obs$.subscribe({
@@ -659,9 +683,117 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       events:    '/events',
       locations: '/locations',
       gallery:   '/gallery',
-      places:    '/places'
+      places:    '/places',
+      packages:  '/packages'
     };
     this.router.navigate([routes[this.activeSearchTab] || '/'], { queryParams });
+  }
+
+  // ── Global (no-tabs) search — free-text typeahead across all content types ──
+  // Sources are merged (not forkJoin'd) so fast ones render immediately instead
+  // of the whole dropdown waiting on the slowest content type; each source also
+  // gets its own timeout so one slow/unreachable endpoint can't hang the UI.
+  private initGlobalSearch(): void {
+    this.globalSearchSub = this.globalSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(query => {
+        const q = query.trim();
+        this.globalSearchResults = [];
+        this.visibleGlobalResultsCount = this.GLOBAL_RESULTS_PAGE_SIZE;
+        if (q.length < 2) {
+          this.globalSearchLoading = false;
+          return of(null);
+        }
+        this.globalSearchLoading = true;
+
+        const sources: Observable<GlobalSearchResult[]>[] = [
+          this.packageService.searchPackages(q).pipe(
+            map(list => list.slice(0, 10).map(p => ({ type: 'package' as const, title: p.title, subtitle: 'Tour Package', route: `/packages/${p.slug}` }))),
+            timeout(12000), catchError(() => of([] as GlobalSearchResult[]))
+          ),
+          this.eventService.searchEvents(q).pipe(
+            map(list => list.slice(0, 10).map(e => ({ type: 'event' as const, title: e.title, subtitle: 'Event', route: `/events/${e.slug}` }))),
+            timeout(12000), catchError(() => of([] as GlobalSearchResult[]))
+          ),
+          this.locationService.searchLocations(q).pipe(
+            map(list => list.slice(0, 10).map(l => ({ type: 'location' as const, title: l.name, subtitle: 'Location', route: `/locations/${l.slug}` }))),
+            timeout(12000), catchError(() => of([] as GlobalSearchResult[]))
+          ),
+          this.placeService.searchPlaces(q).pipe(
+            map(list => list.slice(0, 10).map(pl => ({ type: 'place' as const, title: pl.name, subtitle: 'Place', route: `/places/${pl.slug}` }))),
+            timeout(12000), catchError(() => of([] as GlobalSearchResult[]))
+          ),
+        ];
+
+        let remaining = sources.length;
+        return merge(...sources).pipe(
+          tap(batch => {
+            this.globalSearchResults = [...this.globalSearchResults, ...batch];
+            if (--remaining <= 0) this.globalSearchLoading = false;
+          })
+        );
+      })
+    ).subscribe();
+  }
+
+  // Only the first page is rendered; scrolling near the bottom of the dropdown
+  // reveals more of the already-fetched results (see onGlobalDropdownScroll).
+  get visibleGlobalResults(): GlobalSearchResult[] {
+    return this.globalSearchResults.slice(0, this.visibleGlobalResultsCount);
+  }
+
+  onGlobalSearchInput(): void {
+    this.activeGlobalSuggestionIndex = -1;
+    this.showGlobalSuggestions = true;
+    this.globalSearchSubject.next(this.globalSearchQuery);
+  }
+
+  onGlobalSearchFocus(): void {
+    if (this.globalSearchQuery.trim().length >= 2) this.showGlobalSuggestions = true;
+  }
+
+  onGlobalSearchBlur(): void {
+    setTimeout(() => this.showGlobalSuggestions = false, 150);
+  }
+
+  onGlobalDropdownScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
+    if (nearBottom && this.visibleGlobalResultsCount < this.globalSearchResults.length) {
+      this.visibleGlobalResultsCount = Math.min(
+        this.visibleGlobalResultsCount + this.GLOBAL_RESULTS_PAGE_SIZE,
+        this.globalSearchResults.length
+      );
+    }
+  }
+
+  onGlobalSearchKeydown(event: KeyboardEvent): void {
+    if (!this.showGlobalSuggestions || !this.globalSearchResults.length) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const nextIndex = this.activeGlobalSuggestionIndex + 1;
+      if (nextIndex >= this.visibleGlobalResultsCount && this.visibleGlobalResultsCount < this.globalSearchResults.length) {
+        this.visibleGlobalResultsCount = Math.min(this.visibleGlobalResultsCount + this.GLOBAL_RESULTS_PAGE_SIZE, this.globalSearchResults.length);
+      }
+      this.activeGlobalSuggestionIndex = Math.min(nextIndex, this.visibleGlobalResultsCount - 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeGlobalSuggestionIndex = Math.max(this.activeGlobalSuggestionIndex - 1, -1);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      const idx = this.activeGlobalSuggestionIndex >= 0 ? this.activeGlobalSuggestionIndex : 0;
+      this.selectGlobalResult(this.globalSearchResults[idx]);
+    } else if (event.key === 'Escape') {
+      this.showGlobalSuggestions = false;
+    }
+  }
+
+  selectGlobalResult(result: GlobalSearchResult): void {
+    this.showGlobalSuggestions = false;
+    this.globalSearchQuery = '';
+    this.globalSearchResults = [];
+    this.router.navigate([result.route]);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
