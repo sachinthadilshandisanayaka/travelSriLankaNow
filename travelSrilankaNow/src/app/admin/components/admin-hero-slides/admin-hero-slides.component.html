@@ -250,6 +250,33 @@
     <form [formGroup]="heroSlideForm" (ngSubmit)="saveHeroSlide()">
       <div class="admin-modal__body">
         <div class="admin-form__grid">
+
+          <!-- Slider Type -->
+          <div class="admin-form__group admin-form__group--full">
+            <label class="admin-form__label">Slide Type</label>
+            <div class="slider-type-picker">
+              <label class="slider-type-picker__option" [class.slider-type-picker__option--active]="heroSlideForm.get('sliderType')?.value !== 'rolling_gallery'">
+                <input type="radio" formControlName="sliderType" value="standard" style="display:none">
+                <div class="slider-type-picker__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                </div>
+                <span class="slider-type-picker__label">Standard Slide</span>
+                <span class="slider-type-picker__desc">Full-screen image or video with text overlay</span>
+              </label>
+              <label class="slider-type-picker__option" [class.slider-type-picker__option--active]="heroSlideForm.get('sliderType')?.value === 'rolling_gallery'">
+                <input type="radio" formControlName="sliderType" value="rolling_gallery" style="display:none">
+                <div class="slider-type-picker__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="2" y="7" width="10" height="12" rx="1"/><rect x="14" y="4" width="8" height="10" rx="1" transform="rotate(8 14 4)"/><rect x="14" y="10" width="8" height="10" rx="1" transform="rotate(-5 14 10)"/></svg>
+                </div>
+                <span class="slider-type-picker__label">Rolling Gallery</span>
+                <span class="slider-type-picker__desc">Split layout: text left, 3D fanning image panels right</span>
+              </label>
+            </div>
+            <p class="admin-form__hint" *ngIf="heroSlideForm.get('sliderType')?.value === 'rolling_gallery'">
+              Add gallery images below (after saving) — they will display as 3D rotating panels on the right side.
+            </p>
+          </div>
+
           <!-- Title -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Title *</label>

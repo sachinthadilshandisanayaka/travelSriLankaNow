@@ -31,6 +31,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   currentUser: CustomerUser | null = null;
   logoUrl = '';
   siteName = '';
+  navbarStyle: 'classic' | 'liquid' = 'classic';
 
   navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
@@ -59,6 +60,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.siteSettingsService.getSettingByKey('site_name').subscribe({
       next: (setting) => { if (setting?.value) this.siteName = setting.value; },
+      error: () => {}
+    });
+    this.siteSettingsService.getSettingByKey('navbar_style').subscribe({
+      next: (setting) => { if (setting?.value) this.navbarStyle = setting.value as 'classic' | 'liquid'; },
       error: () => {}
     });
   }
