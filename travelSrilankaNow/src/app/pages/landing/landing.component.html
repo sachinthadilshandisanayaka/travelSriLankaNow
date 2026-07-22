@@ -715,6 +715,156 @@
     </section>
   </ng-container>
 
+
+  <!-- ========== CUSTOMER FEEDBACK ========== -->
+  <ng-container *ngIf="section.sectionType === 'CUSTOMER_FEEDBACK'">
+    <ng-container *ngIf="getFeedbackConf(section.id) as feedbackConf">
+      <section class="feedback-section"
+               [class.feedback-section--dark]="feedbackConf.cardStyle === 'dark'"
+               [class.feedback-section--glass]="feedbackConf.cardStyle === 'glass'">
+        <div class="container">
+          <div class="section-header animate-fadeInUp">
+            <h2>{{ section.title }}</h2>
+            <p *ngIf="section.subtitle" class="lead">{{ section.subtitle }}</p>
+          </div>
+
+          <!-- Carousel style -->
+          <div *ngIf="!feedbackConf.displayStyle || feedbackConf.displayStyle === 'carousel'"
+               class="feedback-carousel">
+            <div class="feedback-track">
+              <div *ngFor="let fb of feedbackConf.feedbacks; let fi = index"
+                   class="feedback-card"
+                   [class.feedback-card--dark]="feedbackConf.cardStyle === 'dark'"
+                   [class.feedback-card--glass]="feedbackConf.cardStyle === 'glass'">
+                <div class="feedback-card__stars">
+                  <span *ngFor="let s of getStarArray(); let si = index"
+                        class="feedback-star"
+                        [class.feedback-star--filled]="si < fb.rating">★</span>
+                </div>
+                <p class="feedback-card__text">{{ fb.text }}</p>
+                <div class="feedback-card__divider"></div>
+                <div class="feedback-card__author">
+                  <div class="feedback-card__avatar">
+                    <img *ngIf="fb.imageUrl" [src]="fb.imageUrl" [alt]="fb.name" loading="lazy">
+                    <div *ngIf="!fb.imageUrl" class="feedback-card__avatar-placeholder">{{ fb.name[0] }}</div>
+                  </div>
+                  <div class="feedback-card__author-info">
+                    <strong>{{ fb.name }}</strong>
+                    <span *ngIf="fb.role || fb.company">
+                      {{ fb.role }}<ng-container *ngIf="fb.role && fb.company"> at </ng-container>{{ fb.company }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid style -->
+          <div *ngIf="feedbackConf.displayStyle === 'grid'" class="feedback-grid">
+            <div *ngFor="let fb of feedbackConf.feedbacks"
+                 class="feedback-card"
+                 [class.feedback-card--dark]="feedbackConf.cardStyle === 'dark'"
+                 [class.feedback-card--glass]="feedbackConf.cardStyle === 'glass'">
+              <div class="feedback-card__stars">
+                <span *ngFor="let s of getStarArray(); let si = index"
+                      class="feedback-star"
+                      [class.feedback-star--filled]="si < fb.rating">★</span>
+              </div>
+              <p class="feedback-card__text">{{ fb.text }}</p>
+              <div class="feedback-card__divider"></div>
+              <div class="feedback-card__author">
+                <div class="feedback-card__avatar">
+                  <img *ngIf="fb.imageUrl" [src]="fb.imageUrl" [alt]="fb.name" loading="lazy">
+                  <div *ngIf="!fb.imageUrl" class="feedback-card__avatar-placeholder">{{ fb.name[0] }}</div>
+                </div>
+                <div class="feedback-card__author-info">
+                  <strong>{{ fb.name }}</strong>
+                  <span *ngIf="fb.role || fb.company">
+                    {{ fb.role }}<ng-container *ngIf="fb.role && fb.company"> at </ng-container>{{ fb.company }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+
+  <!-- ========== SCROLL CARDS ========== -->
+  <ng-container *ngIf="section.sectionType === 'SCROLL_CARDS'">
+    <ng-container *ngIf="getScrollCardsConf(section.id) as scConf">
+      <section class="scroll-cards-section"
+               [class.scroll-cards-section--centered]="scConf.layoutStyle === 'centered'">
+        <div class="container">
+
+          <!-- Split layout: text left, cards right -->
+          <ng-container *ngIf="!scConf.layoutStyle || scConf.layoutStyle === 'split'">
+            <div class="scroll-cards-split">
+              <div class="scroll-cards-split__text">
+                <span *ngIf="scConf.label" class="scroll-cards-label">{{ scConf.label }}</span>
+                <h2 class="scroll-cards-title">{{ section.title }}</h2>
+                <p *ngIf="section.subtitle" class="scroll-cards-subtitle">{{ section.subtitle }}</p>
+                <a *ngIf="scConf.ctaText && scConf.ctaUrl"
+                   [href]="scConf.ctaUrl"
+                   class="btn-primary scroll-cards-cta">
+                  <span>{{ scConf.ctaText }}</span><span class="btn-shine"></span>
+                  <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+                  <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+                </a>
+              </div>
+              <div class="scroll-cards-split__cards">
+                <div class="scroll-cards-stack">
+                  <div *ngFor="let card of scConf.cards; let ci = index"
+                       class="scroll-card scroll-card--stacked"
+                       [attr.data-index]="ci"
+                       [style.background-color]="card.backgroundColor || null">
+                    <div class="scroll-card__header">
+                      <span class="scroll-card__icon" *ngIf="card.icon">{{ card.icon }}</span>
+                      <span class="scroll-card__num">{{ card.number || (ci + 1).toString().padStart(2, '0') }}</span>
+                    </div>
+                    <h3 class="scroll-card__title">{{ card.title }}</h3>
+                    <p class="scroll-card__desc">{{ card.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Centered layout: title top, cards below -->
+          <ng-container *ngIf="scConf.layoutStyle === 'centered'">
+            <div class="section-header animate-fadeInUp">
+              <span *ngIf="scConf.label" class="subtitle">{{ scConf.label }}</span>
+              <h2>{{ section.title }}</h2>
+              <p *ngIf="section.subtitle" class="lead">{{ section.subtitle }}</p>
+            </div>
+            <div class="scroll-cards-centered-grid">
+              <div *ngFor="let card of scConf.cards; let ci = index"
+                   class="scroll-card scroll-card--centered-item"
+                   [attr.data-index]="ci"
+                   [style.background-color]="card.backgroundColor || null">
+                <div class="scroll-card__header">
+                  <span class="scroll-card__icon" *ngIf="card.icon">{{ card.icon }}</span>
+                  <span class="scroll-card__num">{{ card.number || (ci + 1).toString().padStart(2, '0') }}</span>
+                </div>
+                <h3 class="scroll-card__title">{{ card.title }}</h3>
+                <p class="scroll-card__desc">{{ card.description }}</p>
+              </div>
+            </div>
+            <div *ngIf="scConf.ctaText && scConf.ctaUrl" class="text-center" style="margin-top:2rem">
+              <a [href]="scConf.ctaUrl" class="btn-primary">
+                <span>{{ scConf.ctaText }}</span><span class="btn-shine"></span>
+                <span class="btn-corner btn-corner--tl"></span><span class="btn-corner btn-corner--tr"></span>
+                <span class="btn-corner btn-corner--bl"></span><span class="btn-corner btn-corner--br"></span>
+              </a>
+            </div>
+          </ng-container>
+
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+
 </ng-container>
 
 <!-- ========== FALLBACK LAYOUT ========== -->

@@ -69,6 +69,8 @@ public class HomepageSection {
         SOCIAL_MEDIA,
         IMAGE_GALLERY_SLIDER,
         CUSTOM_CONTENT,
-        PACKAGES
+        PACKAGES,
+        CUSTOMER_FEEDBACK,
+        SCROLL_CARDS
     }
 }

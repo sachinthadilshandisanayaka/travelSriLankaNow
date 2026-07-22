@@ -17,7 +17,7 @@ import { Event as EventModel } from '../../models/event.model';
 import { Place } from '../../models/place.model';
 import { TourPackage } from '../../models/package.model';
 import { HeroSlide, HeroSearchConfig } from '../../models/hero-slide.model';
-import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig } from '../../models/homepage-section.model';
+import { HomepageSection, HomepageSectionConfig, GallerySliderConfig, CustomContentConfig, CustomerFeedbackConfig, ScrollCardsConfig } from '../../models/homepage-section.model';
 import { SocialMediaContent } from '../../models/social-media-content.model';
 
 interface GlobalSearchResult {
@@ -82,11 +82,14 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   sectionConfigs: Map<string, HomepageSectionConfig> = new Map();
   gallerySectionConfig: Map<number, GallerySliderConfig> = new Map();
   customSectionConfigs: Map<number, CustomContentConfig> = new Map();
+  feedbackSectionConfigs: Map<number, CustomerFeedbackConfig> = new Map();
+  scrollCardsSectionConfigs: Map<number, ScrollCardsConfig> = new Map();
   sectionsLoaded = false;
   useFallbackLayout = false;
 
   private visibilityObserver: IntersectionObserver | null = null;
   private customAnimObserver: IntersectionObserver | null = null;
+  private scrollCardsObserver: IntersectionObserver | null = null;
   private onPageVisible = () => this.syncVideoPlayback();
 
   constructor(
@@ -134,6 +137,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.stopSlideTimer();
     if (this.visibilityObserver) { this.visibilityObserver.disconnect(); this.visibilityObserver = null; }
     if (this.customAnimObserver) { this.customAnimObserver.disconnect(); this.customAnimObserver = null; }
+    if (this.scrollCardsObserver) { this.scrollCardsObserver.disconnect(); this.scrollCardsObserver = null; }
     document.removeEventListener('visibilitychange', this.onPageVisible);
     this.globalSearchSub?.unsubscribe();
   }
@@ -153,6 +157,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.gallerySectionConfig.set(section.id!, parsed);
               } else if (section.sectionType === 'CUSTOM_CONTENT') {
                 this.customSectionConfigs.set(section.id!, parsed);
+              } else if (section.sectionType === 'CUSTOMER_FEEDBACK') {
+                this.feedbackSectionConfigs.set(section.id!, parsed);
+              } else if (section.sectionType === 'SCROLL_CARDS') {
+                this.scrollCardsSectionConfigs.set(section.id!, parsed);
               } else {
                 this.sectionConfigs.set(section.sectionType, parsed);
               }
@@ -164,7 +172,11 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Load data for active sections
         this.loadSectionData();
-        setTimeout(() => this.setupCustomContentAnimations(), 150);
+        setTimeout(() => {
+          this.setupCustomContentAnimations();
+          this.setupScrollCardsAnimations();
+          this.setupFeedbackCarouselDrag();
+        }, 200);
       },
       error: () => {
         // Fallback: load all data with defaults
@@ -202,6 +214,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
         case 'IMAGE_GALLERY_SLIDER':
         case 'CUSTOM_CONTENT':
+        case 'CUSTOMER_FEEDBACK':
+        case 'SCROLL_CARDS':
           // no data loading needed; config holds everything
           break;
       }
@@ -794,6 +808,87 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.globalSearchQuery = '';
     this.globalSearchResults = [];
     this.router.navigate([result.route]);
+  }
+
+  // ── Scroll Cards animation ───────────────────────────────────────────────
+  private setupScrollCardsAnimations(): void {
+    if (this.scrollCardsObserver) { this.scrollCardsObserver.disconnect(); }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      document.querySelectorAll<HTMLElement>('.scroll-card').forEach(el => el.classList.add('sc--revealed'));
+      return;
+    }
+
+    // For stacked cards: reveal the stack when it enters viewport
+    const stacks = document.querySelectorAll<HTMLElement>('.scroll-cards-stack');
+    if (stacks.length) {
+      this.scrollCardsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const stack = entry.target as HTMLElement;
+            const cards = stack.querySelectorAll<HTMLElement>('.scroll-card--stacked');
+            cards.forEach((card, idx) => {
+              setTimeout(() => card.classList.add('sc--revealed'), idx * 150);
+            });
+            this.scrollCardsObserver?.unobserve(stack);
+          }
+        });
+      }, { threshold: 0.15 });
+      stacks.forEach(s => this.scrollCardsObserver!.observe(s));
+    }
+
+    // For centered grid cards: staggered reveal
+    const centeredCards = document.querySelectorAll<HTMLElement>('.scroll-card--centered-item');
+    if (centeredCards.length) {
+      const centeredObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = parseInt((entry.target as HTMLElement).dataset['index'] || '0');
+            setTimeout(() => entry.target.classList.add('sc--revealed'), idx * 120);
+            centeredObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      centeredCards.forEach(el => centeredObs.observe(el));
+    }
+  }
+
+  // ── Feedback carousel drag-to-scroll ─────────────────────────────────────
+  private setupFeedbackCarouselDrag(): void {
+    const carousels = document.querySelectorAll<HTMLElement>('.feedback-carousel');
+    carousels.forEach(el => {
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+
+      el.addEventListener('mousedown', (e: MouseEvent) => {
+        isDown = true;
+        el.style.cursor = 'grabbing';
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+      });
+      el.addEventListener('mouseleave', () => { isDown = false; el.style.cursor = 'grab'; });
+      el.addEventListener('mouseup', () => { isDown = false; el.style.cursor = 'grab'; });
+      el.addEventListener('mousemove', (e: MouseEvent) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 2;
+        el.scrollLeft = scrollLeft - walk;
+      });
+    });
+  }
+
+  // ── Customer Feedback helpers ────────────────────────────────────────────
+  getFeedbackConf(sectionId?: number): CustomerFeedbackConfig {
+    return this.feedbackSectionConfigs.get(sectionId!) || { feedbacks: [] };
+  }
+
+  getStarArray(): number[] { return [1, 2, 3, 4, 5]; }
+
+  // ── Scroll Cards helpers ─────────────────────────────────────────────────
+  getScrollCardsConf(sectionId?: number): ScrollCardsConfig {
+    return this.scrollCardsSectionConfigs.get(sectionId!) || { cards: [] };
   }
 
   // ─────────────────────────────────────────────────────────────────────────
