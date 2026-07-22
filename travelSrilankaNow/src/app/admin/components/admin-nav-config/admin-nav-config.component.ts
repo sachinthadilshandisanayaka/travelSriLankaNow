@@ -52,7 +52,7 @@ export class AdminNavConfigComponent implements OnInit {
     this.adminApiService.upsertSiteSetting({
       key: 'navbar_style',
       value: style,
-      category: 'APPEARANCE',
+      category: 'GENERAL',
       label: 'Navbar Style',
       sortOrder: 100,
       isActive: true
