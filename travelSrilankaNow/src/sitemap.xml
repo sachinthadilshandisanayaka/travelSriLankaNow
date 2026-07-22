@@ -2,43 +2,49 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://travelsrilankanow.lk/</loc>
+    <loc>https://roamlankatravels.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://travelsrilankanow.lk/locations</loc>
+    <loc>https://roamlankatravels.com/events</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://travelsrilankanow.lk/events</loc>
+    <loc>https://roamlankatravels.com/packages</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://travelsrilankanow.lk/places</loc>
+    <loc>https://roamlankatravels.com/locations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://travelsrilankanow.lk/gallery</loc>
+    <loc>https://roamlankatravels.com/places</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://roamlankatravels.com/gallery</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://travelsrilankanow.lk/login</loc>
+    <loc>https://roamlankatravels.com/login</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
-    <loc>https://travelsrilankanow.lk/register</loc>
+    <loc>https://roamlankatravels.com/register</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
