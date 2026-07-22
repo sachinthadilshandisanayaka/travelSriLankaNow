@@ -10,6 +10,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d
+    ports:
+      # Host 5433, not 5432 - avoids clashing with a Postgres already
+      # running natively (or in another local project) on the default port.
+      - "5433:5432"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]

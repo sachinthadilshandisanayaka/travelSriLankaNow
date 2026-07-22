@@ -93,9 +93,7 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load package categories:', err)
     });
 
-    // Filter dropdown always lists every category, active or not — independent
-    // of whether the "Browse by Category" tiles section is toggled on
-    this.masterDataService.getAllPackageCategories().subscribe({
+    this.masterDataService.getPackageCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Packages' },

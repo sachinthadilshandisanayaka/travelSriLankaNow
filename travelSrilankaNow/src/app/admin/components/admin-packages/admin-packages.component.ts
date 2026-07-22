@@ -154,11 +154,9 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
   }
 
   loadCategories(): void {
-    // Admin's own unfiltered endpoint — filtering/assigning categories should
-    // never be limited to whatever happens to be publicly "active" right now.
     this.apiService.getMasterDataByType('PACKAGE_CATEGORY').subscribe({
       next: (data) => {
-        this.categories = data;
+        this.categories = data.filter((c: MasterData) => c.isActive);
         if (data.length > 0 && !this.packageForm.get('category')?.value) {
           this.packageForm.patchValue({ category: data[0].code });
         }

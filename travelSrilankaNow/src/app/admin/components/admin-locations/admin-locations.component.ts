@@ -122,11 +122,9 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
   }
 
   loadMasterData(): void {
-    // Admin's own unfiltered endpoints — filtering/assigning categories should
-    // never be limited to whatever happens to be publicly "active" right now.
     this.apiService.getMasterDataByType('LOCATION_CATEGORY').subscribe({
       next: (data) => {
-        this.categories = data;
+        this.categories = data.filter((c: MasterData) => c.isActive);
       },
       error: (error) => {
         console.error('Failed to load categories:', error);
@@ -135,7 +133,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
 
     this.apiService.getMasterDataByType('REGION').subscribe({
       next: (data) => {
-        this.regions = data;
+        this.regions = data.filter((r: MasterData) => r.isActive);
       },
       error: (error) => {
         console.error('Failed to load regions:', error);

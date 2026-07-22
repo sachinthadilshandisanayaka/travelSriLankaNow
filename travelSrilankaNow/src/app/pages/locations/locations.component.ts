@@ -77,9 +77,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load location categories:', err)
     });
 
-    // Filter dropdown always lists every category, active or not — independent
-    // of whether the "Browse by Category" tiles section is toggled on
-    this.masterDataService.getAllLocationCategories().subscribe({
+    this.masterDataService.getLocationCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Locations' },
