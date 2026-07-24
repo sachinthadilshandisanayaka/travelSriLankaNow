@@ -35,7 +35,10 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   // Categories and Regions loaded from MasterData
   categoryData: MasterData[] = [];
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Locations' }];
-  browseByCategoryEnabled: boolean = true;
+  // Starts false and hidden until the setting actually loads, so a slow
+  // request can't let the section flash visible before confirming it's off.
+  browseByCategoryEnabled: boolean = false;
+  browseByCategoryLoaded: boolean = false;
   regions: { value: string; label: string }[] = [{ value: 'all', label: 'All Regions' }];
 
   // Browse by Category — search + pagination over categoryData
@@ -90,8 +93,8 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadMasterData(): void {
     this.siteSettingsService.getBrowseByCategoryEnabled('LOCATION_CATEGORY').subscribe({
-      next: (enabled) => { this.browseByCategoryEnabled = enabled; },
-      error: () => { this.browseByCategoryEnabled = true; }
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; this.browseByCategoryLoaded = true; },
+      error: () => { this.browseByCategoryEnabled = true; this.browseByCategoryLoaded = true; }
     });
 
     this.masterDataService.getLocationCategories().subscribe({
