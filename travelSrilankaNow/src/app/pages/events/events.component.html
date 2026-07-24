@@ -10,7 +10,7 @@
 <!-- ========================================================== -->
 <!-- PART 1A: Category Overview (shown on /events without filter) -->
 <!-- ========================================================== -->
-<section *ngIf="!isCategoryView && categoryData.length > 0" class="category-overview">
+<section *ngIf="!isCategoryView && browseByCategoryEnabled && categoryData.length > 0" class="category-overview">
   <div class="container">
     <div class="category-overview__header">
       <div class="category-overview__label">Browse by Category</div>

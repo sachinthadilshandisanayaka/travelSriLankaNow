@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PackageService, PageResponse } from '../../services/package.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { TourPackage } from '../../models/package.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -33,6 +34,7 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
   // Category data
   categoryData: MasterData[] = [];
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Packages' }];
+  browseByCategoryEnabled: boolean = true;
 
   // Browse by Category — search + pagination over categoryData
   categorySearchTerm: string = '';
@@ -58,6 +60,7 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private packageService: PackageService,
     private masterDataService: MasterDataService,
+    private siteSettingsService: SiteSettingsService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -71,8 +74,24 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectedCategory = cat || 'all';
       this.isCategoryView = !!(cat && cat !== 'all');
       this.updateActiveCategoryData();
-      this.currentPage = 0;
+
+      this.searchTerm = params.get('search') || '';
+
+      const pageParam = parseInt(params.get('page') || '1', 10);
+      this.currentPage = (!isNaN(pageParam) && pageParam > 1) ? pageParam - 1 : 0;
+
       this.loadData();
+    });
+  }
+
+  // Single source of truth for list state (category/search/page) so the
+  // browser back button and a page refresh both restore the exact same
+  // view instead of the state living only in memory.
+  private updateQueryParams(overrides: { [key: string]: string | number | null }): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: overrides,
+      queryParamsHandling: 'merge'
     });
   }
 
@@ -85,6 +104,11 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadMasterData(): void {
+    this.siteSettingsService.getBrowseByCategoryEnabled('PACKAGE_CATEGORY').subscribe({
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; },
+      error: () => { this.browseByCategoryEnabled = true; }
+    });
+
     this.masterDataService.getPackageCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categoryData = data.filter((c: MasterData) => c.isActive);
@@ -118,9 +142,7 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
-      this.searchTerm = searchTerm;
-      this.currentPage = 0;
-      this.loadData();
+      this.updateQueryParams({ search: searchTerm || null, page: null });
     });
   }
 
@@ -166,9 +188,7 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterInPlace(category: string): void {
-    this.selectedCategory = category;
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ category: category === 'all' ? null : category, page: null });
   }
 
   getCategoryDisplayName(code: string): string {
@@ -194,15 +214,12 @@ export class PackagesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearAllFilters(): void {
-    this.searchTerm = '';
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ search: null, page: null });
   }
 
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      this.loadData();
+      this.updateQueryParams({ page: page + 1 });
       const target = document.querySelector('.filter-section') as HTMLElement;
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
