@@ -21,7 +21,7 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
           <span class="category-badge">
-            {{ getCategoryIcon(pkg.category) }} {{ pkg.category | titlecase }}
+            {{ getCategoryIcon(pkg.category) }} {{ categoryDisplayName || (pkg.category | titlecase) }}
           </span>
           <h1>{{ pkg.title }}</h1>
           <div class="hero-meta">
@@ -234,7 +234,7 @@
             <div class="package-info">
               <div class="info-item">
                 <span class="info-label">Category</span>
-                <span class="info-value">{{ getCategoryIcon(pkg.category) }} {{ pkg.category | titlecase }}</span>
+                <span class="info-value">{{ getCategoryIcon(pkg.category) }} {{ categoryDisplayName || (pkg.category | titlecase) }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Duration</span>
