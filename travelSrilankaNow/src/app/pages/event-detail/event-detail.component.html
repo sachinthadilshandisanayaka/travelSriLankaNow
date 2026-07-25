@@ -21,7 +21,7 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
           <span class="category-badge">
-            {{ getCategoryIcon(event.category) }} {{ event.category | titlecase }}
+            {{ getCategoryIcon(event.category) }} {{ categoryDisplayName || (event.category | titlecase) }}
           </span>
           <h1>{{ event.title }}</h1>
           <div class="hero-meta">
@@ -234,7 +234,7 @@
             <div class="event-info">
               <div class="info-item">
                 <span class="info-label">Category</span>
-                <span class="info-value">{{ getCategoryIcon(event.category) }} {{ event.category | titlecase }}</span>
+                <span class="info-value">{{ getCategoryIcon(event.category) }} {{ categoryDisplayName || (event.category | titlecase) }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Duration</span>

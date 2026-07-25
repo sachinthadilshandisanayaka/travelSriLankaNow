@@ -1,4 +1,4 @@
-<nav class="navbar" [class.scrolled]="isScrolled" [class.navbar--liquid]="navbarStyle === 'liquid'">
+<nav class="navbar" [class.scrolled]="isScrolled" [class.navbar--liquid]="navbarStyle === 'liquid'" [class.navbar--collapsible]="navbarStyle === 'collapsible'">
   <div class="container navbar-content">
     <!-- Logo: image + site name stacked, or text fallback -->
     <a routerLink="/" class="logo" (click)="closeMenu()">

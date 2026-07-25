@@ -86,6 +86,14 @@ export class SiteSettingsService {
     );
   }
 
+  // Defaults to true (section visible) when unset, so category types that
+  // haven't had this setting explicitly created yet keep their old behavior.
+  getBrowseByCategoryEnabled(categoryType: string): Observable<boolean> {
+    return this.getSettingByKey(`browse_by_category_${categoryType}`).pipe(
+      map(setting => setting?.value !== 'false')
+    );
+  }
+
   getHeroSearchConfig(): Observable<HeroSearchConfig | null> {
     return this.getSettingByKey('hero_search_bar').pipe(
       map(setting => {

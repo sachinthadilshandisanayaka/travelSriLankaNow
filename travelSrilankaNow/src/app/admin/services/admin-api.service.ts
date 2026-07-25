@@ -261,6 +261,26 @@ export class AdminApiService {
     });
   }
 
+  // "Browse by Category" tile-grid section visibility - independent of any
+  // individual category's own isActive flag, so hiding the section doesn't
+  // also empty every filter dropdown that reuses the same master data.
+  getBrowseByCategoryEnabled(categoryType: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/site-settings/key/browse_by_category_${categoryType}`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  setBrowseByCategoryEnabled(categoryType: string, enabled: boolean): Observable<any> {
+    return this.http.post(`${this.apiUrl}/site-settings/upsert`, {
+      category: 'GENERAL',
+      key: `browse_by_category_${categoryType}`,
+      label: `Browse by Category Enabled (${categoryType})`,
+      value: String(enabled),
+      isActive: true,
+      sortOrder: 100
+    });
+  }
+
   // Hero Slides
   getHeroSlides(page: number = 0, size: number = 10, sort: string = 'displayOrder,asc'): Observable<PageResponse<any>> {
     let params = new HttpParams()

@@ -41,6 +41,15 @@
         <span class="style-option__desc">Each nav item has its own glass tile with liquid hover effect</span>
         <span class="style-option__badge" *ngIf="navbarStyle === 'liquid'">Active</span>
       </button>
+      <button class="style-option" [class.style-option--active]="navbarStyle === 'collapsible'" (click)="saveNavbarStyle('collapsible')">
+        <div class="style-option__preview style-option__preview--collapsible">
+          <div class="sp-bar"></div>
+          <div class="sp-hamburger"><span></span><span></span><span></span></div>
+        </div>
+        <span class="style-option__name">Collapsible</span>
+        <span class="style-option__desc">Links stay tucked behind a toggle at every screen size, expanding into a dropdown panel</span>
+        <span class="style-option__badge" *ngIf="navbarStyle === 'collapsible'">Active</span>
+      </button>
     </div>
     <p *ngIf="styleLoading" style="color:var(--text-muted);font-size:0.875rem">Loading style…</p>
     <p *ngIf="styleSaving"  style="color:var(--text-muted);font-size:0.875rem;margin-top:0.5rem">Saving…</p>

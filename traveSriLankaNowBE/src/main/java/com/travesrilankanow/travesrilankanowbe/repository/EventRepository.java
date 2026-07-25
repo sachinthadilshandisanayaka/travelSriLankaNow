@@ -19,7 +19,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByFeaturedTrue();
 
-    List<Event> findByFeaturedTrueOrderByDisplayOrderAsc();
+    List<Event> findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
 
     List<Event> findByCategory(String category);
 
