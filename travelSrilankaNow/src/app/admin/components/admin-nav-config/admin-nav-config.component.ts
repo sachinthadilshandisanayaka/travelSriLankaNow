@@ -18,7 +18,7 @@ export class AdminNavConfigComponent implements OnInit {
   successMsg = '';
   errorMsg = '';
 
-  navbarStyle: 'classic' | 'liquid' = 'classic';
+  navbarStyle: 'classic' | 'liquid' | 'collapsible' = 'classic';
   styleLoading = false;
   styleSaving = false;
 
@@ -41,12 +41,12 @@ export class AdminNavConfigComponent implements OnInit {
   loadNavbarStyle(): void {
     this.styleLoading = true;
     this.siteSettingsService.getSettingByKey('navbar_style').subscribe({
-      next: (s) => { if (s?.value) this.navbarStyle = s.value as 'classic' | 'liquid'; this.styleLoading = false; },
+      next: (s) => { if (s?.value) this.navbarStyle = s.value as 'classic' | 'liquid' | 'collapsible'; this.styleLoading = false; },
       error: () => { this.styleLoading = false; }
     });
   }
 
-  saveNavbarStyle(style: 'classic' | 'liquid'): void {
+  saveNavbarStyle(style: 'classic' | 'liquid' | 'collapsible'): void {
     this.navbarStyle = style;
     this.styleSaving = true;
     this.adminApiService.upsertSiteSetting({

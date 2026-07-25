@@ -32,7 +32,7 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   currentUser: CustomerUser | null = null;
   logoUrl = '';
   siteName = '';
-  navbarStyle: 'classic' | 'liquid' = 'classic';
+  navbarStyle: 'classic' | 'liquid' | 'collapsible' = 'classic';
 
   navLinks: NavConfig[] = FALLBACK_NAV;
   moreSections: MoreSection[] = [];
@@ -68,7 +68,7 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.siteSettingsService.getSettingByKey('navbar_style').subscribe({
       next: (setting) => {
-        if (setting?.value) this.navbarStyle = setting.value as 'classic' | 'liquid';
+        if (setting?.value) this.navbarStyle = setting.value as 'classic' | 'liquid' | 'collapsible';
         setTimeout(() => this.updateLiquidIndicator(false), 80);
       },
       error: () => {}

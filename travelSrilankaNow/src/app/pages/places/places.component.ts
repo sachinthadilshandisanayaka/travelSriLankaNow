@@ -36,7 +36,10 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   categoryData: MasterData[] = [];
   placeTypes: { value: string; label: string }[] = [{ value: 'all', label: 'All Places' }];
   priceRanges: { value: string; label: string }[] = [{ value: 'all', label: 'All Prices' }];
-  browseByCategoryEnabled: boolean = true;
+  // Starts false and hidden until the setting actually loads, so a slow
+  // request can't let the section flash visible before confirming it's off.
+  browseByCategoryEnabled: boolean = false;
+  browseByCategoryLoaded: boolean = false;
 
   // Browse by Category — search + pagination over categoryData
   categorySearchTerm: string = '';
@@ -90,8 +93,8 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadMasterData(): void {
     this.siteSettingsService.getBrowseByCategoryEnabled('PLACE_TYPE').subscribe({
-      next: (enabled) => { this.browseByCategoryEnabled = enabled; },
-      error: () => { this.browseByCategoryEnabled = true; }
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; this.browseByCategoryLoaded = true; },
+      error: () => { this.browseByCategoryEnabled = true; this.browseByCategoryLoaded = true; }
     });
 
     // Load place types
