@@ -88,14 +88,17 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
       lat: [null, [Validators.min(-90), Validators.max(90)]],
       lng: [null, [Validators.min(-180), Validators.max(180)]],
       featured: [false],
-      orderNumber: [0, [Validators.min(0)]]
+      displayOrder: [0, [Validators.min(0)]]
     });
   }
+
+  nextDisplayOrder = 0;
 
   ngOnInit(): void {
     this.loadMasterData();
     this.loadPlaces();
     this.loadFieldConfig();
+    this.refreshNextDisplayOrder();
 
     this.searchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => { this.currentPage = 0; this.loadPlaces(); });
@@ -241,6 +244,16 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
     });
   }
 
+  refreshNextDisplayOrder(): void {
+    this.apiService.getPlaces(0, 1, 'displayOrder,desc').subscribe({
+      next: (response: PageResponse<any>) => {
+        const highest = response.content?.[0]?.displayOrder;
+        this.nextDisplayOrder = (typeof highest === 'number' ? highest : -1) + 1;
+      },
+      error: () => {}
+    });
+  }
+
   loadPlaces(): void {
     this.isLoading = true;
     this.apiService.getPlaces(
@@ -287,7 +300,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
       priceRange: this.priceRanges.length > 1 ? this.priceRanges[1].code : '',
       rating: 0,
       featured: false,
-      orderNumber: 0
+      displayOrder: this.nextDisplayOrder
     });
     this.galleryImages = [];
     this.additionalDetails = this.initAdditionalDetails();
@@ -381,6 +394,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
           this.successMessage = 'Place created successfully!';
           this.closeModal();
           this.loadPlaces();
+          this.refreshNextDisplayOrder();
           this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
@@ -409,6 +423,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
         this.showDeleteConfirm = false;
         this.deletePlaceId = null;
         this.loadPlaces();
+        this.refreshNextDisplayOrder();
         this.hideMessageAfterDelay();
       },
       error: () => {

@@ -34,7 +34,7 @@ public class PackageService {
     }
 
     public List<TourPackage> getFeaturedPackages() {
-        return packageRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
+        return packageRepository.findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
     }
 
     public List<TourPackage> getPackagesByCategory(String category) {

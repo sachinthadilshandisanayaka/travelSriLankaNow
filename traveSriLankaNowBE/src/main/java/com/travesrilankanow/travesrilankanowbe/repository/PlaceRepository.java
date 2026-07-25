@@ -19,7 +19,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
 
     List<Place> findByFeaturedTrue();
 
-    List<Place> findByFeaturedTrueOrderByDisplayOrderAsc();
+    List<Place> findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
 
     List<Place> findByType(String type);
 
