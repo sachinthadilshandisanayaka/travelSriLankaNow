@@ -34,7 +34,7 @@ public class EventService {
     }
 
     public List<Event> getFeaturedEvents() {
-        return eventRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
+        return eventRepository.findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
     }
 
     public List<Event> getEventsByCategory(String category) {

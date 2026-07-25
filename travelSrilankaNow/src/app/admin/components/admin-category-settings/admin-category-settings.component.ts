@@ -64,6 +64,11 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
   successMessage = '';
   errorMessage = '';
 
+  // Whether the "Browse by Category" tile grid is shown on the public
+  // listing page - independent of any individual category's own isActive
+  // flag (that flag alone still governs filter dropdowns/admin forms).
+  sectionEnabled = true;
+
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
 
@@ -72,6 +77,7 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
   ngOnInit(): void {
     this.loadData();
     this.loadAllCategories();
+    this.loadSectionEnabled();
 
     this.searchSubject.pipe(
       debounceTime(300),
@@ -79,6 +85,13 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
     ).subscribe(() => {
       this.currentPage = 0;
       this.loadData();
+    });
+  }
+
+  private loadSectionEnabled(): void {
+    this.adminApiService.getBrowseByCategoryEnabled(this.categoryType).subscribe({
+      next: (setting) => { this.sectionEnabled = setting?.value !== 'false'; },
+      error: () => { this.sectionEnabled = true; }
     });
   }
 
@@ -93,6 +106,7 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
       this.currentPage = 0;
       this.loadData();
       this.loadAllCategories();
+      this.loadSectionEnabled();
     }
   }
 
@@ -112,7 +126,7 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
   }
 
   get masterEnabled(): boolean {
-    return this.allCategories.some(c => c.isActive);
+    return this.sectionEnabled;
   }
 
   onSearchChange(): void {
@@ -342,37 +356,25 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
   }
 
   toggleMasterEnabled(): void {
-    if (this.togglingMaster || this.allCategories.length === 0) { return; }
-    const targetState = !this.masterEnabled;
-    const toToggle = this.allCategories.filter(c => c.isActive !== targetState);
-    if (toToggle.length === 0) { return; }
+    if (this.togglingMaster) { return; }
+    const targetState = !this.sectionEnabled;
+    const prevState = this.sectionEnabled;
 
     this.togglingMaster = true;
-    let remaining = toToggle.length;
+    this.sectionEnabled = targetState;
 
-    toToggle.forEach(cat => {
-      cat.isActive = targetState;
-      const pageCat = this.categories.find(c => c.id === cat.id);
-      if (pageCat) { pageCat.isActive = targetState; }
-      if (this.states[cat.id]) { this.states[cat.id].editing.isActive = targetState; }
-
-      this.adminApiService.toggleMasterDataActive(cat.id).subscribe({
-        next: () => {
-          remaining--;
-          if (remaining === 0) {
-            this.togglingMaster = false;
-            this.successMessage = 'Browse by Category ' + (targetState ? 'enabled' : 'disabled') + '.';
-            setTimeout(() => { this.successMessage = ''; }, 3000);
-          }
-        },
-        error: () => {
-          cat.isActive = !targetState;
-          if (pageCat) { pageCat.isActive = !targetState; }
-          if (this.states[cat.id]) { this.states[cat.id].editing.isActive = !targetState; }
-          remaining--;
-          if (remaining === 0) { this.togglingMaster = false; }
-        }
-      });
+    this.adminApiService.setBrowseByCategoryEnabled(this.categoryType, targetState).subscribe({
+      next: () => {
+        this.togglingMaster = false;
+        this.successMessage = 'Browse by Category ' + (targetState ? 'enabled' : 'disabled') + '.';
+        setTimeout(() => { this.successMessage = ''; }, 3000);
+      },
+      error: () => {
+        this.sectionEnabled = prevState;
+        this.togglingMaster = false;
+        this.errorMessage = 'Failed to update section visibility.';
+        setTimeout(() => { this.errorMessage = ''; }, 3000);
+      }
     });
   }
 

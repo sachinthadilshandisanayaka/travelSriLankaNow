@@ -318,7 +318,7 @@
              [routerLink]="['/locations', location.slug || location.id]"
              class="location-card card-stagger">
             <div class="location-image image-zoom">
-              <img [src]="location.imageUrl" [alt]="location.name" />
+              <img [src]="location.imageUrl" [alt]="location.name" loading="lazy" />
               <div class="image-overlay">
                 <span class="category-badge">{{ location.category }}</span>
               </div>
@@ -363,7 +363,7 @@
              [routerLink]="['/events', event.slug || event.id]"
              class="event-card card-stagger">
             <div class="event-image image-zoom">
-              <img [src]="event.imageUrl" [alt]="event.title || event.name" />
+              <img [src]="event.imageUrl" [alt]="event.title || event.name" loading="lazy" />
               <div class="event-badge-wrapper">
                 <span class="type-badge">{{ event.category }}</span>
                 <span class="price-badge">${{ event.price }}</span>
@@ -415,7 +415,7 @@
              [routerLink]="['/places', place.slug || place.id]"
              class="place-card card-stagger">
             <div class="place-image image-zoom">
-              <img [src]="place.imageUrl" [alt]="place.name" />
+              <img [src]="place.imageUrl" [alt]="place.name" loading="lazy" />
               <div class="place-badge-wrapper">
                 <span class="type-badge">{{ place.type }}</span>
               </div>
@@ -468,7 +468,7 @@
              [routerLink]="['/packages', pkg.slug || pkg.id]"
              class="event-card card-stagger">
             <div class="event-image image-zoom">
-              <img [src]="pkg.imageUrl" [alt]="pkg.title" />
+              <img [src]="pkg.imageUrl" [alt]="pkg.title" loading="lazy" />
               <div class="event-badge-wrapper">
                 <span class="type-badge">{{ pkg.category }}</span>
                 <span class="price-badge">${{ pkg.price }}</span>
@@ -1032,7 +1032,7 @@
            [routerLink]="['/locations', location.slug || location.id]"
            class="location-card card-stagger">
           <div class="location-image image-zoom">
-            <img [src]="location.imageUrl" [alt]="location.name" />
+            <img [src]="location.imageUrl" [alt]="location.name" loading="lazy" />
             <div class="image-overlay"><span class="category-badge">{{ location.category }}</span></div>
           </div>
           <div class="location-content">
@@ -1065,7 +1065,7 @@
            [routerLink]="['/events', event.slug || event.id]"
            class="event-card card-stagger">
           <div class="event-image image-zoom">
-            <img [src]="event.imageUrl" [alt]="event.title || event.name" />
+            <img [src]="event.imageUrl" [alt]="event.title || event.name" loading="lazy" />
             <div class="event-badge-wrapper">
               <span class="type-badge">{{ event.category }}</span><span class="price-badge">${{ event.price }}</span>
             </div>
@@ -1099,7 +1099,7 @@
            [routerLink]="['/places', place.slug || place.id]"
            class="place-card card-stagger">
           <div class="place-image image-zoom">
-            <img [src]="place.imageUrl" [alt]="place.name" />
+            <img [src]="place.imageUrl" [alt]="place.name" loading="lazy" />
             <div class="place-badge-wrapper"><span class="type-badge">{{ place.type }}</span></div>
           </div>
           <div class="place-content">

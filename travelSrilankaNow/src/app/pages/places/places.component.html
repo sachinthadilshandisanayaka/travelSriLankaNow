@@ -8,7 +8,7 @@
 </app-page-header>
 
 <!-- Browse by Category -->
-<section *ngIf="selectedType === 'all' && categoryData.length > 0" class="category-overview">
+<section *ngIf="selectedType === 'all' && browseByCategoryLoaded && browseByCategoryEnabled && categoryData.length > 0" class="category-overview">
   <div class="container">
     <div class="category-overview__header">
       <div class="category-overview__label">Browse by Category</div>
