@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, HostListener, Renderer2, Inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, HostListener, NgZone, Renderer2, Inject, ViewChild, ElementRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -49,6 +49,7 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
     private siteSettingsService: SiteSettingsService,
     private renderer: Renderer2,
     private router: Router,
+    private ngZone: NgZone,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
@@ -77,6 +78,14 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navSub = this.router.events.pipe(
       filter(e => e instanceof NavigationEnd)
     ).subscribe(() => setTimeout(() => this.updateLiquidIndicator(), 60));
+
+    // Runs the native scroll listener outside Angular's zone so it doesn't
+    // trigger a full change-detection pass on every scroll event (Angular
+    // would otherwise re-check the entire app on every pixel scrolled).
+    // Change detection is only re-entered when isScrolled actually flips.
+    this.ngZone.runOutsideAngular(() => {
+      window.addEventListener('scroll', this.onWindowScroll, { passive: true });
+    });
   }
 
   ngAfterViewInit(): void {
@@ -86,7 +95,15 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.userSub?.unsubscribe();
     this.navSub?.unsubscribe();
+    window.removeEventListener('scroll', this.onWindowScroll);
   }
+
+  private onWindowScroll = (): void => {
+    const scrolled = window.scrollY > 50;
+    if (scrolled !== this.isScrolled) {
+      this.ngZone.run(() => { this.isScrolled = scrolled; });
+    }
+  };
 
   private updateLiquidIndicator(animate = true): void {
     if (!this.liqIndicator) return;
@@ -134,11 +151,6 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getNavLabel(link: NavConfig): string {
     return link.labelOverride || '';
-  }
-
-  @HostListener('window:scroll', [])
-  onWindowScroll() {
-    this.isScrolled = window.scrollY > 50;
   }
 
   @HostListener('document:click', ['$event'])
