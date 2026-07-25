@@ -892,7 +892,13 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       const totalScroll = (movingCount - 1) * STAGGER + EXIT_DIST;
       wrapper.style.height = `${totalScroll + winH}px`;
 
-      const handler = () => {
+      // The actual per-frame work (forces a layout read via getBoundingClientRect,
+      // then writes styles). Only ever invoked from a requestAnimationFrame
+      // callback below — never directly from the scroll event — so it runs at
+      // most once per rendered frame no matter how many scroll events the
+      // browser fires in between.
+      const update = () => {
+        ticking = false;
         const rect    = wrapper.getBoundingClientRect();
         const scrolled = Math.max(0, Math.min(totalScroll, -rect.top));
 
@@ -918,9 +924,20 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       };
 
+      // rAF-throttled scroll handler: coalesces any number of scroll events
+      // fired within a single frame into one layout read + style write,
+      // instead of doing forced-reflow work per raw scroll event (the
+      // original cause of scroll jank in this section).
+      let ticking = false;
+      const handler = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(update);
+      };
+
       window.addEventListener('scroll', handler, { passive: true });
       this.scrollCardsListeners.push(handler);
-      handler(); // sync on first render
+      update(); // sync on first render
     });
   }
 
