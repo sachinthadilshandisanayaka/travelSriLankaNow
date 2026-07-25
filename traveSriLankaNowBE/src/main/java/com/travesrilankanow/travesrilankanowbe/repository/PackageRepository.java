@@ -19,7 +19,7 @@ public interface PackageRepository extends JpaRepository<TourPackage, Long> {
 
     List<TourPackage> findByFeaturedTrue();
 
-    List<TourPackage> findByFeaturedTrueOrderByDisplayOrderAsc();
+    List<TourPackage> findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
 
     List<TourPackage> findByCategory(String category);
 

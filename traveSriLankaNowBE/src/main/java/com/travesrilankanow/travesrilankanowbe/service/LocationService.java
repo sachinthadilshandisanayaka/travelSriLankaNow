@@ -32,7 +32,7 @@ public class LocationService {
     }
 
     public List<Location> getFeaturedLocations() {
-        return locationRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
+        return locationRepository.findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
     }
 
     public List<Location> getLocationsByCategory(String category) {

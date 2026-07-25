@@ -50,13 +50,26 @@ export class AdminGalleryComponent implements OnInit {
       photographer: [''],
       tags: [''],
       featured: [false],
-      orderNumber: [0, [Validators.min(0)]]
+      displayOrder: [0, [Validators.min(0)]]
     });
   }
+
+  nextDisplayOrder = 0;
 
   ngOnInit(): void {
     this.loadMasterData();
     this.loadGalleryItems();
+    this.refreshNextDisplayOrder();
+  }
+
+  refreshNextDisplayOrder(): void {
+    this.apiService.getGalleryItems(0, 1, 'displayOrder,desc').subscribe({
+      next: (response: PageResponse<any>) => {
+        const highest = response.content?.[0]?.displayOrder;
+        this.nextDisplayOrder = (typeof highest === 'number' ? highest : -1) + 1;
+      },
+      error: () => {}
+    });
   }
 
   loadMasterData(): void {
@@ -118,7 +131,7 @@ export class AdminGalleryComponent implements OnInit {
       type: this.types.length > 0 ? this.types[0].code : '',
       category: this.categories.length > 0 ? this.categories[0].code : '',
       featured: false,
-      orderNumber: 0
+      displayOrder: this.nextDisplayOrder
     });
     this.showModal = true;
   }
@@ -174,6 +187,7 @@ export class AdminGalleryComponent implements OnInit {
           this.successMessage = 'Gallery item created successfully!';
           this.closeModal();
           this.loadGalleryItems();
+          this.refreshNextDisplayOrder();
           this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
@@ -202,6 +216,7 @@ export class AdminGalleryComponent implements OnInit {
         this.showDeleteConfirm = false;
         this.deleteItemId = null;
         this.loadGalleryItems();
+        this.refreshNextDisplayOrder();
         this.hideMessageAfterDelay();
       },
       error: () => {

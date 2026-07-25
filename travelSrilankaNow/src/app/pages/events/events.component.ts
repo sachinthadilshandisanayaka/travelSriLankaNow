@@ -29,7 +29,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPage: number = 0;
   totalPages: number = 0;
   totalElements: number = 0;
-  pageSize: number = 9;
+  pageSize: number = 20;
 
   // Category data
   categoryData: MasterData[] = [];

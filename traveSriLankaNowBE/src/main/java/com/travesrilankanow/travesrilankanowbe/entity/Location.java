@@ -12,7 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
-@Table(name = "locations")
+@Table(name = "locations", indexes = {
+        @Index(name = "idx_locations_featured", columnList = "featured"),
+        @Index(name = "idx_locations_category", columnList = "category"),
+        @Index(name = "idx_locations_display_order", columnList = "display_order")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

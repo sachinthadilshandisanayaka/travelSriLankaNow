@@ -32,7 +32,7 @@ public class PlaceService {
     }
 
     public List<Place> getFeaturedPlaces() {
-        return placeRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
+        return placeRepository.findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
     }
 
     public List<Place> getPlacesByType(String type) {

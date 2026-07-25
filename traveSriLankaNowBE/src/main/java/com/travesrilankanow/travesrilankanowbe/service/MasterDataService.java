@@ -1,11 +1,14 @@
 package com.travesrilankanow.travesrilankanowbe.service;
 
+import com.travesrilankanow.travesrilankanowbe.config.CacheConfig;
 import com.travesrilankanow.travesrilankanowbe.entity.MasterData;
 import com.travesrilankanow.travesrilankanowbe.entity.MasterData.MasterDataType;
 import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
 import com.travesrilankanow.travesrilankanowbe.repository.MasterDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,10 +27,12 @@ public class MasterDataService {
         return masterDataRepository.findAllByOrderByTypeAscSortOrderAsc();
     }
 
+    @Cacheable(cacheNames = CacheConfig.MASTER_DATA_CACHE, key = "'all_' + #type")
     public List<MasterData> getByType(MasterDataType type) {
         return masterDataRepository.findByTypeOrderBySortOrderAsc(type);
     }
 
+    @Cacheable(cacheNames = CacheConfig.MASTER_DATA_CACHE, key = "'active_' + #type")
     public List<MasterData> getActiveByType(MasterDataType type) {
         return masterDataRepository.findByTypeAndIsActiveTrueOrderBySortOrderAsc(type);
     }
@@ -51,6 +56,7 @@ public class MasterDataService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.MASTER_DATA_CACHE, allEntries = true)
     public MasterData create(MasterData masterData) {
         if (masterDataRepository.existsByTypeAndCode(masterData.getType(), masterData.getCode())) {
             throw new IllegalArgumentException("Master data with type '" + masterData.getType() + "' and code '" + masterData.getCode() + "' already exists");
@@ -62,6 +68,7 @@ public class MasterDataService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.MASTER_DATA_CACHE, allEntries = true)
     public MasterData update(Long id, MasterData masterData) {
         MasterData existing = getById(id);
 
@@ -84,6 +91,7 @@ public class MasterDataService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.MASTER_DATA_CACHE, allEntries = true)
     public void delete(Long id) {
         MasterData existing = getById(id);
         masterDataRepository.delete(existing);
@@ -91,6 +99,7 @@ public class MasterDataService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.MASTER_DATA_CACHE, allEntries = true)
     public MasterData toggleActive(Long id) {
         MasterData existing = getById(id);
         existing.setIsActive(!existing.getIsActive());

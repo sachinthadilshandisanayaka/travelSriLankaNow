@@ -141,6 +141,12 @@
     object-fit: contain;
     display: block;
     transition: opacity 0.2s ease;
+    // Scaled up visually via transform (not height) so it doesn't grow the
+    // navbar's flex row height / overall navbar height. Anchored at the
+    // bottom so the extra size grows upward into the navbar's existing
+    // padding instead of overlapping the site-name text underneath it.
+    transform: scale(1.28);
+    transform-origin: bottom;
 
     @include respond-to('lg') { height: 50px; }
   }

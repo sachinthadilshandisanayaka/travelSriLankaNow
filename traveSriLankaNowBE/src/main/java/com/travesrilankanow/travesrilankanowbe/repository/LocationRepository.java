@@ -19,7 +19,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
     List<Location> findByFeaturedTrue();
 
-    List<Location> findByFeaturedTrueOrderByDisplayOrderAsc();
+    List<Location> findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
 
     List<Location> findByCategory(String category);
 
