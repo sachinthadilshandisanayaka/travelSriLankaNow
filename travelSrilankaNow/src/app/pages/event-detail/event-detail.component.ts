@@ -181,6 +181,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
         this.event = event;
         this.loading = false;
         this.initPricingState();
+        this.loadCategoryDisplayName(event.category);
       },
       error: () => {
         this.error = 'Failed to load event details. Please try again later.';
@@ -197,6 +198,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
         this.event = event;
         this.loading = false;
         this.initPricingState();
+        this.loadCategoryDisplayName(event.category);
       },
       error: () => {
         this.error = 'Failed to load event details. Please try again later.';
@@ -497,6 +499,23 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       'cultural': '🏛️', 'adventure': '⛰️', 'food': '🍽️', 'festival': '🎉', 'tour': '🗺️'
     };
     return icons[category] || '🎯';
+  }
+
+  // The `| titlecase` pipe only capitalizes at whitespace boundaries, so a
+  // camelCase category code like "CultureAndHeritage" comes out mangled
+  // ("Cultureandheritage"). Look up the real master-data display name
+  // instead, falling back to the pipe only if that lookup fails.
+  categoryDisplayName = '';
+
+  private loadCategoryDisplayName(category: string): void {
+    this.categoryDisplayName = '';
+    this.masterDataService.getAllEventCategories().subscribe({
+      next: (cats) => {
+        const match = cats.find(c => c.code === category);
+        this.categoryDisplayName = match?.displayName || '';
+      },
+      error: () => {}
+    });
   }
 
   hasDetails(entity: any): boolean {

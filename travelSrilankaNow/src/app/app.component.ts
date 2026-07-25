@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, ViewportScroller } from '@angular/common';
 import { Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, switchMap } from 'rxjs/operators';
@@ -28,14 +28,22 @@ export class AppComponent implements OnInit {
   isAdminRoute = false;
   isNavigating = false;
 
+  private lastPath = '';
+
   constructor(
     private router: Router,
     private titleService: Title,
     private siteSettings: SiteSettingsService,
     private cdr: ChangeDetectorRef,
+    private viewportScroller: ViewportScroller,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.isAdminRoute = this.router.url.startsWith('/admin');
+    this.lastPath = this.pathOnly(this.router.url);
+  }
+
+  private pathOnly(url: string): string {
+    return url.split('?')[0].split('#')[0];
   }
 
   ngOnInit(): void {
@@ -64,6 +72,16 @@ export class AppComponent implements OnInit {
         this.isAdminRoute = event.url.startsWith('/admin');
         this.isNavigating = false;
         this.cdr.detectChanges();
+
+        // Only scroll to top when the route path itself changed - a filter,
+        // page, or search query-param update on the same page shouldn't
+        // yank the user back up.
+        const newPath = this.pathOnly(event.urlAfterRedirects);
+        if (newPath !== this.lastPath) {
+          this.viewportScroller.scrollToPosition([0, 0]);
+        }
+        this.lastPath = newPath;
+
         this.siteSettings.getSettingsAsMap().subscribe(settings => {
           this.applyTitle(event.url, settings);
         });

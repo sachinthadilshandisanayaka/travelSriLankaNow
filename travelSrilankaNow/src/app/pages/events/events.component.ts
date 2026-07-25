@@ -34,7 +34,10 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   // Category data
   categoryData: MasterData[] = [];
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Events' }];
-  browseByCategoryEnabled: boolean = true;
+  // Starts false and hidden until the setting actually loads, so a slow
+  // request can't let the section flash visible before confirming it's off.
+  browseByCategoryEnabled: boolean = false;
+  browseByCategoryLoaded: boolean = false;
 
   // Browse by Category — search + pagination over categoryData
   categorySearchTerm: string = '';
@@ -70,9 +73,13 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setupSearchDebounce();
 
     this.route.queryParamMap.subscribe(params => {
-      const cat = params.get('category') || '';
-      this.selectedCategory = cat || 'all';
-      this.isCategoryView = !!(cat && cat !== 'all');
+      // "category" (tile click) opens the dedicated category landing view;
+      // "filter" (the plain Category <select>) just filters this same list
+      // in place, without switching to that view.
+      const tileCat = params.get('category') || '';
+      this.isCategoryView = !!(tileCat && tileCat !== 'all');
+      const filterCat = params.get('filter') || '';
+      this.selectedCategory = this.isCategoryView ? tileCat : (filterCat || 'all');
       this.updateActiveCategoryData();
 
       this.searchTerm = params.get('search') || '';
@@ -105,8 +112,8 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadMasterData(): void {
     this.siteSettingsService.getBrowseByCategoryEnabled('EVENT_CATEGORY').subscribe({
-      next: (enabled) => { this.browseByCategoryEnabled = enabled; },
-      error: () => { this.browseByCategoryEnabled = true; }
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; this.browseByCategoryLoaded = true; },
+      error: () => { this.browseByCategoryEnabled = true; this.browseByCategoryLoaded = true; }
     });
 
     this.masterDataService.getEventCategories().subscribe({
@@ -188,7 +195,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterInPlace(category: string): void {
-    this.updateQueryParams({ category: category === 'all' ? null : category, page: null });
+    this.updateQueryParams({ filter: category === 'all' ? null : category, category: null, page: null });
   }
 
   getCategoryDisplayName(code: string): string {
