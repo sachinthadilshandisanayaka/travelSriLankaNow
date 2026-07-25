@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventService, PageResponse } from '../../services/event.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { Event as EventModel } from '../../models/event.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -28,11 +29,15 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPage: number = 0;
   totalPages: number = 0;
   totalElements: number = 0;
-  pageSize: number = 9;
+  pageSize: number = 20;
 
   // Category data
   categoryData: MasterData[] = [];
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Events' }];
+  // Starts false and hidden until the setting actually loads, so a slow
+  // request can't let the section flash visible before confirming it's off.
+  browseByCategoryEnabled: boolean = false;
+  browseByCategoryLoaded: boolean = false;
 
   // Browse by Category — search + pagination over categoryData
   categorySearchTerm: string = '';
@@ -58,6 +63,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private eventService: EventService,
     private masterDataService: MasterDataService,
+    private siteSettingsService: SiteSettingsService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -67,12 +73,32 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setupSearchDebounce();
 
     this.route.queryParamMap.subscribe(params => {
-      const cat = params.get('category') || '';
-      this.selectedCategory = cat || 'all';
-      this.isCategoryView = !!(cat && cat !== 'all');
+      // "category" (tile click) opens the dedicated category landing view;
+      // "filter" (the plain Category <select>) just filters this same list
+      // in place, without switching to that view.
+      const tileCat = params.get('category') || '';
+      this.isCategoryView = !!(tileCat && tileCat !== 'all');
+      const filterCat = params.get('filter') || '';
+      this.selectedCategory = this.isCategoryView ? tileCat : (filterCat || 'all');
       this.updateActiveCategoryData();
-      this.currentPage = 0;
+
+      this.searchTerm = params.get('search') || '';
+
+      const pageParam = parseInt(params.get('page') || '1', 10);
+      this.currentPage = (!isNaN(pageParam) && pageParam > 1) ? pageParam - 1 : 0;
+
       this.loadData();
+    });
+  }
+
+  // Single source of truth for list state (category/search/page) so the
+  // browser back button and a page refresh both restore the exact same
+  // view instead of the state living only in memory.
+  private updateQueryParams(overrides: { [key: string]: string | number | null }): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: overrides,
+      queryParamsHandling: 'merge'
     });
   }
 
@@ -85,6 +111,11 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadMasterData(): void {
+    this.siteSettingsService.getBrowseByCategoryEnabled('EVENT_CATEGORY').subscribe({
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; this.browseByCategoryLoaded = true; },
+      error: () => { this.browseByCategoryEnabled = true; this.browseByCategoryLoaded = true; }
+    });
+
     this.masterDataService.getEventCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categoryData = data.filter((c: MasterData) => c.isActive);
@@ -93,9 +124,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load event categories:', err)
     });
 
-    // Filter dropdown always lists every category, active or not — independent
-    // of whether the "Browse by Category" tiles section is toggled on
-    this.masterDataService.getAllEventCategories().subscribe({
+    this.masterDataService.getEventCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Events' },
@@ -120,9 +149,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
-      this.searchTerm = searchTerm;
-      this.currentPage = 0;
-      this.loadData();
+      this.updateQueryParams({ search: searchTerm || null, page: null });
     });
   }
 
@@ -168,9 +195,7 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterInPlace(category: string): void {
-    this.selectedCategory = category;
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ filter: category === 'all' ? null : category, category: null, page: null });
   }
 
   getCategoryDisplayName(code: string): string {
@@ -196,15 +221,12 @@ export class EventsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearAllFilters(): void {
-    this.searchTerm = '';
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ search: null, page: null });
   }
 
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      this.loadData();
+      this.updateQueryParams({ page: page + 1 });
       const target = document.querySelector('.filter-section') as HTMLElement;
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });

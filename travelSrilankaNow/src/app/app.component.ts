@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
+import { DOCUMENT, ViewportScroller } from '@angular/common';
 import { Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { filter, switchMap } from 'rxjs/operators';
@@ -27,19 +28,29 @@ export class AppComponent implements OnInit {
   isAdminRoute = false;
   isNavigating = false;
 
+  private lastPath = '';
+
   constructor(
     private router: Router,
     private titleService: Title,
     private siteSettings: SiteSettingsService,
     private cdr: ChangeDetectorRef,
+    private viewportScroller: ViewportScroller,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.isAdminRoute = this.router.url.startsWith('/admin');
+    this.lastPath = this.pathOnly(this.router.url);
+  }
+
+  private pathOnly(url: string): string {
+    return url.split('?')[0].split('#')[0];
   }
 
   ngOnInit(): void {
 
     this.siteSettings.getSettingsAsMap().subscribe(settings => {
       this.applyTitle(this.router.url, settings);
+      this.applyFavicon(settings['favicon_url']);
     });
 
     this.router.events.pipe(
@@ -61,6 +72,16 @@ export class AppComponent implements OnInit {
         this.isAdminRoute = event.url.startsWith('/admin');
         this.isNavigating = false;
         this.cdr.detectChanges();
+
+        // Only scroll to top when the route path itself changed - a filter,
+        // page, or search query-param update on the same page shouldn't
+        // yank the user back up.
+        const newPath = this.pathOnly(event.urlAfterRedirects);
+        if (newPath !== this.lastPath) {
+          this.viewportScroller.scrollToPosition([0, 0]);
+        }
+        this.lastPath = newPath;
+
         this.siteSettings.getSettingsAsMap().subscribe(settings => {
           this.applyTitle(event.url, settings);
         });
@@ -68,6 +89,19 @@ export class AppComponent implements OnInit {
         this.isNavigating = false;
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  private applyFavicon(faviconUrl: string): void {
+    if (!faviconUrl) return;
+    const selectors = [
+      'link[rel="icon"]',
+      'link[rel="shortcut icon"]',
+      'link[rel="apple-touch-icon"]'
+    ];
+    selectors.forEach(sel => {
+      const el = this.document.querySelector(sel) as HTMLLinkElement | null;
+      if (el) { el.href = faviconUrl + '?v=' + Date.now(); }
     });
   }
 

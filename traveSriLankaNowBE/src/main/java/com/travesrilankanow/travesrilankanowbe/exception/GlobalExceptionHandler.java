@@ -70,8 +70,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        String message = "A record with the same value already exists.";
         String cause = ex.getMostSpecificCause().getMessage();
+
+        // Not actually a duplicate - a value exceeded its column length. Was
+        // previously reported as "already exists", which sent debugging in
+        // the wrong direction entirely.
+        if (cause != null && cause.contains("value too long")) {
+            ErrorResponse error = new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "One of the fields is too long. Please shorten it and try again.",
+                    LocalDateTime.now());
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        }
+
+        String message = "A record with the same value already exists.";
         if (cause != null && cause.contains("email")) {
             message = "Email address is already in use.";
         } else if (cause != null && cause.contains("username")) {

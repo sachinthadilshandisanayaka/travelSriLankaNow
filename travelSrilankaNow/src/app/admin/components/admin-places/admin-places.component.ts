@@ -88,14 +88,17 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
       lat: [null, [Validators.min(-90), Validators.max(90)]],
       lng: [null, [Validators.min(-180), Validators.max(180)]],
       featured: [false],
-      orderNumber: [0, [Validators.min(0)]]
+      displayOrder: [0, [Validators.min(0)]]
     });
   }
+
+  nextDisplayOrder = 0;
 
   ngOnInit(): void {
     this.loadMasterData();
     this.loadPlaces();
     this.loadFieldConfig();
+    this.refreshNextDisplayOrder();
 
     this.searchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => { this.currentPage = 0; this.loadPlaces(); });
@@ -213,11 +216,9 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
   }
 
   loadMasterData(): void {
-    // Admin's own unfiltered endpoints — filtering/assigning categories should
-    // never be limited to whatever happens to be publicly "active" right now.
     this.apiService.getMasterDataByType('PLACE_TYPE').subscribe({
       next: (data) => {
-        this.placeTypes = data;
+        this.placeTypes = data.filter((t: MasterData) => t.isActive);
       },
       error: (error) => {
         console.error('Failed to load place types:', error);
@@ -226,7 +227,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
 
     this.apiService.getMasterDataByType('REGION').subscribe({
       next: (data) => {
-        this.regions = data;
+        this.regions = data.filter((r: MasterData) => r.isActive);
       },
       error: (error) => {
         console.error('Failed to load regions:', error);
@@ -235,11 +236,21 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
 
     this.apiService.getMasterDataByType('PRICE_RANGE').subscribe({
       next: (data) => {
-        this.priceRanges = data;
+        this.priceRanges = data.filter((p: MasterData) => p.isActive);
       },
       error: (error) => {
         console.error('Failed to load price ranges:', error);
       }
+    });
+  }
+
+  refreshNextDisplayOrder(): void {
+    this.apiService.getPlaces(0, 1, 'displayOrder,desc').subscribe({
+      next: (response: PageResponse<any>) => {
+        const highest = response.content?.[0]?.displayOrder;
+        this.nextDisplayOrder = (typeof highest === 'number' ? highest : -1) + 1;
+      },
+      error: () => {}
     });
   }
 
@@ -289,7 +300,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
       priceRange: this.priceRanges.length > 1 ? this.priceRanges[1].code : '',
       rating: 0,
       featured: false,
-      orderNumber: 0
+      displayOrder: this.nextDisplayOrder
     });
     this.galleryImages = [];
     this.additionalDetails = this.initAdditionalDetails();
@@ -383,6 +394,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
           this.successMessage = 'Place created successfully!';
           this.closeModal();
           this.loadPlaces();
+          this.refreshNextDisplayOrder();
           this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
@@ -411,6 +423,7 @@ export class AdminPlacesComponent implements OnInit, OnDestroy {
         this.showDeleteConfirm = false;
         this.deletePlaceId = null;
         this.loadPlaces();
+        this.refreshNextDisplayOrder();
         this.hideMessageAfterDelay();
       },
       error: () => {

@@ -1,10 +1,13 @@
 package com.travesrilankanow.travesrilankanowbe.service;
 
+import com.travesrilankanow.travesrilankanowbe.config.CacheConfig;
 import com.travesrilankanow.travesrilankanowbe.entity.SiteSetting;
 import com.travesrilankanow.travesrilankanowbe.entity.SiteSetting.SettingCategory;
 import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
 import com.travesrilankanow.travesrilankanowbe.repository.SiteSettingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ public class SiteSettingService {
         return siteSettingRepository.findAllByOrderByCategoryAscSortOrderAsc();
     }
 
+    @Cacheable(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, key = "'active'")
     public List<SiteSetting> getActiveSettings() {
         return siteSettingRepository.findByIsActiveTrueOrderByCategoryAscSortOrderAsc();
     }
@@ -32,6 +36,7 @@ public class SiteSettingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Setting not found with id: " + id));
     }
 
+    @Cacheable(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, key = "'key_' + #key")
     public SiteSetting getSettingByKey(String key) {
         return siteSettingRepository.findByKey(key)
                 .orElseThrow(() -> new ResourceNotFoundException("Setting not found with key: " + key));
@@ -41,6 +46,7 @@ public class SiteSettingService {
         return siteSettingRepository.findByCategoryAndIsActiveTrue(category);
     }
 
+    @Cacheable(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, key = "'map'")
     public Map<String, String> getActiveSettingsAsMap() {
         return siteSettingRepository.findByIsActiveTrueOrderByCategoryAscSortOrderAsc()
                 .stream()
@@ -54,6 +60,7 @@ public class SiteSettingService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, allEntries = true)
     public SiteSetting createSetting(SiteSetting setting) {
         if (siteSettingRepository.existsByKey(setting.getKey())) {
             throw new IllegalArgumentException("Setting with key '" + setting.getKey() + "' already exists");
@@ -62,6 +69,7 @@ public class SiteSettingService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, allEntries = true)
     public SiteSetting upsertSetting(SiteSetting setting) {
         return siteSettingRepository.findByKey(setting.getKey())
                 .map(existing -> {
@@ -88,6 +96,7 @@ public class SiteSettingService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, allEntries = true)
     public SiteSetting updateSetting(SiteSetting setting) {
         SiteSetting existingSetting = siteSettingRepository.findById(setting.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Setting not found with id: " + setting.getId()));
@@ -104,6 +113,7 @@ public class SiteSettingService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, allEntries = true)
     public void deleteSetting(Long id) {
         if (!siteSettingRepository.existsById(id)) {
             throw new ResourceNotFoundException("Setting not found with id: " + id);
@@ -112,6 +122,7 @@ public class SiteSettingService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.SITE_SETTINGS_CACHE, allEntries = true)
     public SiteSetting toggleStatus(Long id) {
         SiteSetting setting = siteSettingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Setting not found with id: " + id));

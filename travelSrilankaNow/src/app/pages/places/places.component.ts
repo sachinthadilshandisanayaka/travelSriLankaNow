@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlaceService, PageResponse } from '../../services/place.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { Place } from '../../models/place.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -35,6 +36,10 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   categoryData: MasterData[] = [];
   placeTypes: { value: string; label: string }[] = [{ value: 'all', label: 'All Places' }];
   priceRanges: { value: string; label: string }[] = [{ value: 'all', label: 'All Prices' }];
+  // Starts false and hidden until the setting actually loads, so a slow
+  // request can't let the section flash visible before confirming it's off.
+  browseByCategoryEnabled: boolean = false;
+  browseByCategoryLoaded: boolean = false;
 
   // Browse by Category — search + pagination over categoryData
   categorySearchTerm: string = '';
@@ -53,6 +58,7 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private placeService: PlaceService,
     private masterDataService: MasterDataService,
+    private siteSettingsService: SiteSettingsService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -64,12 +70,33 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.route.queryParamMap.subscribe(params => {
       const type = params.get('type') || '';
       this.selectedType = type || 'all';
-      this.currentPage = 0;
+      this.selectedPriceRange = params.get('priceRange') || 'all';
+      this.searchTerm = params.get('search') || '';
+
+      const pageParam = parseInt(params.get('page') || '1', 10);
+      this.currentPage = (!isNaN(pageParam) && pageParam > 1) ? pageParam - 1 : 0;
+
       this.loadData();
     });
   }
 
+  // Single source of truth for list state (type/priceRange/search/page) so
+  // the browser back button and a page refresh both restore the exact same
+  // view instead of the state living only in memory.
+  private updateQueryParams(overrides: { [key: string]: string | number | null }): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: overrides,
+      queryParamsHandling: 'merge'
+    });
+  }
+
   private loadMasterData(): void {
+    this.siteSettingsService.getBrowseByCategoryEnabled('PLACE_TYPE').subscribe({
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; this.browseByCategoryLoaded = true; },
+      error: () => { this.browseByCategoryEnabled = true; this.browseByCategoryLoaded = true; }
+    });
+
     // Load place types
     this.masterDataService.getPlaceTypes().subscribe({
       next: (data: MasterData[]) => {
@@ -78,9 +105,7 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load place types:', err)
     });
 
-    // Filter dropdown always lists every type, active or not — independent
-    // of whether the "Browse by Category" tiles section is toggled on
-    this.masterDataService.getAllPlaceTypes().subscribe({
+    this.masterDataService.getPlaceTypes().subscribe({
       next: (data: MasterData[]) => {
         this.placeTypes = [
           { value: 'all', label: 'All Places' },
@@ -124,9 +149,7 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
-      this.searchTerm = searchTerm;
-      this.currentPage = 0;
-      this.loadData();
+      this.updateQueryParams({ search: searchTerm || null, page: null });
     });
   }
 
@@ -243,9 +266,7 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterByPriceRange(priceRange: string): void {
-    this.selectedPriceRange = priceRange;
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ priceRange: priceRange === 'all' ? null : priceRange, page: null });
   }
 
   onSearchChange(event: any): void {
@@ -265,17 +286,12 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearAllFilters(): void {
-    this.searchTerm = '';
-    this.selectedType = 'all';
-    this.selectedPriceRange = 'all';
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ search: null, type: null, priceRange: null, page: null });
   }
 
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      this.loadData();
+      this.updateQueryParams({ page: page + 1 });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }

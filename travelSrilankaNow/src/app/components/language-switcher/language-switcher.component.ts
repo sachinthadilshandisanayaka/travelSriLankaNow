@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { LanguageService, Language } from '../../services/language.service';
 
 @Component({
@@ -6,14 +6,14 @@ import { LanguageService, Language } from '../../services/language.service';
   templateUrl: './language-switcher.component.html',
   styleUrls: ['./language-switcher.component.scss']
 })
-export class LanguageSwitcherComponent implements OnInit {
+export class LanguageSwitcherComponent implements OnInit, OnDestroy {
   isOpen = false;
   isScrolled = false;
   searchQuery = '';
   languages: Language[] = [];
   current: Language = { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧' };
 
-  constructor(public langService: LanguageService) {}
+  constructor(public langService: LanguageService, private ngZone: NgZone) {}
 
   ngOnInit(): void {
     this.languages = this.langService.languages;
@@ -21,6 +21,17 @@ export class LanguageSwitcherComponent implements OnInit {
     this.langService.currentLang$.subscribe(() => {
       this.current = this.langService.getCurrentLanguage();
     });
+
+    // Outside Angular's zone so this doesn't force a full change-detection
+    // pass on every scroll event; only re-enters the zone when isScrolled
+    // actually flips.
+    this.ngZone.runOutsideAngular(() => {
+      window.addEventListener('scroll', this.onWindowScroll, { passive: true });
+    });
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('scroll', this.onWindowScroll);
   }
 
   get filteredLanguages(): Language[] {
@@ -46,10 +57,12 @@ export class LanguageSwitcherComponent implements OnInit {
     this.searchQuery = '';
   }
 
-  @HostListener('window:scroll', [])
-  onWindowScroll(): void {
-    this.isScrolled = window.scrollY > 50;
-  }
+  private onWindowScroll = (): void => {
+    const scrolled = window.scrollY > 50;
+    if (scrolled !== this.isScrolled) {
+      this.ngZone.run(() => { this.isScrolled = scrolled; });
+    }
+  };
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {

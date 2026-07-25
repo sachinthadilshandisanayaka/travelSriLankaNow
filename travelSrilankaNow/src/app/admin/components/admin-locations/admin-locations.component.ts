@@ -75,17 +75,20 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
       region: ['', Validators.required],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
       featured: [false],
-      orderNumber: [0, [Validators.min(0)]],
+      displayOrder: [0, [Validators.min(0)]],
       bestTimeToVisit: [''],
       activities: [''],
       highlights: ['']
     });
   }
 
+  nextDisplayOrder = 0;
+
   ngOnInit(): void {
     this.loadMasterData();
     this.loadLocations();
     this.loadFieldConfig();
+    this.refreshNextDisplayOrder();
 
     this.searchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => { this.currentPage = 0; this.loadLocations(); });
@@ -122,11 +125,9 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
   }
 
   loadMasterData(): void {
-    // Admin's own unfiltered endpoints — filtering/assigning categories should
-    // never be limited to whatever happens to be publicly "active" right now.
     this.apiService.getMasterDataByType('LOCATION_CATEGORY').subscribe({
       next: (data) => {
-        this.categories = data;
+        this.categories = data.filter((c: MasterData) => c.isActive);
       },
       error: (error) => {
         console.error('Failed to load categories:', error);
@@ -135,11 +136,21 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
 
     this.apiService.getMasterDataByType('REGION').subscribe({
       next: (data) => {
-        this.regions = data;
+        this.regions = data.filter((r: MasterData) => r.isActive);
       },
       error: (error) => {
         console.error('Failed to load regions:', error);
       }
+    });
+  }
+
+  refreshNextDisplayOrder(): void {
+    this.apiService.getLocations(0, 1, 'displayOrder,desc').subscribe({
+      next: (response: PageResponse<any>) => {
+        const highest = response.content?.[0]?.displayOrder;
+        this.nextDisplayOrder = (typeof highest === 'number' ? highest : -1) + 1;
+      },
+      error: () => {}
     });
   }
 
@@ -206,7 +217,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
       region: this.regions.length > 0 ? this.regions[0].code : '',
       rating: 0,
       featured: false,
-      orderNumber: 0
+      displayOrder: this.nextDisplayOrder
     });
     this.galleryImages = [];
     this.additionalDetails = this.initAdditionalDetails();
@@ -278,6 +289,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
           this.successMessage = 'Location created successfully!';
           this.closeModal();
           this.loadLocations();
+          this.refreshNextDisplayOrder();
           this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
@@ -382,6 +394,7 @@ export class AdminLocationsComponent implements OnInit, OnDestroy {
         this.showDeleteConfirm = false;
         this.deleteLocationId = null;
         this.loadLocations();
+        this.refreshNextDisplayOrder();
         this.hideMessageAfterDelay();
       },
       error: () => {

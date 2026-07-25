@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LocationService, PageResponse } from '../../services/location.service';
 import { MasterDataService, MasterData } from '../../services/master-data.service';
+import { SiteSettingsService } from '../../services/site-settings.service';
 import { Location } from '../../models/location.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -34,6 +35,10 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   // Categories and Regions loaded from MasterData
   categoryData: MasterData[] = [];
   categories: { value: string; label: string }[] = [{ value: 'all', label: 'All Locations' }];
+  // Starts false and hidden until the setting actually loads, so a slow
+  // request can't let the section flash visible before confirming it's off.
+  browseByCategoryEnabled: boolean = false;
+  browseByCategoryLoaded: boolean = false;
   regions: { value: string; label: string }[] = [{ value: 'all', label: 'All Regions' }];
 
   // Browse by Category — search + pagination over categoryData
@@ -53,6 +58,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private locationService: LocationService,
     private masterDataService: MasterDataService,
+    private siteSettingsService: SiteSettingsService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -64,12 +70,33 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.route.queryParamMap.subscribe(params => {
       const cat = params.get('category') || '';
       this.selectedCategory = cat || 'all';
-      this.currentPage = 0;
+      this.selectedRegion = params.get('region') || 'all';
+      this.searchTerm = params.get('search') || '';
+
+      const pageParam = parseInt(params.get('page') || '1', 10);
+      this.currentPage = (!isNaN(pageParam) && pageParam > 1) ? pageParam - 1 : 0;
+
       this.loadData();
     });
   }
 
+  // Single source of truth for list state (category/search/page) so the
+  // browser back button and a page refresh both restore the exact same
+  // view instead of the state living only in memory.
+  private updateQueryParams(overrides: { [key: string]: string | number | null }): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: overrides,
+      queryParamsHandling: 'merge'
+    });
+  }
+
   private loadMasterData(): void {
+    this.siteSettingsService.getBrowseByCategoryEnabled('LOCATION_CATEGORY').subscribe({
+      next: (enabled) => { this.browseByCategoryEnabled = enabled; this.browseByCategoryLoaded = true; },
+      error: () => { this.browseByCategoryEnabled = true; this.browseByCategoryLoaded = true; }
+    });
+
     this.masterDataService.getLocationCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categoryData = data.filter((c: MasterData) => c.isActive);
@@ -77,9 +104,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load location categories:', err)
     });
 
-    // Filter dropdown always lists every category, active or not — independent
-    // of whether the "Browse by Category" tiles section is toggled on
-    this.masterDataService.getAllLocationCategories().subscribe({
+    this.masterDataService.getLocationCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Locations' },
@@ -122,9 +147,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
-      this.searchTerm = searchTerm;
-      this.currentPage = 0;
-      this.loadData();
+      this.updateQueryParams({ search: searchTerm || null, page: null });
     });
   }
 
@@ -241,9 +264,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   filterByRegion(region: string): void {
-    this.selectedRegion = region;
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ region: region === 'all' ? null : region, page: null });
   }
 
   onSearchChange(event: any): void {
@@ -263,17 +284,12 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearAllFilters(): void {
-    this.searchTerm = '';
-    this.selectedCategory = 'all';
-    this.selectedRegion = 'all';
-    this.currentPage = 0;
-    this.loadData();
+    this.updateQueryParams({ search: null, category: null, region: null, page: null });
   }
 
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      this.loadData();
+      this.updateQueryParams({ page: page + 1 });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }

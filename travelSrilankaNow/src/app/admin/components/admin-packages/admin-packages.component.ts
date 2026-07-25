@@ -112,15 +112,18 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
       requirements: [''],
       rating: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
       featured: [false],
-      orderNumber: [0, [Validators.min(0)]]
+      displayOrder: [0, [Validators.min(0)]]
     });
   }
+
+  nextDisplayOrder = 0;
 
   ngOnInit(): void {
     this.loadCategories();
     this.loadCurrencies();
     this.loadPackages();
     this.loadFieldConfig();
+    this.refreshNextDisplayOrder();
     this.searchSubject.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => { this.currentPage = 0; this.loadPackages(); });
   }
@@ -154,11 +157,9 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
   }
 
   loadCategories(): void {
-    // Admin's own unfiltered endpoint — filtering/assigning categories should
-    // never be limited to whatever happens to be publicly "active" right now.
     this.apiService.getMasterDataByType('PACKAGE_CATEGORY').subscribe({
       next: (data) => {
-        this.categories = data;
+        this.categories = data.filter((c: MasterData) => c.isActive);
         if (data.length > 0 && !this.packageForm.get('category')?.value) {
           this.packageForm.patchValue({ category: data[0].code });
         }
@@ -166,6 +167,16 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Failed to load categories:', error);
       }
+    });
+  }
+
+  refreshNextDisplayOrder(): void {
+    this.apiService.getPackagesPaginated(0, 1, 'displayOrder,desc').subscribe({
+      next: (response: PageResponse<any>) => {
+        const highest = response.content?.[0]?.displayOrder;
+        this.nextDisplayOrder = (typeof highest === 'number' ? highest : -1) + 1;
+      },
+      error: () => {}
     });
   }
 
@@ -212,7 +223,7 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
       availableSpots: 0,
       rating: 0,
       featured: false,
-      orderNumber: 0
+      displayOrder: this.nextDisplayOrder
     });
     this.galleryImages = [];
     this.packageLocations = [];
@@ -311,6 +322,7 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
           this.successMessage = 'Package created successfully!';
           this.closeModal();
           this.loadPackages();
+          this.refreshNextDisplayOrder();
           this.contentStats.notify();
           this.hideMessageAfterDelay();
         },
@@ -338,6 +350,7 @@ export class AdminPackagesComponent implements OnInit, OnDestroy {
         this.showDeleteConfirm = false;
         this.deletePackageId = null;
         this.loadPackages();
+        this.refreshNextDisplayOrder();
         this.contentStats.notify();
         this.hideMessageAfterDelay();
       },

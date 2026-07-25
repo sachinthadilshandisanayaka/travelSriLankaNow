@@ -43,7 +43,11 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' })],
+  // Scroll restoration is handled manually in AppComponent instead of 'top',
+  // since 'top' fires on every navigation - including same-page filter/page
+  // query-param changes (e.g. selecting a category), which jarringly yanked
+  // the user back to the top of a long list they were scrolled through.
+  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

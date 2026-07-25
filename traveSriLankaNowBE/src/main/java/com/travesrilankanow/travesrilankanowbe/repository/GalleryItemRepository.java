@@ -19,7 +19,7 @@ public interface GalleryItemRepository extends JpaRepository<GalleryItem, Long> 
 
     List<GalleryItem> findByFeaturedTrue();
 
-    List<GalleryItem> findByFeaturedTrueOrderByDisplayOrderAsc();
+    List<GalleryItem> findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
 
     List<GalleryItem> findByCategory(String category);
 

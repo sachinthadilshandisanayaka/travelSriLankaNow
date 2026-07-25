@@ -27,7 +27,7 @@ public class GalleryService {
     }
 
     public List<GalleryItem> getFeaturedGalleryItems() {
-        return galleryItemRepository.findByFeaturedTrueOrderByDisplayOrderAsc();
+        return galleryItemRepository.findByFeaturedTrueOrderByDisplayOrderAscIdAsc();
     }
 
     public List<GalleryItem> getGalleryItemsByCategory(String category) {
