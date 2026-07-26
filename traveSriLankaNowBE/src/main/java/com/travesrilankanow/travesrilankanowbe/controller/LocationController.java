@@ -22,7 +22,7 @@ public class LocationController {
     @GetMapping
     public ResponseEntity<Page<Location>> getAllLocations(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "24") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String region) {
