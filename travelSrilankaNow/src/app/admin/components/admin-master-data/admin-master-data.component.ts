@@ -43,12 +43,14 @@ export class AdminMasterDataComponent implements OnInit {
   // Type display names
   typeDisplayNames: { [key: string]: string } = {
     'EVENT_CATEGORY': 'Event Categories',
+    'PACKAGE_CATEGORY': 'Package Categories',
     'LOCATION_CATEGORY': 'Location Categories',
     'PLACE_TYPE': 'Place Types',
     'REGION': 'Regions',
     'PRICE_RANGE': 'Price Ranges',
     'GALLERY_CATEGORY': 'Gallery Categories',
-    'GALLERY_TYPE': 'Gallery Types'
+    'GALLERY_TYPE': 'Gallery Types',
+    'CURRENCY': 'Currencies'
   };
 
   constructor(
