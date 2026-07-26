@@ -79,7 +79,7 @@
             <h3 class="section-card__title">{{ section.title }}</h3>
             <span class="section-card__type">{{ getSectionLabel(section.sectionType) }}</span>
           </div>
-          <p *ngIf="section.subtitle" class="section-card__subtitle">{{ section.subtitle }}</p>
+          <p *ngIf="section.subtitle" class="section-card__subtitle" [title]="section.subtitle">{{ section.subtitle.length > 80 ? (section.subtitle | slice:0:80) + '...' : section.subtitle }}</p>
           <div class="section-card__config" *ngIf="section.sectionType === 'IMAGE_GALLERY_SLIDER'">
             <span class="section-card__config-item">{{ parseGalleryConfig(section.config).images.length }} images</span>
             <span class="section-card__config-item section-card__config-hint">Click ✏️ to configure images &amp; style</span>
