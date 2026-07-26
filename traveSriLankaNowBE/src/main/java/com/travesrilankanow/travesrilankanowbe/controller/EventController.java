@@ -22,7 +22,7 @@ public class EventController {
     @GetMapping
     public ResponseEntity<Page<Event>> getAllEvents(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "24") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category) {
         Sort sort = Sort.by(Sort.Order.desc("featured"), Sort.Order.asc("displayOrder"), Sort.Order.desc("id"));
