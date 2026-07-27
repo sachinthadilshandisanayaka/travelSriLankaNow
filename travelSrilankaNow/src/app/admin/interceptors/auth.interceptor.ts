@@ -44,7 +44,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401 && !this.isAuthEndpoint(request.url)) {
           return this.handle401Error(request, next);
         }
-        return throwError(() => error);
+        return throwError(error);
       })
     );
   }
@@ -87,21 +87,21 @@ export class AuthInterceptor implements HttpInterceptor {
             } else {
               this.authService.clearAuth();
               this.router.navigate(['/admin/login']);
-              return throwError(() => new Error('Token refresh failed'));
+              return throwError(new Error('Token refresh failed'));
             }
           }),
           catchError((error) => {
             this.isRefreshing = false;
             this.authService.clearAuth();
             this.router.navigate(['/admin/login']);
-            return throwError(() => error);
+            return throwError(error);
           })
         );
       } else {
         this.isRefreshing = false;
         this.authService.clearAuth();
         this.router.navigate(['/admin/login']);
-        return throwError(() => new Error('No refresh token available'));
+        return throwError(new Error('No refresh token available'));
       }
     }
 

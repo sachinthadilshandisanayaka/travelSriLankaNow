@@ -1,0 +1,152 @@
+<div class="admin-page">
+  <div class="admin-page__container">
+    <header class="admin-header">
+      <div class="admin-header__info">
+        <h1>Email Settings</h1>
+        <p>Configure the SMTP account used to send booking confirmations and password-reset emails</p>
+      </div>
+    </header>
+
+    <div *ngIf="successMessage" class="admin-toast admin-toast--success">{{ successMessage }}</div>
+    <div *ngIf="errorMessage" class="admin-toast admin-toast--error">{{ errorMessage }}</div>
+
+    <div *ngIf="isLoading" class="admin-loader">
+      <svg class="admin-loader__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <form *ngIf="!isLoading" [formGroup]="configForm" (ngSubmit)="saveConfig()" class="admin-card">
+      <h2 class="admin-card__title">SMTP Connection</h2>
+
+      <div class="admin-form__grid">
+        <div class="admin-form__group">
+          <label class="admin-form__label">SMTP Host *</label>
+          <input type="text" formControlName="smtpHost" class="admin-input" placeholder="smtp-relay.brevo.com">
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-form__label">Port *</label>
+          <input type="number" formControlName="smtpPort" class="admin-input" placeholder="587">
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-form__label">Login / Username *</label>
+          <input type="text" formControlName="smtpUsername" class="admin-input">
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-form__label">Password {{ hasPassword ? '' : '*' }}</label>
+          <input type="password" formControlName="smtpPassword" class="admin-input"
+                 [placeholder]="hasPassword ? 'Leave blank to keep current password' : 'Enter password'">
+          <p class="admin-form__hint" *ngIf="hasPassword">A password is already saved. Only fill this in to change it.</p>
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-form__label">From Email *</label>
+          <input type="email" formControlName="fromEmail" class="admin-input" placeholder="noreply@roamlankatravels.com">
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-form__label">From Name *</label>
+          <input type="text" formControlName="fromName" class="admin-input" placeholder="Roam Lanka Travels">
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-form__label">Owner Notification Email</label>
+          <input type="email" formControlName="ownerNotificationEmail" class="admin-input" placeholder="owner@example.com">
+          <p class="admin-form__hint">Where new-booking notifications are sent. Can be different from the SMTP login above.</p>
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-checkbox">
+            <input type="checkbox" formControlName="useTls">
+            <span>Use TLS/STARTTLS</span>
+          </label>
+        </div>
+
+        <div class="admin-form__group">
+          <label class="admin-checkbox">
+            <input type="checkbox" formControlName="isActive">
+            <span>Email sending enabled</span>
+          </label>
+          <p class="admin-form__hint">While off, booking/password-reset emails are silently skipped (no error is shown to customers).</p>
+        </div>
+      </div>
+
+      <div class="admin-card__actions">
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="isSavingConfig">
+          {{ isSavingConfig ? 'Saving...' : 'Save Settings' }}
+        </button>
+        <button type="button" class="admin-btn admin-btn--ghost" [disabled]="isSendingTest" (click)="sendTestEmail()">
+          {{ isSendingTest ? 'Sending...' : 'Send Test Email' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="admin-card" *ngIf="!isLoading">
+      <h2 class="admin-card__title">Email Templates</h2>
+      <p class="admin-card__subtitle">Edit the subject and content sent for each type of email. Use double-curly placeholder tags (e.g. bookingReference, itemTitle, otp) to insert booking/customer details.</p>
+
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Template</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let template of templates">
+            <td>{{ templateLabel(template.templateKey) }}</td>
+            <td>{{ template.subject }}</td>
+            <td>
+              <span class="admin-badge" [class.admin-badge--success]="template.isActive" [class.admin-badge--gray]="!template.isActive">
+                {{ template.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <button class="admin-btn admin-btn--ghost" (click)="openTemplateModal(template)" type="button">Edit</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Template Edit Modal -->
+<div *ngIf="showTemplateModal" class="admin-modal">
+  <div class="admin-modal__content">
+    <div class="admin-modal__header">
+      <h2>{{ editingTemplate ? templateLabel(editingTemplate.templateKey) : '' }}</h2>
+      <button class="admin-modal__close" (click)="closeTemplateModal()">&times;</button>
+    </div>
+    <form [formGroup]="templateForm" (ngSubmit)="saveTemplate()">
+      <div class="admin-modal__body">
+        <div class="admin-form__group">
+          <label class="admin-form__label">Subject</label>
+          <input type="text" formControlName="subject" class="admin-input">
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-form__label">Body (HTML)</label>
+          <textarea formControlName="bodyHtml" class="admin-input" rows="14"></textarea>
+        </div>
+        <div class="admin-form__group">
+          <label class="admin-checkbox">
+            <input type="checkbox" formControlName="isActive">
+            <span>Active</span>
+          </label>
+        </div>
+      </div>
+      <div class="admin-modal__footer">
+        <button type="button" class="admin-btn admin-btn--ghost" (click)="closeTemplateModal()">Cancel</button>
+        <button type="submit" class="admin-btn admin-btn--primary" [disabled]="isSavingTemplate">
+          {{ isSavingTemplate ? 'Saving...' : 'Save Template' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

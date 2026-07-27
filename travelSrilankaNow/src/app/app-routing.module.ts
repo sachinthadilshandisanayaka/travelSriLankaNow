@@ -15,14 +15,21 @@ import { MoreSectionDetailComponent } from './pages/more-section-detail/more-sec
 import { MoreSectionItemDetailComponent } from './pages/more-section-item-detail/more-section-item-detail.component';
 import { AuthLoginComponent } from './pages/auth/auth-login.component';
 import { AuthRegisterComponent } from './pages/auth/auth-register.component';
+import { AuthForgotPasswordComponent } from './pages/auth/auth-forgot-password.component';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
+import { ContactComponent } from './pages/contact/contact.component';
+import { BookTourComponent } from './pages/book-tour/book-tour.component';
 
 const routes: Routes = [
   { path: '', component: LandingComponent, data: { animation: 'HomePage' } },
   { path: 'test-simple', component: LandingSimpleComponent, data: { animation: 'TestPage' } },
   { path: 'login', component: AuthLoginComponent },
   { path: 'register', component: AuthRegisterComponent },
+  { path: 'forgot-password', component: AuthForgotPasswordComponent },
   { path: 'my-bookings', component: MyBookingsComponent },
+  { path: 'contact', component: ContactComponent, data: { animation: 'ContactPage' } },
+  // Deliberately not in NavConfig/the navbar — reachable only via direct URL.
+  { path: 'book-a-tour', component: BookTourComponent, data: { animation: 'BookTourPage' } },
   { path: 'locations', component: LocationsComponent, data: { animation: 'LocationsPage' } },
   { path: 'locations/:slug', component: LocationDetailComponent, data: { animation: 'LocationDetailPage' } },
   { path: 'gallery', component: GalleryComponent, data: { animation: 'GalleryPage' } },

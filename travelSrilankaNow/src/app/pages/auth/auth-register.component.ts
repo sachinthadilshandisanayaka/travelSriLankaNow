@@ -19,7 +19,7 @@ export class AuthRegisterComponent implements OnInit {
   loading = false;
   error = '';
   siteName = '';
-  private returnUrl = '/';
+  returnUrl = '/';
 
   constructor(
     private authService: CustomerAuthService,
