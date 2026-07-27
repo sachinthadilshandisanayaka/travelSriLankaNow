@@ -13,6 +13,7 @@ import { AdminPlacesComponent } from './components/admin-places/admin-places.com
 import { AdminGalleryComponent } from './components/admin-gallery/admin-gallery.component';
 import { AdminMasterDataComponent } from './components/admin-master-data/admin-master-data.component';
 import { AdminSiteSettingsComponent } from './components/admin-site-settings/admin-site-settings.component';
+import { AdminEmailSettingsComponent } from './components/admin-email-settings/admin-email-settings.component';
 import { AdminItemOrderComponent } from './components/admin-item-order/admin-item-order.component';
 import { AdminHeroSlidesComponent } from './components/admin-hero-slides/admin-hero-slides.component';
 import { PageHeaderBackgroundsComponent } from './components/page-header-backgrounds/page-header-backgrounds.component';
@@ -190,6 +191,12 @@ const routes: Routes = [
         component: AdminSiteSettingsComponent,
         canActivate: [PermissionGuard],
         data: { permission: 'SITE_SETTINGS:VIEW' }
+      },
+      {
+        path: 'email-settings',
+        component: AdminEmailSettingsComponent,
+        canActivate: [PermissionGuard],
+        data: { permission: 'EMAIL_SETTINGS:VIEW' }
       },
 
       // Administration

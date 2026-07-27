@@ -217,13 +217,37 @@ echo "[theme] Done."
 # ── Favicon ────────────────────────────────────────────────────────────────────
 # Browsers fetch favicon.ico before JavaScript runs, so we replace the static
 # file at container start using the FAVICON_URL env var.
+#
+# FAVICON_URL can be:
+#   - A remote URL:  https://example.com/logo.png  (downloaded with wget)
+#   - A local path:  assets/images/favicon-proj001.png  (copied from nginx root)
+#
+# To set a per-client favicon, put the client's logo in
+# travelSrilankaNow/src/assets/images/ and set FAVICON_URL to the relative path.
 if [ -n "$FAVICON_URL" ]; then
   HTML=/usr/share/nginx/html
-  echo "[favicon] Downloading from $FAVICON_URL"
-  wget -q -O "$HTML/favicon.ico"                    "$FAVICON_URL" && echo "[favicon] favicon.ico updated"
-  wget -q -O "$HTML/assets/images/favicon-32.png"   "$FAVICON_URL" && echo "[favicon] favicon-32.png updated"
-  wget -q -O "$HTML/assets/images/favicon-192.png"  "$FAVICON_URL" && echo "[favicon] favicon-192.png updated"
-  wget -q -O "$HTML/assets/images/apple-touch-icon.png" "$FAVICON_URL" && echo "[favicon] apple-touch-icon.png updated"
+  case "$FAVICON_URL" in
+    http://*|https://*)
+      echo "[favicon] Downloading from $FAVICON_URL"
+      wget -q -O "$HTML/favicon.ico"                        "$FAVICON_URL" && echo "[favicon] favicon.ico updated"
+      wget -q -O "$HTML/assets/images/favicon-32.png"       "$FAVICON_URL" && echo "[favicon] favicon-32.png updated"
+      wget -q -O "$HTML/assets/images/favicon-192.png"      "$FAVICON_URL" && echo "[favicon] favicon-192.png updated"
+      wget -q -O "$HTML/assets/images/apple-touch-icon.png" "$FAVICON_URL" && echo "[favicon] apple-touch-icon.png updated"
+      ;;
+    *)
+      # Local path relative to nginx html root (e.g. assets/images/favicon-proj001.png)
+      SRC="$HTML/$FAVICON_URL"
+      if [ -f "$SRC" ]; then
+        echo "[favicon] Copying from $SRC"
+        cp "$SRC" "$HTML/favicon.ico"                        && echo "[favicon] favicon.ico updated"
+        cp "$SRC" "$HTML/assets/images/favicon-32.png"       && echo "[favicon] favicon-32.png updated"
+        cp "$SRC" "$HTML/assets/images/favicon-192.png"      && echo "[favicon] favicon-192.png updated"
+        cp "$SRC" "$HTML/assets/images/apple-touch-icon.png" && echo "[favicon] apple-touch-icon.png updated"
+      else
+        echo "[favicon] WARNING: local file not found: $SRC — using build default."
+      fi
+      ;;
+  esac
 else
   echo "[favicon] FAVICON_URL not set, using build default."
 fi

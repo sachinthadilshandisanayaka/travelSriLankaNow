@@ -30,7 +30,7 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPage: number = 0;
   totalPages: number = 0;
   totalElements: number = 0;
-  pageSize: number = 10;
+  pageSize: number = 24;
 
   // Categories and Regions loaded from MasterData
   categoryData: MasterData[] = [];

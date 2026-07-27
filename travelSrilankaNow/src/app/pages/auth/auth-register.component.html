@@ -65,7 +65,7 @@
     </button>
 
     <p class="auth-card__switch">
-      Already have an account? <a routerLink="/login">Sign in</a>
+      Already have an account? <a routerLink="/login" [queryParams]="{returnUrl: returnUrl}">Sign in</a>
     </p>
   </div>
 </div>

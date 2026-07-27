@@ -131,7 +131,7 @@
         <tbody>
           <tr *ngFor="let b of bookings" (click)="openDetail(b)" class="admin-table__row">
             <td><code class="booking-ref">{{ b.bookingReference }}</code></td>
-            <td class="event-cell">{{ b.eventTitle }}</td>
+            <td class="event-cell">{{ b.displayTitle }}</td>
             <td>
               <div class="participant-cell">
                 <span>{{ b.participantName }}</span>
@@ -256,7 +256,7 @@
             <code class="booking-ref">{{ b.bookingReference }}</code>
             <span [class]="getStatusClass(b.status)">{{ b.status | titlecase }}</span>
           </div>
-          <div class="cal-booking-item__title">{{ b.eventTitle }}</div>
+          <div class="cal-booking-item__title">{{ b.displayTitle }}</div>
           <div class="cal-booking-item__meta">
             <span>{{ b.participantName }}</span>
             <span>{{ b.numberOfPeople }} pax</span>
@@ -305,8 +305,8 @@
         <span>{{ confirmBooking.participantName }}</span>
       </div>
       <div class="confirm-meta-row">
-        <span class="confirm-meta-label">Event</span>
-        <span>{{ confirmBooking.eventTitle }}</span>
+        <span class="confirm-meta-label">{{ confirmBooking.displayTypeLabel }}</span>
+        <span>{{ confirmBooking.displayTitle }}</span>
       </div>
     </div>
 
@@ -365,9 +365,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
           </svg>
-          Event
+          {{ selectedBooking.displayTypeLabel }}
         </div>
-        <div class="bk-section__value bk-section__value--strong">{{ selectedBooking.eventTitle }}</div>
+        <div class="bk-section__value bk-section__value--strong">{{ selectedBooking.displayTitle }}</div>
       </div>
 
       <!-- Participant section -->

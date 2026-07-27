@@ -6,11 +6,16 @@ import { CustomerAuthService, CustomerUser } from '../../services/customer-auth.
 export interface MyBooking {
   id: number;
   bookingReference: string;
-  bookingType: 'EVENT' | 'PLACE';
+  bookingType: 'EVENT' | 'PLACE' | 'PACKAGE' | string;
   eventId: number;
   eventTitle: string;
   placeId: number;
   placeName: string;
+  packageId: number;
+  packageName: string;
+  /** Type-agnostic — always populated regardless of bookingType. Prefer these over the type-specific fields above. */
+  displayTitle: string;
+  displayTypeLabel: string;
   participantName: string;
   email: string;
   phone: string;
@@ -190,17 +195,18 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
   }
 
   bookingTitle(booking: MyBooking): string {
-    if (booking.bookingType === 'PLACE') return booking.placeName || 'Place Reservation';
-    return booking.eventTitle || 'Event Booking';
+    return booking.displayTitle;
   }
 
   bookingTypeLabel(booking: MyBooking): string {
-    return booking.bookingType === 'PLACE' ? 'Place' : 'Event';
+    return booking.displayTypeLabel;
   }
 
   viewBookingSource(booking: MyBooking): void {
     if (booking.bookingType === 'PLACE' && booking.placeId) {
       this.router.navigate(['/places', booking.placeId]);
+    } else if (booking.bookingType === 'PACKAGE' && booking.packageId) {
+      this.router.navigate(['/packages', booking.packageId]);
     } else if (booking.eventId) {
       this.router.navigate(['/events', booking.eventId]);
     }

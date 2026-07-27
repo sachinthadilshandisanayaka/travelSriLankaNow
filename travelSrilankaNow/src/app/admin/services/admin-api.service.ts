@@ -244,6 +244,28 @@ export class AdminApiService {
     return this.http.post(`${this.apiUrl}/site-settings/upsert`, setting);
   }
 
+  // Email Settings (SMTP)
+  getEmailSettings(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/email-settings`);
+  }
+
+  updateEmailSettings(config: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/email-settings`, config);
+  }
+
+  sendTestEmail(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/email-settings/test`, {});
+  }
+
+  // Email Templates
+  getEmailTemplates(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/email-templates`);
+  }
+
+  updateEmailTemplate(id: number, template: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/email-templates/${id}`, template);
+  }
+
   getHeroSearchConfig(): Observable<any> {
     return this.http.get(`${this.apiUrl}/site-settings/key/hero_search_bar`).pipe(
       catchError(() => of(null))

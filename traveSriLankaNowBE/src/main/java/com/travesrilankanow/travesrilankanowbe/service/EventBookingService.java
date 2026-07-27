@@ -6,8 +6,12 @@ import com.travesrilankanow.travesrilankanowbe.entity.Event;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import com.travesrilankanow.travesrilankanowbe.entity.EventDate;
 import com.travesrilankanow.travesrilankanowbe.entity.Place;
+import com.travesrilankanow.travesrilankanowbe.entity.PackageDate;
+import com.travesrilankanow.travesrilankanowbe.entity.TourPackage;
 import com.travesrilankanow.travesrilankanowbe.exception.ResourceNotFoundException;
 import com.travesrilankanow.travesrilankanowbe.repository.*;
+import com.travesrilankanow.travesrilankanowbe.service.booking.BookableEntityResolver;
+import com.travesrilankanow.travesrilankanowbe.service.booking.BookableEntityResolverRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,14 +40,19 @@ public class EventBookingService {
     private final EventDateRepository eventDateRepository;
     private final UserRepository userRepository;
     private final PlaceRepository placeRepository;
+    private final PackageRepository packageRepository;
+    private final PackageDateRepository packageDateRepository;
     private final BookingConditionEngine conditionEngine;
     private final BookingAuditService auditService;
     private final BkAvailabilityConfigRepository availabilityRepo;
     private final NavBookingConfigService navBookingConfigService;
+    private final EmailService emailService;
+    private final SystemEmailConfigService systemEmailConfigService;
+    private final BookableEntityResolverRegistry resolverRegistry;
 
     @Transactional
     public EventBooking bookEvent(EventBookingDTO dto, String currentUsername) {
-        eventRepository.findById(dto.getEventId())
+        Event event = eventRepository.findById(dto.getEventId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found: " + dto.getEventId()));
 
         // Resolve requestedDate before availability check
@@ -106,12 +116,13 @@ public class EventBookingService {
         saved.setBookingReference(buildRef(saved.getId()));
         saved = bookingRepository.save(saved);
         auditService.logCreated(saved, currentUsername);
+        sendBookingConfirmationEmails(saved, event.getTitle());
         return saved;
     }
 
     @Transactional
     public EventBooking bookPlace(Long placeId, PlaceBookingRequest req, String currentUsername) {
-        placeRepository.findById(placeId)
+        Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Place not found: " + placeId));
 
         StringBuilder notes = new StringBuilder();
@@ -173,6 +184,80 @@ public class EventBookingService {
         saved.setBookingReference(buildRef(saved.getId()));
         saved = bookingRepository.save(saved);
         auditService.logCreated(saved, currentUsername);
+        sendBookingConfirmationEmails(saved, place.getName());
+        return saved;
+    }
+
+    @Transactional
+    public EventBooking bookPackage(Long packageId, PackageBookingRequest req, String currentUsername) {
+        TourPackage pkg = packageRepository.findById(packageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Package not found: " + packageId));
+
+        // Resolve requestedDate before availability check
+        LocalDate requestedDate = null;
+        if (req.getPreferredDate() != null && !req.getPreferredDate().isBlank()) {
+            try { requestedDate = LocalDate.parse(req.getPreferredDate()); } catch (Exception ignored) {}
+        }
+
+        checkAvailability(EventBooking.BookingTypes.PACKAGE, packageId, requestedDate);
+
+        LocalDate checkIn = null;
+        LocalDate checkOut = null;
+        if (req.getCheckInDate() != null && !req.getCheckInDate().isBlank()) {
+            try { checkIn = LocalDate.parse(req.getCheckInDate()); } catch (Exception ignored) {}
+        }
+        if (req.getCheckOutDate() != null && !req.getCheckOutDate().isBlank()) {
+            try { checkOut = LocalDate.parse(req.getCheckOutDate()); } catch (Exception ignored) {}
+        }
+        if (requestedDate == null && checkIn != null) {
+            requestedDate = checkIn;
+        }
+
+        // Validate against nav-item booking rules (lead time, party size, blackouts, etc.)
+        navBookingConfigService.validateBooking(
+                req.getNavRoutePath(), requestedDate, checkOut,
+                req.getNumberOfPeople(), currentUsername != null);
+
+        if (req.getPackageDateId() != null) {
+            PackageDate packageDate = packageDateRepository.findById(req.getPackageDateId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Package date not found: " + req.getPackageDateId()));
+            int requested = req.getNumberOfPeople() != null ? req.getNumberOfPeople() : 1;
+            if (packageDate.getAvailableSpots() < requested) {
+                throw new IllegalStateException("Not enough spots available for this date");
+            }
+            packageDate.setAvailableSpots(packageDate.getAvailableSpots() - requested);
+            packageDateRepository.save(packageDate);
+        }
+
+        EventBooking booking = new EventBooking();
+        booking.setBookingType(EventBooking.BookingTypes.PACKAGE);
+        booking.setPackageId(packageId);
+        booking.setParticipantName(req.getParticipantName());
+        booking.setEmail(req.getEmail());
+        booking.setPhone(req.getPhone() != null ? req.getPhone() : "");
+        booking.setNumberOfPeople(req.getNumberOfPeople() != null ? req.getNumberOfPeople() : 1);
+        booking.setSpecialRequests(req.getSpecialRequests());
+        booking.setTotalPrice(req.getTotalPrice() != null ? req.getTotalPrice() : 0.0);
+        booking.setBookingDate(LocalDateTime.now());
+        booking.setRequestedDate(requestedDate);
+        booking.setCheckInDate(checkIn);
+        booking.setCheckOutDate(checkOut);
+        booking.setStatus(EventBooking.BookingStatus.pending);
+        booking.setPaymentStatus(EventBooking.PaymentStatus.UNPAID);
+
+        if (currentUsername != null) {
+            userRepository.findByUsername(currentUsername)
+                    .ifPresent(user -> {
+                        booking.setCustomerId(user.getId());
+                        booking.setCreatedBy(user.getUsername());
+                    });
+        }
+
+        EventBooking saved = bookingRepository.save(booking);
+        saved.setBookingReference(buildRef(saved.getId()));
+        saved = bookingRepository.save(saved);
+        auditService.logCreated(saved, currentUsername);
+        sendBookingConfirmationEmails(saved, pkg.getTitle());
         return saved;
     }
 
@@ -196,11 +281,21 @@ public class EventBookingService {
     @Transactional
     public EventBooking updateBookingStatus(Long id, EventBooking.BookingStatus newStatus, String changedBy) {
         EventBooking booking = getBookingById(id);
-        String oldStatus = booking.getStatus().name();
+        EventBooking.BookingStatus oldStatus = booking.getStatus();
         booking.setStatus(newStatus);
         if (changedBy != null) booking.setUpdatedBy(changedBy);
         EventBooking saved = bookingRepository.save(booking);
-        auditService.logStatusChange(saved.getId(), oldStatus, newStatus.name(), changedBy, null);
+        auditService.logStatusChange(saved.getId(), oldStatus.name(), newStatus.name(), changedBy, null);
+
+        // Only notify the customer on an actual transition, and only for the
+        // two status changes that matter to them — not e.g. confirmed -> completed.
+        if (newStatus != oldStatus) {
+            if (newStatus == EventBooking.BookingStatus.confirmed) {
+                sendBookingStatusChangeEmail(saved, EmailTemplateKeys.BOOKING_CONFIRMED_CUSTOMER);
+            } else if (newStatus == EventBooking.BookingStatus.cancelled) {
+                sendBookingStatusChangeEmail(saved, EmailTemplateKeys.BOOKING_CANCELLED_CUSTOMER);
+            }
+        }
         return saved;
     }
 
@@ -291,7 +386,9 @@ public class EventBookingService {
 
     public BookingAdminResponse getAdminBooking(Long id) {
         EventBooking b = getBookingById(id);
-        return BookingAdminResponse.from(b, resolveBookingTitle(b));
+        BookableEntityResolver resolver = resolverRegistry.get(b.getBookingType());
+        String title = resolver.resolveTitle(resolver.getEntityId(b));
+        return BookingAdminResponse.from(b, title, resolver.getDisplayTypeLabel());
     }
 
     public List<BookingCalendarDay> getBookingCalendar(int year, int month) {
@@ -309,16 +406,7 @@ public class EventBookingService {
                     return b.getBookingDate().toLocalDate().toString();
                 }));
 
-        Map<Long, String> eventTitles = bookings.stream()
-                .filter(b -> b.getEventId() != null)
-                .map(EventBooking::getEventId).distinct()
-                .collect(Collectors.toMap(id -> id,
-                        id -> eventRepository.findById(id).map(Event::getTitle).orElse("Unknown Event")));
-        Map<Long, String> placeTitles = bookings.stream()
-                .filter(b -> b.getPlaceId() != null)
-                .map(EventBooking::getPlaceId).distinct()
-                .collect(Collectors.toMap(id -> id,
-                        id -> placeRepository.findById(id).map(Place::getName).orElse("Unknown Place")));
+        Map<String, Map<Long, String>> titleCache = buildTitleCache(bookings);
 
         List<BookingCalendarDay> result = new ArrayList<>();
         for (int d = 1; d <= ym.lengthOfMonth(); d++) {
@@ -328,46 +416,44 @@ public class EventBookingService {
             long confirmed = dayBookings.stream().filter(b -> b.getStatus() == EventBooking.BookingStatus.confirmed).count();
             long completed = dayBookings.stream().filter(b -> b.getStatus() == EventBooking.BookingStatus.completed).count();
             List<BookingAdminResponse> enriched = dayBookings.stream()
-                    .map(b -> {
-                        String title = (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()))
-                                ? placeTitles.getOrDefault(b.getPlaceId(), "Unknown Place")
-                                : eventTitles.getOrDefault(b.getEventId(), "Unknown Event");
-                        return BookingAdminResponse.from(b, title);
-                    })
+                    .map(b -> toAdminResponse(b, titleCache))
                     .collect(Collectors.toList());
             result.add(new BookingCalendarDay(date, dayBookings.size(), pending, confirmed, completed, enriched));
         }
         return result;
     }
 
-    private String resolveBookingTitle(EventBooking b) {
-        if (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()) && b.getPlaceId() != null) {
-            return placeRepository.findById(b.getPlaceId()).map(Place::getName).orElse("Unknown Place");
-        }
-        if (b.getEventId() != null) {
-            return eventRepository.findById(b.getEventId()).map(Event::getTitle).orElse("Unknown Event");
-        }
-        return "Unknown";
+    /** Single-item title resolution (no caching needed) — used by CustomerController for one booking at a time. */
+    public String resolveTitle(EventBooking b) {
+        BookableEntityResolver resolver = resolverRegistry.get(b.getBookingType());
+        return resolver.resolveTitle(resolver.getEntityId(b));
     }
 
-    private List<BookingAdminResponse> enrichBookings(List<EventBooking> bookings) {
-        Map<Long, String> eventTitles = bookings.stream()
-                .filter(b -> b.getEventId() != null)
-                .map(EventBooking::getEventId).distinct()
-                .collect(Collectors.toMap(id -> id,
-                        id -> eventRepository.findById(id).map(Event::getTitle).orElse("Unknown Event")));
-        Map<Long, String> placeTitles = bookings.stream()
-                .filter(b -> b.getPlaceId() != null)
-                .map(EventBooking::getPlaceId).distinct()
-                .collect(Collectors.toMap(id -> id,
-                        id -> placeRepository.findById(id).map(Place::getName).orElse("Unknown Place")));
+    /** Batches title lookups per (bookingType, entityId) pair so repeated entities across many bookings are resolved once. */
+    private Map<String, Map<Long, String>> buildTitleCache(List<EventBooking> bookings) {
+        Map<String, Map<Long, String>> cache = new HashMap<>();
+        for (EventBooking b : bookings) {
+            BookableEntityResolver resolver = resolverRegistry.get(b.getBookingType());
+            Long entityId = resolver.getEntityId(b);
+            cache.computeIfAbsent(b.getBookingType(), k -> new HashMap<>())
+                    .computeIfAbsent(entityId, resolver::resolveTitle);
+        }
+        return cache;
+    }
+
+    private BookingAdminResponse toAdminResponse(EventBooking b, Map<String, Map<Long, String>> titleCache) {
+        BookableEntityResolver resolver = resolverRegistry.get(b.getBookingType());
+        Long entityId = resolver.getEntityId(b);
+        String title = titleCache.getOrDefault(b.getBookingType(), Map.of())
+                .getOrDefault(entityId, resolver.resolveTitle(entityId));
+        return BookingAdminResponse.from(b, title, resolver.getDisplayTypeLabel());
+    }
+
+    /** Public — also used by CustomerController for the customer's own booking list. */
+    public List<BookingAdminResponse> enrichBookings(List<EventBooking> bookings) {
+        Map<String, Map<Long, String>> titleCache = buildTitleCache(bookings);
         return bookings.stream()
-                .map(b -> {
-                    String title = (EventBooking.BookingTypes.PLACE.equals(b.getBookingType()))
-                            ? placeTitles.getOrDefault(b.getPlaceId(), "Unknown Place")
-                            : eventTitles.getOrDefault(b.getEventId(), "Unknown Event");
-                    return BookingAdminResponse.from(b, title);
-                })
+                .map(b -> toAdminResponse(b, titleCache))
                 .collect(Collectors.toList());
     }
 
@@ -401,9 +487,7 @@ public class EventBookingService {
 
         List<Object[]> rows;
         if (entityId != null) {
-            rows = EventBooking.BookingTypes.EVENT.equals(bookingType)
-                    ? bookingRepository.countByTypeAndEventAndDateRange(bookingType, entityId, from, to, EventBooking.BookingStatus.cancelled)
-                    : bookingRepository.countByTypeAndPlaceAndDateRange(bookingType, entityId, from, to, EventBooking.BookingStatus.cancelled);
+            rows = resolverRegistry.get(bookingType).countByDateRange(entityId, from, to, EventBooking.BookingStatus.cancelled);
         } else {
             rows = bookingRepository.countByTypeAndDateRange(bookingType, from, to, EventBooking.BookingStatus.cancelled);
         }
@@ -447,9 +531,7 @@ public class EventBookingService {
 
         long existing;
         if (entityId != null) {
-            existing = EventBooking.BookingTypes.EVENT.equals(bookingType)
-                    ? bookingRepository.countActiveByTypeAndEventAndDate(bookingType, entityId, requestedDate, EventBooking.BookingStatus.cancelled)
-                    : bookingRepository.countActiveByTypeAndPlaceAndDate(bookingType, entityId, requestedDate, EventBooking.BookingStatus.cancelled);
+            existing = resolverRegistry.get(bookingType).countActiveByDate(entityId, requestedDate, EventBooking.BookingStatus.cancelled);
         } else {
             existing = bookingRepository.countActiveByTypeAndDate(bookingType, requestedDate, EventBooking.BookingStatus.cancelled);
         }
@@ -472,5 +554,51 @@ public class EventBookingService {
     private String buildRef(Long id) {
         return "TSL-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"))
                 + "-" + String.format("%04d", id);
+    }
+
+    /**
+     * Fires the customer + owner confirmation emails for a newly-created booking.
+     * EmailService.sendTemplatedEmail is @Async and catches every exception itself,
+     * so this never affects the booking transaction/response even if SMTP is down.
+     * The context map is built entirely from the in-memory `booking` object (not
+     * re-queried) since the async send may run before this transaction commits.
+     */
+    private void sendBookingConfirmationEmails(EventBooking booking, String itemTitle) {
+        Map<String, Object> ctx = buildEmailContext(booking, itemTitle);
+
+        emailService.sendTemplatedEmail(EmailTemplateKeys.BOOKING_CONFIRMATION_CUSTOMER, booking.getEmail(), ctx);
+
+        String ownerEmail = systemEmailConfigService.getConfig().getOwnerNotificationEmail();
+        if (ownerEmail != null && !ownerEmail.isBlank()) {
+            emailService.sendTemplatedEmail(EmailTemplateKeys.BOOKING_CONFIRMATION_OWNER, ownerEmail, ctx);
+        }
+    }
+
+    /**
+     * Fires the customer-facing status-change email (confirmed/cancelled) when
+     * an admin changes a booking's status. Resolves the item title fresh here
+     * since, unlike booking creation, the caller (updateBookingStatus) doesn't
+     * already have it in scope.
+     */
+    private void sendBookingStatusChangeEmail(EventBooking booking, String templateKey) {
+        BookableEntityResolver resolver = resolverRegistry.get(booking.getBookingType());
+        String itemTitle = resolver.resolveTitle(resolver.getEntityId(booking));
+        emailService.sendTemplatedEmail(templateKey, booking.getEmail(), buildEmailContext(booking, itemTitle));
+    }
+
+    private Map<String, Object> buildEmailContext(EventBooking booking, String itemTitle) {
+        Map<String, Object> ctx = new java.util.HashMap<>();
+        ctx.put("bookingReference", booking.getBookingReference());
+        ctx.put("itemTitle", itemTitle);
+        ctx.put("participantName", booking.getParticipantName());
+        ctx.put("numberOfPeople", booking.getNumberOfPeople());
+        ctx.put("totalPrice", booking.getTotalPrice());
+        ctx.put("requestedDate", booking.getRequestedDate() != null ? booking.getRequestedDate().toString() : "");
+        ctx.put("checkInDate", booking.getCheckInDate() != null ? booking.getCheckInDate().toString() : "");
+        ctx.put("checkOutDate", booking.getCheckOutDate() != null ? booking.getCheckOutDate().toString() : "");
+        ctx.put("phone", booking.getPhone());
+        ctx.put("email", booking.getEmail());
+        ctx.put("cancellationReason", booking.getCancellationReason() != null ? booking.getCancellationReason() : "Not specified");
+        return ctx;
     }
 }

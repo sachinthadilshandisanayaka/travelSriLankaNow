@@ -25,6 +25,9 @@ public class EventBooking {
     @Column
     private Long placeId;
 
+    @Column
+    private Long packageId;
+
     /** FK to bk_types.code — the string column is the writable side of the relationship. */
     @Column(name = "booking_type", nullable = false, length = 50)
     private String bookingType = "EVENT";
@@ -38,6 +41,7 @@ public class EventBooking {
     public static final class BookingTypes {
         public static final String EVENT = "EVENT";
         public static final String PLACE = "PLACE";
+        public static final String PACKAGE = "PACKAGE";
     }
 
     @Column

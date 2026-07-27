@@ -32,9 +32,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // Only rate-limit POST to login and refresh endpoints
+        // Only rate-limit POST to login, refresh, and password-reset endpoints
         if ("POST".equalsIgnoreCase(method) &&
-                (path.endsWith("/admin/auth/login") || path.endsWith("/admin/auth/refresh"))) {
+                (path.endsWith("/admin/auth/login") || path.endsWith("/admin/auth/refresh")
+                        || path.endsWith("/auth/forgot-password") || path.endsWith("/auth/reset-password"))) {
 
             String clientIp = getClientIp(request);
             String key = clientIp + ":" + path;

@@ -1,0 +1,37 @@
+@import '../../styles/admin-shared';
+
+.admin-card {
+  background: $admin-white;
+  border-radius: $admin-radius-xl;
+  box-shadow: $admin-shadow-sm, 0 0 0 1px rgba($admin-gray-900, 0.04);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: $admin-gray-900;
+    margin: 0 0 0.25rem;
+  }
+
+  &__subtitle {
+    font-size: 0.875rem;
+    color: $admin-gray-500;
+    margin: 0 0 1.25rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid $admin-gray-200;
+  }
+}
+
+textarea.admin-input {
+  resize: vertical;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}

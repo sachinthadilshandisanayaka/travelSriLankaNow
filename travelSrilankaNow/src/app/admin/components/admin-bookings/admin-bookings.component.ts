@@ -8,10 +8,16 @@ import { environment } from '../../../../environments/environment';
 export interface BookingAdminResponse {
   id: number;
   bookingReference: string;
-  bookingType: 'EVENT' | 'PLACE';
+  bookingType: 'EVENT' | 'PLACE' | 'PACKAGE' | string;
   eventId: number | null;
   eventTitle: string;
   placeId: number | null;
+  placeName: string | null;
+  packageId: number | null;
+  packageName: string | null;
+  /** Type-agnostic — always populated regardless of bookingType. Prefer these over the type-specific fields above. */
+  displayTitle: string;
+  displayTypeLabel: string;
   customerId: number | null;
   participantName: string;
   email: string;
