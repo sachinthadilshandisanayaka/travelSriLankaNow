@@ -1,6 +1,8 @@
 @import '../../../styles/variables';
 @import '../../../styles/mixins';
 
+$navbar-height: 80px;
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -25,7 +27,7 @@
 
   @media (max-width: 480px) {
     border-radius: 0;
-    padding: $spacing-2xl $spacing-lg;
+    padding: calc(#{$spacing-2xl} + #{$navbar-height}) $spacing-lg $spacing-2xl;
     min-height: 100vh;
     box-shadow: none;
     max-width: 100%;
@@ -150,59 +152,6 @@
   @media (max-width: 480px) {
     min-height: 56px;
     font-size: 1rem;
-  }
-}
-
-// Social login divider
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-  margin: $spacing-xl 0;
-
-  &__line {
-    flex: 1;
-    height: 1px;
-    background: $light-gray;
-  }
-
-  &__text {
-    font-size: $font-size-xs;
-    color: $warm-gray;
-    white-space: nowrap;
-    font-weight: $font-weight-medium;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-}
-
-// Google login button
-.auth-btn-google {
-  width: 100%;
-  padding: 0.875rem;
-  background: $white;
-  color: #3c4043;
-  border: 1.5px solid #dadce0;
-  border-radius: $radius-lg;
-  font-size: $font-size-base;
-  font-weight: $font-weight-medium;
-  cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-md;
-  min-height: 52px;
-
-  &:hover {
-    background: #f8f9fa;
-    box-shadow: $shadow-sm;
-  }
-
-  svg { flex-shrink: 0; }
-
-  @media (max-width: 480px) {
-    min-height: 56px;
   }
 }
 

@@ -69,8 +69,4 @@ export class AuthRegisterComponent implements OnInit {
       }
     });
   }
-
-  signUpWithGoogle(): void {
-    this.error = 'Google sign-up coming soon. Please use the form above for now.';
-  }
 }
