@@ -202,6 +202,45 @@ $navbar-height: 80px;
       color: $warm-gray;
       line-height: $line-height-relaxed;
       font-size: $font-size-lg;
+
+      // Rich text viewer: reset editor chrome, keep prose styles
+      .ql-snow {
+        border: none;
+      }
+
+      .event-description {
+        padding: 0;
+        border: none;
+        outline: none;
+        cursor: default;
+        white-space: normal;
+        font-size: $font-size-lg;
+        line-height: $line-height-relaxed;
+        color: $warm-gray;
+
+        // Preserve blank placeholder hidden
+        &.ql-blank::before { display: none; }
+
+        // Prose content styles
+        p   { margin: 0 0 0.75rem; }
+        h1  { font-size: 1.6rem; font-weight: 700; color: var(--primary-navy-dark); margin: 1rem 0 0.5rem; }
+        h2  { font-size: 1.3rem; font-weight: 700; color: var(--primary-navy-dark); margin: 1rem 0 0.5rem; }
+        h3  { font-size: 1.1rem; font-weight: 600; color: var(--primary-navy-dark); margin: 0.75rem 0 0.4rem; }
+        ul, ol { padding-left: 1.5rem; margin: 0.25rem 0 0.75rem; }
+        li  { margin: 0.2rem 0; }
+        strong { font-weight: 700; color: inherit; }
+        em { font-style: italic; }
+        u  { text-decoration: underline; }
+        s  { text-decoration: line-through; }
+        a  { color: var(--primary-sky); text-decoration: underline; }
+        blockquote {
+          border-left: 4px solid var(--primary-sky);
+          margin: 0.75rem 0;
+          padding: 0.5rem 1rem;
+          color: lighten($warm-gray, 10%);
+          font-style: italic;
+        }
+      }
     }
   }
 }
