@@ -41,7 +41,9 @@
           <!-- Overview Section -->
           <section class="detail-section">
             <h2>Event Overview</h2>
-            <p class="description">{{ event.description }}</p>
+            <div class="description ql-snow">
+              <div class="ql-editor event-description" [innerHTML]="safeDescription"></div>
+            </div>
           </section>
 
           <!-- Contact Details -->
