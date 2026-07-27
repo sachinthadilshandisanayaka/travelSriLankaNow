@@ -1,6 +1,108 @@
 // Import shared admin styles
 @import '../../styles/admin-shared';
 
+// ── Rich text editor (Quill) ─────────────────────────────────────────────────
+
+// Allow sticky to pierce through the modal form's overflow:hidden
+.admin-events-form {
+  overflow: clip !important;
+}
+
+.quill-editor-wrapper {
+  border: 1px solid $admin-gray-300;
+  border-radius: $admin-radius;
+  background: $admin-white;
+
+  // Quill internals — ::ng-deep is required because they're rendered by ngx-quill
+  ::ng-deep {
+    quill-editor {
+      display: block;
+    }
+
+    .ql-toolbar.ql-snow {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: $admin-gray-50;
+      border: none;
+      border-bottom: 1px solid $admin-gray-200;
+      border-radius: $admin-radius $admin-radius 0 0;
+      padding: 6px 8px;
+
+      // Style toolbar buttons to match admin theme
+      .ql-formats {
+        margin-right: 8px;
+      }
+
+      button,
+      .ql-picker-label {
+        color: $admin-gray-700;
+
+        &:hover,
+        &.ql-active {
+          color: $admin-navy;
+        }
+      }
+
+      .ql-stroke {
+        stroke: $admin-gray-600;
+      }
+
+      .ql-fill {
+        fill: $admin-gray-600;
+      }
+
+      button:hover .ql-stroke,
+      button.ql-active .ql-stroke,
+      .ql-picker-label:hover .ql-stroke {
+        stroke: $admin-navy;
+      }
+
+      button:hover .ql-fill,
+      button.ql-active .ql-fill {
+        fill: $admin-navy;
+      }
+    }
+
+    .ql-container.ql-snow {
+      border: none;
+      border-radius: 0 0 $admin-radius $admin-radius;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .ql-editor {
+      min-height: 220px;
+      max-height: 480px;
+      overflow-y: auto;
+      line-height: 1.65;
+      padding: 12px 14px;
+      color: $admin-gray-800;
+
+      &.ql-blank::before {
+        color: $admin-gray-400;
+        font-style: normal;
+        font-size: 14px;
+      }
+
+      p { margin: 0 0 0.5rem; }
+      h1 { font-size: 1.5rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
+      h2 { font-size: 1.25rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
+      h3 { font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.5rem; }
+      ul, ol { padding-left: 1.5rem; margin: 0.25rem 0 0.5rem; }
+      li { margin: 0.15rem 0; }
+      blockquote {
+        border-left: 3px solid $admin-gray-300;
+        margin: 0.5rem 0;
+        padding: 0.25rem 0.75rem;
+        color: $admin-gray-500;
+        font-style: italic;
+      }
+      a { color: $admin-navy; }
+    }
+  }
+}
+
 // ── Table layout fix: force min-width so wrapper scrolls instead of squishing ──
 .admin-table {
 

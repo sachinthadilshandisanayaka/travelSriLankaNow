@@ -73,6 +73,19 @@ export class AdminEventsComponent implements OnInit, OnDestroy {
     { value: 'FULL_EVENT', label: 'Full Event Package' }
   ];
 
+  quillModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote'],
+      [{ header: [1, 2, 3, false] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
+      ['link'],
+      ['clean']
+    ]
+  };
+
   // Dynamic field config
   fieldDefinitions: FieldDefinition[] = [];
   showFieldConfigModal = false;

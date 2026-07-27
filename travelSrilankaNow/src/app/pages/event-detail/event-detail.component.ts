@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { EventService } from '../../services/event.service';
 import { Event, EventPricing, EventLocation } from '../../models/event.model';
 import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
@@ -65,12 +66,17 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
+    private sanitizer: DomSanitizer,
     private eventService: EventService,
     private dataService: DataService,
     private masterDataService: MasterDataService,
     private customerAuthService: CustomerAuthService,
     private navBookingConfigService: NavBookingConfigService
   ) {}
+
+  get safeDescription(): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(this.event?.description || '');
+  }
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');

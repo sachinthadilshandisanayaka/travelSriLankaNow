@@ -206,7 +206,7 @@
       </button>
     </div>
 
-    <form [formGroup]="eventForm" (ngSubmit)="saveEvent()">
+    <form [formGroup]="eventForm" (ngSubmit)="saveEvent()" class="admin-events-form">
       <div class="admin-modal__body">
         <div class="admin-form__grid">
           <!-- Title -->
@@ -313,7 +313,13 @@
           <!-- Full Description -->
           <div class="admin-form__group admin-form__group--full">
             <label class="admin-form__label">Full Description *</label>
-            <textarea formControlName="description" class="admin-textarea" rows="4" placeholder="Detailed description of the event"></textarea>
+            <div class="quill-editor-wrapper">
+              <quill-editor
+                formControlName="description"
+                [modules]="quillModules"
+                placeholder="Detailed description of the event">
+              </quill-editor>
+            </div>
           </div>
 
           <!-- Included -->
