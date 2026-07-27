@@ -46,8 +46,4 @@ export class AuthLoginComponent implements OnInit {
       error: () => { this.loading = false; this.error = 'Invalid username or password.'; }
     });
   }
-
-  loginWithGoogle(): void {
-    this.error = 'Google login coming soon. Please use username & password for now.';
-  }
 }

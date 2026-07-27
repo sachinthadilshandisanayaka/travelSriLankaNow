@@ -97,7 +97,7 @@ export class BookTourComponent implements OnInit {
     // This page always requires login, independent of any individual tour's
     // own NavBookingConfig.requireAuth — a hard requirement for the hub itself.
     if (!this.customerAuthService.isLoggedIn()) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/book-a-tour' } });
+      this.router.navigate(['/register'], { queryParams: { returnUrl: '/book-a-tour' } });
       return;
     }
     this.checkingAuth = false;
