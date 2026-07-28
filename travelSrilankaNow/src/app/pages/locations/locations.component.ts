@@ -104,11 +104,14 @@ export class LocationsComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load location categories:', err)
     });
 
-    this.masterDataService.getLocationCategories().subscribe({
+    // Unfiltered + isActive-only here (not the tile grid's isActive+visibleOnPublicPage
+    // set) — hiding a category from Browse by Category must not remove it as a filter
+    // option for browsing the full list.
+    this.masterDataService.getAllLocationCategories().subscribe({
       next: (data: MasterData[]) => {
         this.categories = [
           { value: 'all', label: 'All Locations' },
-          ...data.map(item => ({
+          ...data.filter((c: MasterData) => c.isActive).map(item => ({
             value: item.code,
             label: item.displayName
           }))

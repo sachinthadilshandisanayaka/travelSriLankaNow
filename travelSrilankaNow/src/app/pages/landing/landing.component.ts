@@ -699,12 +699,14 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadSearchCategories(tabKey: string): void {
+    // Unfiltered + isActive-only (not isActive+visibleOnPublicPage) — hiding a
+    // category from Browse by Category must not remove it from this search widget.
     let obs$;
     switch (tabKey) {
-      case 'events':    obs$ = this.masterDataService.getEventCategories();    break;
-      case 'locations': obs$ = this.masterDataService.getLocationCategories(); break;
-      case 'places':    obs$ = this.masterDataService.getPlaceTypes();         break;
-      case 'packages':  obs$ = this.masterDataService.getPackageCategories();  break;
+      case 'events':    obs$ = this.masterDataService.getAllEventCategories();    break;
+      case 'locations': obs$ = this.masterDataService.getAllLocationCategories(); break;
+      case 'places':    obs$ = this.masterDataService.getAllPlaceTypes();         break;
+      case 'packages':  obs$ = this.masterDataService.getAllPackageCategories();  break;
       default: this.searchCategories = []; return;
     }
     obs$.subscribe({
