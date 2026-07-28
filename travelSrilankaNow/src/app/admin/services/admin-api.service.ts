@@ -215,6 +215,11 @@ export class AdminApiService {
     return this.http.patch(`${this.apiUrl}/master-data/${id}/toggle-active`, {});
   }
 
+  // Toggles Browse-by-Category public visibility only — independent of isActive.
+  toggleMasterDataVisible(id: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/master-data/${id}/toggle-visible`, {});
+  }
+
   // Site Settings
   getSiteSettings(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/site-settings`);
