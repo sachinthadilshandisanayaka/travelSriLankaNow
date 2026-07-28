@@ -54,6 +54,13 @@
       Nav Booking Rules
       <span class="bks-tab__count">{{ navRules.length }}</span>
     </button>
+    <button class="bks-tab" [class.bks-tab--active]="activeTab === 'form-fields'" (click)="activeTab = 'form-fields'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      Booking Form Fields
+      <span class="bks-tab__count">{{ formFields.length }}</span>
+    </button>
   </div>
 
   <!-- ════════════════ BOOKING TYPES ════════════════ -->
@@ -758,6 +765,213 @@
         </div>
         <div class="bks-modal__footer">
           <button class="bks-btn bks-btn--primary" (click)="showBlackoutForm = false">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════ BOOKING FORM FIELDS ════════════════ -->
+  <div *ngIf="activeTab === 'form-fields'" class="bks-panel">
+
+    <div class="bks-panel__header">
+      <div>
+        <h2 class="bks-panel__title">Booking Form Fields</h2>
+        <p class="bks-panel__desc">Define extra fields shown on the customer booking form. Fixed system fields are always included and cannot be removed.</p>
+      </div>
+      <button class="bks-btn bks-btn--primary" (click)="openNewField()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Field
+      </button>
+    </div>
+
+    <div *ngIf="formFieldsError" class="bks-alert bks-alert--error">{{ formFieldsError }}</div>
+    <div *ngIf="formFieldsSuccess" class="bks-alert bks-alert--success">{{ formFieldsSuccess }}</div>
+
+    <!-- ── Fixed system fields ─────────────────────────────────── -->
+    <div class="bks-ff-group">
+      <div class="bks-ff-group__hd">
+        <span class="bks-ff-group__title">System Fields</span>
+        <span class="bks-badge bks-badge--locked">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10" style="display:inline;vertical-align:middle;margin-right:3px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Always included
+        </span>
+      </div>
+      <div class="bks-ff-list">
+        <div class="bks-ff-card bks-ff-card--fixed" *ngFor="let f of FIXED_FIELDS">
+          <div class="bks-ff-chip bks-ff-chip--{{f.fieldType}}">{{ getTypeIcon(f.fieldType) }}</div>
+          <div class="bks-ff-info">
+            <div class="bks-ff-name">{{ f.label }}</div>
+            <div class="bks-ff-note">{{ f.note }}</div>
+          </div>
+          <div class="bks-ff-badges">
+            <span class="bks-badge" [class.bks-badge--required]="f.required" [class.bks-badge--optional]="!f.required">
+              {{ f.required ? 'Required' : 'Optional' }}
+            </span>
+          </div>
+          <div class="bks-ff-actions">
+            <span class="bks-ff-lock" title="Cannot be removed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Custom fields ───────────────────────────────────────── -->
+    <div class="bks-ff-group">
+      <div class="bks-ff-group__hd">
+        <span class="bks-ff-group__title">Custom Fields</span>
+        <span class="bks-badge bks-badge--active" *ngIf="formFields.length > 0">{{ formFields.length }}</span>
+      </div>
+
+      <div *ngIf="formFieldsLoading" class="bks-loading">Loading…</div>
+
+      <div *ngIf="!formFieldsLoading && formFields.length === 0" class="bks-ff-empty">
+        <div class="bks-ff-empty__icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" width="44" height="44">
+            <rect x="8" y="6" width="32" height="36" rx="4"/>
+            <line x1="15" y1="16" x2="33" y2="16"/>
+            <line x1="15" y1="22" x2="33" y2="22"/>
+            <line x1="15" y1="28" x2="26" y2="28"/>
+            <circle cx="36" cy="36" r="7" stroke-dasharray="3 2"/>
+            <line x1="33" y1="36" x2="39" y2="36"/>
+            <line x1="36" y1="33" x2="36" y2="39"/>
+          </svg>
+        </div>
+        <div class="bks-ff-empty__title">No custom fields yet</div>
+        <div class="bks-ff-empty__sub">Click <strong>Add Field</strong> above to add extra questions to the booking form.</div>
+      </div>
+
+      <div class="bks-ff-list" *ngIf="!formFieldsLoading && formFields.length > 0">
+        <div class="bks-ff-card" *ngFor="let f of formFields" [class.bks-ff-card--inactive]="!f.active">
+          <div class="bks-ff-chip bks-ff-chip--{{f.fieldType}}">{{ getTypeIcon(f.fieldType) }}</div>
+          <div class="bks-ff-info">
+            <div class="bks-ff-name">{{ f.label }}</div>
+            <div class="bks-ff-key">{{ f.fieldKey }}</div>
+          </div>
+          <div class="bks-ff-badges">
+            <span class="bks-badge" [class.bks-badge--required]="f.required" [class.bks-badge--optional]="!f.required">
+              {{ f.required ? 'Required' : 'Optional' }}
+            </span>
+            <span class="bks-badge" [class.bks-badge--active]="f.active" [class.bks-badge--inactive]="!f.active">
+              {{ f.active ? 'Active' : 'Off' }}
+            </span>
+          </div>
+          <div class="bks-ff-actions">
+            <button class="bks-icon-btn" [title]="f.active ? 'Deactivate' : 'Activate'" (click)="toggleFieldActive(f)">
+              <svg *ngIf="f.active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg *ngIf="!f.active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+            <button class="bks-icon-btn" title="Edit field" (click)="editField(f)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="bks-icon-btn bks-icon-btn--danger" title="Delete field" (click)="deleteField(f)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Add / Edit field modal ──────────────────────────────── -->
+    <div class="bks-modal-overlay" *ngIf="showFieldForm" (click)="$event.target === $event.currentTarget && (showFieldForm = false)">
+      <div class="bks-modal bks-modal--lg">
+        <div class="bks-modal__header">
+          <div class="bks-ff-modal-hd">
+            <div class="bks-ff-modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 8h8M8 12h5M8 16h3"/></svg>
+            </div>
+            <div>
+              <h3>{{ editingField ? 'Edit Form Field' : 'New Form Field' }}</h3>
+              <p class="bks-ff-modal-sub">{{ editingField ? 'Update field properties below' : 'Add a custom question to the booking form' }}</p>
+            </div>
+          </div>
+          <button class="bks-modal__close" (click)="showFieldForm = false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="bks-ff-modal-body">
+
+          <!-- Field label -->
+          <div class="bks-ff-field">
+            <label class="bks-ff-label">Field Label <span class="bks-required">*</span></label>
+            <input class="bks-ff-input" [(ngModel)]="fieldForm.label" placeholder="e.g. Dietary Requirements">
+            <span class="bks-ff-hint">Shown above the input on the booking form</span>
+          </div>
+
+          <!-- Field type visual card picker -->
+          <div class="bks-ff-field">
+            <label class="bks-ff-label">Field Type <span class="bks-required">*</span></label>
+            <div class="bks-type-grid">
+              <button class="bks-type-card" type="button" *ngFor="let t of FIELD_TYPES"
+                      [class.bks-type-card--active]="fieldForm.fieldType === t.value"
+                      (click)="fieldForm.fieldType = t.value">
+                <span [class]="'bks-type-card__icon bks-type-card__icon--' + t.value">{{ t.icon }}</span>
+                <span class="bks-type-card__label">{{ t.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Placeholder (text / textarea / number only) -->
+          <div class="bks-ff-field" *ngIf="fieldForm.fieldType === 'TEXT' || fieldForm.fieldType === 'TEXTAREA' || fieldForm.fieldType === 'NUMBER'">
+            <label class="bks-ff-label">Placeholder Text</label>
+            <input class="bks-ff-input" [(ngModel)]="fieldForm.placeholder" placeholder="Hint shown inside the field">
+          </div>
+
+          <!-- Options builder (dropdown / checkbox_group) -->
+          <div class="bks-ff-field" *ngIf="needsOptions()">
+            <label class="bks-ff-label">Options <span class="bks-required">*</span></label>
+            <div class="bks-option-builder">
+              <div class="bks-option-list">
+                <div class="bks-option-item" *ngFor="let opt of fieldOptions; let i = index">
+                  <span class="bks-option-item__text">{{ opt }}</span>
+                  <button class="bks-option-item__remove" type="button" (click)="removeFieldOption(i)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div class="bks-option-empty" *ngIf="fieldOptions.length === 0">No options yet — add one below</div>
+              </div>
+              <div class="bks-option-add">
+                <input class="bks-ff-input" [(ngModel)]="fieldOptionInput" placeholder="Type an option and press Add…"
+                       (keydown.enter)="addFieldOption(); $event.preventDefault()">
+                <button class="bks-btn bks-btn--secondary" type="button" (click)="addFieldOption()">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order + settings row -->
+          <div class="bks-ff-row-2">
+            <div class="bks-ff-field">
+              <label class="bks-ff-label">Display Order</label>
+              <input class="bks-ff-input" type="number" [(ngModel)]="fieldForm.displayOrder" min="0">
+              <span class="bks-ff-hint">Lower = appears first</span>
+            </div>
+            <div class="bks-ff-field">
+              <label class="bks-ff-label">Settings</label>
+              <div class="bks-ff-switch-group">
+                <label class="bks-toggle">
+                  <input type="checkbox" [(ngModel)]="fieldForm.required">
+                  <span class="bks-toggle__track"></span>
+                  <span class="bks-toggle__label">Required field</span>
+                </label>
+                <label class="bks-toggle">
+                  <input type="checkbox" [(ngModel)]="fieldForm.active">
+                  <span class="bks-toggle__track"></span>
+                  <span class="bks-toggle__label">Active on form</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="bks-modal__footer">
+          <button class="bks-btn bks-btn--ghost" (click)="showFieldForm = false">Cancel</button>
+          <button class="bks-btn bks-btn--primary" (click)="saveField()" [disabled]="isSaving || !fieldForm.label || !fieldForm.fieldType">
+            <span *ngIf="isSaving">Saving…</span>
+            <span *ngIf="!isSaving">{{ editingField ? 'Update Field' : 'Add Field' }}</span>
+          </button>
         </div>
       </div>
     </div>

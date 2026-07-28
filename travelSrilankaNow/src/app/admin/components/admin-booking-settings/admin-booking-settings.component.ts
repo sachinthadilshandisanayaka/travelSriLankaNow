@@ -45,6 +45,26 @@ export interface BkAvailabilityConfig {
   active: boolean;
 }
 
+export interface BookingFormField {
+  id?: number;
+  fieldKey?: string;
+  label: string;
+  fieldType: string;   // TEXT | TEXTAREA | DROPDOWN | CHECKBOX_GROUP | DATE | NUMBER
+  placeholder?: string;
+  required: boolean;
+  options?: string;    // JSON array string e.g. '["Option A","Option B"]'
+  displayOrder: number;
+  active: boolean;
+}
+
+export const FIXED_FIELDS = [
+  { label: 'Full Name',             fieldType: 'TEXT',   required: true,  note: 'Always collected' },
+  { label: 'Phone',                 fieldType: 'TEXT',   required: true,  note: 'Always collected' },
+  { label: 'Email',                 fieldType: 'TEXT',   required: true,  note: 'Always collected' },
+  { label: 'Number of People',      fieldType: 'NUMBER', required: true,  note: 'Always collected' },
+  { label: 'Preferred Date',        fieldType: 'DATE',   required: false, note: 'Optional – configurable via Nav Booking Rules' },
+];
+
 @Component({
   selector: 'app-admin-booking-settings',
   templateUrl: './admin-booking-settings.component.html',
@@ -53,7 +73,7 @@ export interface BkAvailabilityConfig {
 export class AdminBookingSettingsComponent implements OnInit {
   private apiBase = `${environment.apiUrl}/admin/booking-settings`;
 
-  activeTab: 'types' | 'conditions' | 'terms' | 'availability' | 'nav-rules' = 'conditions';
+  activeTab: 'types' | 'conditions' | 'terms' | 'availability' | 'nav-rules' | 'form-fields' = 'conditions';
 
   readonly PAGE_SIZE = 6;
 
@@ -130,6 +150,26 @@ export class AdminBookingSettingsComponent implements OnInit {
     { value: 'NONE',   label: 'No Date',      desc: 'No date required (open voucher, gift package)' },
   ];
 
+  // ── Form Fields ──
+  readonly FIXED_FIELDS = FIXED_FIELDS;
+  readonly FIELD_TYPES = [
+    { value: 'TEXT',           label: 'Short Text',  icon: 'Aa' },
+    { value: 'TEXTAREA',       label: 'Long Text',   icon: '¶'  },
+    { value: 'NUMBER',         label: 'Number',      icon: '#'  },
+    { value: 'DATE',           label: 'Date Picker', icon: '○'  },
+    { value: 'DROPDOWN',       label: 'Dropdown',    icon: '▾'  },
+    { value: 'CHECKBOX_GROUP', label: 'Checkboxes',  icon: '☑'  },
+  ];
+  formFields: BookingFormField[] = [];
+  formFieldsLoading = false;
+  formFieldsError = '';
+  formFieldsSuccess = '';
+  showFieldForm = false;
+  editingField: BookingFormField | null = null;
+  fieldForm: BookingFormField = this.blankField();
+  fieldOptionInput = '';   // staging area for adding a new option item
+  fieldOptions: string[] = []; // parsed list of options for the current form
+
   // ── Shared delete dialog ──
   showDeleteDialog = false;
   deleteDialogMessage = '';
@@ -150,6 +190,7 @@ export class AdminBookingSettingsComponent implements OnInit {
     this.loadTerms();
     this.loadAvailability();
     this.loadNavConfigs();
+    this.loadFormFields();
   }
 
   get activeTypeNames(): string[] {
@@ -430,6 +471,95 @@ export class AdminBookingSettingsComponent implements OnInit {
       });
     };
     this.showDeleteDialog = true;
+  }
+
+  // ─────────────── BOOKING FORM FIELDS ───────────────
+
+  loadFormFields(): void {
+    this.formFieldsLoading = true;
+    this.http.get<BookingFormField[]>(`${this.apiBase}/form-fields`).subscribe({
+      next: (d) => { this.formFields = d; this.formFieldsLoading = false; },
+      error: () => { this.formFieldsError = 'Failed to load form fields.'; this.formFieldsLoading = false; }
+    });
+  }
+
+  openNewField(): void {
+    this.fieldForm = this.blankField();
+    this.fieldOptions = [];
+    this.fieldOptionInput = '';
+    this.editingField = null;
+    this.showFieldForm = true;
+  }
+
+  editField(f: BookingFormField): void {
+    this.fieldForm = { ...f };
+    this.editingField = f;
+    try { this.fieldOptions = f.options ? JSON.parse(f.options) : []; } catch { this.fieldOptions = []; }
+    this.fieldOptionInput = '';
+    this.showFieldForm = true;
+  }
+
+  addFieldOption(): void {
+    const val = this.fieldOptionInput.trim();
+    if (val && !this.fieldOptions.includes(val)) {
+      this.fieldOptions.push(val);
+      this.fieldOptionInput = '';
+    }
+  }
+
+  removeFieldOption(i: number): void {
+    this.fieldOptions.splice(i, 1);
+  }
+
+  needsOptions(): boolean {
+    return this.fieldForm.fieldType === 'DROPDOWN' || this.fieldForm.fieldType === 'CHECKBOX_GROUP';
+  }
+
+  getTypeIcon(value: string): string {
+    return this.FIELD_TYPES.find(t => t.value === value)?.icon ?? value.charAt(0);
+  }
+
+  saveField(): void {
+    const payload: BookingFormField = {
+      ...this.fieldForm,
+      options: this.needsOptions() ? JSON.stringify(this.fieldOptions) : undefined,
+    };
+    this.isSaving = true;
+    const req = this.editingField
+      ? this.http.put<BookingFormField>(`${this.apiBase}/form-fields/${payload.id}`, payload)
+      : this.http.post<BookingFormField>(`${this.apiBase}/form-fields`, payload);
+    req.subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.formFieldsSuccess = 'Form field saved.';
+        this.showFieldForm = false;
+        this.loadFormFields();
+        setTimeout(() => this.formFieldsSuccess = '', 3000);
+      },
+      error: () => { this.isSaving = false; this.formFieldsError = 'Failed to save form field.'; }
+    });
+  }
+
+  toggleFieldActive(f: BookingFormField): void {
+    const updated = { ...f, active: !f.active };
+    this.http.put<BookingFormField>(`${this.apiBase}/form-fields/${f.id}`, updated).subscribe({
+      next: (res) => { const i = this.formFields.findIndex(x => x.id === f.id); if (i >= 0) this.formFields[i] = res; }
+    });
+  }
+
+  deleteField(f: BookingFormField): void {
+    this.deleteDialogMessage = `Delete form field "${f.label}"? This will remove it from the booking form.`;
+    this.pendingDeleteAction = () => {
+      this.http.delete(`${this.apiBase}/form-fields/${f.id}`).subscribe({
+        next: () => { this.formFields = this.formFields.filter(x => x.id !== f.id); },
+        error: () => { this.formFieldsError = 'Failed to delete form field.'; }
+      });
+    };
+    this.showDeleteDialog = true;
+  }
+
+  private blankField(): BookingFormField {
+    return { label: '', fieldType: 'TEXT', placeholder: '', required: false, options: undefined, displayOrder: this.formFields.length, active: true };
   }
 
   confirmDelete(): void {

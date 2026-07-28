@@ -1424,7 +1424,8 @@ $navbar-height: 80px;
   border-radius: $radius-md;
   padding: $spacing-sm $spacing-md;
   font-size: $font-size-sm;
-  margin-bottom: $spacing-lg;
+  margin: 0 $spacing-2xl $spacing-sm;
+  flex-shrink: 0;
 }
 
 .booking-cancel-btn {
