@@ -153,12 +153,12 @@ export class AdminBookingSettingsComponent implements OnInit {
   // ── Form Fields ──
   readonly FIXED_FIELDS = FIXED_FIELDS;
   readonly FIELD_TYPES = [
-    { value: 'TEXT',          label: 'Text Input' },
-    { value: 'TEXTAREA',      label: 'Text Area' },
-    { value: 'NUMBER',        label: 'Number' },
-    { value: 'DATE',          label: 'Date Picker' },
-    { value: 'DROPDOWN',      label: 'Dropdown (select one)' },
-    { value: 'CHECKBOX_GROUP',label: 'Checkboxes (select many)' },
+    { value: 'TEXT',           label: 'Short Text',  icon: 'Aa' },
+    { value: 'TEXTAREA',       label: 'Long Text',   icon: '¶'  },
+    { value: 'NUMBER',         label: 'Number',      icon: '#'  },
+    { value: 'DATE',           label: 'Date Picker', icon: '○'  },
+    { value: 'DROPDOWN',       label: 'Dropdown',    icon: '▾'  },
+    { value: 'CHECKBOX_GROUP', label: 'Checkboxes',  icon: '☑'  },
   ];
   formFields: BookingFormField[] = [];
   formFieldsLoading = false;
@@ -513,6 +513,10 @@ export class AdminBookingSettingsComponent implements OnInit {
 
   needsOptions(): boolean {
     return this.fieldForm.fieldType === 'DROPDOWN' || this.fieldForm.fieldType === 'CHECKBOX_GROUP';
+  }
+
+  getTypeIcon(value: string): string {
+    return this.FIELD_TYPES.find(t => t.value === value)?.icon ?? value.charAt(0);
   }
 
   saveField(): void {

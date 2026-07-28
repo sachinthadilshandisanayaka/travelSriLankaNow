@@ -318,8 +318,6 @@
         </span>
       </div>
 
-      <div class="booking-error" *ngIf="bookingError">{{ bookingError }}</div>
-
       <div class="booking-form">
         <div class="booking-form__row">
           <div class="booking-form__group">
@@ -514,6 +512,8 @@
         </div>
       </div>
     </div>
+
+    <div class="booking-error" *ngIf="bookingError">{{ bookingError }}</div>
 
     <div class="booking-modal__footer" *ngIf="bookingStep === 'form'">
       <button class="booking-cancel-btn" (click)="closeBookingModal()" [disabled]="bookingLoading">Cancel</button>

@@ -884,6 +884,69 @@
   to   { transform: translateY(0); opacity: 1; }
 }
 
+// Booking form custom-field responses
+.bk-cf-section {
+  border: 1.5px solid $admin-gray-200;
+  border-radius: $admin-radius;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.875rem;
+    background: $admin-gray-50;
+    border-bottom: 1.5px solid $admin-gray-200;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $admin-gray-400;
+
+    svg { flex-shrink: 0; }
+  }
+}
+
+// Grid: column 1 = label (max-content → all values start at same x)
+//       column 2 = value (fills remaining space)
+.bk-cf-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+}
+
+.bk-cf-item {
+  display: contents; // children become direct grid items → perfect alignment
+
+  &__label {
+    padding: 0.6rem 1rem 0.6rem 0.875rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: $admin-gray-500;
+    background: $admin-gray-50;
+    border-bottom: 1px solid $admin-gray-100;
+    border-right: 1px solid $admin-gray-200;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+  }
+
+  &__value {
+    padding: 0.6rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $admin-navy-dark;
+    border-bottom: 1px solid $admin-gray-100;
+    display: flex;
+    align-items: center;
+    word-break: break-word;
+  }
+
+  &:last-child .bk-cf-item__label,
+  &:last-child .bk-cf-item__value {
+    border-bottom: none;
+  }
+}
+
 // ===== Confirmation Dialog =====
 .confirm-overlay {
   position: fixed;
