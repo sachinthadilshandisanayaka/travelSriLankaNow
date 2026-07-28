@@ -133,6 +133,9 @@ public class EventBooking {
     @Column(name = "edited_at")
     private LocalDateTime editedAt;
 
+    @Column(name = "custom_fields", columnDefinition = "TEXT")
+    private String customFields;
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
