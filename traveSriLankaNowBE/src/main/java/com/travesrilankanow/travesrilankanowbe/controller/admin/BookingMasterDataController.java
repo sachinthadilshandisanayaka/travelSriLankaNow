@@ -1,6 +1,7 @@
 package com.travesrilankanow.travesrilankanowbe.controller.admin;
 
 import com.travesrilankanow.travesrilankanowbe.entity.*;
+import com.travesrilankanow.travesrilankanowbe.service.BookingFormFieldService;
 import com.travesrilankanow.travesrilankanowbe.service.BookingMasterDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.Optional;
 public class BookingMasterDataController {
 
     private final BookingMasterDataService masterDataService;
+    private final BookingFormFieldService formFieldService;
 
     // ── Statuses ──────────────────────────────────────────────────────────────
 
@@ -169,6 +171,34 @@ public class BookingMasterDataController {
     @PreAuthorize("hasAuthority('BOOKING_SETTINGS:DELETE')")
     public ResponseEntity<Void> deleteAvailabilityConfig(@PathVariable Long id) {
         masterDataService.deleteAvailabilityConfig(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Booking Form Fields ───────────────────────────────────────────────────
+
+    @GetMapping("/form-fields")
+    @PreAuthorize("hasAuthority('BOOKING_SETTINGS:VIEW')")
+    public List<BookingFormField> getAllFormFields() {
+        return formFieldService.getAll();
+    }
+
+    @PostMapping("/form-fields")
+    @PreAuthorize("hasAuthority('BOOKING_SETTINGS:CREATE')")
+    public ResponseEntity<BookingFormField> createFormField(@RequestBody BookingFormField field) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(formFieldService.create(field));
+    }
+
+    @PutMapping("/form-fields/{id}")
+    @PreAuthorize("hasAuthority('BOOKING_SETTINGS:UPDATE')")
+    public ResponseEntity<BookingFormField> updateFormField(@PathVariable Long id,
+                                                            @RequestBody BookingFormField field) {
+        return ResponseEntity.ok(formFieldService.update(id, field));
+    }
+
+    @DeleteMapping("/form-fields/{id}")
+    @PreAuthorize("hasAuthority('BOOKING_SETTINGS:DELETE')")
+    public ResponseEntity<Void> deleteFormField(@PathVariable Long id) {
+        formFieldService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

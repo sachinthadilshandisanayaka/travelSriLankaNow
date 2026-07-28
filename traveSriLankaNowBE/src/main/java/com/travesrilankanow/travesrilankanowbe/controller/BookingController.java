@@ -4,8 +4,10 @@ import com.travesrilankanow.travesrilankanowbe.dto.BookingAdminResponse;
 import com.travesrilankanow.travesrilankanowbe.dto.BookingCalendarDay;
 import com.travesrilankanow.travesrilankanowbe.dto.EventBookingDTO;
 import com.travesrilankanow.travesrilankanowbe.entity.BkAuditLog;
+import com.travesrilankanow.travesrilankanowbe.entity.BookingFormField;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import com.travesrilankanow.travesrilankanowbe.service.BookingAuditService;
+import com.travesrilankanow.travesrilankanowbe.service.BookingFormFieldService;
 import com.travesrilankanow.travesrilankanowbe.service.EventBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.List;
 public class BookingController {
 
     private final EventBookingService bookingService;
+    private final BookingFormFieldService formFieldService;
     private final BookingAuditService auditService;
 
     // ── Customer-facing ───────────────────────────────────────────────────────
@@ -102,5 +105,11 @@ public class BookingController {
     @PreAuthorize("hasAuthority('BOOKINGS:VIEW')")
     public ResponseEntity<List<BkAuditLog>> getAuditHistory(@PathVariable Long id) {
         return ResponseEntity.ok(auditService.getHistory(id));
+    }
+
+    /** Public — booking form loads active custom fields without auth. */
+    @GetMapping("/booking-form-fields")
+    public ResponseEntity<List<BookingFormField>> getPublicFormFields() {
+        return ResponseEntity.ok(formFieldService.getActive());
     }
 }

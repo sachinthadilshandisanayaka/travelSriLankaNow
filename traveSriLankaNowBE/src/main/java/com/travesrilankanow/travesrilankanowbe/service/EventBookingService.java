@@ -94,6 +94,16 @@ public class EventBookingService {
         String notes = dto.getSpecialRequests() != null ? dto.getSpecialRequests() : "";
         booking.setSpecialRequests(notes.isBlank() ? null : notes);
 
+        // Serialise custom field answers to JSON text
+        if (dto.getCustomFields() != null && !dto.getCustomFields().isEmpty()) {
+            try {
+                booking.setCustomFields(new com.fasterxml.jackson.databind.ObjectMapper()
+                        .writeValueAsString(dto.getCustomFields()));
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                booking.setCustomFields(null);
+            }
+        }
+
         if (currentUsername != null) {
             userRepository.findByUsername(currentUsername)
                     .ifPresent(user -> {

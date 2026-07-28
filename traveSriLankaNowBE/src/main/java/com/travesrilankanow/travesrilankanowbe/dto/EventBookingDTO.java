@@ -62,4 +62,7 @@ public class EventBookingDTO {
     private LocalDateTime bookingDate;
 
     private EventBooking.BookingStatus status;
+
+    /** Custom field answers: key → value (serialised to JSON before persisting). */
+    private java.util.Map<String, Object> customFields;
 }

@@ -1424,7 +1424,37 @@ $navbar-height: 80px;
   border-radius: $radius-md;
   padding: $spacing-sm $spacing-md;
   font-size: $font-size-sm;
-  margin-bottom: $spacing-lg;
+  margin: 0 $spacing-2xl $spacing-sm;
+  flex-shrink: 0;
+}
+
+.booking-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.booking-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.booking-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: $font-size-sm;
+  color: $warm-gray;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--primary-navy);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
 }
 
 .booking-cancel-btn {

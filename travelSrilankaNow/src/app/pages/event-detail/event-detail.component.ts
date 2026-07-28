@@ -52,6 +52,14 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     checkOutDate: null as string | null
   };
 
+  // Dynamic custom form fields
+  customFormFields: Array<{
+    id: number; fieldKey: string; label: string; fieldType: string;
+    placeholder?: string; required: boolean; options?: string; displayOrder: number;
+  }> = [];
+  customFieldValues: { [key: string]: any } = {};
+  customFieldChecked: { [key: string]: { [opt: string]: boolean } } = {};
+
   // Calendar state
   calendarMonth: Date = new Date();
   showMonthPicker = false;
@@ -110,6 +118,49 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.navBookingConfigService.getByRoutePath('/events').subscribe(configs => {
       this.navBookingConfig = configs.find(c => c.isActive) || configs[0] || null;
     });
+
+    this.http.get<any[]>(`${environment.apiUrl}/booking-form-fields`).subscribe({
+      next: (fields) => {
+        this.customFormFields = fields;
+        this.customFieldValues = {};
+        this.customFieldChecked = {};
+        fields.forEach(f => {
+          this.customFieldValues[f.fieldKey] = '';
+          if (f.fieldType === 'CHECKBOX_GROUP') {
+            this.customFieldChecked[f.fieldKey] = {};
+            try {
+              (JSON.parse(f.options || '[]') as string[]).forEach((opt: string) => {
+                this.customFieldChecked[f.fieldKey][opt] = false;
+              });
+            } catch {}
+          }
+        });
+      },
+      error: () => {}
+    });
+  }
+
+  parseOptions(field: any): string[] {
+    try { return JSON.parse(field.options || '[]'); } catch { return []; }
+  }
+
+  onCheckboxChange(fieldKey: string, opt: string, checked: boolean): void {
+    if (!this.customFieldChecked[fieldKey]) this.customFieldChecked[fieldKey] = {};
+    this.customFieldChecked[fieldKey][opt] = checked;
+  }
+
+  buildCustomFieldPayload(): { [key: string]: any } {
+    const result: { [key: string]: any } = {};
+    this.customFormFields.forEach(f => {
+      if (f.fieldType === 'CHECKBOX_GROUP') {
+        const selected = Object.entries(this.customFieldChecked[f.fieldKey] || {})
+          .filter(([, v]) => v).map(([k]) => k);
+        result[f.fieldKey] = selected;
+      } else {
+        result[f.fieldKey] = this.customFieldValues[f.fieldKey] ?? '';
+      }
+    });
+    return result;
   }
 
   get dateMode(): string {
@@ -451,6 +502,17 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       this.bookingError = 'Please fill in all required fields.';
       return;
     }
+    // Validate required custom fields
+    for (const f of this.customFormFields) {
+      if (!f.required) continue;
+      if (f.fieldType === 'CHECKBOX_GROUP') {
+        const anyChecked = Object.values(this.customFieldChecked[f.fieldKey] || {}).some(v => v);
+        if (!anyChecked) { this.bookingError = `"${f.label}" is required.`; return; }
+      } else {
+        const val = this.customFieldValues[f.fieldKey];
+        if (!val || String(val).trim() === '') { this.bookingError = `"${f.label}" is required.`; return; }
+      }
+    }
     if (this.dateMode === 'RANGE') {
       if (!this.booking.checkInDate || !this.booking.checkOutDate) {
         this.bookingError = 'Please select both check-in and check-out dates.';
@@ -473,7 +535,8 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       numberOfPeople: this.booking.numberOfPeople,
       specialRequests: this.booking.specialRequests,
       totalPrice: this.bookingTotalPrice,
-      navRoutePath: '/events'
+      navRoutePath: '/events',
+      customFields: this.buildCustomFieldPayload()
     };
     if (this.dateMode === 'RANGE') {
       payload.checkInDate = this.booking.checkInDate;
