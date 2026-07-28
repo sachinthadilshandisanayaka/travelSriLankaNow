@@ -29,6 +29,7 @@ export interface BookingAdminResponse {
   editedAt: string | null;
   createdDate: string | null;
   updatedDate: string | null;
+  customFields?: { [key: string]: any };
 }
 
 export interface BookingCalendarDay {
@@ -392,5 +393,15 @@ export class AdminBookingsComponent implements OnInit, OnDestroy {
     if (!dateStr) return '';
     const d = new Date(dateStr + 'T00:00:00');
     return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  getCustomFieldEntries(b: BookingAdminResponse | null): { label: string; value: string }[] {
+    if (!b?.customFields) return [];
+    return Object.entries(b.customFields)
+      .map(([k, v]) => ({
+        label: k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        value: Array.isArray(v) ? (v as any[]).join(', ') : String(v ?? '')
+      }))
+      .filter(e => e.value.trim());
   }
 }

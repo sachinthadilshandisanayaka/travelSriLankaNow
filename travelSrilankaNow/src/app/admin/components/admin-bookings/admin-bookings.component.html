@@ -464,6 +464,23 @@
         <div class="bk-section__value bk-section__value--note">{{ selectedBooking.specialRequests }}</div>
       </div>
 
+      <!-- Booking form responses (custom fields) -->
+      <div class="bk-cf-section" *ngIf="getCustomFieldEntries(selectedBooking).length > 0">
+        <div class="bk-cf-section__header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <path d="M8 8h8M8 12h5M8 16h3"/>
+          </svg>
+          Booking Form Responses
+        </div>
+        <div class="bk-cf-list">
+          <div class="bk-cf-item" *ngFor="let entry of getCustomFieldEntries(selectedBooking)">
+            <span class="bk-cf-item__label">{{ entry.label }}</span>
+            <span class="bk-cf-item__value">{{ entry.value }}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Footer actions -->

@@ -1,13 +1,17 @@
 package com.travesrilankanow.travesrilankanowbe.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.travesrilankanow.travesrilankanowbe.entity.EventBooking;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 public class BookingAdminResponse {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private Long id;
     private String bookingReference;
@@ -33,6 +37,7 @@ public class BookingAdminResponse {
     private LocalDateTime editedAt;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private Map<String, Object> customFields;
 
     public static BookingAdminResponse from(EventBooking b, String displayTitle) {
         BookingAdminResponse r = new BookingAdminResponse();
@@ -65,6 +70,12 @@ public class BookingAdminResponse {
         r.setEditedAt(b.getEditedAt());
         r.setCreatedDate(b.getCreatedDate());
         r.setUpdatedDate(b.getUpdatedDate());
+        if (b.getCustomFields() != null && !b.getCustomFields().isBlank()) {
+            try {
+                r.setCustomFields(MAPPER.readValue(b.getCustomFields(), MAPPER.getTypeFactory()
+                        .constructMapType(java.util.LinkedHashMap.class, String.class, Object.class)));
+            } catch (Exception ignored) {}
+        }
         return r;
     }
 }

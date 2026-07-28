@@ -129,6 +129,10 @@ public class EventBooking {
     @Column(name = "edited_at")
     private LocalDateTime editedAt;
 
+    /** JSON map of custom field answers keyed by field_key. */
+    @Column(name = "custom_fields", columnDefinition = "TEXT")
+    private String customFields;
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
