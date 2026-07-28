@@ -105,11 +105,14 @@ export class PlacesComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('Failed to load place types:', err)
     });
 
-    this.masterDataService.getPlaceTypes().subscribe({
+    // Unfiltered + isActive-only here (not the tile grid's isActive+visibleOnPublicPage
+    // set) — hiding a category from Browse by Category must not remove it as a filter
+    // option for browsing the full list.
+    this.masterDataService.getAllPlaceTypes().subscribe({
       next: (data: MasterData[]) => {
         this.placeTypes = [
           { value: 'all', label: 'All Places' },
-          ...data.map(item => ({
+          ...data.filter((c: MasterData) => c.isActive).map(item => ({
             value: item.code,
             label: item.displayName
           }))
