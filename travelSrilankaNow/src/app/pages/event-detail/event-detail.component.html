@@ -461,6 +461,53 @@
             </div>
           </div>
         </div>
+        <!-- Dynamic custom fields -->
+        <ng-container *ngFor="let field of customFormFields">
+          <div class="booking-form__group">
+            <label>{{ field.label }} <span *ngIf="field.required" class="booking-required">*</span></label>
+
+            <!-- TEXT -->
+            <input *ngIf="field.fieldType === 'TEXT'"
+                   type="text"
+                   [(ngModel)]="customFieldValues[field.fieldKey]"
+                   [placeholder]="field.placeholder || ''">
+
+            <!-- NUMBER -->
+            <input *ngIf="field.fieldType === 'NUMBER'"
+                   type="number"
+                   [(ngModel)]="customFieldValues[field.fieldKey]"
+                   [placeholder]="field.placeholder || ''">
+
+            <!-- DATE -->
+            <input *ngIf="field.fieldType === 'DATE'"
+                   type="date"
+                   [(ngModel)]="customFieldValues[field.fieldKey]">
+
+            <!-- TEXTAREA -->
+            <textarea *ngIf="field.fieldType === 'TEXTAREA'"
+                      rows="3"
+                      [(ngModel)]="customFieldValues[field.fieldKey]"
+                      [placeholder]="field.placeholder || ''"></textarea>
+
+            <!-- DROPDOWN -->
+            <select *ngIf="field.fieldType === 'DROPDOWN'"
+                    [(ngModel)]="customFieldValues[field.fieldKey]">
+              <option value="">-- Select --</option>
+              <option *ngFor="let opt of parseOptions(field)" [value]="opt">{{ opt }}</option>
+            </select>
+
+            <!-- CHECKBOX_GROUP -->
+            <div *ngIf="field.fieldType === 'CHECKBOX_GROUP'" class="booking-checkbox-group">
+              <label *ngFor="let opt of parseOptions(field)" class="booking-checkbox-label">
+                <input type="checkbox"
+                       [checked]="customFieldChecked[field.fieldKey] && customFieldChecked[field.fieldKey][opt]"
+                       (change)="onCheckboxChange(field.fieldKey, opt, $any($event.target).checked)">
+                {{ opt }}
+              </label>
+            </div>
+          </div>
+        </ng-container>
+
         <div class="booking-form__group">
           <label>Special Requests</label>
           <textarea [(ngModel)]="booking.specialRequests" rows="3" placeholder="Dietary requirements, accessibility needs, etc."></textarea>
