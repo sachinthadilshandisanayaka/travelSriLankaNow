@@ -10,7 +10,7 @@
 // ===== Hero header — deliberately distinct from the catalog pages so it's
 // unmistakably a booking utility, not another browse page =====
 .book-tour-hero {
-  background: $gradient-primary;
+  background: var(--gradient-primary);
   color: $white;
   text-align: center;
   padding: $spacing-4xl $spacing-lg $spacing-3xl;

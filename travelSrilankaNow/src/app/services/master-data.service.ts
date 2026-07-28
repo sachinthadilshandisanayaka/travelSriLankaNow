@@ -12,6 +12,7 @@ export interface MasterData {
   description?: string;
   sortOrder: number;
   isActive: boolean;
+  visibleOnPublicPage: boolean;
   color?: string;
   icon?: string;
   createdAt: string;

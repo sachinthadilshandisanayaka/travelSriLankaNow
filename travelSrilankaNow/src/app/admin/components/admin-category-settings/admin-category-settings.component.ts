@@ -11,6 +11,7 @@ interface CategoryItem {
   description: string;
   sortOrder: number;
   isActive: boolean;
+  visibleOnPublicPage: boolean;
   color: string;
   icon: string;
 }
@@ -327,28 +328,31 @@ export class AdminCategorySettingsComponent implements OnInit, OnChanges, OnDest
     });
   }
 
+  // Toggles this category's Browse-by-Category public visibility only — must
+  // never touch isActive, which is a separate concern owned by the Event
+  // Categories master-data screen (whether the category is usable at all).
   toggleActive(id: number): void {
     if (this.togglingIds.has(id)) { return; }
     const cat = this.categories.find(c => c.id === id);
     if (!cat) { return; }
 
     this.togglingIds.add(id);
-    const prev = cat.isActive;
-    cat.isActive = !cat.isActive;
-    if (this.states[id]) { this.states[id].editing.isActive = cat.isActive; }
+    const prev = cat.visibleOnPublicPage;
+    cat.visibleOnPublicPage = !cat.visibleOnPublicPage;
+    if (this.states[id]) { this.states[id].editing.visibleOnPublicPage = cat.visibleOnPublicPage; }
     const allCat = this.allCategories.find(c => c.id === id);
-    if (allCat) { allCat.isActive = cat.isActive; }
+    if (allCat) { allCat.visibleOnPublicPage = cat.visibleOnPublicPage; }
 
-    this.adminApiService.toggleMasterDataActive(id).subscribe({
+    this.adminApiService.toggleMasterDataVisible(id).subscribe({
       next: () => {
         this.togglingIds.delete(id);
-        this.successMessage = '"' + cat.displayName + '" is now ' + (cat.isActive ? 'visible' : 'hidden') + ' on the public page.';
+        this.successMessage = '"' + cat.displayName + '" is now ' + (cat.visibleOnPublicPage ? 'visible' : 'hidden') + ' on the public page.';
         setTimeout(() => { this.successMessage = ''; }, 3000);
       },
       error: (err) => {
-        cat.isActive = prev;
-        if (this.states[id]) { this.states[id].editing.isActive = prev; }
-        if (allCat) { allCat.isActive = prev; }
+        cat.visibleOnPublicPage = prev;
+        if (this.states[id]) { this.states[id].editing.visibleOnPublicPage = prev; }
+        if (allCat) { allCat.visibleOnPublicPage = prev; }
         this.togglingIds.delete(id);
         this.errorMessage = (err.error && err.error.message) || 'Failed to update visibility.';
       }
