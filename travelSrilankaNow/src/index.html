@@ -33,16 +33,29 @@
   <!-- Theme CSS: loaded before Angular bundle so there is zero flash of default colours -->
   <link rel="stylesheet" href="assets/theme.css">
 
-  <link rel="shortcut icon" href="favicon.ico?v=4">
-  <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png?v=4">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-32.png?v=4">
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192.png?v=4">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png?v=4">
+  <link rel="shortcut icon" href="favicon.ico?v=5">
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=5">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png?v=5">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-32.png?v=5">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192.png?v=5">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png?v=5">
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6131703907084310"
        crossorigin="anonymous"></script>
+
+  <!-- Google Translate: hidden widget driven programmatically by LanguageService -->
+  <div id="google_translate_element" style="display:none"></div>
+  <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+      // Counteract GT's body.style.top offset (set when the banner is shown)
+      new MutationObserver(function() {
+        if (document.body.style.top) document.body.style.top = '';
+      }).observe(document.body, { attributes: true, attributeFilter: ['style'] });
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
   <app-root></app-root>
