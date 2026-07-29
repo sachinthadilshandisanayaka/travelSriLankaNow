@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router, NavigationEnd } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, filter } from 'rxjs/operators';
 
 export interface Language {
   code: string;
@@ -61,6 +62,11 @@ const BROWSER_LANG_MAP: { [key: string]: string } = {
   es: 'es', it: 'it', pt: 'pt', zh: 'zh', ja: 'ja', ko: 'ko', ar: 'ar'
 };
 
+// Our language codes → Google Translate codes (only overrides that differ)
+const GT_CODE_MAP: { [key: string]: string } = {
+  zh: 'zh-CN'
+};
+
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
   // Start with English so the pipe never renders raw keys on first paint.
@@ -68,17 +74,27 @@ export class LanguageService {
   private currentLangSubject = new BehaviorSubject<string>(this.getInitialLang());
   currentLang$ = this.currentLangSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     const lang = this.currentLang;
     if (lang === 'en') {
-      // English is already embedded — emit immediately, no HTTP round-trip needed.
       this.currentLangSubject.next(lang);
     } else {
-      // For other languages load the JSON, then notify.
       this.loadTranslations(lang).subscribe(() => {
         this.currentLangSubject.next(lang);
       });
+      // Apply Google Translate on page load for the saved language.
+      // GT widget may not be ready yet — triggerGT retries until the select appears.
+      setTimeout(() => this.triggerGT(GT_CODE_MAP[lang] || lang), 800);
     }
+
+    // Re-apply Google Translate after every Angular route change so newly rendered
+    // content gets translated (Angular re-renders DOM; GT doesn't know about it).
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+      const current = this.currentLang;
+      if (current !== 'en') {
+        setTimeout(() => this.triggerGT(GT_CODE_MAP[current] || current), 500);
+      }
+    });
   }
 
   get currentLang(): string {
@@ -101,6 +117,11 @@ export class LanguageService {
       document.documentElement.dir  = lang?.dir || 'ltr';
       document.documentElement.lang = code;
       this.currentLangSubject.next(code);
+      if (code === 'en') {
+        this.restoreGT();
+      } else {
+        this.triggerGT(GT_CODE_MAP[code] || code);
+      }
     };
     if (code === 'en') {
       this.translations = { ...EN_TRANSLATIONS };
@@ -108,6 +129,28 @@ export class LanguageService {
     } else {
       this.loadTranslations(code).subscribe(() => applyLang());
     }
+  }
+
+  private triggerGT(gtCode: string, attempt = 0): void {
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+    if (select) {
+      select.value = gtCode;
+      select.dispatchEvent(new Event('change'));
+    } else if (attempt < 20) {
+      // GT widget not ready yet — retry every 300 ms (up to 6 s total)
+      setTimeout(() => this.triggerGT(gtCode, attempt + 1), 300);
+    }
+  }
+
+  private restoreGT(): void {
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+    if (select && select.value) {
+      select.value = '';
+      select.dispatchEvent(new Event('change'));
+    }
+    // Clear GT cookie so a subsequent page reload also shows English
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${location.hostname}`;
   }
 
   translate(key: string): string {
