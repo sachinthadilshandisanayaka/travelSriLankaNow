@@ -1,31 +1,26 @@
--- V38: Replace incorrect nomad / senior-citizens packages and add honeymoon package.
--- Child rows (package_locations, package_pricing, package_included, package_requirements)
--- are removed automatically via ON DELETE CASCADE from the FK relationships.
+-- V39: Move nomad/senior/honeymoon data from wrong packages table to events table.
+-- V38 incorrectly inserted these into packages; they belong in events (FE calls /api/events/slug/).
+-- Also removes old incorrect 6/8-day event records.
 
--- ─── Remove existing incorrect packages ──────────────────────────────────────
-DELETE FROM package_locations    WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR title ILIKE '%nomad%');
-DELETE FROM package_pricing      WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR title ILIKE '%nomad%');
-DELETE FROM package_included     WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR title ILIKE '%nomad%');
-DELETE FROM package_requirements WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR title ILIKE '%nomad%');
-DELETE FROM packages WHERE slug ILIKE '%nomad%' OR title ILIKE '%nomad%';
+-- ─── 1. Clean up wrong records inserted by V38 into packages table ────────────
+DELETE FROM package_locations    WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM package_pricing      WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM package_included     WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM package_requirements WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM packages WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%';
 
-DELETE FROM package_locations    WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%senior%' OR title ILIKE '%senior%');
-DELETE FROM package_pricing      WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%senior%' OR title ILIKE '%senior%');
-DELETE FROM package_included     WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%senior%' OR title ILIKE '%senior%');
-DELETE FROM package_requirements WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%senior%' OR title ILIKE '%senior%');
-DELETE FROM packages WHERE slug ILIKE '%senior%' OR title ILIKE '%senior%';
-
-DELETE FROM package_locations    WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%honey%' OR slug ILIKE '%honeymoon%' OR title ILIKE '%honey%');
-DELETE FROM package_pricing      WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%honey%' OR slug ILIKE '%honeymoon%' OR title ILIKE '%honey%');
-DELETE FROM package_included     WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%honey%' OR slug ILIKE '%honeymoon%' OR title ILIKE '%honey%');
-DELETE FROM package_requirements WHERE package_id IN (SELECT id FROM packages WHERE slug ILIKE '%honey%' OR slug ILIKE '%honeymoon%' OR title ILIKE '%honey%');
-DELETE FROM packages WHERE slug ILIKE '%honey%' OR slug ILIKE '%honeymoon%' OR title ILIKE '%honey%';
+-- ─── 2. Remove old incorrect events (6/8-day nomad, 6/8-day honeymoon, 10-day senior) ──
+DELETE FROM event_locations    WHERE event_id IN (SELECT id FROM events WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM event_pricing      WHERE event_id IN (SELECT id FROM events WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM event_included     WHERE event_id IN (SELECT id FROM events WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM event_requirements WHERE event_id IN (SELECT id FROM events WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%');
+DELETE FROM events WHERE slug ILIKE '%nomad%' OR slug ILIKE '%senior%' OR slug ILIKE '%honey%';
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- HONEYMOON PACKAGE 1 — Transportation & Accommodation (11 Days / 10 Nights)
+-- HONEYMOON EVENT 1 — Transportation & Accommodation (11 Days / 10 Nights)
 -- ═══════════════════════════════════════════════════════════════════════════════
-INSERT INTO packages (
+INSERT INTO events (
   title, slug, description, short_description, category, location,
   price, duration, max_participants, available_spots,
   featured, display_order, additional_details
@@ -139,19 +134,18 @@ INSERT INTO packages (
 <li>7–13 days: 75% of total booking value</li>
 <li>Less than 7 days: 100% of total booking value</li>
 </ul>
-
 <p><em>Prices are valid until 31 October 2026. Prices may change due to fuel or tax adjustments.</em></p>',
   '11-day romantic honeymoon: Negombo, Sigiriya, Polonnaruwa, Kandy, Hatton, Nuwara Eliya, Haputale, Bentota & Galle coast. 4-star hotels with breakfast and dinner. Private vehicle and chauffeur guide.',
-  'tour',
+  'TransportationAndAccommodation',
   'Sri Lanka',
   0.00,
   '11 Days / 10 Nights',
   2, 2, true, 10,
-  '{"packageType":"Transportation and Accommodation","validUntil":"2026-10-31","targetAudience":"Honeymoon couples","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
+  '{"validUntil":"2026-10-31","targetAudience":"Honeymoon couples","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- Honeymoon T&A — Inclusions
-INSERT INTO package_included (package_id, included_item)
+INSERT INTO event_included (event_id, included_item)
 SELECT id, unnest(ARRAY[
   'Accommodation with breakfast and dinner in double/twin rooms at listed 4-star hotels or equivalent',
   'Private luxury vehicle for all internal road travel as per the itinerary',
@@ -160,10 +154,10 @@ SELECT id, unnest(ARRAY[
   'Visits to Galle Fort and Kandy city tour',
   '1 litre of bottled drinking water per person per day'
 ])
-FROM packages WHERE slug = 'honeymoon-transport-accommodation-11days';
+FROM events WHERE slug = 'honeymoon-transport-accommodation-11days';
 
--- Honeymoon T&A — Exclusions (stored as requirements field)
-INSERT INTO package_requirements (package_id, requirement)
+-- Honeymoon T&A — Requirements
+INSERT INTO event_requirements (event_id, requirement)
 SELECT id, unnest(ARRAY[
   'Valid passport with at least 6 months validity',
   'Sri Lanka tourist visa (ETA — obtainable online before arrival)',
@@ -171,49 +165,41 @@ SELECT id, unnest(ARRAY[
   'Comfortable walking shoes for sightseeing and nature walks',
   'Personal travel insurance strongly recommended'
 ])
-FROM packages WHERE slug = 'honeymoon-transport-accommodation-11days';
+FROM events WHERE slug = 'honeymoon-transport-accommodation-11days';
 
 -- Honeymoon T&A — Pricing
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM packages WHERE slug = 'honeymoon-transport-accommodation-11days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM packages WHERE slug = 'honeymoon-transport-accommodation-11days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM packages WHERE slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM events WHERE slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM events WHERE slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM events WHERE slug = 'honeymoon-transport-accommodation-11days';
 
--- Honeymoon T&A — Day-by-day locations
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Negombo', 'Arrival at Bandaranaike International Airport. Transfer to Negombo — a laid-back coastal town with colonial canals, Dutch-era churches, sandy beach, and rich Catholic heritage. Relax and prepare for the journey ahead.', 1, '1 Night', (SELECT id FROM locations WHERE slug = 'negombo' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Sigiriya', 'UNESCO World Heritage "Lion Rock" — 5th-century palace complex perched 200 m high with frescoes, Mirror Wall, royal water gardens, and panoramic jungle views. Optional walk with elephants at the Elephant Care Relief Foundation.', 2, '1 Night', (SELECT id FROM locations WHERE slug = 'sigiriya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Polonnaruwa', 'Sri Lanka''s best-preserved ancient capital (UNESCO). Cycle through royal palace ruins, Gal Vihara rock statues, and Parakrama Samudra reservoir. Optional romantic signature dining atop a treehouse. Visit Minneriya for "The Gathering" elephant spectacle (June–Sept).', 3, '1 Night', (SELECT id FROM locations WHERE slug = 'polonnaruwa' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Kandy', 'Sri Lanka''s cultural capital. Visit the sacred Temple of the Tooth Relic, stroll Kandy Lake, explore the Royal Botanical Gardens at Peradeniya, and enjoy an evening Kandyan cultural dance performance. Romantic candlelit dinner for two.', 4, '2 Nights', (SELECT id FROM locations WHERE slug = 'kandy' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Hatton', 'Upcountry train journey through tea plantations and misty valleys. Luxury colonial bungalow with personal butler, views of Castlereigh Lake, and afternoon valley walks or cycling beside the peaceful lake.', 5, '1 Night', (SELECT id FROM locations WHERE slug = 'hatton' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Nuwara Eliya', '"Little England" at 1,868 m elevation — colonial buildings, Gregory Lake, Hakgala Botanical Gardens, Pedro Tea Estate, and Lover''s Leap waterfall set among rolling tea estates.', 6, '1 Night', (SELECT id FROM locations WHERE slug = 'nuwara-eliya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Haputale', 'Dramatic mountain ridge town with endless views over the southern plains. Lipton''s Seat sunrise hike, Dambatenne Tea Factory, Adisham Bungalow monastery, Thangamale Bird Sanctuary, and Diyaluma Falls nearby.', 7, '1 Night', (SELECT id FROM locations WHERE slug = 'haputale' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Bentota', 'Sri Lanka''s premier honeymoon beach destination — pristine beach, calm river lagoon, and luxury resorts. River safari through mangroves, turtle hatchery, Brief Garden, water sports, and a sunset drive to historic Galle Fort on Day 10.', 8, '2 Nights', (SELECT id FROM locations WHERE slug = 'bentota' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
-
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Airport Departure', 'Final breakfast by the beach. Comfortable transfer to Bandaranaike International Airport.', 9, '', NULL, NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-accommodation-11days';
+-- Honeymoon T&A — Locations
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Negombo', 'Arrival at Bandaranaike International Airport. Transfer to Negombo — a laid-back coastal town with colonial canals, Dutch-era churches, sandy beach, and rich Catholic heritage. Relax and prepare for the journey ahead.', 1, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Sigiriya', 'UNESCO World Heritage "Lion Rock" — 5th-century palace complex perched 200 m high with frescoes, Mirror Wall, and royal water gardens. Optional walk with elephants at the Elephant Care Relief Foundation.', 2, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Polonnaruwa', 'Sri Lanka''s best-preserved ancient capital (UNESCO). Cycle through royal palace ruins, Gal Vihara rock statues, and Parakrama Samudra reservoir. Watch the Minneriya elephant gathering (June–Sept).', 3, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Kandy', 'Sri Lanka''s cultural capital. Temple of the Tooth Relic, Kandy Lake, Royal Botanical Gardens Peradeniya, and Kandyan cultural dance performance. Romantic candlelit dinner for two.', 4, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Hatton', 'Upcountry train journey through tea plantations and misty valleys. Luxury colonial bungalow with personal butler, views of Castlereigh Lake, and afternoon valley walks or cycling.', 5, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Nuwara Eliya', '"Little England" at 1,868 m elevation — colonial buildings, Gregory Lake, Hakgala Botanical Gardens, Pedro Tea Estate, and Lover''s Leap waterfall set among rolling tea estates.', 6, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Haputale', 'Dramatic mountain ridge town. Lipton''s Seat sunrise hike, Dambatenne Tea Factory, Adisham Bungalow monastery, Thangamale Bird Sanctuary, and Diyaluma Falls nearby.', 7, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Bentota', 'Sri Lanka''s premier honeymoon beach destination — pristine beach, calm river lagoon, mangrove river safari, turtle hatchery, Brief Garden, water sports, and a sunset drive to historic Galle Fort on Day 10.', 8, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Airport Departure', 'Final breakfast by the beach. Comfortable transfer to Bandaranaike International Airport.', 9, '', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-accommodation-11days';
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- HONEYMOON PACKAGE 2 — Transportation Only (11 Days / 10 Nights)
+-- HONEYMOON EVENT 2 — Transportation Only (11 Days / 10 Nights)
 -- ═══════════════════════════════════════════════════════════════════════════════
-INSERT INTO packages (
+INSERT INTO events (
   title, slug, description, short_description, category, location,
   price, duration, max_participants, available_spots,
   featured, display_order, additional_details
@@ -221,20 +207,20 @@ INSERT INTO packages (
   'Honeymoon Sri Lanka – Transportation Only (11 Days / 10 Nights)',
   'honeymoon-transport-only-11days',
   '<h2>A Romantic Journey Through Sri Lanka</h2>
-<p>Celebrate your love story across Sri Lanka''s most breathtaking landscapes — from ancient cultural kingdoms to misty highland bungalows and sun-kissed southern beaches. This carefully curated 11-day honeymoon itinerary blends history, romance, and luxury in perfect measure. Guests arrange their own accommodation; the package covers a private luxury vehicle and English-speaking chauffeur guide throughout.</p>
+<p>Celebrate your love story across Sri Lanka''s most breathtaking landscapes. This 11-day honeymoon itinerary covers ancient cultural kingdoms, misty highland bungalows, and sun-kissed southern beaches. A private luxury vehicle and English-speaking chauffeur guide are included throughout. Guests arrange their own accommodation.</p>
 
 <h3>Day 1 — Airport → Negombo</h3>
-<p>Negombo is a laid-back coastal town close to Bandaranaike International Airport. Known for its colonial canals, Dutch-era churches, and sandy beach, Negombo boasts rich Catholic heritage and bustling fish markets. Transfer to your own-arranged hotel to settle in.</p>
+<p>Transfer to Negombo — a laid-back coastal town with colonial canals, Dutch-era churches, sandy beach, and rich Catholic heritage.</p>
 
 <h3>Day 2 — Negombo → Sigiriya</h3>
-<p>UNESCO World Heritage "Lion Rock" — 5th-century palace complex perched 200 m high with frescoes, Mirror Wall, Royal Water Gardens, and panoramic jungle views. Optional visit to the Elephant Care Relief Foundation.</p>
+<p>UNESCO World Heritage "Lion Rock" — 5th-century palace complex perched 200 m high with frescoes, Mirror Wall, and royal water gardens. Optional visit to the Elephant Care Relief Foundation.</p>
 <p><em>Overnight: Own-arranged accommodation, Habarana area</em></p>
 
 <h3>Day 3 — Sigiriya → Polonnaruwa</h3>
 <p>Sri Lanka''s best-preserved ancient capital. Cycle through royal palace ruins, Gal Vihara rock statues, and Parakrama Samudra reservoir. Visit Minneriya National Park for the famous elephant gathering.</p>
 
 <h3>Day 4 — Polonnaruwa → Kandy</h3>
-<p>Cultural capital of Sri Lanka. Temple of the Tooth Relic, Kandy Lake walk, Peradeniya Botanical Gardens, and an evening Kandyan cultural dance performance.</p>
+<p>Cultural capital of Sri Lanka. Temple of the Tooth Relic, Kandy Lake walk, Peradeniya Botanical Gardens, and evening Kandyan cultural dance performance.</p>
 
 <h3>Day 5 — Kandy (Leisure)</h3>
 <p>Walk around Kandy Lake and up Lake Drive for spectacular town views. Short drive to the Royal Botanical Gardens of Peradeniya for a picnic lunch. Evening at leisure.</p>
@@ -264,27 +250,27 @@ INSERT INTO packages (
 <li>7–13 days: 75% of total booking value</li>
 <li>Less than 7 days: 100% of total booking value</li>
 </ul>',
-  'An 11-day romantic honeymoon itinerary with private transport and chauffeur guide — Negombo, Sigiriya, Polonnaruwa, Kandy, Hatton, Nuwara Eliya, Haputale, Bentota, and Galle. Guests arrange their own accommodation.',
-  'tour',
+  '11-day romantic honeymoon itinerary with private transport and chauffeur guide — Negombo, Sigiriya, Polonnaruwa, Kandy, Hatton, Nuwara Eliya, Haputale, Bentota, and Galle. Guests arrange their own accommodation.',
+  'TransportationOnly',
   'Sri Lanka',
   0.00,
   '11 Days / 10 Nights',
   2, 2, false, 11,
-  '{"packageType":"Transportation Only","validUntil":"2026-10-31","targetAudience":"Honeymoon couples","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
+  '{"validUntil":"2026-10-31","targetAudience":"Honeymoon couples","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- Honeymoon T-Only — Inclusions
-INSERT INTO package_included (package_id, included_item)
+INSERT INTO event_included (event_id, included_item)
 SELECT id, unnest(ARRAY[
   'Private luxury vehicle for all internal road travel as per the itinerary',
   'Assistance from an English-speaking chauffeur guide throughout',
   'All applicable taxes and VAT',
   '1 litre of bottled drinking water per person per day'
 ])
-FROM packages WHERE slug = 'honeymoon-transport-only-11days';
+FROM events WHERE slug = 'honeymoon-transport-only-11days';
 
 -- Honeymoon T-Only — Requirements
-INSERT INTO package_requirements (package_id, requirement)
+INSERT INTO event_requirements (event_id, requirement)
 SELECT id, unnest(ARRAY[
   'Valid passport with at least 6 months validity',
   'Sri Lanka tourist visa (ETA — obtainable online before arrival)',
@@ -292,41 +278,41 @@ SELECT id, unnest(ARRAY[
   'Comfortable walking shoes for sightseeing and nature walks',
   'Personal travel insurance strongly recommended'
 ])
-FROM packages WHERE slug = 'honeymoon-transport-only-11days';
+FROM events WHERE slug = 'honeymoon-transport-only-11days';
 
 -- Honeymoon T-Only — Pricing
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM packages WHERE slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM packages WHERE slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM packages WHERE slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM events WHERE slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM events WHERE slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM events WHERE slug = 'honeymoon-transport-only-11days';
 
 -- Honeymoon T-Only — Locations
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Negombo', 'Arrival and transfer to own-arranged hotel. Laid-back coastal town with colonial canals, Dutch churches, fish markets, and beachfront cafés.', 1, '1 Night', (SELECT id FROM locations WHERE slug = 'negombo' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Sigiriya', 'UNESCO "Lion Rock" — ancient palace fortress at 200 m with frescoes, Mirror Wall, and royal water gardens. Own-arranged accommodation in Habarana area.', 2, '1 Night', (SELECT id FROM locations WHERE slug = 'sigiriya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Polonnaruwa', 'Best-preserved ancient capital. Gal Vihara statues, royal palace complex, Parakrama Samudra reservoir, Minneriya elephant gathering.', 3, '1 Night', (SELECT id FROM locations WHERE slug = 'polonnaruwa' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Kandy', 'Cultural capital — Temple of the Tooth Relic, Kandy Lake, Peradeniya Botanical Gardens, and Kandyan cultural dance performance.', 4, '2 Nights', (SELECT id FROM locations WHERE slug = 'kandy' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Hatton', 'Scenic upcountry train journey. Tea plantation bungalow setting, Castlereigh Lake walks, and valley cycling.', 5, '1 Night', (SELECT id FROM locations WHERE slug = 'hatton' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Nuwara Eliya', '"Little England" highland town — Gregory Lake, Hakgala Gardens, Pedro Tea Estate, and Lover''s Leap waterfall.', 6, '1 Night', (SELECT id FROM locations WHERE slug = 'nuwara-eliya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Haputale', 'Mountain ridge panoramas, Lipton''s Seat sunrise hike, Dambatenne Tea Factory, Adisham Bungalow, and Diyaluma Falls.', 7, '1 Night', (SELECT id FROM locations WHERE slug = 'haputale' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Bentota', 'Premier honeymoon beach — pristine sands, mangrove river safari, turtle hatcheries, Brief Garden, water sports, and a day trip to UNESCO Galle Fort.', 8, '2 Nights', (SELECT id FROM locations WHERE slug = 'bentota' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Airport Departure', 'Final beach morning. Transfer to Bandaranaike International Airport.', 9, '', NULL, NOW() FROM packages p WHERE p.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Negombo', 'Arrival and transfer to own-arranged hotel. Colonial canals, Dutch churches, fish markets, and beachfront cafés.', 1, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Sigiriya', 'UNESCO "Lion Rock" — ancient palace fortress at 200 m with frescoes, Mirror Wall, and royal water gardens.', 2, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Polonnaruwa', 'Best-preserved ancient capital. Gal Vihara statues, royal palace complex, Parakrama Samudra reservoir, Minneriya elephant gathering.', 3, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Kandy', 'Cultural capital — Temple of the Tooth Relic, Kandy Lake, Peradeniya Botanical Gardens, and Kandyan cultural dance performance.', 4, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Hatton', 'Scenic upcountry train journey. Tea plantation setting, Castlereigh Lake walks, and valley cycling.', 5, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Nuwara Eliya', '"Little England" highland town — Gregory Lake, Hakgala Gardens, Pedro Tea Estate, and Lover''s Leap waterfall.', 6, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Haputale', 'Mountain ridge panoramas, Lipton''s Seat sunrise hike, Dambatenne Tea Factory, Adisham Bungalow, and Diyaluma Falls.', 7, '1 Night', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Bentota', 'Premier honeymoon beach — pristine sands, mangrove river safari, turtle hatcheries, Brief Garden, water sports, and a day trip to UNESCO Galle Fort.', 8, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Airport Departure', 'Final beach morning. Transfer to Bandaranaike International Airport.', 9, '', NULL, NOW() FROM events e WHERE e.slug = 'honeymoon-transport-only-11days';
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- SENIOR CITIZENS PACKAGE 1 — Transportation & Accommodation (12 Days / 11 Nights)
+-- SENIOR CITIZENS EVENT 1 — Transportation & Accommodation (12 Days / 11 Nights)
 -- ═══════════════════════════════════════════════════════════════════════════════
-INSERT INTO packages (
+INSERT INTO events (
   title, slug, description, short_description, category, location,
   price, duration, max_participants, available_spots,
   featured, display_order, additional_details
@@ -418,8 +404,8 @@ INSERT INTO packages (
 <p><em>Overnight: Nuwara Eliya</em></p>
 
 <h3>Day 9 — Nuwara Eliya → Beach Resort</h3>
-<p><strong>Winter (Dec–Apr): South Coast, Bentota</strong> — Calm seas, protected beaches, and luxury resorts with ground-floor rooms, pools, spa facilities, and diverse dining. Accessible flat terrain ideal for senior travelers.</p>
-<p><strong>Summer (May–Nov): East Coast, Passikudah</strong> — Shallow reef-protected coastline with exceptionally calm, clear waters ideal for gentle swimming. Luxury resorts with exceptional beach experiences.</p>
+<p><strong>Winter (Dec–Apr): South Coast, Bentota</strong> — Calm seas, protected beaches, and luxury resorts with ground-floor rooms, pools, spa facilities, and diverse dining.</p>
+<p><strong>Summer (May–Nov): East Coast, Passikudah</strong> — Shallow reef-protected coastline with exceptionally calm, clear waters ideal for gentle swimming.</p>
 <ul>
 <li>Leisurely breakfast and checkout (8:30 AM) · Scenic descent through tea estates</li>
 <li>Mid-morning rest stop · Lunch at air-conditioned restaurant midway</li>
@@ -448,7 +434,7 @@ INSERT INTO packages (
 <p><em>Overnight: Beach Resort</em></p>
 
 <h3>Day 12 — Beach Resort → Airport (Departure)</h3>
-<p>Comfortable Sri Lankan journey conclusion with a relaxed transfer to the airport, timed according to your flight schedule. The morning allows leisurely packing and final moments at the beach before beginning your homeward journey with wonderful memories.</p>
+<p>Comfortable transfer to the airport timed according to your flight schedule. The morning allows leisurely packing and final moments at the beach.</p>
 <ul>
 <li>Leisurely breakfast at resort · Final beach moments or pool time</li>
 <li>Checkout at appropriate time for flight schedule</li>
@@ -479,16 +465,16 @@ INSERT INTO packages (
 <li>Less than 7 days: 100% of total booking value</li>
 </ul>',
   '12-day / 11-night comfort-paced Sri Lanka tour for travelers aged 60+. Unhurried pace, late departures, rest periods, accessible activities, medical support. Full board and premium hotel accommodation.',
-  'tour',
+  'TransportationAndAccommodation',
   'Sri Lanka',
   0.00,
   '12 Days / 11 Nights',
   8, 8, false, 20,
-  '{"packageType":"Transportation and Accommodation","targetAudience":"Senior citizens (60+)","mealPlan":"Full Board","validUntil":"2026-12-31","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
+  '{"targetAudience":"Senior citizens (60+)","mealPlan":"Full Board","validUntil":"2026-12-31","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- Senior T&A — Inclusions
-INSERT INTO package_included (package_id, included_item)
+INSERT INTO event_included (event_id, included_item)
 SELECT id, unnest(ARRAY[
   'Accommodation in premium accessible hotels (11 nights)',
   'Full Board meal plan — breakfast, lunch, and dinner daily',
@@ -502,10 +488,10 @@ SELECT id, unnest(ARRAY[
   'Emergency medical coordination support',
   'Travel insurance guidance and recommendations'
 ])
-FROM packages WHERE slug = 'senior-leisure-transport-accommodation-12days';
+FROM events WHERE slug = 'senior-leisure-transport-accommodation-12days';
 
 -- Senior T&A — Requirements
-INSERT INTO package_requirements (package_id, requirement)
+INSERT INTO event_requirements (event_id, requirement)
 SELECT id, unnest(ARRAY[
   'Valid passport with at least 6 months validity',
   'Sri Lanka tourist visa (ETA — free for most nationalities, apply online)',
@@ -515,35 +501,35 @@ SELECT id, unnest(ARRAY[
   'Modest attire for temple visits (shoulders and knees covered)',
   'Personal medications and any required medical equipment'
 ])
-FROM packages WHERE slug = 'senior-leisure-transport-accommodation-12days';
+FROM events WHERE slug = 'senior-leisure-transport-accommodation-12days';
 
 -- Senior T&A — Pricing
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM packages WHERE slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM packages WHERE slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM packages WHERE slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM events WHERE slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM events WHERE slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM events WHERE slug = 'senior-leisure-transport-accommodation-12days';
 
--- Senior T&A — Day locations
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Negombo', 'Airport pickup with traditional welcome. Comfortable coastal town introduction with Dutch canals, colonial churches, and beachfront relaxation. Full rest day on Day 2 for travel recovery.', 1, '2 Nights', (SELECT id FROM locations WHERE slug = 'negombo' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Sigiriya', 'Ground-level garden exploration of the UNESCO Lion Rock fortress — no strenuous climbing. Dambulla Cave Temple with rest points. Village bullock cart ride and traditional cooking demonstration.', 2, '2 Nights', (SELECT id FROM locations WHERE slug = 'sigiriya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Kandy', 'Cultural capital with lakeside comfort. Temple of the Tooth Relic (minimal walking, seating areas), Peradeniya Botanical Gardens (paved paths or electric cart), evening cultural dance performance while seated.', 3, '2 Nights', (SELECT id FROM locations WHERE slug = 'kandy' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Nuwara Eliya', '"Little England" at 1,868 m — cool climate, colonial charm, Gregory Lake, heritage hotel with fireplace. Full leisure day for personal-pace exploration.', 4, '2 Nights', (SELECT id FROM locations WHERE slug = 'nuwara-eliya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Beach Resort (Bentota or Passikudah)', 'Three nights at a senior-accessible beach resort — calm waters, pool, spa, and beachfront dining. Complete relaxation with no scheduled activities. Destination varies by season: Bentota (winter) or Passikudah (summer).', 5, '3 Nights', NULL, NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-accommodation-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Airport Departure', 'Leisurely final morning at beach resort before comfortable transfer to Bandaranaike International Airport with rest stops as needed.', 6, '', NULL, NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-accommodation-12days';
+-- Senior T&A — Locations
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Negombo', 'Airport pickup with traditional welcome. Comfortable coastal town introduction with Dutch canals, colonial churches, and beachfront relaxation. Full rest day on Day 2 for travel recovery.', 1, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Sigiriya', 'Ground-level garden exploration of the UNESCO Lion Rock fortress — no strenuous climbing. Dambulla Cave Temple with rest points. Village bullock cart ride and traditional cooking demonstration.', 2, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Kandy', 'Cultural capital with lakeside comfort. Temple of the Tooth Relic (minimal walking), Peradeniya Botanical Gardens (paved paths or electric cart), evening cultural dance performance while seated.', 3, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Nuwara Eliya', '"Little England" at 1,868 m — cool climate, colonial charm, Gregory Lake, heritage hotel with fireplace. Full leisure day for personal-pace exploration.', 4, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Beach Resort (Bentota or Passikudah)', 'Three nights at a senior-accessible beach resort — calm waters, pool, spa, and beachfront dining. No scheduled activities. Bentota (winter Dec–Apr) or Passikudah (summer May–Nov).', 5, '3 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-accommodation-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Airport Departure', 'Leisurely final morning at beach resort before comfortable transfer to Bandaranaike International Airport with rest stops as needed.', 6, '', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-accommodation-12days';
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- SENIOR CITIZENS PACKAGE 2 — Transportation Only (12 Days / 11 Nights)
+-- SENIOR CITIZENS EVENT 2 — Transportation Only (12 Days / 11 Nights)
 -- ═══════════════════════════════════════════════════════════════════════════════
-INSERT INTO packages (
+INSERT INTO events (
   title, slug, description, short_description, category, location,
   price, duration, max_participants, available_spots,
   featured, display_order, additional_details
@@ -551,7 +537,7 @@ INSERT INTO packages (
   'Senior Citizens Leisure Package – Transportation Only (12 Days / 11 Nights)',
   'senior-leisure-transport-only-12days',
   '<h2>Comfort-Paced Sri Lanka Experience for Senior Travelers</h2>
-<p>Discover Sri Lanka''s cultural and natural wonders at a comfortable, unhurried pace designed specifically for mature travelers aged 60 and above. This package includes a private senior-friendly vehicle and English-speaking guide. Guests arrange their own accommodation at premium accessible hotels. No over-rushed itineraries — each day features late morning departures, afternoon rest periods, and activities requiring minimal physical exertion.</p>
+<p>Discover Sri Lanka''s cultural and natural wonders at a comfortable, unhurried pace designed for mature travelers aged 60 and above. This package includes a private senior-friendly vehicle and English-speaking guide. Guests arrange their own accommodation at premium accessible hotels. No over-rushed itineraries — each day features late morning departures, afternoon rest periods, and activities requiring minimal physical exertion.</p>
 
 <h3>Itinerary Highlights</h3>
 <ul>
@@ -588,16 +574,16 @@ INSERT INTO packages (
 <li>Less than 7 days: 100% of total booking value</li>
 </ul>',
   'A comfort-paced 12-day / 11-night Sri Lanka transport package for travelers aged 60 and above — senior-friendly vehicle and guide included, guests arrange own accommodation. Unhurried itinerary with late departures and rest periods.',
-  'tour',
+  'TransportationOnly',
   'Sri Lanka',
   0.00,
   '12 Days / 11 Nights',
   8, 8, false, 21,
-  '{"packageType":"Transportation Only","targetAudience":"Senior citizens (60+)","validUntil":"2026-12-31","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
+  '{"targetAudience":"Senior citizens (60+)","validUntil":"2026-12-31","cancellationPolicy":{"30+ days":"No charge","14-29 days":"30% of total booking value","7-13 days":"75% of total booking value","less than 7 days":"100% of total booking value"}}'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- Senior T-Only — Inclusions
-INSERT INTO package_included (package_id, included_item)
+INSERT INTO event_included (event_id, included_item)
 SELECT id, unnest(ARRAY[
   'Private comfortable air-conditioned vehicle with experienced senior-friendly driver',
   'English-speaking guide throughout (other languages on request)',
@@ -608,10 +594,10 @@ SELECT id, unnest(ARRAY[
   'Emergency medical coordination support',
   'Travel insurance guidance and recommendations'
 ])
-FROM packages WHERE slug = 'senior-leisure-transport-only-12days';
+FROM events WHERE slug = 'senior-leisure-transport-only-12days';
 
 -- Senior T-Only — Requirements
-INSERT INTO package_requirements (package_id, requirement)
+INSERT INTO event_requirements (event_id, requirement)
 SELECT id, unnest(ARRAY[
   'Valid passport with at least 6 months validity',
   'Sri Lanka tourist visa (ETA — free for most nationalities, apply online)',
@@ -621,35 +607,35 @@ SELECT id, unnest(ARRAY[
   'Modest attire for temple visits (shoulders and knees covered)',
   'Personal medications and any required medical equipment'
 ])
-FROM packages WHERE slug = 'senior-leisure-transport-only-12days';
+FROM events WHERE slug = 'senior-leisure-transport-only-12days';
 
 -- Senior T-Only — Pricing
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM packages WHERE slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM packages WHERE slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM packages WHERE slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 2, 2, 'Per Person – 2 Passengers (Private Car)', true, 1 FROM events WHERE slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 4, 4, 'Per Person – 4 Passengers (Toyota KDH Van)', false, 2 FROM events WHERE slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'GROUP', 6, 6, 'Per Person – 6 Passengers (Toyota KDH Van)', false, 3 FROM events WHERE slug = 'senior-leisure-transport-only-12days';
 
 -- Senior T-Only — Locations
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Negombo', 'Arrival, traditional welcome, and full rest day for travel recovery. Coastal town with Dutch canals, colonial churches, and beachfront cafés.', 1, '2 Nights', (SELECT id FROM locations WHERE slug = 'negombo' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Sigiriya', 'Ground-level Sigiriya garden visit (no climbing). Sigiriya Museum, Dambulla Cave Temple with rest points, traditional village bullock cart ride.', 2, '2 Nights', (SELECT id FROM locations WHERE slug = 'sigiriya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Kandy', 'Lakeside cultural capital. Temple of the Tooth Relic with seating areas, Peradeniya Botanical Gardens with electric cart option, Kandyan cultural dance (seated).', 3, '2 Nights', (SELECT id FROM locations WHERE slug = 'kandy' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Nuwara Eliya', '"Little England" highland retreat. Cool climate, colonial architecture, Gregory Lake, tea tasting, and a full leisure day at own pace.', 4, '2 Nights', (SELECT id FROM locations WHERE slug = 'nuwara-eliya' LIMIT 1), NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Beach Resort (Bentota or Passikudah)', 'Three nights of complete beach relaxation — own-arranged accessible resort. Calm waters, optional spa, gentle beach walks. Bentota (winter) or Passikudah (summer).', 5, '3 Nights', NULL, NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-only-12days';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Airport Departure', 'Relaxed final morning before transfer to Bandaranaike International Airport with rest stops as needed.', 6, '', NULL, NOW() FROM packages p WHERE p.slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Negombo', 'Arrival, traditional welcome, and full rest day for travel recovery. Coastal town with Dutch canals, colonial churches, and beachfront cafés.', 1, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Sigiriya', 'Ground-level Sigiriya garden visit (no climbing). Sigiriya Museum, Dambulla Cave Temple with rest points, traditional village bullock cart ride.', 2, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Kandy', 'Lakeside cultural capital. Temple of the Tooth Relic with seating areas, Peradeniya Botanical Gardens with electric cart option, Kandyan cultural dance (seated).', 3, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Nuwara Eliya', '"Little England" highland retreat. Cool climate, colonial architecture, Gregory Lake, tea tasting, and a full leisure day at own pace.', 4, '2 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Beach Resort (Bentota or Passikudah)', 'Three nights of complete beach relaxation — own-arranged accessible resort. Calm waters, optional spa, gentle beach walks. Bentota (winter) or Passikudah (summer).', 5, '3 Nights', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-only-12days';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Airport Departure', 'Relaxed final morning before transfer to Bandaranaike International Airport with rest stops as needed.', 6, '', NULL, NOW() FROM events e WHERE e.slug = 'senior-leisure-transport-only-12days';
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- DIGITAL NOMAD PACKAGE 1 — Transportation & Accommodation
+-- DIGITAL NOMAD EVENT 1 — Transportation & Accommodation
 -- ═══════════════════════════════════════════════════════════════════════════════
-INSERT INTO packages (
+INSERT INTO events (
   title, slug, description, short_description, category, location,
   price, duration, max_participants, available_spots,
   featured, display_order, additional_details
@@ -689,16 +675,16 @@ INSERT INTO packages (
 <h3>Getting Started</h3>
 <p>Are you thinking of applying for the Digital Nomad Visa, or would you like to know more about the specific application process? Contact your trusted travel partner Ruklak Travels by email or WhatsApp for personalised assistance.</p>',
   'Live & work from Sri Lanka on the Digital Nomad Visa (USD 500/yr, 12 months). Includes accommodation in nomad hubs and private transport. High-speed internet, co-working spaces, and surf beaches.',
-  'tour',
+  'TransportationAndAccommodation',
   'Sri Lanka',
   0.00,
   'Flexible (1 Week – 1 Year)',
   4, 4, false, 30,
-  '{"packageType":"Transportation and Accommodation","targetAudience":"Digital nomads and remote workers","visaType":"Digital Nomad Visa","visaCost":"USD 500/year","minimumIncome":"USD 2,000/month from outside Sri Lanka","popularHubs":["Weligama","Ahangama","Hiriketiya","Arugam Bay","Colombo"]}'
+  '{"targetAudience":"Digital nomads and remote workers","visaType":"Digital Nomad Visa","visaCost":"USD 500/year","minimumIncome":"USD 2,000/month from outside Sri Lanka","popularHubs":["Weligama","Ahangama","Hiriketiya","Arugam Bay","Colombo"]}'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- Nomad T&A — Inclusions
-INSERT INTO package_included (package_id, included_item)
+INSERT INTO event_included (event_id, included_item)
 SELECT id, unnest(ARRAY[
   'Accommodation in nomad-friendly locations (duration as agreed)',
   'Private vehicle for airport transfer and initial hub exploration',
@@ -706,10 +692,10 @@ SELECT id, unnest(ARRAY[
   'All applicable taxes and VAT',
   'Bottled water during transfers'
 ])
-FROM packages WHERE slug = 'digital-nomad-transport-accommodation';
+FROM events WHERE slug = 'digital-nomad-transport-accommodation';
 
 -- Nomad T&A — Requirements
-INSERT INTO package_requirements (package_id, requirement)
+INSERT INTO event_requirements (event_id, requirement)
 SELECT id, unnest(ARRAY[
   'Valid passport with at least 12 months validity',
   'Proof of remote income of minimum USD 2,000/month from outside Sri Lanka',
@@ -717,25 +703,25 @@ SELECT id, unnest(ARRAY[
   'Laptop and work equipment',
   'Personal travel and health insurance recommended'
 ])
-FROM packages WHERE slug = 'digital-nomad-transport-accommodation';
+FROM events WHERE slug = 'digital-nomad-transport-accommodation';
 
 -- Nomad T&A — Pricing
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'PER_PERSON', 1, 1, 'Per Person (Contact for custom quote)', true, 1 FROM packages WHERE slug = 'digital-nomad-transport-accommodation';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'PER_PERSON', 1, 1, 'Per Person (Contact for custom quote)', true, 1 FROM events WHERE slug = 'digital-nomad-transport-accommodation';
 
 -- Nomad T&A — Locations
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Colombo', 'Sri Lanka''s vibrant capital — excellent co-working spaces, international restaurants, fast fiber internet, and easy connections to the rest of the island.', 1, 'Optional', NULL, NOW() FROM packages p WHERE p.slug = 'digital-nomad-transport-accommodation';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Weligama / Ahangama (South Coast)', 'The premier digital nomad hub — world-class surfing, abundant co-working cafés, co-living spaces with pools, and a thriving international community of remote workers.', 2, 'Flexible', NULL, NOW() FROM packages p WHERE p.slug = 'digital-nomad-transport-accommodation';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Arugam Bay (East Coast)', 'Sri Lanka''s surf capital on the east coast — perfect for summer months, relaxed vibe, growing co-working scene, and stunning bay scenery.', 3, 'Flexible', NULL, NOW() FROM packages p WHERE p.slug = 'digital-nomad-transport-accommodation';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Colombo', 'Sri Lanka''s vibrant capital — excellent co-working spaces, international restaurants, fast fiber internet, and easy connections to the rest of the island.', 1, 'Optional', NULL, NOW() FROM events e WHERE e.slug = 'digital-nomad-transport-accommodation';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Weligama / Ahangama (South Coast)', 'The premier digital nomad hub — world-class surfing, abundant co-working cafés, co-living spaces with pools, and a thriving international community of remote workers.', 2, 'Flexible', NULL, NOW() FROM events e WHERE e.slug = 'digital-nomad-transport-accommodation';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Arugam Bay (East Coast)', 'Sri Lanka''s surf capital on the east coast — perfect for summer months, relaxed vibe, growing co-working scene, and stunning bay scenery.', 3, 'Flexible', NULL, NOW() FROM events e WHERE e.slug = 'digital-nomad-transport-accommodation';
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- DIGITAL NOMAD PACKAGE 2 — Transportation Only
+-- DIGITAL NOMAD EVENT 2 — Transportation Only
 -- ═══════════════════════════════════════════════════════════════════════════════
-INSERT INTO packages (
+INSERT INTO events (
   title, slug, description, short_description, category, location,
   price, duration, max_participants, available_spots,
   featured, display_order, additional_details
@@ -769,26 +755,26 @@ INSERT INTO packages (
 
 <p>Contact your trusted travel partner Ruklak Travels by email or WhatsApp for personalised assistance with visa application, co-working recommendations, and transport planning.</p>',
   'Transport package for digital nomads on the Sri Lanka Nomad Visa (USD 500/year). Private vehicle between hubs — Colombo, Weligama, Hiriketiya, Arugam Bay. Guests arrange their own co-living or accommodation.',
-  'tour',
+  'TransportationOnly',
   'Sri Lanka',
   0.00,
   'Flexible (1 Week – 1 Year)',
   4, 4, false, 31,
-  '{"packageType":"Transportation Only","targetAudience":"Digital nomads and remote workers","visaType":"Digital Nomad Visa","visaCost":"USD 500/year","minimumIncome":"USD 2,000/month from outside Sri Lanka"}'
+  '{"targetAudience":"Digital nomads and remote workers","visaType":"Digital Nomad Visa","visaCost":"USD 500/year","minimumIncome":"USD 2,000/month from outside Sri Lanka"}'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- Nomad T-Only — Inclusions
-INSERT INTO package_included (package_id, included_item)
+INSERT INTO event_included (event_id, included_item)
 SELECT id, unnest(ARRAY[
   'Private vehicle for airport transfer and inter-hub travel',
   'English-speaking local guide for logistics and orientation',
   'All applicable taxes and VAT',
   'Bottled water during transfers'
 ])
-FROM packages WHERE slug = 'digital-nomad-transport-only';
+FROM events WHERE slug = 'digital-nomad-transport-only';
 
 -- Nomad T-Only — Requirements
-INSERT INTO package_requirements (package_id, requirement)
+INSERT INTO event_requirements (event_id, requirement)
 SELECT id, unnest(ARRAY[
   'Valid passport with at least 12 months validity',
   'Proof of remote income of minimum USD 2,000/month from outside Sri Lanka',
@@ -796,16 +782,16 @@ SELECT id, unnest(ARRAY[
   'Laptop and work equipment',
   'Personal travel and health insurance recommended'
 ])
-FROM packages WHERE slug = 'digital-nomad-transport-only';
+FROM events WHERE slug = 'digital-nomad-transport-only';
 
 -- Nomad T-Only — Pricing
-INSERT INTO package_pricing (package_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
-SELECT id, 'USD', 0.00, 'PER_PERSON', 1, 1, 'Per Person (Contact for custom quote)', true, 1 FROM packages WHERE slug = 'digital-nomad-transport-only';
+INSERT INTO event_pricing (event_id, currency_code, amount, pricing_type, group_size_min, group_size_max, label, is_primary, display_order)
+SELECT id, 'USD', 0.00, 'PER_PERSON', 1, 1, 'Per Person (Contact for custom quote)', true, 1 FROM events WHERE slug = 'digital-nomad-transport-only';
 
 -- Nomad T-Only — Locations
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Colombo', 'Capital hub with fast internet, international co-working offices, and easy island-wide connections.', 1, 'Optional', NULL, NOW() FROM packages p WHERE p.slug = 'digital-nomad-transport-only';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Weligama / Ahangama (South Coast)', 'Premier nomad hub — surf, co-working cafés, co-living spaces, and thriving international community.', 2, 'Flexible', NULL, NOW() FROM packages p WHERE p.slug = 'digital-nomad-transport-only';
-INSERT INTO package_locations (package_id, name, description, visit_order, duration_here, location_ref_id, created_at)
-SELECT p.id, 'Arugam Bay (East Coast)', 'East coast surf paradise — ideal for summer months with a growing remote-work community.', 3, 'Flexible', NULL, NOW() FROM packages p WHERE p.slug = 'digital-nomad-transport-only';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Colombo', 'Capital hub with fast internet, international co-working offices, and easy island-wide connections.', 1, 'Optional', NULL, NOW() FROM events e WHERE e.slug = 'digital-nomad-transport-only';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Weligama / Ahangama (South Coast)', 'Premier nomad hub — surf, co-working cafés, co-living spaces, and thriving international community.', 2, 'Flexible', NULL, NOW() FROM events e WHERE e.slug = 'digital-nomad-transport-only';
+INSERT INTO event_locations (event_id, name, description, visit_order, duration_here, location_ref_id, created_at)
+SELECT e.id, 'Arugam Bay (East Coast)', 'East coast surf paradise — ideal for summer months with a growing remote-work community.', 3, 'Flexible', NULL, NOW() FROM events e WHERE e.slug = 'digital-nomad-transport-only';
