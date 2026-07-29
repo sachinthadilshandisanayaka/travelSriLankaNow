@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router, NavigationEnd } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, filter } from 'rxjs/operators';
 
 export interface Language {
   code: string;
@@ -21,10 +22,17 @@ export const LANGUAGES: Language[] = [
   { code: 'es', label: 'Spanish',    nativeLabel: 'Español',    flag: '🇪🇸' },
   { code: 'it', label: 'Italian',    nativeLabel: 'Italiano',   flag: '🇮🇹' },
   { code: 'pt', label: 'Portuguese', nativeLabel: 'Português',  flag: '🇧🇷' },
+  { code: 'nl', label: 'Dutch',      nativeLabel: 'Nederlands', flag: '🇳🇱' },
+  { code: 'pl', label: 'Polish',     nativeLabel: 'Polski',     flag: '🇵🇱' },
+  { code: 'sv', label: 'Swedish',    nativeLabel: 'Svenska',    flag: '🇸🇪' },
+  { code: 'no', label: 'Norwegian',  nativeLabel: 'Norsk',      flag: '🇳🇴' },
+  { code: 'da', label: 'Danish',     nativeLabel: 'Dansk',      flag: '🇩🇰' },
+  { code: 'el', label: 'Greek',      nativeLabel: 'Ελληνικά',   flag: '🇬🇷' },
+  { code: 'tr', label: 'Turkish',    nativeLabel: 'Türkçe',     flag: '🇹🇷' },
+  { code: 'uk', label: 'Ukrainian',  nativeLabel: 'Українська', flag: '🇺🇦' },
   { code: 'zh', label: 'Chinese',    nativeLabel: '中文',        flag: '🇨🇳' },
   { code: 'ja', label: 'Japanese',   nativeLabel: '日本語',      flag: '🇯🇵' },
   { code: 'ko', label: 'Korean',     nativeLabel: '한국어',      flag: '🇰🇷' },
-  { code: 'ar', label: 'Arabic',     nativeLabel: 'العربية',    flag: '🇸🇦', dir: 'rtl' }
 ];
 
 const STORAGE_KEY = 'tsln_language';
@@ -58,7 +66,14 @@ const EN_TRANSLATIONS: { [key: string]: string } = {
 };
 const BROWSER_LANG_MAP: { [key: string]: string } = {
   si: 'si', ta: 'ta', de: 'de', fr: 'fr', ru: 'ru',
-  es: 'es', it: 'it', pt: 'pt', zh: 'zh', ja: 'ja', ko: 'ko', ar: 'ar'
+  es: 'es', it: 'it', pt: 'pt', nl: 'nl', pl: 'pl',
+  sv: 'sv', no: 'no', da: 'da', el: 'el', tr: 'tr',
+  uk: 'uk', zh: 'zh', ja: 'ja', ko: 'ko'
+};
+
+// Our language codes → Google Translate codes (only overrides that differ)
+const GT_CODE_MAP: { [key: string]: string } = {
+  zh: 'zh-CN'
 };
 
 @Injectable({ providedIn: 'root' })
@@ -68,17 +83,27 @@ export class LanguageService {
   private currentLangSubject = new BehaviorSubject<string>(this.getInitialLang());
   currentLang$ = this.currentLangSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     const lang = this.currentLang;
     if (lang === 'en') {
-      // English is already embedded — emit immediately, no HTTP round-trip needed.
       this.currentLangSubject.next(lang);
     } else {
-      // For other languages load the JSON, then notify.
       this.loadTranslations(lang).subscribe(() => {
         this.currentLangSubject.next(lang);
       });
+      // Apply Google Translate on page load for the saved language.
+      // GT widget may not be ready yet — triggerGT retries until the select appears.
+      setTimeout(() => this.triggerGT(GT_CODE_MAP[lang] || lang), 800);
     }
+
+    // Re-apply Google Translate after every Angular route change so newly rendered
+    // content gets translated (Angular re-renders DOM; GT doesn't know about it).
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+      const current = this.currentLang;
+      if (current !== 'en') {
+        setTimeout(() => this.triggerGT(GT_CODE_MAP[current] || current), 500);
+      }
+    });
   }
 
   get currentLang(): string {
@@ -101,6 +126,11 @@ export class LanguageService {
       document.documentElement.dir  = lang?.dir || 'ltr';
       document.documentElement.lang = code;
       this.currentLangSubject.next(code);
+      if (code === 'en') {
+        this.restoreGT();
+      } else {
+        this.triggerGT(GT_CODE_MAP[code] || code);
+      }
     };
     if (code === 'en') {
       this.translations = { ...EN_TRANSLATIONS };
@@ -108,6 +138,26 @@ export class LanguageService {
     } else {
       this.loadTranslations(code).subscribe(() => applyLang());
     }
+  }
+
+  private triggerGT(gtCode: string, attempt = 0): void {
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+    if (select) {
+      select.value = gtCode;
+      select.dispatchEvent(new Event('change'));
+    } else if (attempt < 20) {
+      // GT widget not ready yet — retry every 300 ms (up to 6 s total)
+      setTimeout(() => this.triggerGT(gtCode, attempt + 1), 300);
+    }
+  }
+
+  private restoreGT(): void {
+    // GT rewrites the entire DOM — there is no clean programmatic undo.
+    // The only reliable restore is: clear the googtrans cookie, then reload.
+    // localStorage already holds 'en' at this point, so the reload starts fresh in English.
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${location.hostname}`;
+    location.reload();
   }
 
   translate(key: string): string {
