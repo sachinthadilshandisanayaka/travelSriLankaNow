@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/events/book").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/nav-booking-config/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/booking-form-fields/**").permitAll()
 
                         // Admin endpoints - require ADMIN role
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
