@@ -119,3 +119,14 @@ select option {
   background-color: #ffffff !important;
   color: #374151 !important;
 }
+
+// ─── Google Translate: suppress all default UI ────────────────────────────────
+// GT injects a banner iframe + a gadget div — both hidden; we drive it via JS.
+.goog-te-banner-frame,
+.goog-te-menu-frame    { display: none !important; }
+.goog-te-gadget        { display: none !important; }
+#google_translate_element { display: none !important; }
+// GT stylesheet sets body.translated-ltr { top: Xpx } to make room for the banner.
+// Since the banner is hidden, cancel that offset here.
+body.translated-ltr,
+body.translated-rtl    { top: 0 !important; }
