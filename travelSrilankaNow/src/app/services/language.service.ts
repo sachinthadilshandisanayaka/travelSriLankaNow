@@ -143,14 +143,12 @@ export class LanguageService {
   }
 
   private restoreGT(): void {
-    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
-    if (select && select.value) {
-      select.value = '';
-      select.dispatchEvent(new Event('change'));
-    }
-    // Clear GT cookie so a subsequent page reload also shows English
+    // GT rewrites the entire DOM — there is no clean programmatic undo.
+    // The only reliable restore is: clear the googtrans cookie, then reload.
+    // localStorage already holds 'en' at this point, so the reload starts fresh in English.
     document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
     document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${location.hostname}`;
+    location.reload();
   }
 
   translate(key: string): string {
