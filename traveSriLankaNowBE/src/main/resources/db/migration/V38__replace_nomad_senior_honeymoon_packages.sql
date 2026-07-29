@@ -141,7 +141,7 @@ INSERT INTO packages (
 </ul>
 
 <p><em>Prices are valid until 31 October 2026. Prices may change due to fuel or tax adjustments.</em></p>',
-  'An 11-day romantic honeymoon journey through Sri Lanka — colonial Negombo, ancient Sigiriya & Polonnaruwa, cultural Kandy, misty highlands of Hatton & Nuwara Eliya, scenic Haputale, and the pristine beaches of Bentota and Galle. 4-star accommodation with breakfast and dinner included.',
+  '11-day romantic honeymoon: Negombo, Sigiriya, Polonnaruwa, Kandy, Hatton, Nuwara Eliya, Haputale, Bentota & Galle coast. 4-star hotels with breakfast and dinner. Private vehicle and chauffeur guide.',
   'tour',
   'Sri Lanka',
   0.00,
@@ -478,7 +478,7 @@ INSERT INTO packages (
 <li>7–13 days: 75% of total booking value</li>
 <li>Less than 7 days: 100% of total booking value</li>
 </ul>',
-  'A comfort-paced 12-day / 11-night Sri Lanka experience designed specifically for travelers aged 60 and above — unhurried itinerary, late morning departures, afternoon rest periods, accessible activities, and medical support coordination. Full board with all meals included.',
+  '12-day / 11-night comfort-paced Sri Lanka tour for travelers aged 60+. Unhurried pace, late departures, rest periods, accessible activities, medical support. Full board and premium hotel accommodation.',
   'tour',
   'Sri Lanka',
   0.00,
@@ -688,7 +688,7 @@ INSERT INTO packages (
 
 <h3>Getting Started</h3>
 <p>Are you thinking of applying for the Digital Nomad Visa, or would you like to know more about the specific application process? Contact your trusted travel partner Ruklak Travels by email or WhatsApp for personalised assistance.</p>',
-  'Live and work from Sri Lanka on the official Digital Nomad Visa (USD 500/year, up to 12 months). Package includes accommodation in nomad-friendly hubs and private transport. High-speed internet, co-working spaces, surf beaches, and a thriving remote-work community.',
+  'Live & work from Sri Lanka on the Digital Nomad Visa (USD 500/yr, 12 months). Includes accommodation in nomad hubs and private transport. High-speed internet, co-working spaces, and surf beaches.',
   'tour',
   'Sri Lanka',
   0.00,
