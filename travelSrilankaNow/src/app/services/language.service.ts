@@ -22,10 +22,17 @@ export const LANGUAGES: Language[] = [
   { code: 'es', label: 'Spanish',    nativeLabel: 'Español',    flag: '🇪🇸' },
   { code: 'it', label: 'Italian',    nativeLabel: 'Italiano',   flag: '🇮🇹' },
   { code: 'pt', label: 'Portuguese', nativeLabel: 'Português',  flag: '🇧🇷' },
+  { code: 'nl', label: 'Dutch',      nativeLabel: 'Nederlands', flag: '🇳🇱' },
+  { code: 'pl', label: 'Polish',     nativeLabel: 'Polski',     flag: '🇵🇱' },
+  { code: 'sv', label: 'Swedish',    nativeLabel: 'Svenska',    flag: '🇸🇪' },
+  { code: 'no', label: 'Norwegian',  nativeLabel: 'Norsk',      flag: '🇳🇴' },
+  { code: 'da', label: 'Danish',     nativeLabel: 'Dansk',      flag: '🇩🇰' },
+  { code: 'el', label: 'Greek',      nativeLabel: 'Ελληνικά',   flag: '🇬🇷' },
+  { code: 'tr', label: 'Turkish',    nativeLabel: 'Türkçe',     flag: '🇹🇷' },
+  { code: 'uk', label: 'Ukrainian',  nativeLabel: 'Українська', flag: '🇺🇦' },
   { code: 'zh', label: 'Chinese',    nativeLabel: '中文',        flag: '🇨🇳' },
   { code: 'ja', label: 'Japanese',   nativeLabel: '日本語',      flag: '🇯🇵' },
   { code: 'ko', label: 'Korean',     nativeLabel: '한국어',      flag: '🇰🇷' },
-  { code: 'ar', label: 'Arabic',     nativeLabel: 'العربية',    flag: '🇸🇦', dir: 'rtl' }
 ];
 
 const STORAGE_KEY = 'tsln_language';
@@ -59,7 +66,9 @@ const EN_TRANSLATIONS: { [key: string]: string } = {
 };
 const BROWSER_LANG_MAP: { [key: string]: string } = {
   si: 'si', ta: 'ta', de: 'de', fr: 'fr', ru: 'ru',
-  es: 'es', it: 'it', pt: 'pt', zh: 'zh', ja: 'ja', ko: 'ko', ar: 'ar'
+  es: 'es', it: 'it', pt: 'pt', nl: 'nl', pl: 'pl',
+  sv: 'sv', no: 'no', da: 'da', el: 'el', tr: 'tr',
+  uk: 'uk', zh: 'zh', ja: 'ja', ko: 'ko'
 };
 
 // Our language codes → Google Translate codes (only overrides that differ)
