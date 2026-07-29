@@ -30,6 +30,7 @@ export const LANGUAGES: Language[] = [
   { code: 'el', label: 'Greek',      nativeLabel: 'Ελληνικά',   flag: '🇬🇷' },
   { code: 'tr', label: 'Turkish',    nativeLabel: 'Türkçe',     flag: '🇹🇷' },
   { code: 'uk', label: 'Ukrainian',  nativeLabel: 'Українська', flag: '🇺🇦' },
+  { code: 'ka', label: 'Georgian',   nativeLabel: 'ქართული',    flag: '🇬🇪' },
   { code: 'zh', label: 'Chinese',    nativeLabel: '中文',        flag: '🇨🇳' },
   { code: 'ja', label: 'Japanese',   nativeLabel: '日本語',      flag: '🇯🇵' },
   { code: 'ko', label: 'Korean',     nativeLabel: '한국어',      flag: '🇰🇷' },
