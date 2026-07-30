@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { PackageService } from '../../services/package.service';
 import { EventService } from '../../services/event.service';
 import { NavBookingConfigService } from '../../services/nav-booking-config.service';
@@ -125,7 +126,7 @@ export class BookTourComponent implements OnInit {
     this.loading = true;
     forkJoin({
       packages: this.packageService.getAllPackages(),
-      events: this.eventService.getAllEvents()
+      events: this.eventService.getEventsPaginated(0, 500).pipe(map(r => r.content))
     }).subscribe({
       next: ({ packages, events }) => {
         const packageTours: UnifiedTour[] = (packages || []).map(p => ({
@@ -138,7 +139,14 @@ export class BookTourComponent implements OnInit {
           location: e.location, duration: e.duration, price: e.price, maxParticipants: e.maxParticipants,
           availableSpots: e.availableSpots, dates: e.dates || [], pricings: e.pricings || []
         }));
-        this.tours = [...packageTours, ...eventTours];
+        const isDayFn = (c: string) => ['DayTours', 'DaysTour', 'TourWithOutAccommodation'].includes(c);
+        this.tours = [...packageTours, ...eventTours]
+          .sort((a, b) => {
+            const aDay = isDayFn(a.category) ? 0 : 1;
+            const bDay = isDayFn(b.category) ? 0 : 1;
+            if (aDay !== bDay) return aDay - bDay;
+            return a.title.localeCompare(b.title);
+          });
         this.applyFilters();
         this.loading = false;
       },
