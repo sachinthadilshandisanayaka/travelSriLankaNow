@@ -271,6 +271,63 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.book-tour-categories {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1px solid $light-gray;
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $warm-gray;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.3rem 0.8rem;
+  border: 1.5px solid $light-gray;
+  border-radius: $radius-full;
+  background: $white;
+  color: $warm-gray;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover:not(.category-chip--active) {
+    border-color: var(--primary-sky);
+    color: var(--primary-navy);
+    background: var(--primary-sky-a08);
+  }
+
+  &--active {
+    border-color: var(--primary-navy);
+    background: var(--primary-navy);
+    color: $white;
+  }
+
+  &__count {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    opacity: 0.75;
+  }
+}
+
 .book-tour-type-select {
   padding: 0.85rem 1rem;
   border: 1.5px solid $light-gray;
