@@ -77,4 +77,10 @@ public class AdminMasterDataController {
     public ResponseEntity<MasterData> toggleActive(@PathVariable Long id) {
         return ResponseEntity.ok(masterDataService.toggleActive(id));
     }
+
+    @PatchMapping("/{id}/toggle-visible")
+    @PreAuthorize("hasAuthority('MASTER_DATA:UPDATE')")
+    public ResponseEntity<MasterData> toggleVisibleOnPublicPage(@PathVariable Long id) {
+        return ResponseEntity.ok(masterDataService.toggleVisibleOnPublicPage(id));
+    }
 }

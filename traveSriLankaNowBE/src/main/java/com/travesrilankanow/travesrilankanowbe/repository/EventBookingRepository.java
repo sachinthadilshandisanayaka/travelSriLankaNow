@@ -51,6 +51,10 @@ public interface EventBookingRepository extends JpaRepository<EventBooking, Long
     long countActiveByTypeAndPlaceAndDate(@Param("type") String type, @Param("entityId") Long entityId,
                                           @Param("date") LocalDate date, @Param("cancelled") EventBooking.BookingStatus cancelled);
 
+    @Query("SELECT COUNT(b) FROM EventBooking b WHERE b.bookingType = :type AND b.packageId = :entityId AND b.requestedDate = :date AND b.status <> :cancelled")
+    long countActiveByTypeAndPackageAndDate(@Param("type") String type, @Param("entityId") Long entityId,
+                                            @Param("date") LocalDate date, @Param("cancelled") EventBooking.BookingStatus cancelled);
+
     // ── Grouped counts per date (for blocked-dates API) ───────────────────────
 
     @Query("SELECT b.requestedDate, COUNT(b) FROM EventBooking b WHERE b.bookingType = :type AND b.requestedDate BETWEEN :from AND :to AND b.status <> :cancelled GROUP BY b.requestedDate")
@@ -66,6 +70,11 @@ public interface EventBookingRepository extends JpaRepository<EventBooking, Long
     List<Object[]> countByTypeAndPlaceAndDateRange(@Param("type") String type, @Param("entityId") Long entityId,
                                                    @Param("from") LocalDate from, @Param("to") LocalDate to,
                                                    @Param("cancelled") EventBooking.BookingStatus cancelled);
+
+    @Query("SELECT b.requestedDate, COUNT(b) FROM EventBooking b WHERE b.bookingType = :type AND b.packageId = :entityId AND b.requestedDate BETWEEN :from AND :to AND b.status <> :cancelled GROUP BY b.requestedDate")
+    List<Object[]> countByTypeAndPackageAndDateRange(@Param("type") String type, @Param("entityId") Long entityId,
+                                                     @Param("from") LocalDate from, @Param("to") LocalDate to,
+                                                     @Param("cancelled") EventBooking.BookingStatus cancelled);
 
     @Query("SELECT b FROM EventBooking b WHERE " +
            "(b.bookingDate BETWEEN :from AND :to) OR " +

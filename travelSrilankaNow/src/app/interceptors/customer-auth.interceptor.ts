@@ -30,7 +30,7 @@ export class CustomerAuthInterceptor implements HttpInterceptor {
           this.authService.logout();
           this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url, reason: 'session-expired' } });
         }
-        return throwError(() => error);
+        return throwError(error);
       })
     );
   }

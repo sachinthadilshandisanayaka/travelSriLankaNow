@@ -344,8 +344,12 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   }
 
   // ===== Booking =====
+  // Whether login is required before booking is governed entirely by this
+  // route's NavBookingConfig (requireAuth), set under Booking Settings ->
+  // Nav Booking Rules — not hardcoded here, so an admin can change it for
+  // Long Tours without a code change.
   openBookingModal(): void {
-    if (!this.currentUser) {
+    if (this.navBookingConfig?.requireAuth && !this.currentUser) {
       this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       return;
     }

@@ -3,10 +3,13 @@ package com.travesrilankanow.travesrilankanowbe.controller;
 import com.travesrilankanow.travesrilankanowbe.dto.AuthenticationRequest;
 import com.travesrilankanow.travesrilankanowbe.dto.AuthenticationResponse;
 import com.travesrilankanow.travesrilankanowbe.dto.CustomerRegistrationRequest;
+import com.travesrilankanow.travesrilankanowbe.dto.ForgotPasswordRequest;
+import com.travesrilankanow.travesrilankanowbe.dto.ResetPasswordRequest;
 import com.travesrilankanow.travesrilankanowbe.entity.User;
 import com.travesrilankanow.travesrilankanowbe.repository.UserRepository;
 import com.travesrilankanow.travesrilankanowbe.security.JwtService;
 import com.travesrilankanow.travesrilankanowbe.service.AuthenticationService;
+import com.travesrilankanow.travesrilankanowbe.service.PasswordResetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,7 @@ public class CustomerAuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody CustomerRegistrationRequest request) {
@@ -72,5 +76,17 @@ public class CustomerAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        passwordResetService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(Map.of("message", "If an account exists for that email, a reset code has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Password reset successful"));
     }
 }

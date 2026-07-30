@@ -32,9 +32,11 @@ public class MasterDataService {
         return masterDataRepository.findByTypeOrderBySortOrderAsc(type);
     }
 
+    // "Active" here means shown on the public site at all: usable AND not
+    // hidden from the Browse by Category grid. See MasterData.visibleOnPublicPage.
     @Cacheable(cacheNames = CacheConfig.MASTER_DATA_CACHE, key = "'active_' + #type")
     public List<MasterData> getActiveByType(MasterDataType type) {
-        return masterDataRepository.findByTypeAndIsActiveTrueOrderBySortOrderAsc(type);
+        return masterDataRepository.findByTypeAndIsActiveTrueAndVisibleOnPublicPageTrueOrderBySortOrderAsc(type);
     }
 
     public Page<MasterData> getByTypePaginated(MasterDataType type, String search, Pageable pageable) {
@@ -42,7 +44,7 @@ public class MasterDataService {
     }
 
     public Page<MasterData> getActiveByTypePaginated(MasterDataType type, String search, Pageable pageable) {
-        return masterDataRepository.findByTypeAndIsActiveTrueAndSearch(type, search, pageable);
+        return masterDataRepository.findByTypeAndIsActiveTrueAndVisibleOnPublicPageTrueAndSearch(type, search, pageable);
     }
 
     public MasterData getById(Long id) {
@@ -82,6 +84,9 @@ public class MasterDataService {
         existing.setDescription(masterData.getDescription());
         existing.setSortOrder(masterData.getSortOrder());
         existing.setIsActive(masterData.getIsActive());
+        if (masterData.getVisibleOnPublicPage() != null) {
+            existing.setVisibleOnPublicPage(masterData.getVisibleOnPublicPage());
+        }
         existing.setColor(masterData.getColor());
         existing.setIcon(masterData.getIcon());
 
@@ -105,6 +110,17 @@ public class MasterDataService {
         existing.setIsActive(!existing.getIsActive());
         MasterData updated = masterDataRepository.save(existing);
         log.info("Master data {} status changed to: {}", updated.getCode(), updated.getIsActive() ? "active" : "inactive");
+        return updated;
+    }
+
+    /** Toggles Browse-by-Category public visibility only — deliberately leaves isActive untouched. */
+    @Transactional
+    @CacheEvict(cacheNames = CacheConfig.MASTER_DATA_CACHE, allEntries = true)
+    public MasterData toggleVisibleOnPublicPage(Long id) {
+        MasterData existing = getById(id);
+        existing.setVisibleOnPublicPage(!existing.getVisibleOnPublicPage());
+        MasterData updated = masterDataRepository.save(existing);
+        log.info("Master data {} public-page visibility changed to: {}", updated.getCode(), updated.getVisibleOnPublicPage());
         return updated;
     }
 

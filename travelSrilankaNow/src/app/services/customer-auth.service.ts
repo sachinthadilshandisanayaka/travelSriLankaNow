@@ -57,6 +57,14 @@ export class CustomerAuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiBase}/auth/forgot-password`, { email });
+  }
+
+  resetPassword(email: string, otp: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiBase}/auth/reset-password`, { email, otp, newPassword });
+  }
+
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
