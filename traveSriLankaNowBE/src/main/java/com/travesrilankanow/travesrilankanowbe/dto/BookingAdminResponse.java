@@ -20,6 +20,17 @@ public class BookingAdminResponse {
     private String eventTitle;
     private Long placeId;
     private String placeName;
+    private Long packageId;
+    private String packageName;
+
+    /**
+     * Always-populated, type-agnostic title/label — the frontend should read
+     * these instead of eventTitle/placeName/packageName so a future bookable
+     * type needs no frontend changes at all to display correctly.
+     */
+    private String displayTitle;
+    private String displayTypeLabel;
+
     private Long customerId;
     private String participantName;
     private String email;
@@ -39,20 +50,30 @@ public class BookingAdminResponse {
     private LocalDateTime updatedDate;
     private Map<String, Object> customFields;
 
-    public static BookingAdminResponse from(EventBooking b, String displayTitle) {
+    public static BookingAdminResponse from(EventBooking b, String displayTitle, String displayTypeLabel) {
         BookingAdminResponse r = new BookingAdminResponse();
         r.setId(b.getId());
         r.setBookingReference(b.getBookingReference());
         r.setBookingType(b.getBookingType() != null ? b.getBookingType() : EventBooking.BookingTypes.EVENT);
         r.setEventId(b.getEventId());
         r.setPlaceId(b.getPlaceId());
+        r.setPackageId(b.getPackageId());
+        // Legacy type-specific fields — kept for backward compatibility, superseded by displayTitle/displayTypeLabel below.
         if (EventBooking.BookingTypes.PLACE.equals(r.getBookingType())) {
             r.setPlaceName(displayTitle);
             r.setEventTitle(null);
+            r.setPackageName(null);
+        } else if (EventBooking.BookingTypes.PACKAGE.equals(r.getBookingType())) {
+            r.setPackageName(displayTitle);
+            r.setEventTitle(null);
+            r.setPlaceName(null);
         } else {
             r.setEventTitle(displayTitle);
             r.setPlaceName(null);
+            r.setPackageName(null);
         }
+        r.setDisplayTitle(displayTitle);
+        r.setDisplayTypeLabel(displayTypeLabel);
         r.setCustomerId(b.getCustomerId());
         r.setParticipantName(b.getParticipantName());
         r.setEmail(b.getEmail());

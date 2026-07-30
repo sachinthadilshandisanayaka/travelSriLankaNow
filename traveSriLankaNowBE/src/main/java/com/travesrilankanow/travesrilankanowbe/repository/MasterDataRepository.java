@@ -19,6 +19,8 @@ public interface MasterDataRepository extends JpaRepository<MasterData, Long> {
 
     List<MasterData> findByTypeAndIsActiveTrueOrderBySortOrderAsc(MasterDataType type);
 
+    List<MasterData> findByTypeAndIsActiveTrueAndVisibleOnPublicPageTrueOrderBySortOrderAsc(MasterDataType type);
+
     Optional<MasterData> findByTypeAndCode(MasterDataType type, String code);
 
     boolean existsByTypeAndCode(MasterDataType type, String code);
@@ -37,6 +39,13 @@ public interface MasterDataRepository extends JpaRepository<MasterData, Long> {
     @Query("SELECT m FROM MasterData m WHERE m.type = :type AND m.isActive = true " +
            "AND (:search IS NULL OR :search = '' OR LOWER(m.displayName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(m.code) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<MasterData> findByTypeAndIsActiveTrueAndSearch(
+            @Param("type") MasterDataType type,
+            @Param("search") String search,
+            Pageable pageable);
+
+    @Query("SELECT m FROM MasterData m WHERE m.type = :type AND m.isActive = true AND m.visibleOnPublicPage = true " +
+           "AND (:search IS NULL OR :search = '' OR LOWER(m.displayName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(m.code) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<MasterData> findByTypeAndIsActiveTrueAndVisibleOnPublicPageTrueAndSearch(
             @Param("type") MasterDataType type,
             @Param("search") String search,
             Pageable pageable);

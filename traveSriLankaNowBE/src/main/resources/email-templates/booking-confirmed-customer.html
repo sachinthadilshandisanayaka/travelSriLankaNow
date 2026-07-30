@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<body style="margin:0;padding:0;background:#F8FAFC;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:12px;overflow:hidden;">
+          <tr>
+            <td style="background:#15803D;padding:28px 32px;">
+              <h1 style="margin:0;color:#FFFFFF;font-size:20px;">Booking Confirmed 🎉</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;color:#2A2826;">
+              <p style="margin:0 0 16px;">Hi {{participantName}},</p>
+              <p style="margin:0 0 16px;">Good news — your booking has been <strong>confirmed</strong>. Here are your final details:</p>
+              <table width="100%" cellpadding="8" cellspacing="0" style="background:#F8FAFC;border-radius:8px;margin:16px 0;">
+                <tr><td style="color:#6B6762;">Reference</td><td style="text-align:right;font-weight:bold;">{{bookingReference}}</td></tr>
+                <tr><td style="color:#6B6762;">Booking</td><td style="text-align:right;">{{itemTitle}}</td></tr>
+                <tr><td style="color:#6B6762;">Date</td><td style="text-align:right;">{{requestedDate}}</td></tr>
+                <tr><td style="color:#6B6762;">Guests</td><td style="text-align:right;">{{numberOfPeople}}</td></tr>
+                <tr><td style="color:#6B6762;">Total</td><td style="text-align:right;font-weight:bold;">${{totalPrice}}</td></tr>
+              </table>
+              <p style="margin:16px 0 0;color:#6B6762;font-size:14px;">We look forward to having you! If anything about your booking needs to change, just reply to this email or reach out to us directly.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px;background:#F8FAFC;color:#B8B5B1;font-size:12px;text-align:center;">
+              Roam Lanka Travels
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

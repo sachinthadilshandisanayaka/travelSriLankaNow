@@ -21,10 +21,13 @@ public class CacheConfig {
 
     public static final String MASTER_DATA_CACHE = "masterData";
     public static final String SITE_SETTINGS_CACHE = "siteSettings";
+    public static final String EMAIL_CONFIG_CACHE = "emailConfig";
+    public static final String EMAIL_TEMPLATE_CACHE = "emailTemplates";
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager manager = new CaffeineCacheManager(MASTER_DATA_CACHE, SITE_SETTINGS_CACHE);
+        CaffeineCacheManager manager = new CaffeineCacheManager(
+                MASTER_DATA_CACHE, SITE_SETTINGS_CACHE, EMAIL_CONFIG_CACHE, EMAIL_TEMPLATE_CACHE);
         manager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .maximumSize(500));

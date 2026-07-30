@@ -13,6 +13,7 @@ import { AdminGalleryComponent } from './components/admin-gallery/admin-gallery.
 import { ImageUploadComponent } from './components/image-upload/image-upload.component';
 import { AdminMasterDataComponent } from './components/admin-master-data/admin-master-data.component';
 import { AdminSiteSettingsComponent } from './components/admin-site-settings/admin-site-settings.component';
+import { AdminEmailSettingsComponent } from './components/admin-email-settings/admin-email-settings.component';
 import { AdminItemOrderComponent } from './components/admin-item-order/admin-item-order.component';
 import { AdminHeroSlidesComponent } from './components/admin-hero-slides/admin-hero-slides.component';
 import { PageHeaderBackgroundsComponent } from './components/page-header-backgrounds/page-header-backgrounds.component';
@@ -63,6 +64,7 @@ import { SharedModule } from '../shared/shared.module';
     ImageUploadComponent,
     AdminMasterDataComponent,
     AdminSiteSettingsComponent,
+    AdminEmailSettingsComponent,
     AdminItemOrderComponent,
     AdminHeroSlidesComponent,
     PageHeaderBackgroundsComponent,
