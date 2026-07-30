@@ -52,7 +52,7 @@
                   <div class="book-tour-dropdown__item-body">
                     <span class="book-tour-dropdown__item-title">{{ t.title }}</span>
                     <span class="book-tour-dropdown__item-meta">
-                      <span class="book-tour-dropdown__item-badge" [class.book-tour-dropdown__item-badge--event]="t.type === 'EVENT'">{{ typeLabel(t.type) }}</span>
+                      <span class="book-tour-dropdown__item-badge" [class.book-tour-dropdown__item-badge--event]="!isDayCategory(t.category)">{{ typeLabel(t.category) }}</span>
                       <span *ngIf="t.location">📍 {{ t.location }}</span>
                     </span>
                   </div>
@@ -68,8 +68,8 @@
 
           <select class="book-tour-type-select" [value]="typeFilter" (change)="setTypeFilter($event.target.value)">
             <option value="ALL">All Tours</option>
-            <option value="PACKAGE">Day Tours</option>
-            <option value="EVENT">Long Tours</option>
+            <option value="DAY">Day Tours</option>
+            <option value="LONG">Long Tours</option>
           </select>
         </div>
       </div>
@@ -78,7 +78,7 @@
       <div class="book-tour-summary" *ngIf="selectedTour">
         <img *ngIf="selectedTour.imageUrl" [src]="selectedTour.imageUrl" [alt]="selectedTour.title" class="book-tour-summary__image">
         <div class="book-tour-summary__body">
-          <span class="book-tour-summary__badge">{{ getCategoryIcon(selectedTour.category) }} {{ typeLabel(selectedTour.type) }}</span>
+          <span class="book-tour-summary__badge">{{ getCategoryIcon(selectedTour.category) }} {{ typeLabel(selectedTour.category) }}</span>
           <h2>{{ selectedTour.title }}</h2>
           <div class="book-tour-summary__meta">
             <span *ngIf="selectedTour.location">📍 {{ selectedTour.location }}</span>
