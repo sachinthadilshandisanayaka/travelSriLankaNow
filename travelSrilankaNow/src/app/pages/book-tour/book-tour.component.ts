@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { PackageService } from '../../services/package.service';
 import { EventService } from '../../services/event.service';
 import { NavBookingConfigService } from '../../services/nav-booking-config.service';
@@ -40,7 +41,7 @@ export class BookTourComponent implements OnInit {
   tours: UnifiedTour[] = [];
   filteredTours: UnifiedTour[] = [];
   searchTerm = '';
-  typeFilter: 'ALL' | TourType = 'ALL';
+  typeFilter: 'ALL' | 'DAY' | 'LONG' = 'ALL';
 
   // Searchable combobox state for the tour picker (replaces the old plain <select>)
   showDropdown = false;
@@ -125,7 +126,7 @@ export class BookTourComponent implements OnInit {
     this.loading = true;
     forkJoin({
       packages: this.packageService.getAllPackages(),
-      events: this.eventService.getAllEvents()
+      events: this.eventService.getEventsPaginated(0, 500).pipe(map(r => r.content))
     }).subscribe({
       next: ({ packages, events }) => {
         const packageTours: UnifiedTour[] = (packages || []).map(p => ({
@@ -138,7 +139,14 @@ export class BookTourComponent implements OnInit {
           location: e.location, duration: e.duration, price: e.price, maxParticipants: e.maxParticipants,
           availableSpots: e.availableSpots, dates: e.dates || [], pricings: e.pricings || []
         }));
-        this.tours = [...packageTours, ...eventTours];
+        const isDayFn = (c: string) => ['DayTours', 'DaysTour', 'TourWithOutAccommodation'].includes(c);
+        this.tours = [...packageTours, ...eventTours]
+          .sort((a, b) => {
+            const aDay = isDayFn(a.category) ? 0 : 1;
+            const bDay = isDayFn(b.category) ? 0 : 1;
+            if (aDay !== bDay) return aDay - bDay;
+            return a.title.localeCompare(b.title);
+          });
         this.applyFilters();
         this.loading = false;
       },
@@ -152,7 +160,10 @@ export class BookTourComponent implements OnInit {
   applyFilters(): void {
     const term = this.searchTerm.trim().toLowerCase();
     this.filteredTours = this.tours.filter(t => {
-      const matchesType = this.typeFilter === 'ALL' || t.type === this.typeFilter;
+      const isDay = this.isDayCategory(t.category);
+      const matchesType = this.typeFilter === 'ALL'
+        || (this.typeFilter === 'DAY' && isDay)
+        || (this.typeFilter === 'LONG' && !isDay);
       const matchesSearch = !term || t.title.toLowerCase().includes(term) || t.location?.toLowerCase().includes(term);
       return matchesType && matchesSearch;
     });
@@ -166,8 +177,8 @@ export class BookTourComponent implements OnInit {
     this.applyFilters();
   }
 
-  setTypeFilter(type: 'ALL' | TourType): void {
-    this.typeFilter = type;
+  setTypeFilter(type: string): void {
+    this.typeFilter = type as 'ALL' | 'DAY' | 'LONG';
     this.applyFilters();
   }
 
@@ -236,8 +247,12 @@ export class BookTourComponent implements OnInit {
     }
   }
 
-  typeLabel(type: TourType): string {
-    return type === 'PACKAGE' ? 'Day Tour' : 'Long Tour';
+  isDayCategory(category: string): boolean {
+    return ['DayTours', 'DaysTour', 'TourWithOutAccommodation'].includes(category);
+  }
+
+  typeLabel(category: string): string {
+    return this.isDayCategory(category) ? 'Day Tour' : 'Long Tour';
   }
 
   clearSelection(): void {
