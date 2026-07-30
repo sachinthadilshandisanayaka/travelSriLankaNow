@@ -42,6 +42,7 @@ export class BookTourComponent implements OnInit {
   filteredTours: UnifiedTour[] = [];
   searchTerm = '';
   typeFilter: 'ALL' | 'DAY' | 'LONG' = 'ALL';
+  categoryFilter: string | null = null;
 
   // Searchable combobox state for the tour picker (replaces the old plain <select>)
   showDropdown = false;
@@ -164,8 +165,9 @@ export class BookTourComponent implements OnInit {
       const matchesType = this.typeFilter === 'ALL'
         || (this.typeFilter === 'DAY' && isDay)
         || (this.typeFilter === 'LONG' && !isDay);
+      const matchesCategory = !this.categoryFilter || t.category === this.categoryFilter;
       const matchesSearch = !term || t.title.toLowerCase().includes(term) || t.location?.toLowerCase().includes(term);
-      return matchesType && matchesSearch;
+      return matchesType && matchesCategory && matchesSearch;
     });
     this.highlightedIndex = this.filteredTours.length ? 0 : -1;
   }
@@ -179,7 +181,33 @@ export class BookTourComponent implements OnInit {
 
   setTypeFilter(type: string): void {
     this.typeFilter = type as 'ALL' | 'DAY' | 'LONG';
+    this.categoryFilter = null;
     this.applyFilters();
+  }
+
+  setCategoryFilter(cat: string | null): void {
+    this.categoryFilter = cat;
+    this.typeFilter = 'ALL';
+    this.applyFilters();
+  }
+
+  get categories(): { value: string; label: string; count: number }[] {
+    const map = new Map<string, number>();
+    this.tours.forEach(t => map.set(t.category, (map.get(t.category) || 0) + 1));
+    return Array.from(map.entries())
+      .map(([value, count]) => ({ value, label: this.getCategoryLabel(value), count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  getCategoryLabel(cat: string): string {
+    const labels: { [key: string]: string } = {
+      DayTours: 'Day Tours',
+      DaysTour: 'Days Tour',
+      TourWithOutAccommodation: 'Without Accommodation',
+      TransportationAndAccommodation: 'Transportation & Accommodation',
+      TransportationOnly: 'Transportation Only'
+    };
+    return labels[cat] || cat;
   }
 
   // ===== Searchable tour combobox =====

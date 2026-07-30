@@ -72,6 +72,21 @@
             <option value="LONG">Long Tours</option>
           </select>
         </div>
+
+        <!-- Event Categories filter -->
+        <div class="book-tour-categories">
+          <span class="book-tour-categories__label">Event Categories</span>
+          <div class="book-tour-categories__chips">
+            <button type="button" class="category-chip" [class.category-chip--active]="!categoryFilter" (click)="setCategoryFilter(null)">
+              All <span class="category-chip__count">{{ tours.length }}</span>
+            </button>
+            <button type="button" *ngFor="let cat of categories" class="category-chip"
+                    [class.category-chip--active]="categoryFilter === cat.value"
+                    (click)="setCategoryFilter(cat.value)">
+              {{ cat.label }} <span class="category-chip__count">{{ cat.count }}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Selected tour summary -->
