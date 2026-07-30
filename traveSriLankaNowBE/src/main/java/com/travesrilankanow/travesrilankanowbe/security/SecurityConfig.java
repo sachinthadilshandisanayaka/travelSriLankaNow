@@ -57,8 +57,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/homepage-sections/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/more-sections/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/entity-field-configs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/bookings/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/events/book").permitAll()
+                        // Generic patterns covering every current and future booking-creation
+                        // endpoint shape ("/api/{type}/book" and "/api/{type}/{id}/book") so a
+                        // new bookable type never needs a new line here — actual login
+                        // requirements are enforced dynamically per-route by NavBookingConfig
+                        // inside EventBookingService, not by this allowlist.
+                        .requestMatchers(HttpMethod.POST, "/api/*/book").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/*/book").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/nav-booking-config/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/booking-form-fields/**").permitAll()

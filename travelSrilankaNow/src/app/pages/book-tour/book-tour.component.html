@@ -1,0 +1,270 @@
+<div class="book-tour-page" *ngIf="!checkingAuth">
+
+  <header class="book-tour-hero">
+    <div class="book-tour-hero__badge">📅 Booking</div>
+    <h1>Book a Tour</h1>
+    <p>Search and book any Day Tour or Long Tour in one place.</p>
+  </header>
+
+  <div class="book-tour-container">
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading tours...</p>
+    </div>
+
+    <div class="error-state" *ngIf="error && !loading">{{ error }}</div>
+
+    <ng-container *ngIf="!loading && !error">
+
+      <!-- Search + filters -->
+      <div class="book-tour-picker">
+        <div class="book-tour-picker__row">
+          <div class="book-tour-search">
+            <svg class="book-tour-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="Search or select a tour by name or location..."
+                   role="combobox" [attr.aria-expanded]="showDropdown" aria-autocomplete="list"
+                   [(ngModel)]="searchTerm"
+                   (input)="onSearchChange()"
+                   (focus)="openDropdown($event)"
+                   (keydown)="onSearchKeydown($event)">
+            <button type="button" class="book-tour-search__clear" *ngIf="searchTerm" (mousedown)="clearSearch($event)" aria-label="Clear">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <!-- Searchable tour dropdown — replaces the old plain <select> -->
+            <div class="book-tour-dropdown" *ngIf="showDropdown">
+              <div class="book-tour-dropdown__count">{{ filteredTours.length }} tour{{ filteredTours.length === 1 ? '' : 's' }} found</div>
+              <div class="book-tour-dropdown__list">
+                <button *ngFor="let t of filteredTours; let i = index" type="button"
+                        class="book-tour-dropdown__item"
+                        [class.book-tour-dropdown__item--highlighted]="i === highlightedIndex"
+                        [class.book-tour-dropdown__item--selected]="selectedTour?.type === t.type && selectedTour?.id === t.id"
+                        (mousedown)="$event.preventDefault()"
+                        (mouseenter)="highlightedIndex = i"
+                        (click)="selectTourFromDropdown(t)">
+                  <img *ngIf="t.imageUrl" [src]="t.imageUrl" [alt]="t.title" class="book-tour-dropdown__item-image">
+                  <div *ngIf="!t.imageUrl" class="book-tour-dropdown__item-image book-tour-dropdown__item-image--placeholder">{{ getCategoryIcon(t.category) }}</div>
+                  <div class="book-tour-dropdown__item-body">
+                    <span class="book-tour-dropdown__item-title">{{ t.title }}</span>
+                    <span class="book-tour-dropdown__item-meta">
+                      <span class="book-tour-dropdown__item-badge" [class.book-tour-dropdown__item-badge--event]="t.type === 'EVENT'">{{ typeLabel(t.type) }}</span>
+                      <span *ngIf="t.location">📍 {{ t.location }}</span>
+                    </span>
+                  </div>
+                  <span class="book-tour-dropdown__item-price" *ngIf="t.price">${{ t.price | number:'1.0-2' }}</span>
+                </button>
+
+                <div class="book-tour-dropdown__empty" *ngIf="filteredTours.length === 0">
+                  No tours match "{{ searchTerm }}". Try a different name or location.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <select class="book-tour-type-select" [value]="typeFilter" (change)="setTypeFilter($event.target.value)">
+            <option value="ALL">All Tours</option>
+            <option value="PACKAGE">Day Tours</option>
+            <option value="EVENT">Long Tours</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Selected tour summary -->
+      <div class="book-tour-summary" *ngIf="selectedTour">
+        <img *ngIf="selectedTour.imageUrl" [src]="selectedTour.imageUrl" [alt]="selectedTour.title" class="book-tour-summary__image">
+        <div class="book-tour-summary__body">
+          <span class="book-tour-summary__badge">{{ getCategoryIcon(selectedTour.category) }} {{ typeLabel(selectedTour.type) }}</span>
+          <h2>{{ selectedTour.title }}</h2>
+          <div class="book-tour-summary__meta">
+            <span *ngIf="selectedTour.location">📍 {{ selectedTour.location }}</span>
+            <span *ngIf="selectedTour.duration">⏱ {{ selectedTour.duration }}</span>
+            <span>👥 {{ selectedTour.availableSpots }} spots available</span>
+          </div>
+          <div class="book-tour-summary__footer">
+            <span class="book-tour-summary__price" *ngIf="selectedTour.price">from ${{ selectedTour.price | number:'1.0-2' }}</span>
+            <button class="btn-primary" (click)="openBookingModal()" [disabled]="selectedTour.availableSpots === 0">
+              {{ selectedTour.availableSpots === 0 ? 'Sold Out' : 'Book Now' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-tour-empty" *ngIf="!selectedTour">
+        <p>Search or pick a tour above to see details and book.</p>
+      </div>
+
+    </ng-container>
+  </div>
+</div>
+
+<!-- Booking Modal (mirrors package-detail / event-detail) -->
+<div class="booking-modal-overlay" *ngIf="showBookingModal" (click)="closeBookingModal()">
+  <div class="booking-modal" (click)="$event.stopPropagation()">
+
+    <div class="booking-modal__header">
+      <div>
+        <h3>{{ bookingStep === 'success' ? 'Booking Confirmed!' : 'Book This Tour' }}</h3>
+        <p *ngIf="bookingStep === 'form'">{{ selectedTour?.title }}</p>
+      </div>
+      <button class="booking-modal__close" (click)="closeBookingModal()">✕</button>
+    </div>
+
+    <div *ngIf="bookingStep === 'success'" class="booking-success">
+      <div class="booking-success__icon">🎉</div>
+      <h4>You're booked!</h4>
+      <p>Your booking reference is:</p>
+      <div class="booking-success__ref">{{ bookingReference }}</div>
+      <p class="booking-success__note">A confirmation will be sent to <strong>{{ booking.email }}</strong></p>
+      <button class="btn-primary" (click)="closeBookingModal()">Done</button>
+    </div>
+
+    <div *ngIf="bookingStep === 'form'" class="booking-modal__body">
+      <div class="booking-price-summary" *ngIf="selectedTour?.price">
+        <span>Estimated total</span>
+        <span class="booking-price-summary__total">${{ bookingTotalPrice | number:'1.0-2' }}</span>
+      </div>
+
+      <div class="booking-error" *ngIf="bookingError">{{ bookingError }}</div>
+
+      <div class="booking-form">
+        <div class="booking-form__row">
+          <div class="booking-form__group">
+            <label>Full Name *</label>
+            <input type="text" [(ngModel)]="booking.participantName" placeholder="Your full name">
+          </div>
+          <div class="booking-form__group">
+            <label>Phone *</label>
+            <input type="tel" [(ngModel)]="booking.phone" placeholder="+94 77 000 0000">
+          </div>
+        </div>
+        <div class="booking-form__group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="booking.email" placeholder="your@email.com">
+        </div>
+        <div class="booking-form__row">
+          <div class="booking-form__group">
+            <label>Number of People *</label>
+            <input type="number" [(ngModel)]="booking.numberOfPeople" min="1" [max]="selectedTour?.availableSpots">
+          </div>
+        </div>
+
+        <!-- Date Range Picker (RANGE mode) -->
+        <div class="booking-form__group" *ngIf="dateMode === 'RANGE'">
+          <label>Select Dates <span style="color:#e53e3e">*</span></label>
+          <app-date-range-picker
+            mode="range"
+            [startDate]="booking.checkInDate || ''"
+            [endDate]="booking.checkOutDate || ''"
+            [minDate]="checkInMin"
+            [minStay]="minStayDays"
+            [maxStay]="maxStayDays || 0"
+            [blockedDates]="blockedDates"
+            placeholder="Select check-in & check-out"
+            (apply)="onDateRangeApply($event)">
+          </app-date-range-picker>
+
+          <div *ngIf="booking.checkInDate && booking.checkOutDate" class="booking-date-summary">
+            <div class="booking-date-summary__row">
+              <div class="booking-date-summary__item">
+                <span class="booking-date-summary__label">Check-in</span>
+                <span class="booking-date-summary__value">{{ formatDateDisplay(booking.checkInDate) }}</span>
+              </div>
+              <div class="booking-date-summary__divider">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </div>
+              <div class="booking-date-summary__item">
+                <span class="booking-date-summary__label">Check-out</span>
+                <span class="booking-date-summary__value">{{ formatDateDisplay(booking.checkOutDate) }}</span>
+              </div>
+            </div>
+            <div class="booking-date-summary__nights">
+              <strong>{{ getNights() }}</strong>&nbsp;night<span *ngIf="getNights() !== 1">s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inline Date Calendar (SINGLE / free-form modes) -->
+        <div class="booking-form__group booking-calendar-group" *ngIf="dateMode !== 'RANGE' && dateMode !== 'NONE'">
+          <label>{{ hasTourDates ? 'Select a Date' : 'Preferred Date (Optional)' }}</label>
+          <div class="booking-calendar">
+            <div class="booking-calendar__header">
+              <button type="button" class="booking-calendar__nav"
+                      (click)="showMonthPicker ? pickerPrevYear() : calendarPrevMonth()">&#8249;</button>
+              <button type="button" class="booking-calendar__month-toggle" (click)="toggleMonthPicker()">
+                <span>{{ showMonthPicker ? pickerYear : calendarMonthLabel }}</span>
+                <svg class="booking-calendar__chevron" [class.booking-calendar__chevron--up]="showMonthPicker"
+                     width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+              <button type="button" class="booking-calendar__nav"
+                      (click)="showMonthPicker ? pickerNextYear() : calendarNextMonth()">&#8250;</button>
+            </div>
+
+            <div class="booking-calendar__month-picker" *ngIf="showMonthPicker">
+              <button *ngFor="let m of MONTHS; let i = index" type="button" class="booking-calendar__mp-item"
+                      [class.booking-calendar__mp-item--selected]="isPickerMonthSelected(i)"
+                      [class.booking-calendar__mp-item--past]="isPickerMonthPast(i)"
+                      (click)="selectPickerMonth(i)">
+                {{ m }}
+              </button>
+            </div>
+
+            <div class="booking-calendar__weekdays" *ngIf="!showMonthPicker">
+              <span *ngFor="let w of WEEKDAYS">{{ w }}</span>
+            </div>
+            <div class="booking-calendar__grid" *ngIf="!showMonthPicker">
+              <div *ngFor="let cell of calendarDays"
+                   class="booking-calendar__cell"
+                   [class.booking-calendar__cell--empty]="!cell.date"
+                   [class.booking-calendar__cell--past]="cell.isPast"
+                   [class.booking-calendar__cell--today]="cell.isToday"
+                   [class.booking-calendar__cell--blocked]="cell.isBlocked"
+                   [class.booking-calendar__cell--available]="cell.tourDate && !cell.isPast && !cell.isBlocked && cell.tourDate.availableSpots > 0"
+                   [class.booking-calendar__cell--full]="cell.tourDate && cell.tourDate.availableSpots === 0"
+                   [class.booking-calendar__cell--selected]="isCalendarDaySelected(cell)"
+                   (click)="selectCalendarDate(cell)">
+                <span class="booking-calendar__day-num" *ngIf="cell.date">{{ cell.date.getDate() }}</span>
+                <span class="booking-calendar__dot" *ngIf="cell.tourDate && !cell.isPast && !cell.isBlocked && cell.tourDate.availableSpots > 0"></span>
+              </div>
+            </div>
+            <div class="booking-calendar__legend" *ngIf="hasTourDates || blockedDates.length > 0">
+              <span class="legend-item legend-item--available" *ngIf="hasTourDates">Available</span>
+              <span class="legend-item legend-item--full" *ngIf="hasTourDates">Fully Booked</span>
+              <span class="legend-item legend-item--blocked" *ngIf="blockedDates.length > 0">Unavailable</span>
+              <span class="legend-item legend-item--selected">Selected</span>
+            </div>
+            <div class="booking-calendar__selected-info" *ngIf="booking.selectedDateId">
+              <ng-container *ngFor="let d of selectedTour!.dates">
+                <span *ngIf="d.id === booking.selectedDateId">
+                  ✅ {{ d.date | date:'EEEE, MMM dd, yyyy' }} · {{ d.startTime }}–{{ d.endTime }} · {{ d.availableSpots }} spots left
+                </span>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-form__group">
+          <label>Special Requests</label>
+          <textarea [(ngModel)]="booking.specialRequests" rows="3" placeholder="Dietary requirements, accessibility needs, etc."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-modal__footer" *ngIf="bookingStep === 'form'">
+      <button class="booking-cancel-btn" (click)="closeBookingModal()" [disabled]="bookingLoading">Cancel</button>
+      <button class="btn-primary" (click)="submitBooking()" [disabled]="bookingLoading">
+        <span *ngIf="!bookingLoading">Confirm Booking</span>
+        <span *ngIf="bookingLoading" class="booking-spinner"></span>
+      </button>
+    </div>
+
+  </div>
+</div>

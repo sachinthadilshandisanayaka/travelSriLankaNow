@@ -287,23 +287,25 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   }
 
   // ===== Booking =====
-  // NOTE: Packages don't have a dedicated booking backend yet (unlike Events) — that's a
-  // separate, deliberately-deferred piece of work (see PROJ002 session notes). Rather than
-  // show a booking form that fails on submit, "Book Now" opens a pre-filled WhatsApp inquiry
-  // using the same contact number already used sitewide.
+  // Whether login is required before booking is governed entirely by this
+  // route's NavBookingConfig (requireAuth), set under Booking Settings ->
+  // Nav Booking Rules — not hardcoded here, so an admin can change it for
+  // Day Tours without a code change.
   openBookingModal(): void {
-    this.http.get<Record<string, string>>(`${environment.apiUrl}/site-settings/map`).subscribe({
-      next: (settings) => this.openWhatsAppInquiry(settings['contact_phone']),
-      error: () => this.openWhatsAppInquiry(null)
-    });
-  }
-
-  private openWhatsAppInquiry(rawPhone: string | null | undefined): void {
-    const phone = (rawPhone || '').replace(/[^\d]/g, '');
-    const packageName = this.pkg?.title || 'this package';
-    const message = encodeURIComponent(`Hi! I'd like to book "${packageName}". Could you help me with availability and pricing?`);
-    const url = phone ? `https://wa.me/${phone}?text=${message}` : `mailto:?subject=${encodeURIComponent('Booking enquiry: ' + packageName)}&body=${message}`;
-    window.open(url, '_blank');
+    if (this.navBookingConfig?.requireAuth && !this.currentUser) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+    this.bookingStep = 'form';
+    this.bookingError = '';
+    const today = new Date();
+    const firstFuture = this.pkg?.dates?.find(d => new Date(d.date) >= today && d.availableSpots > 0);
+    this.calendarMonth = firstFuture ? new Date(firstFuture.date) : new Date();
+    this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), 1);
+    this.showBookingModal = true;
+    document.body.style.overflow = 'hidden';
+    this.blockedDates = [];
+    this.fetchBlockedDates(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth());
   }
 
   fetchBlockedDates(year: number, month: number): void {
@@ -461,7 +463,6 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     this.bookingError = '';
 
     const payload: any = {
-      packageId: this.pkg.id,
       participantName: this.booking.participantName,
       email: this.booking.email,
       phone: this.booking.phone,
@@ -478,7 +479,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       if (this.booking.preferredDate) payload.preferredDate = this.booking.preferredDate;
     }
 
-    this.http.post<any>(`${environment.apiUrl}/packages/book`, payload).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/packages/${this.pkg.id}/book`, payload).subscribe({
       next: (res) => {
         this.bookingLoading = false;
         this.bookingReference = res.bookingReference || '';

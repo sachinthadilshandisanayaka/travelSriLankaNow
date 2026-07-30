@@ -1,0 +1,70 @@
+<app-page-header
+  subtitle="Get In Touch"
+  title="Contact Us"
+  description="Have a question about a tour, booking, or anything else? We'd love to hear from you."
+  theme="default"
+  [showAnimation]="true">
+</app-page-header>
+
+<section class="section contact-page">
+  <div class="container">
+    <div class="contact-loading" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <div class="contact-cards" *ngIf="hasContactInfo; else noContact">
+        <div class="contact-card" *ngIf="contactPhone">
+          <div class="contact-card__icon">📞</div>
+          <h3>Phone</h3>
+          <a [href]="'tel:' + contactPhone">{{ contactPhone }}</a>
+          <a *ngIf="whatsappUrl" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer" class="contact-card__whatsapp">
+            Message us on WhatsApp
+          </a>
+        </div>
+
+        <div class="contact-card" *ngIf="contactEmail">
+          <div class="contact-card__icon">✉️</div>
+          <h3>Email</h3>
+          <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>
+        </div>
+
+        <div class="contact-card" *ngIf="contactAddress">
+          <div class="contact-card__icon">📍</div>
+          <h3>Address</h3>
+          <p>{{ contactAddress }}</p>
+        </div>
+      </div>
+
+      <ng-template #noContact>
+        <p class="contact-empty">Contact details haven't been added yet — please check back soon.</p>
+      </ng-template>
+
+      <div class="contact-extra" *ngIf="businessHours.length || socialLinks.length">
+        <div class="contact-extra__block" *ngIf="businessHours.length">
+          <h3>Business Hours</h3>
+          <ul class="contact-hours">
+            <li *ngFor="let hour of businessHours">
+              <span class="contact-hours__label">{{ hour.label }}</span>
+              <span class="contact-hours__value">{{ hour.value }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="contact-extra__block" *ngIf="socialLinks.length">
+          <h3>Follow Us</h3>
+          <div class="contact-social">
+            <a *ngFor="let social of socialLinks"
+               [href]="social.value"
+               [attr.aria-label]="social.label"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="contact-social__link">
+              {{ social.label }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</section>

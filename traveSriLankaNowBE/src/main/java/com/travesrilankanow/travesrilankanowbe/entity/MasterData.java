@@ -40,6 +40,16 @@ public class MasterData {
     @Column(nullable = false)
     private Boolean isActive;
 
+    /**
+     * Whether this category shows in the public "Browse by Category" tile
+     * grid — deliberately separate from isActive, which governs whether the
+     * category is usable at all (selectable in admin forms, appears in
+     * filter dropdowns). Hiding a category from the browse grid must not
+     * deactivate it.
+     */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean visibleOnPublicPage;
+
     private String color;
 
     private String icon;
@@ -54,6 +64,9 @@ public class MasterData {
         createdAt = LocalDateTime.now();
         if (isActive == null) {
             isActive = true;
+        }
+        if (visibleOnPublicPage == null) {
+            visibleOnPublicPage = true;
         }
         if (sortOrder == null) {
             sortOrder = 0;

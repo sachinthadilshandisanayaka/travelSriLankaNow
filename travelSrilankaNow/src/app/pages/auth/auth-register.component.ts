@@ -19,7 +19,7 @@ export class AuthRegisterComponent implements OnInit {
   loading = false;
   error = '';
   siteName = '';
-  private returnUrl = '/';
+  returnUrl = '/';
 
   constructor(
     private authService: CustomerAuthService,
@@ -68,9 +68,5 @@ export class AuthRegisterComponent implements OnInit {
         this.error = err?.error?.message || 'Registration failed. Username or email may already be taken.';
       }
     });
-  }
-
-  signUpWithGoogle(): void {
-    this.error = 'Google sign-up coming soon. Please use the form above for now.';
   }
 }

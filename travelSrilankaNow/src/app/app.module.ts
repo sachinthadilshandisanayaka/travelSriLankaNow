@@ -31,7 +31,10 @@ import { LanguageSwitcherComponent } from './components/language-switcher/langua
 import { ContactDetailsComponent } from './shared/components/contact-details/contact-details.component';
 import { AuthLoginComponent } from './pages/auth/auth-login.component';
 import { AuthRegisterComponent } from './pages/auth/auth-register.component';
+import { AuthForgotPasswordComponent } from './pages/auth/auth-forgot-password.component';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
+import { ContactComponent } from './pages/contact/contact.component';
+import { BookTourComponent } from './pages/book-tour/book-tour.component';
 import { FloatingSocialWidgetComponent } from './components/floating-social-widget/floating-social-widget.component';
 import { SharedModule } from './shared/shared.module';
 
@@ -61,8 +64,11 @@ import { SharedModule } from './shared/shared.module';
     ContactDetailsComponent,
     AuthLoginComponent,
     AuthRegisterComponent,
+    AuthForgotPasswordComponent,
     MyBookingsComponent,
-    FloatingSocialWidgetComponent
+    FloatingSocialWidgetComponent,
+    ContactComponent,
+    BookTourComponent
   ],
   imports: [
     BrowserModule,
