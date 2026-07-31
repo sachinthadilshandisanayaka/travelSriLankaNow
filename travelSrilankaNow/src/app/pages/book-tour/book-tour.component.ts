@@ -41,7 +41,8 @@ export class BookTourComponent implements OnInit {
   tours: UnifiedTour[] = [];
   filteredTours: UnifiedTour[] = [];
   searchTerm = '';
-  categoryFilter: string | null = null;
+  categoryFilter = '';
+  categoryOptions: { value: string; label: string }[] = [];
 
   // Searchable combobox state for the tour picker (replaces the old plain <select>)
   showDropdown = false;
@@ -147,6 +148,7 @@ export class BookTourComponent implements OnInit {
             if (aDay !== bDay) return aDay - bDay;
             return a.title.localeCompare(b.title);
           });
+        this.buildCategoryOptions();
         this.applyFilters();
         this.loading = false;
       },
@@ -174,17 +176,17 @@ export class BookTourComponent implements OnInit {
     this.applyFilters();
   }
 
-  setCategoryFilter(cat: string | null): void {
-    this.categoryFilter = cat || null;
+  setCategoryFilter(cat: string): void {
+    this.categoryFilter = cat || '';
     this.applyFilters();
   }
 
-  get categories(): { value: string; label: string; count: number }[] {
+  private buildCategoryOptions(): void {
     const map = new Map<string, number>();
     this.tours.forEach(t => map.set(t.category, (map.get(t.category) || 0) + 1));
-    return Array.from(map.entries())
-      .map(([value, count]) => ({ value, label: this.getCategoryLabel(value), count }))
-      .sort((a, b) => b.count - a.count);
+    this.categoryOptions = Array.from(map.entries())
+      .map(([value, count]) => ({ value, label: this.getCategoryLabel(value) }))
+      .sort((a, b) => (map.get(b.value) || 0) - (map.get(a.value) || 0));
   }
 
   getCategoryLabel(cat: string): string {
