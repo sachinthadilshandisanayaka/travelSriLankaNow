@@ -3,7 +3,7 @@
   <header class="book-tour-hero">
     <div class="book-tour-hero__badge">📅 Booking</div>
     <h1>Book a Tour</h1>
-    <p>Search and book any Day Tour or Long Tour in one place.</p>
+    <p>Search and book any tour in one place.</p>
   </header>
 
   <div class="book-tour-container">
@@ -52,7 +52,7 @@
                   <div class="book-tour-dropdown__item-body">
                     <span class="book-tour-dropdown__item-title">{{ t.title }}</span>
                     <span class="book-tour-dropdown__item-meta">
-                      <span class="book-tour-dropdown__item-badge" [class.book-tour-dropdown__item-badge--event]="!isDayCategory(t.category)">{{ typeLabel(t.category) }}</span>
+                      <span class="book-tour-dropdown__item-badge" [class.book-tour-dropdown__item-badge--event]="!isDayCategory(t.category)">{{ getCategoryLabel(t.category) }}</span>
                       <span *ngIf="t.location">📍 {{ t.location }}</span>
                     </span>
                   </div>
@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          <select class="book-tour-type-select" [value]="categoryFilter || ''" (change)="setCategoryFilter($event.target.value || null)">
+          <select class="book-tour-type-select" #categorySelect [value]="categoryFilter || ''" (change)="setCategoryFilter(categorySelect.value || null)">
             <option value="">All Tours</option>
             <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
           </select>
@@ -77,7 +77,7 @@
       <div class="book-tour-summary" *ngIf="selectedTour">
         <img *ngIf="selectedTour.imageUrl" [src]="selectedTour.imageUrl" [alt]="selectedTour.title" class="book-tour-summary__image">
         <div class="book-tour-summary__body">
-          <span class="book-tour-summary__badge">{{ getCategoryIcon(selectedTour.category) }} {{ typeLabel(selectedTour.category) }}</span>
+          <span class="book-tour-summary__badge">{{ getCategoryIcon(selectedTour.category) }} {{ getCategoryLabel(selectedTour.category) }}</span>
           <h2>{{ selectedTour.title }}</h2>
           <div class="book-tour-summary__meta">
             <span *ngIf="selectedTour.location">📍 {{ selectedTour.location }}</span>
