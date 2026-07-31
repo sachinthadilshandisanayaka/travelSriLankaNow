@@ -41,7 +41,6 @@ export class BookTourComponent implements OnInit {
   tours: UnifiedTour[] = [];
   filteredTours: UnifiedTour[] = [];
   searchTerm = '';
-  typeFilter: 'ALL' | 'DAY' | 'LONG' = 'ALL';
   categoryFilter: string | null = null;
 
   // Searchable combobox state for the tour picker (replaces the old plain <select>)
@@ -161,13 +160,9 @@ export class BookTourComponent implements OnInit {
   applyFilters(): void {
     const term = this.searchTerm.trim().toLowerCase();
     this.filteredTours = this.tours.filter(t => {
-      const isDay = this.isDayCategory(t.category);
-      const matchesType = this.typeFilter === 'ALL'
-        || (this.typeFilter === 'DAY' && isDay)
-        || (this.typeFilter === 'LONG' && !isDay);
       const matchesCategory = !this.categoryFilter || t.category === this.categoryFilter;
       const matchesSearch = !term || t.title.toLowerCase().includes(term) || t.location?.toLowerCase().includes(term);
-      return matchesType && matchesCategory && matchesSearch;
+      return matchesCategory && matchesSearch;
     });
     this.highlightedIndex = this.filteredTours.length ? 0 : -1;
   }
@@ -179,15 +174,8 @@ export class BookTourComponent implements OnInit {
     this.applyFilters();
   }
 
-  setTypeFilter(type: string): void {
-    this.typeFilter = type as 'ALL' | 'DAY' | 'LONG';
-    this.categoryFilter = null;
-    this.applyFilters();
-  }
-
   setCategoryFilter(cat: string | null): void {
-    this.categoryFilter = cat;
-    this.typeFilter = 'ALL';
+    this.categoryFilter = cat || null;
     this.applyFilters();
   }
 
