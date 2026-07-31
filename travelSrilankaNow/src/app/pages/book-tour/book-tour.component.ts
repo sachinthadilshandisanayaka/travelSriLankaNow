@@ -41,7 +41,7 @@ export class BookTourComponent implements OnInit {
   tours: UnifiedTour[] = [];
   filteredTours: UnifiedTour[] = [];
   searchTerm = '';
-  categoryFilter: string | null = null;
+  categoryFilter = '';
 
   // Searchable combobox state for the tour picker (replaces the old plain <select>)
   showDropdown = false;
@@ -174,8 +174,8 @@ export class BookTourComponent implements OnInit {
     this.applyFilters();
   }
 
-  setCategoryFilter(cat: string | null): void {
-    this.categoryFilter = cat || null;
+  setCategoryFilter(cat: string): void {
+    this.categoryFilter = cat || '';
     this.applyFilters();
   }
 
