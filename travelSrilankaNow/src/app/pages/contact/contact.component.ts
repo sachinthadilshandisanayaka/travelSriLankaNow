@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { SiteSettingsService, SiteSetting } from '../../services/site-settings.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-contact',
@@ -14,7 +16,16 @@ export class ContactComponent implements OnInit {
   businessHours: SiteSetting[] = [];
   socialLinks: SiteSetting[] = [];
 
-  constructor(private siteSettingsService: SiteSettingsService) {}
+  // Contact form
+  contactFormModel = { name: '', phone: '', email: '', message: '' };
+  contactFormLoading = false;
+  contactFormError = '';
+  contactFormSubmitted = false;
+
+  constructor(
+    private siteSettingsService: SiteSettingsService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     this.siteSettingsService.getContactInfo().subscribe({
@@ -45,5 +56,32 @@ export class ContactComponent implements OnInit {
   get whatsappUrl(): string {
     const digits = (this.contactPhone || '').replace(/[^\d]/g, '');
     return digits ? `https://wa.me/${digits}` : '';
+  }
+
+  submitContactForm(): void {
+    if (!this.contactFormModel.name.trim() || !this.contactFormModel.phone.trim() || !this.contactFormModel.message.trim()) {
+      this.contactFormError = 'Please fill in your name, contact number, and message.';
+      return;
+    }
+
+    this.contactFormLoading = true;
+    this.contactFormError = '';
+
+    this.http.post<any>(`${environment.apiUrl}/contact`, this.contactFormModel).subscribe({
+      next: () => {
+        this.contactFormLoading = false;
+        this.contactFormSubmitted = true;
+      },
+      error: (err) => {
+        this.contactFormLoading = false;
+        this.contactFormError = err?.error?.message || 'Something went wrong. Please try again or contact us directly.';
+      }
+    });
+  }
+
+  resetContactForm(): void {
+    this.contactFormModel = { name: '', phone: '', email: '', message: '' };
+    this.contactFormSubmitted = false;
+    this.contactFormError = '';
   }
 }

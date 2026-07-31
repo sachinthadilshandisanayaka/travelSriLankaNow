@@ -18,6 +18,7 @@ export class AuthRegisterComponent implements OnInit {
   phoneNumber = '';
   loading = false;
   error = '';
+  submitted = false;
   siteName = '';
   returnUrl = '/';
 
@@ -36,6 +37,7 @@ export class AuthRegisterComponent implements OnInit {
   }
 
   register(): void {
+    this.submitted = true;
     if (!this.username || !this.email || !this.password) {
       this.error = 'Please fill all required fields.'; return;
     }

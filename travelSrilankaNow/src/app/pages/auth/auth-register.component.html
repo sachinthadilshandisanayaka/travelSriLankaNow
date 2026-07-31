@@ -6,7 +6,11 @@
     <h3 class="auth-card__title">Create Account</h3>
     <p class="auth-card__subtitle">Join us and start booking adventures</p>
 
-    <div class="auth-error" *ngIf="error">{{ error }}</div>
+    <div class="auth-error-toast" *ngIf="error">
+      <span class="auth-error-toast__icon">⚠</span>
+      <span class="auth-error-toast__msg">{{ error }}</span>
+      <button class="auth-error-toast__close" type="button" (click)="error = ''">✕</button>
+    </div>
 
     <form (ngSubmit)="register()" class="auth-form">
       <div class="auth-form__row">
@@ -21,11 +25,15 @@
       </div>
       <div class="auth-form__group">
         <label>Username *</label>
-        <input type="text" [(ngModel)]="username" name="username" placeholder="Choose a username" autocomplete="username">
+        <input type="text" [(ngModel)]="username" name="username" placeholder="Choose a username" autocomplete="username"
+               [class.input-error]="submitted && !username">
+        <span class="field-error" *ngIf="submitted && !username">Username is required</span>
       </div>
       <div class="auth-form__group">
         <label>Email *</label>
-        <input type="email" [(ngModel)]="email" name="email" placeholder="your@email.com" autocomplete="email">
+        <input type="email" [(ngModel)]="email" name="email" placeholder="your@email.com" autocomplete="email"
+               [class.input-error]="submitted && !email">
+        <span class="field-error" *ngIf="submitted && !email">Email is required</span>
       </div>
       <div class="auth-form__group">
         <label>Phone Number</label>
@@ -34,11 +42,15 @@
       <div class="auth-form__row">
         <div class="auth-form__group">
           <label>Password *</label>
-          <input type="password" [(ngModel)]="password" name="password" placeholder="Min 6 characters" autocomplete="new-password">
+          <input type="password" [(ngModel)]="password" name="password" placeholder="Min 6 characters" autocomplete="new-password"
+                 [class.input-error]="submitted && !password">
+          <span class="field-error" *ngIf="submitted && !password">Password is required</span>
         </div>
         <div class="auth-form__group">
           <label>Confirm Password *</label>
-          <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Repeat password" autocomplete="new-password">
+          <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Repeat password" autocomplete="new-password"
+                 [class.input-error]="submitted && confirmPassword && password !== confirmPassword">
+          <span class="field-error" *ngIf="submitted && confirmPassword && password !== confirmPassword">Passwords do not match</span>
         </div>
       </div>
       <button type="submit" class="auth-btn" [disabled]="loading">

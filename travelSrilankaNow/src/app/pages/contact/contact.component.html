@@ -40,6 +40,53 @@
         <p class="contact-empty">Contact details haven't been added yet — please check back soon.</p>
       </ng-template>
 
+      <div class="contact-form-section">
+        <div class="contact-form-section__intro">
+          <h2>Send Us a Message</h2>
+          <p>Fill out the form below and our team will get back to you as soon as possible.</p>
+        </div>
+
+        <form class="contact-form" *ngIf="!contactFormSubmitted" (ngSubmit)="submitContactForm()" #contactNgForm="ngForm" novalidate>
+          <div class="contact-form__row">
+            <div class="contact-form__group">
+              <label for="cf-name">Name <span class="contact-form__required">*</span></label>
+              <input id="cf-name" type="text" name="name" [(ngModel)]="contactFormModel.name" placeholder="Your full name" required autocomplete="name">
+            </div>
+            <div class="contact-form__group">
+              <label for="cf-phone">Contact Number <span class="contact-form__required">*</span></label>
+              <input id="cf-phone" type="tel" name="phone" [(ngModel)]="contactFormModel.phone" placeholder="+94 77 123 4567" required autocomplete="tel">
+            </div>
+          </div>
+
+          <div class="contact-form__group">
+            <label for="cf-email">Email Address <span class="contact-form__optional">(optional)</span></label>
+            <input id="cf-email" type="email" name="email" [(ngModel)]="contactFormModel.email" placeholder="you@example.com" autocomplete="email">
+          </div>
+
+          <div class="contact-form__group">
+            <label for="cf-message">Message <span class="contact-form__required">*</span></label>
+            <textarea id="cf-message" name="message" [(ngModel)]="contactFormModel.message" rows="5" placeholder="How can we help you?" required></textarea>
+          </div>
+
+          <p class="contact-form__error" *ngIf="contactFormError">{{ contactFormError }}</p>
+
+          <button type="submit" class="btn-primary contact-form__submit" [disabled]="contactFormLoading">
+            <span *ngIf="!contactFormLoading">Send Message</span>
+            <span *ngIf="contactFormLoading">Sending...</span>
+          </button>
+        </form>
+
+        <div class="contact-form__success" *ngIf="contactFormSubmitted">
+          <div class="contact-form__success-icon">✓</div>
+          <h3>Message Sent!</h3>
+          <p>
+            Thanks for reaching out — we've received your message and will contact you soon.
+            <ng-container *ngIf="contactFormModel.email"> We've also sent a confirmation to <strong>{{ contactFormModel.email }}</strong>.</ng-container>
+          </p>
+          <button type="button" class="contact-form__another" (click)="resetContactForm()">Send Another Message</button>
+        </div>
+      </div>
+
       <div class="contact-extra" *ngIf="businessHours.length || socialLinks.length">
         <div class="contact-extra__block" *ngIf="businessHours.length">
           <h3>Business Hours</h3>

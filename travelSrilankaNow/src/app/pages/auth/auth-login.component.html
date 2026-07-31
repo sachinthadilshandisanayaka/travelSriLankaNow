@@ -6,16 +6,24 @@
     <h3 class="auth-card__title">Welcome Back</h3>
     <p class="auth-card__subtitle">Sign in to manage your bookings</p>
 
-    <div class="auth-error" *ngIf="error">{{ error }}</div>
+    <div class="auth-error-toast" *ngIf="error">
+      <span class="auth-error-toast__icon">⚠</span>
+      <span class="auth-error-toast__msg">{{ error }}</span>
+      <button class="auth-error-toast__close" type="button" (click)="error = ''">✕</button>
+    </div>
 
     <form (ngSubmit)="login()" class="auth-form">
       <div class="auth-form__group">
         <label>Username</label>
-        <input type="text" [(ngModel)]="username" name="username" placeholder="Your username" autocomplete="username">
+        <input type="text" [(ngModel)]="username" name="username" placeholder="Your username" autocomplete="username"
+               [class.input-error]="submitted && !username">
+        <span class="field-error" *ngIf="submitted && !username">Username is required</span>
       </div>
       <div class="auth-form__group">
         <label>Password</label>
-        <input type="password" [(ngModel)]="password" name="password" placeholder="Your password" autocomplete="current-password">
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Your password" autocomplete="current-password"
+               [class.input-error]="submitted && !password">
+        <span class="field-error" *ngIf="submitted && !password">Password is required</span>
       </div>
       <p class="auth-card__switch" style="text-align: right; margin: -0.5rem 0 1rem;">
         <a routerLink="/forgot-password">Forgot password?</a>
