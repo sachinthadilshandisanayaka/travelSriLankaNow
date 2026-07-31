@@ -159,7 +159,9 @@ export class AdminEmailSettingsComponent implements OnInit {
       BOOKING_CONFIRMATION_OWNER: 'Booking Received — Owner',
       BOOKING_CONFIRMED_CUSTOMER: 'Booking Confirmed — Customer',
       BOOKING_CANCELLED_CUSTOMER: 'Booking Cancelled — Customer',
-      PASSWORD_RESET_OTP: 'Password Reset Code'
+      PASSWORD_RESET_OTP: 'Password Reset Code',
+      CONTACT_FORM_OWNER: 'Contact Form — Owner',
+      CONTACT_FORM_CUSTOMER: 'Contact Form — Customer'
     };
     return labels[key] || key;
   }

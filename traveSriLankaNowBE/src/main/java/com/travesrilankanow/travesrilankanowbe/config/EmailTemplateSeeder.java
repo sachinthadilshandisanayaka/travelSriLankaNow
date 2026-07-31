@@ -54,6 +54,14 @@ public class EmailTemplateSeeder implements CommandLineRunner {
                 "email-templates/password-reset-otp.html",
                 "Your password reset code",
                 "Sent when a customer requests a password reset.");
+        seedTemplateIfMissing(EmailTemplateKeys.CONTACT_FORM_OWNER,
+                "email-templates/contact-form-owner.html",
+                "New website inquiry from {{name}}",
+                "Sent to the owner-notification address when a visitor submits the Contact Us form.");
+        seedTemplateIfMissing(EmailTemplateKeys.CONTACT_FORM_CUSTOMER,
+                "email-templates/contact-form-customer.html",
+                "We've received your message — thank you for contacting us",
+                "Sent to the customer after they submit the Contact Us form (only if they provided an email).");
 
         seedEmailPermissions();
     }
