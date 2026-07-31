@@ -350,7 +350,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   // Long Tours without a code change.
   openBookingModal(): void {
     if (this.navBookingConfig?.requireAuth && !this.currentUser) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      this.router.navigate(['/register'], { queryParams: { returnUrl: this.router.url } });
       return;
     }
     this.bookingStep = 'form';

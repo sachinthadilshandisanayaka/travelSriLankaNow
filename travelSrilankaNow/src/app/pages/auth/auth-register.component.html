@@ -6,7 +6,11 @@
     <h3 class="auth-card__title">Create Account</h3>
     <p class="auth-card__subtitle">Join us and start booking adventures</p>
 
-    <div class="auth-error" *ngIf="error">{{ error }}</div>
+    <div class="auth-error-toast" *ngIf="error">
+      <span class="auth-error-toast__icon">⚠</span>
+      <span class="auth-error-toast__msg">{{ error }}</span>
+      <button class="auth-error-toast__close" type="button" (click)="error = ''">✕</button>
+    </div>
 
     <form (ngSubmit)="register()" class="auth-form">
       <div class="auth-form__row">

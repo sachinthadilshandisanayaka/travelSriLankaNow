@@ -64,20 +64,43 @@ $navbar-height: 80px;
     margin-top: $spacing-xl;
     font-size: $font-size-sm;
     color: $warm-gray;
-    a { color: var(--primary-sky); font-weight: $font-weight-medium; text-decoration: none;
-      &:hover { text-decoration: underline; } }
+    a { color: #c94a1a; font-weight: $font-weight-semibold; text-decoration: none;
+      &:hover { text-decoration: underline; color: darken(#c94a1a, 10%); } }
   }
 }
 
-.auth-error {
-  background: rgba($error, 0.1);
-  color: darken($error, 10%);
-  border: 1px solid rgba($error, 0.3);
-  border-radius: $radius-md;
-  padding: $spacing-sm $spacing-md;
+.auth-error-toast {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #c0392b;
+  color: #fff;
+  border-radius: $radius-lg;
+  padding: 0.875rem 1.25rem;
+  min-width: 280px;
+  max-width: 90vw;
+  box-shadow: 0 6px 24px rgba(#c0392b, 0.45);
   font-size: $font-size-sm;
-  margin-bottom: $spacing-lg;
-  text-align: center;
+  font-weight: $font-weight-semibold;
+  animation: toastSlideDown 0.28s ease;
+
+  &__icon { font-size: 1.1rem; flex-shrink: 0; }
+  &__msg { flex: 1; line-height: 1.4; }
+  &__close {
+    background: none; border: none; color: rgba(#fff, 0.8); cursor: pointer;
+    font-size: 1rem; padding: 0; flex-shrink: 0; line-height: 1;
+    &:hover { color: #fff; }
+  }
+}
+
+@keyframes toastSlideDown {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
 .auth-form {
