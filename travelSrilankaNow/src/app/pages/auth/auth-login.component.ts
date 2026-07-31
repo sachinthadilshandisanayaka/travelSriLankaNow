@@ -13,6 +13,7 @@ export class AuthLoginComponent implements OnInit {
   password = '';
   loading = false;
   error = '';
+  submitted = false;
   siteName = '';
   returnUrl = '/';
 
@@ -31,6 +32,7 @@ export class AuthLoginComponent implements OnInit {
   }
 
   login(): void {
+    this.submitted = true;
     if (!this.username || !this.password) { this.error = 'Please enter username and password.'; return; }
     this.loading = true;
     this.error = '';

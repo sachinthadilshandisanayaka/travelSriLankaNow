@@ -131,11 +131,13 @@ $navbar-height: 80px;
       font-size: $font-size-base;
       color: var(--primary-navy-dark);
       background: $white;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       box-sizing: border-box;
       -webkit-appearance: none;
       &:focus { outline: none; border-color: var(--primary-sky); box-shadow: 0 0 0 3px var(--primary-sky-a15); }
       &::placeholder { color: $warm-gray; }
+      &.input-error { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(#c0392b, 0.15); }
+      &.input-error:focus { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(#c0392b, 0.25); }
 
       @media (max-width: 480px) {
         font-size: 1rem; // Prevents iOS zoom on focus
@@ -143,6 +145,14 @@ $navbar-height: 80px;
       }
     }
   }
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: $font-size-xs;
+  color: #c0392b;
+  font-weight: $font-weight-medium;
 }
 
 .auth-btn {
