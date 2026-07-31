@@ -68,7 +68,7 @@
 
           <select class="book-tour-type-select" [(ngModel)]="categoryFilter" (ngModelChange)="applyFilters()">
             <option value="">All Tours</option>
-            <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+            <option *ngFor="let cat of categoryOptions" [value]="cat.value">{{ cat.label }}</option>
           </select>
         </div>
       </div>
