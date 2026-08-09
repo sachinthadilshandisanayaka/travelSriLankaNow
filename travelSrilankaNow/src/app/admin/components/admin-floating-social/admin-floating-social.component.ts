@@ -21,7 +21,8 @@ const PLATFORM_DEFAULTS: FloatingButton[] = [
   { platform: 'instagram', label: 'Instagram', url: '', color: '#E4405F', enabled: false },
   { platform: 'twitter',   label: 'X / Twitter', url: '', color: '#000000', enabled: false },
   { platform: 'youtube',   label: 'YouTube',   url: '', color: '#FF0000', enabled: false },
-  { platform: 'tiktok',    label: 'TikTok',    url: '', color: '#010101', enabled: false },
+  { platform: 'tiktok',       label: 'TikTok',       url: '', color: '#010101', enabled: false },
+  { platform: 'tripadvisor', label: 'TripAdvisor',  url: '', color: '#34E0A1', enabled: false },
 ];
 
 @Component({
@@ -48,7 +49,8 @@ export class AdminFloatingSocialComponent implements OnInit {
     instagram: 'Profile URL: https://instagram.com/yourprofile',
     twitter:   'Profile URL: https://twitter.com/yourprofile',
     youtube:   'Channel URL: https://youtube.com/@yourchannel',
-    tiktok:    'Profile URL: https://tiktok.com/@yourprofile',
+    tiktok:       'Profile URL: https://tiktok.com/@yourprofile',
+    tripadvisor:  'Profile URL: https://tripadvisor.com/Profile/yourprofile',
   };
 
   constructor(private apiService: AdminApiService) {}
