@@ -25,6 +25,7 @@
             "aot": true,
             "assets": [
               "src/favicon.ico",
+              "src/manifest.json",
               "src/assets",
               "src/sitemap.xml",
               "src/robots.txt"
@@ -127,6 +128,7 @@
           }
         }
       }
-    }},
+    }
+  },
   "defaultProject": "travelSrilankaNow"
 }
