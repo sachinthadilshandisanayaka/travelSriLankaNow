@@ -7,4 +7,4 @@ Disallow: /my-bookings
 Disallow: /login
 Disallow: /register
 
-Sitemap: https://roamlankatravels.com/sitemap.xml
+Sitemap: https://www.ruklaktravels.com/sitemap.xml
