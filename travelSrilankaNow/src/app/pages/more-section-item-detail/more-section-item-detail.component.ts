@@ -6,6 +6,7 @@ import { MoreSectionService } from '../../services/more-section.service';
 import { MoreSection, MoreSectionItem } from '../../models/more-section.model';
 import { LanguageService } from '../../services/language.service';
 import { ContentTranslationService } from '../../services/content-translation.service';
+import { SeoService } from '../../services/seo.service';
 
 @Component({
   selector: 'app-more-section-item-detail',
@@ -33,7 +34,8 @@ export class MoreSectionItemDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private moreSectionService: MoreSectionService,
     private langService: LanguageService,
-    private contentTranslation: ContentTranslationService
+    private contentTranslation: ContentTranslationService,
+    private seo: SeoService
   ) {}
 
   ngOnInit(): void {
@@ -69,6 +71,7 @@ export class MoreSectionItemDetailComponent implements OnInit, OnDestroy {
         if (!this.item) {
           this.error = true;
         } else {
+          this.setSeo();
           this.applyTranslations();
         }
         this.isLoading = false;
@@ -151,5 +154,34 @@ export class MoreSectionItemDetailComponent implements OnInit, OnDestroy {
     const defs = this.section?.additionalFieldDefinitions || [];
     const def = defs.find(d => d.key === key);
     return def?.type === 'link';
+  }
+
+  private setSeo(): void {
+    const it = this.item!;
+    const sec = this.section!;
+    const path = `/more/${sec.slug}/${it.slug}`;
+    this.seo.set({
+      title: `${it.title} - ${sec.name}`,
+      description: it.shortDescription || it.description || it.articleContent,
+      image: it.imageUrl,
+      path,
+      type: 'article',
+      jsonLd: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: it.title,
+          description: it.shortDescription || undefined,
+          image: it.imageUrl,
+          datePublished: it.createdAt,
+          dateModified: it.updatedAt || it.createdAt,
+          mainEntityOfPage: this.seo.absoluteUrl(path),
+          publisher: { '@type': 'Organization', name: 'Travel Sri Lanka Now', url: 'https://travelsrilankanow.lk' }
+        },
+        this.seo.breadcrumbs([
+          { name: 'Home', path: '/' }, { name: sec.name, path: '/more/' + sec.slug }, { name: it.title, path }
+        ])
+      ]
+    });
   }
 }

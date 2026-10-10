@@ -5,6 +5,7 @@ import { Location } from '../../models/location.model';
 import { ImageLightboxComponent } from '../../shared/components/image-lightbox/image-lightbox.component';
 import { DataService } from '../../services/data.service';
 import { FieldDefinition } from '../../models/more-section.model';
+import { SeoService } from '../../services/seo.service';
 
 @Component({
   selector: 'app-location-detail',
@@ -23,7 +24,8 @@ export class LocationDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private locationService: LocationService,
-    private dataService: DataService
+    private dataService: DataService,
+    private seo: SeoService
   ) { }
 
   ngOnInit(): void {
@@ -48,7 +50,8 @@ export class LocationDetailComponent implements OnInit {
     this.loading = true;
     this.error = null;
     this.locationService.getLocationBySlug(slug).subscribe({
-      next: (location) => { this.location = location; this.loading = false; },
+      next: (location) => { this.location = location;
+        this.setSeo(location); this.loading = false; },
       error: () => { this.error = 'Failed to load location details. Please try again later.'; this.loading = false; }
     });
   }
@@ -60,6 +63,7 @@ export class LocationDetailComponent implements OnInit {
     this.locationService.getLocationById(id).subscribe({
       next: (location) => {
         this.location = location;
+        this.setSeo(location);
         this.loading = false;
         console.log('Loaded location:', location);
       },
@@ -150,5 +154,33 @@ export class LocationDetailComponent implements OnInit {
       'central': 'Central Province'
     };
     return regions[region] || region;
+  }
+
+  private setSeo(l: Location): void {
+    const slug = (l as any).slug;
+    const path = slug ? '/locations/' + slug : undefined;
+    const url = this.seo.absoluteUrl(path || '/locations/' + l.id);
+    this.seo.set({
+      title: `${l.name} - Travel Guide, Things to Do & Best Time to Visit`,
+      description: l.shortDescription || l.description,
+      image: l.imageUrl || (l.images && l.images[0]),
+      path,
+      type: 'article',
+      jsonLd: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'TouristAttraction',
+          name: l.name,
+          description: l.shortDescription || l.description,
+          image: l.images && l.images.length ? l.images : l.imageUrl,
+          url,
+          touristType: l.activities,
+          address: { '@type': 'PostalAddress', addressCountry: 'LK', addressRegion: l.region }
+        },
+        this.seo.breadcrumbs([
+          { name: 'Home', path: '/' }, { name: 'Locations', path: '/locations' }, { name: l.name, path: path || '/locations/' + l.id }
+        ])
+      ]
+    });
   }
 }

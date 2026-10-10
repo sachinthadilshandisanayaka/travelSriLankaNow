@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SeoService } from '../../services/seo.service';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
@@ -71,7 +72,8 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private placeService: PlaceService,
     private dataService: DataService,
-    private customerAuthService: CustomerAuthService
+    private customerAuthService: CustomerAuthService,
+    private seo: SeoService
   ) { }
 
   ngOnInit(): void {
@@ -104,7 +106,8 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     this.placeService.getPlaceBySlug(slug).subscribe({
-      next: (place) => { this.place = place; this.loading = false; },
+      next: (place) => { this.place = place;
+        this.setSeo(place); this.loading = false; },
       error: () => { this.error = 'Failed to load place details. Please try again later.'; this.loading = false; }
     });
   }
@@ -116,6 +119,7 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
     this.placeService.getPlaceById(id).subscribe({
       next: (place) => {
         this.place = place;
+        this.setSeo(place);
         this.loading = false;
       },
       error: (error) => {
@@ -451,5 +455,35 @@ export class PlaceDetailComponent implements OnInit, OnDestroy {
   goToMyBookings(): void {
     this.closeReservationModal();
     this.router.navigate(['/my-bookings']);
+  }
+
+  private setSeo(p: Place): void {
+    const slug = (p as any).slug;
+    const path = slug ? '/places/' + slug : undefined;
+    const type = p.type === 'restaurant' || p.type === 'cafe' ? 'Restaurant' : 'LodgingBusiness';
+    this.seo.set({
+      title: `${p.name} - ${p.type.charAt(0).toUpperCase() + p.type.slice(1)} in ${p.location || 'Sri Lanka'}`,
+      description: p.shortDescription || p.description,
+      image: p.imageUrl || (p.images && p.images[0]),
+      path,
+      jsonLd: [
+        {
+          '@context': 'https://schema.org',
+          '@type': type,
+          name: p.name,
+          description: p.shortDescription || p.description,
+          image: p.images && p.images.length ? p.images : p.imageUrl,
+          url: this.seo.absoluteUrl(path || '/places/' + p.id),
+          telephone: p.contact && p.contact.phone,
+          priceRange: p.priceRange,
+          servesCuisine: p.cuisine && p.cuisine.length ? p.cuisine : undefined,
+          address: { '@type': 'PostalAddress', streetAddress: p.address, addressLocality: p.location, addressCountry: 'LK' },
+          geo: p.coordinates ? { '@type': 'GeoCoordinates', latitude: p.coordinates.lat, longitude: p.coordinates.lng } : undefined
+        },
+        this.seo.breadcrumbs([
+          { name: 'Home', path: '/' }, { name: 'Places', path: '/places' }, { name: p.name, path: path || '/places/' + p.id }
+        ])
+      ]
+    });
   }
 }
