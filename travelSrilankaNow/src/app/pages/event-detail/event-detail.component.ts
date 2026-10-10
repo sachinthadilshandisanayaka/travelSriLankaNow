@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SeoService } from '../../services/seo.service';
 import { HttpClient } from '@angular/common/http';
 import { EventService } from '../../services/event.service';
 import { Event, EventPricing, EventLocation } from '../../models/event.model';
@@ -61,7 +62,8 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     private eventService: EventService,
     private dataService: DataService,
     private masterDataService: MasterDataService,
-    private customerAuthService: CustomerAuthService
+    private customerAuthService: CustomerAuthService,
+    private seo: SeoService
   ) {}
 
   ngOnInit(): void {
@@ -100,6 +102,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.eventService.getEventById(id).subscribe({
       next: (event) => {
         this.event = event;
+        this.setSeo(event);
         this.loading = false;
         this.initPricingState();
       },
@@ -116,6 +119,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.eventService.getEventBySlug(slug).subscribe({
       next: (event) => {
         this.event = event;
+        this.setSeo(event);
         this.loading = false;
         this.initPricingState();
       },
@@ -453,5 +457,36 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     if (a === 0) return 'Sold Out';
     if (a <= 5) return `Only ${a} spots left!`;
     return `${a} spots available`;
+  }
+
+  private setSeo(e: Event): void {
+    const slug = (e as any).slug;
+    const path = slug ? '/events/' + slug : undefined;
+    const primary = (e.pricings || []).find(x => x.isPrimary) || (e.pricings || [])[0];
+    this.seo.set({
+      title: `${e.title} - Sri Lanka Tour & Experience`,
+      description: e.shortDescription || e.description,
+      image: e.imageUrl || (e.images && e.images[0]),
+      path,
+      type: 'article',
+      jsonLd: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'TouristTrip',
+          name: e.title,
+          description: e.shortDescription || e.description,
+          image: e.images && e.images.length ? e.images : e.imageUrl,
+          url: this.seo.absoluteUrl(path || '/events/' + e.id),
+          touristType: e.category,
+          offers: primary ? { '@type': 'Offer', price: primary.amount, priceCurrency: primary.currencyCode, availability: 'https://schema.org/InStock' } : undefined,
+          itinerary: e.eventLocations && e.eventLocations.length
+            ? { '@type': 'ItemList', itemListElement: e.eventLocations.map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.name })) }
+            : undefined
+        },
+        this.seo.breadcrumbs([
+          { name: 'Home', path: '/' }, { name: 'Events', path: '/events' }, { name: e.title, path: path || '/events/' + e.id }
+        ])
+      ]
+    });
   }
 }

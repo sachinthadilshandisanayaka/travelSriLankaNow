@@ -1,10 +1,12 @@
 User-agent: *
 Allow: /
 
-# Block admin and private routes
+# Block admin, private and non-content routes
 Disallow: /admin
 Disallow: /my-bookings
 Disallow: /login
 Disallow: /register
+Disallow: /test-simple
+Disallow: /api/
 
 Sitemap: https://travelsrilankanow.lk/sitemap.xml

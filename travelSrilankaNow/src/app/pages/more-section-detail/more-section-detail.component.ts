@@ -5,6 +5,7 @@ import { MoreSectionService } from '../../services/more-section.service';
 import { MoreSection, MoreSectionItem } from '../../models/more-section.model';
 import { LanguageService } from '../../services/language.service';
 import { ContentTranslationService } from '../../services/content-translation.service';
+import { SeoService } from '../../services/seo.service';
 
 @Component({
   selector: 'app-more-section-detail',
@@ -29,7 +30,8 @@ export class MoreSectionDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private moreSectionService: MoreSectionService,
     private langService: LanguageService,
-    private contentTranslation: ContentTranslationService
+    private contentTranslation: ContentTranslationService,
+    private seo: SeoService
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +55,13 @@ export class MoreSectionDetailComponent implements OnInit, OnDestroy {
     this.moreSectionService.getSectionBySlug(slug).subscribe({
       next: (section) => {
         this.section = section;
+        this.seo.set({
+          title: `${section.name} - Sri Lanka Travel Guide`,
+          description: section.description,
+          image: section.imageUrl,
+          path: '/more/' + section.slug,
+          jsonLd: this.seo.breadcrumbs([{ name: 'Home', path: '/' }, { name: section.name, path: '/more/' + section.slug }])
+        });
         this.initDisplayFields();
         this.translateItems();
         this.isLoading = false;
@@ -150,4 +159,5 @@ export class MoreSectionDetailComponent implements OnInit, OnDestroy {
     const text = item.articleContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     return text.length > 160 ? text.substring(0, 160) + '...' : text;
   }
+
 }
